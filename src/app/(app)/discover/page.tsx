@@ -18,18 +18,11 @@ export default function Discover() {
       <div className="absolute inset-x-0 top-[74%] bottom-0 bg-ink" />
 
       <header className="absolute inset-x-5 top-0 pt-safe mt-2 flex items-center justify-between">
-        <span className="flex items-center gap-2">
-          <LogoMark size={22} />
-          <span className="text-[13px] font-medium">Today · 1 of 5</span>
-        </span>
-        <span aria-label="Match 1 of 5" className="flex gap-1">
-          {MUSICIANS.concat(MUSICIANS).slice(0, 5).map((_, i) => (
-            <span key={i} className={`w-5 h-[3px] rounded-full ${i === 0 ? "bg-paper" : "bg-paper/30"}`} />
-          ))}
-        </span>
+        <LogoMark size={24} />
+        <span className="glass h-8 px-3 rounded-full flex items-center text-[13px] font-semibold">Today&apos;s match 1 of 5</span>
       </header>
 
-      <div className="absolute inset-x-0 bottom-0 pb-[calc(max(env(safe-area-inset-bottom),16px)+80px)] flex flex-col gap-3">
+      <div className="absolute inset-x-0 bottom-0 pb-[calc(max(env(safe-area-inset-bottom),16px)+96px)] flex flex-col gap-6">
         <div className="px-5 flex flex-col gap-2">
           <span className="flex items-center gap-2 text-[12px] font-semibold tracking-[0.16em] uppercase">
             <span className="size-2 rounded-full bg-tungsten" />
@@ -40,12 +33,12 @@ export default function Discover() {
           </h1>
         </div>
 
-        <section aria-label="Influence overlap" className="glass mx-4 rounded-[28px] py-4 flex flex-col gap-3 overflow-hidden">
-          <div className="px-[18px] flex flex-col gap-0.5">
-            <span className="font-display font-bold tracking-[-0.02em] text-[24px] leading-none">{m.shared.length} shared influences</span>
-            <span className="text-[13px] text-smoke">Same commitment · {m.commitment.toLowerCase()}</span>
+        <section aria-label="Influence overlap" className="glass mx-4 rounded-[24px] py-3.5 flex flex-col gap-2.5 overflow-hidden">
+          <div className="px-4 flex items-baseline justify-between gap-2">
+            <span className="text-[16px] font-semibold">{m.shared.length} shared influences</span>
+            <span className="text-[13px] text-smoke">{m.commitment}, like you</span>
           </div>
-          <div className="hscroll flex gap-1.5 px-[18px]">
+          <div className="hscroll flex gap-1.5 px-4">
             {m.shared.map((a) => (
               <span key={a.id} className="shrink-0 flex items-center gap-2 h-8 pl-1 pr-3 rounded-full bg-paper/8 border border-paper/12 text-[13px] whitespace-nowrap">
                 <ArtistAvatar artist={a} size={24} />
