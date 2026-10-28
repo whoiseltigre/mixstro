@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-/** OAuth (Apple, Google) lands here with a code to exchange for a session. */
+/** OAuth (Apple, Google) and the email sign-in link land here with a code to exchange for a session. */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");

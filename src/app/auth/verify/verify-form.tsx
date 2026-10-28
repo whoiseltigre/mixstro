@@ -54,7 +54,7 @@ export function VerifyForm() {
       className="min-h-dvh flex flex-col"
     >
       <StepHeader back="/auth/email" />
-      <StepTitle title="Enter the code" sub={`Sent to ${email || "your email"}. It fills in automatically from Mail or Messages.`} />
+      <StepTitle title="Enter the code" sub={`Sent to ${email || "your email"}. Enter the code, or just tap the link in the email.`} />
       <div className="px-5 pt-8 flex flex-col gap-5">
         <label className="relative block">
           <span className="sr-only">6-digit code</span>

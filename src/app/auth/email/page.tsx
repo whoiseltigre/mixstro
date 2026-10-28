@@ -20,7 +20,10 @@ export default function EmailPage() {
     setError(undefined);
     const supabase = createClient();
     if (supabase) {
-      const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: true, emailRedirectTo: `${location.origin}/auth/callback` },
+      });
       if (error) {
         setError(error.message);
         setBusy(false);
