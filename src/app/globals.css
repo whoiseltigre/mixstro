@@ -14,7 +14,7 @@
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-geist), system-ui, sans-serif;
   --font-display: -apple-system, "SF Pro Display", var(--font-inter-tight), system-ui, sans-serif;
-  --font-wordmark: var(--font-quicksand), ui-rounded, sans-serif;
+  --font-wordmark: var(--font-outfit), system-ui, sans-serif;
 }
 
 :root {

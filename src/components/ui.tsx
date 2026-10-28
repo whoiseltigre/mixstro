@@ -10,18 +10,24 @@ const LOGO_POINTS =
 
 export function LogoMark({ size = 24, className }: { size?: number; className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="0.25" strokeLinejoin="round" aria-hidden="true" className={className}>
       <polygon points={LOGO_POINTS} />
     </svg>
   );
 }
 
+/** Final lockup: diamond mark + lowercase "mixstro" in Outfit 550. `size` is the font size. */
 export function Wordmark({ size = 24 }: { size?: number }) {
+  const icon = Math.round(size * 0.95);
   return (
-    <span role="img" aria-label="Mixstro" className="inline-flex items-center gap-2.5">
-      <LogoMark size={size} />
-      <span aria-hidden="true" className="font-wordmark font-bold tracking-[0.16em]" style={{ fontSize: size * 0.7 }}>
-        MIXSTRO
+    <span role="img" aria-label="Mixstro" className="inline-flex items-center" style={{ gap: icon * 0.24 }}>
+      <LogoMark size={icon} />
+      <span
+        aria-hidden="true"
+        className="font-wordmark leading-none"
+        style={{ fontSize: size, fontWeight: 550, letterSpacing: "-0.025em", transform: "translateY(-0.1em)" }}
+      >
+        mixstro
       </span>
     </span>
   );

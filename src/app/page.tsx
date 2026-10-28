@@ -11,7 +11,7 @@ export default function Welcome() {
       </div>
 
       <header className="relative pt-safe mt-6 flex justify-center">
-        <Wordmark size={26} />
+        <Wordmark size={30} />
       </header>
 
       <section className="relative mt-auto px-6 pb-safe flex flex-col gap-8">

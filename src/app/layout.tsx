@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Inter_Tight, Quicksand } from "next/font/google";
+import { Geist, Inter_Tight, Outfit } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -8,11 +8,8 @@ const interTight = Inter_Tight({
   subsets: ["latin"],
   weight: ["700", "800"],
 });
-const quicksand = Quicksand({
-  variable: "--font-quicksand",
-  subsets: ["latin"],
-  weight: ["700"],
-});
+// Wordmark face: Outfit variable, set at weight 550.
+const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Mixstro",
@@ -32,7 +29,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} ${interTight.variable} ${quicksand.variable}`}>
+      <body className={`${geist.variable} ${interTight.variable} ${outfit.variable}`}>
         <div className="mx-auto min-h-dvh w-full max-w-[440px] relative">{children}</div>
       </body>
     </html>
