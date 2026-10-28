@@ -1,0 +1,46 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { AppleIcon, Button, ButtonLink, GoogleIcon } from "@/components/ui";
+import { createClient } from "@/lib/supabase/client";
+
+export function SignInButtons() {
+  const router = useRouter();
+  const [error, setError] = useState<string>();
+
+  async function oauth(provider: "apple" | "google") {
+    const supabase = createClient();
+    if (!supabase) {
+      router.push("/onboarding/basics");
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${location.origin}/auth/callback` },
+    });
+    if (error) setError(error.message);
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      <Button onClick={() => oauth("apple")}>
+        <AppleIcon /> Continue with Apple
+      </Button>
+      <Button variant="glass" onClick={() => oauth("google")}>
+        <GoogleIcon /> Continue with Google
+      </Button>
+      <ButtonLink variant="glass" href="/auth/email">
+        Continue with email
+      </ButtonLink>
+      {error && (
+        <p role="alert" className="text-center text-[13px] text-[#FF453A]">
+          {error}
+        </p>
+      )}
+      <p className="mt-1.5 text-center text-[12px] leading-[1.4] text-smoke">
+        By continuing you agree to the Mixstro Terms and Privacy Policy.
+      </p>
+    </div>
+  );
+}

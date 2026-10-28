@@ -1,0 +1,90 @@
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArtistAvatar } from "@/components/artist-avatar";
+import { BackButton, ButtonLink } from "@/components/ui";
+import { findMusician } from "@/lib/mock";
+
+export default async function Profile({ params }: { params: Promise<{ username: string }> }) {
+  const { username } = await params;
+  const m = findMusician(username);
+  if (!m) notFound();
+  const sharedIds = new Set(m.shared.map((a) => a.id));
+
+  return (
+    <main className="pb-16">
+      <div className="relative h-[330px]">
+        <Image src={m.photo} alt={m.photoAlt} fill priority sizes="440px" className="object-cover object-[50%_40%]" />
+        <div className="absolute inset-x-0 bottom-0 h-[170px] bg-gradient-to-b from-ink/0 to-ink" />
+        <div className="absolute inset-x-5 top-0 pt-safe mt-2">
+          <BackButton href="/discover" />
+        </div>
+      </div>
+
+      <div className="relative -mt-20 px-5 flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
+            {m.instrument} · {m.genres} · {m.neighborhood}
+          </span>
+          <h1 className="headline text-[44px] leading-[0.98]">{m.name}</h1>
+        </div>
+        <div className="flex gap-2 flex-wrap text-[13px]">
+          <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
+          <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>
+        </div>
+        <div className="flex gap-2.5">
+          <ButtonLink href={`/connected/${m.username}`} className="h-12 text-[16px]">Connect</ButtonLink>
+          <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
+        </div>
+
+        <section className="flex flex-col gap-2.5 pt-2">
+          <div className="flex justify-between items-baseline">
+            <h2 className="text-[17px] font-semibold">Influences</h2>
+            <span className="text-[13px] text-smoke">{m.shared.length} shared</span>
+          </div>
+          <div className="hscroll flex gap-4 -mx-5 px-5">
+            {m.influences.map((a) => {
+              const shared = sharedIds.has(a.id);
+              return (
+                <div key={a.id} className="w-[88px] shrink-0 flex flex-col items-center gap-2">
+                  <span className="rounded-full p-[2px]" style={{ background: shared ? "var(--gel)" : "transparent" }}>
+                    <span className="block rounded-full border-2 border-ink">
+                      <ArtistAvatar artist={a} size={80} />
+                    </span>
+                  </span>
+                  <span className="flex flex-col items-center w-full">
+                    <span className="text-[13px] font-semibold truncate max-w-full">{a.name}</span>
+                    <span className="text-[12px] text-smoke">{shared ? "Shared" : "Artist"}</span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {m.bands.length > 0 && (
+          <section className="flex flex-col gap-2.5 pt-2">
+            <h2 className="text-[17px] font-semibold">Played in</h2>
+            <div className="hscroll flex gap-2.5 -mx-5 px-5">
+              {m.bands.map((b) => (
+                <div key={b.name} className="w-[286px] shrink-0 flex gap-3 p-2.5 rounded-[20px] bg-stage">
+                  <div className="relative w-[104px] h-[78px] rounded-xl overflow-hidden shrink-0">
+                    <Image src={b.photo} alt="" fill sizes="104px" className="object-cover" />
+                  </div>
+                  <div className="flex flex-col justify-center gap-0.5">
+                    <span className="text-[16px] font-semibold">{b.name}</span>
+                    <span className="text-[13px] text-smoke">{b.years}</span>
+                    <span className="text-[13px] text-smoke">{b.role}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        <p className="pt-2 text-[13px] text-smoke">
+          Sample profile. <Link href="/discover" className="underline">Back to today&apos;s matches</Link>
+        </p>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+/*
+ * House Lights palette. The UI is the dark room; the musicians are the light.
+ * Warm neutrals do 95% of the work; Tungsten appears at most once per screen.
+ */
+@theme {
+  --color-ink: #0f0d0b;
+  --color-stage: #1a1816;
+  --color-riser: #292624;
+  --color-smoke: #a8a49e;
+  --color-paper: #f5f1ec;
+  --color-tungsten: #ffb245;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-geist), system-ui, sans-serif;
+  --font-display: -apple-system, "SF Pro Display", var(--font-inter-tight), system-ui, sans-serif;
+  --font-wordmark: var(--font-quicksand), ui-rounded, sans-serif;
+}
+
+:root {
+  --gel: conic-gradient(from 200deg, #f7bf77, #ffacba, #b5c5ff, #67e2da, #f7bf77);
+  --gel-linear: linear-gradient(90deg, #f7bf77, #ffacba, #b5c5ff, #67e2da);
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+@utility glass {
+  background: rgb(26 24 22 / 0.55);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  backdrop-filter: blur(30px) saturate(160%);
+  border: 1px solid rgb(245 241 236 / 0.12);
+  box-shadow: inset 0 1px 0 rgb(245 241 236 / 0.16);
+}
+
+@utility gel-rim {
+  background: var(--gel);
+  padding: 1.5px;
+}
+
+@utility headline {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+@utility hscroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top), 16px);
+}
+
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-tungsten);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
