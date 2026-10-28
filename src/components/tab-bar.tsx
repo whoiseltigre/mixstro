@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { cx } from "./ui";
 
 const TABS = [
@@ -42,7 +41,7 @@ const TABS = [
   },
   {
     href: "/me",
-    label: "You",
+    label: "Profile",
     icon: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -57,14 +56,6 @@ const UNREAD = 2; // TODO: from the messages query once messaging is live.
 
 export function TabBar() {
   const path = usePathname();
-  const [avatar, setAvatar] = useState<string>();
-
-  useEffect(() => {
-    try {
-      setAvatar(JSON.parse(localStorage.getItem("mixstro:onboarding") ?? "{}").avatarUrl);
-    } catch {}
-  }, []);
-
   // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
   if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
 
@@ -73,7 +64,6 @@ export function TabBar() {
       <nav aria-label="Main" className="glass w-[286px] h-[62px] rounded-[31px] flex items-center px-[5px]">
         {TABS.map((t) => {
           const active = path === t.href || path.startsWith(t.href + "/");
-          const showPhoto = t.href === "/me" && avatar;
           return (
             <Link
               key={t.href}
@@ -89,14 +79,9 @@ export function TabBar() {
                   {UNREAD}
                 </span>
               )}
-              {showPhoto ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt="" className={cx("size-[23px] rounded-full object-cover border-[1.5px]", active ? "border-paper" : "border-smoke/60")} />
-              ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
-                  {t.icon}
-                </svg>
-              )}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+                {t.icon}
+              </svg>
               {t.label}
             </Link>
           );
