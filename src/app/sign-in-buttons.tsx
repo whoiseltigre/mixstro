@@ -5,6 +5,9 @@ import { useState } from "react";
 import { AppleIcon, Button, ButtonLink, GoogleIcon } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
+// Apple sign-in needs a paid Apple Developer membership; it stays hidden until the provider is set up.
+const APPLE_ENABLED = process.env.NEXT_PUBLIC_APPLE_SIGN_IN === "on";
+
 export function SignInButtons() {
   const router = useRouter();
   const [error, setError] = useState<string>();
@@ -24,10 +27,12 @@ export function SignInButtons() {
 
   return (
     <div className="flex flex-col gap-2.5">
-      <Button onClick={() => oauth("apple")}>
-        <AppleIcon /> Continue with Apple
-      </Button>
-      <Button variant="glass" onClick={() => oauth("google")}>
+      {APPLE_ENABLED && (
+        <Button onClick={() => oauth("apple")}>
+          <AppleIcon /> Continue with Apple
+        </Button>
+      )}
+      <Button variant={APPLE_ENABLED ? "glass" : "primary"} onClick={() => oauth("google")}>
         <GoogleIcon /> Continue with Google
       </Button>
       <ButtonLink variant="glass" href="/auth/email">
