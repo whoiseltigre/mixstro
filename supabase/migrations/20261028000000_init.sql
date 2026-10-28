@@ -41,8 +41,8 @@ create table public.clips (
   id bigint generated always as identity primary key,
   profile_id uuid not null references public.profiles (id) on delete cascade,
   kind text not null check (kind in ('clip', 'band')),
-  provider text check (provider in ('youtube', 'tiktok')),
-  url text not null, -- clip: the pasted YouTube/TikTok link; band: the band name
+  provider text check (provider in ('youtube', 'tiktok', 'instagram', 'soundcloud', 'spotify', 'apple_music')),
+  url text not null, -- clip: the pasted link; band: the band name
   created_at timestamptz not null default now()
 );
 

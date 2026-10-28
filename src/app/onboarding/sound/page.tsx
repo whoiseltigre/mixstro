@@ -23,7 +23,7 @@ export default function Sound() {
 
   function addClip(raw: string) {
     const parsed = parseClip(raw);
-    if (!parsed) return setError("Paste a YouTube or TikTok video link.");
+    if (!parsed) return setError("That link isn't one we can play yet. Try YouTube, TikTok, Instagram, SoundCloud, Spotify or Apple Music.");
     if (clips.some((c) => parseClip(c.value)?.id === parsed.id)) return setError("You already added that one.");
     setError(undefined);
     update({ clips: [...draft.clips, { kind: "clip", value: parsed.url }] });
@@ -33,7 +33,7 @@ export default function Sound() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="Show how you sound" sub="Paste a YouTube or TikTok link and it shows up in the Clips section of your profile." />
+      <StepTitle title="Show how you sound" sub="Paste a link from YouTube, TikTok, Instagram, SoundCloud, Spotify or Apple Music. It plays right on your profile." />
       <div className="px-5 pt-7 flex flex-col gap-7">
         <form
           onSubmit={(e) => {
@@ -63,7 +63,7 @@ export default function Sound() {
               inputMode="url"
               autoCapitalize="none"
               autoCorrect="off"
-              placeholder="youtube.com/… or tiktok.com/…"
+              placeholder="Paste a link"
               disabled={clips.length >= MAX_CLIPS}
               className="flex-1 min-w-0 h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 text-[16px] placeholder:text-smoke/60 outline-none focus:border-paper/50"
             />
