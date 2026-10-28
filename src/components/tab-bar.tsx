@@ -2,77 +2,112 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cx } from "./ui";
 
 const TABS = [
   {
     href: "/discover",
-    label: "Matches",
-    // Two stacked cards: today's curated matches.
+    label: "Today",
+    // The Mixstro diamond and waveform as a line icon. "Today", not "Matches": no dating language.
     icon: (
       <>
-        <rect x="6" y="3.5" width="12" height="16" rx="2.5" />
-        <path d="M3.5 7.5v10a3 3 0 0 0 3 3h9" />
+        <path d="M12 2.8L21.2 12 12 21.2 2.8 12z" />
+        <path d="M6.6 12h2.1l1.4-2.4 2.2 5 1.5-2.6h3.6" />
       </>
     ),
   },
   {
     href: "/board",
     label: "Board",
-    // A pinned notice: "looking for" posts.
+    // A pinned notice, like the flyer wall at a rehearsal space.
     icon: (
       <>
-        <rect x="4" y="5" width="16" height="15" rx="2.5" />
-        <circle cx="12" cy="5" r="1.8" fill="currentColor" />
-        <path d="M8 11h8M8 15h5" strokeLinecap="round" />
+        <rect x="3.5" y="6.5" width="17" height="13.5" rx="2.5" />
+        <path d="M12 6.5V4" />
+        <circle cx="12" cy="3.2" r="1.2" />
+        <path d="M7.5 11.5h5M7.5 15.5h9" />
       </>
     ),
   },
   {
     href: "/messages",
     label: "Messages",
-    icon: <path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5a1.5 1.5 0 0 1-1.5 1.5H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z" strokeLinejoin="round" />,
+    icon: (
+      <>
+        <path d="M4 4.5h10.5A1.5 1.5 0 0116 6v6.5a1.5 1.5 0 01-1.5 1.5H9l-3.5 3v-3H4a1.5 1.5 0 01-1.5-1.5V6A1.5 1.5 0 014 4.5z" />
+        <path d="M19 8.5h.5A1.5 1.5 0 0121 10v6.5a1.5 1.5 0 01-1.5 1.5H19v3l-3.5-3H11" />
+      </>
+    ),
   },
   {
     href: "/me",
-    label: "Profile",
+    label: "You",
     icon: (
       <>
-        <circle cx="12" cy="8.5" r="3.8" />
-        <path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="10.5" r="3" />
+        <path d="M6.5 18c1.2-2.3 3.2-3.5 5.5-3.5s4.3 1.2 5.5 3.5" />
       </>
     ),
   },
 ];
 
+const UNREAD = 2; // TODO: from the messages query once messaging is live.
+
 export function TabBar() {
   const path = usePathname();
-  // Full-screen moments (profiles, a conversation, a new connection) hide the tab bar.
-  if (/^\/(m|connected)\/|^\/messages\/.+/.test(path)) return null;
+  const [avatar, setAvatar] = useState<string>();
+
+  useEffect(() => {
+    try {
+      setAvatar(JSON.parse(localStorage.getItem("mixstro:onboarding") ?? "{}").avatarUrl);
+    } catch {}
+  }, []);
+
+  // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
+  if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
+
   return (
-    <nav
-      aria-label="Main"
-      className="fixed z-20 left-1/2 -translate-x-1/2 bottom-[max(env(safe-area-inset-bottom),16px)] glass h-[62px] rounded-[31px] flex items-center gap-0.5 px-1.5"
-    >
-      {TABS.map((t) => {
-        const active = path === t.href || path.startsWith(t.href + "/");
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            aria-current={active ? "page" : undefined}
-            className={cx(
-              "w-[74px] h-[52px] rounded-[26px] flex flex-col items-center justify-center gap-0.5 transition",
-              active ? "bg-paper/14 text-paper" : "text-smoke",
-            )}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              {t.icon}
-            </svg>
-            <span className="text-[10px] font-semibold tracking-[0.01em]">{t.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="fixed z-20 left-1/2 -translate-x-1/2 bottom-[max(env(safe-area-inset-bottom),16px)] flex gap-2.5">
+      <nav aria-label="Main" className="glass w-[286px] h-[62px] rounded-[31px] flex items-center px-[5px]">
+        {TABS.map((t) => {
+          const active = path === t.href || path.startsWith(t.href + "/");
+          const showPhoto = t.href === "/me" && avatar;
+          return (
+            <Link
+              key={t.href}
+              href={t.href}
+              aria-current={active ? "page" : undefined}
+              className={cx(
+                "relative flex-1 h-[52px] rounded-[26px] flex flex-col items-center justify-center gap-[3px] text-[10px] font-semibold transition",
+                active ? "bg-paper/12 text-paper" : "text-smoke",
+              )}
+            >
+              {t.href === "/messages" && UNREAD > 0 && (
+                <span aria-label={`${UNREAD} unread`} className="absolute top-[5px] right-[14px] min-w-4 h-4 px-1 rounded-full bg-paper text-ink text-[10px] font-bold flex items-center justify-center">
+                  {UNREAD}
+                </span>
+              )}
+              {showPhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt="" className={cx("size-[23px] rounded-full object-cover border-[1.5px]", active ? "border-paper" : "border-smoke/60")} />
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
+                  {t.icon}
+                </svg>
+              )}
+              {t.label}
+            </Link>
+          );
+        })}
+      </nav>
+      <Link href="/search" aria-label="Search" className="glass size-[62px] rounded-full flex items-center justify-center text-paper">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="M16 16l4.5 4.5" />
+        </svg>
+      </Link>
+    </div>
   );
 }

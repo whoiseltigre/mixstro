@@ -19,7 +19,7 @@ export default function Discover() {
 
       <header className="absolute inset-x-5 top-0 pt-safe mt-2 flex items-center justify-between">
         <LogoMark size={24} />
-        <span className="glass h-8 px-3 rounded-full flex items-center text-[13px] font-semibold">Today&apos;s match 1 of 5</span>
+        <span className="glass h-8 px-3 rounded-full flex items-center text-[13px] font-semibold">1 of 5 today</span>
       </header>
 
       <div className="absolute inset-x-0 bottom-0 pb-[calc(max(env(safe-area-inset-bottom),16px)+96px)] flex flex-col gap-6">
