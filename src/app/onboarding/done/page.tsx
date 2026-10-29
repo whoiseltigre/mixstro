@@ -60,7 +60,7 @@ export default function Done() {
         <div className="flex flex-col gap-2.5">
           <h1 className="headline text-[34px]">You&apos;re in.</h1>
           <p className="text-[15px] leading-[1.45] text-smoke text-pretty">
-            Your first five matches arrive tomorrow at 9 AM. Turn on notifications so you don&apos;t miss them.
+            Your first five musicians to meet arrive tomorrow at 9 AM. Turn on notifications so you don&apos;t miss them.
           </p>
           {state === "error" && (
             <p role="alert" className="text-[13px] text-[#FF453A]">

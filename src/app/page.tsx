@@ -22,7 +22,7 @@ export default function Welcome() {
             meet.
           </h1>
           <p className="max-w-[320px] text-[16px] leading-[1.45] text-smoke text-pretty">
-            No swiping. Five great matches a day, based on the artists you love, how serious you are and where you play.
+            Show off your whole musical journey, find the people to start or fill out a band, and meet the musicians and gigs near you.
           </p>
         </div>
         <SignInButtons />
