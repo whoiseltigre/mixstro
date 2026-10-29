@@ -32,7 +32,7 @@ export default function ConnectMusic() {
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
       <StepTitle
         title="Connect your music"
-        sub="We read the artists you listen to most, so your matches share your influences. We never post or change anything."
+        sub="We read the artists you listen to most, so the musicians we introduce share your influences. We never post or change anything."
       />
       <div className="px-5 pt-7 flex flex-col gap-2.5">
         {SOURCES.map((s) => (

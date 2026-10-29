@@ -6,7 +6,7 @@ import { useState } from "react";
 import { BackButton } from "@/components/ui";
 import { MUSICIANS } from "@/lib/mock";
 
-/** Search by name, instrument, genre, neighborhood or influence. Sample data until matching is live. */
+/** Search by name, instrument, genre, neighborhood or influence. Sample data until introductions are live. */
 export default function Search() {
   const [q, setQ] = useState("");
   const s = q.trim().toLowerCase();

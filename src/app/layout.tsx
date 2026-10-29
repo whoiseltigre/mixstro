@@ -13,7 +13,7 @@ const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Mixstro",
-  description: "Where musicians meet. Five great matches a day, based on the artists you love.",
+  description: "Where musicians meet. Show off your musical journey, find bandmates and land gigs.",
   applicationName: "Mixstro",
   appleWebApp: { capable: true, title: "Mixstro", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },

@@ -15,7 +15,7 @@ export default function Me() {
     return (
       <main className="min-h-dvh px-5 pt-safe flex flex-col justify-center gap-4">
         <h1 className="headline text-[34px]">No profile yet</h1>
-        <p className="text-smoke">Set up your profile to start getting matches.</p>
+        <p className="text-smoke">Set up your profile to start meeting musicians.</p>
         <ButtonLink href="/onboarding/basics">Set up my profile</ButtonLink>
       </main>
     );

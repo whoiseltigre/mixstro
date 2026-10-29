@@ -50,10 +50,11 @@ export type Step = (typeof STEPS)[number];
 export const INSTRUMENTS = ["Guitar", "Bass", "Drums", "Keys", "Vocals", "Producer", "Songwriter", "DJ", "Strings", "Horns"];
 export const GENRES = ["Indie", "Rock", "Neo-soul", "Funk", "Jazz", "Hip-hop", "R&B", "Folk", "Electronic", "Punk", "Metal", "Country", "Pop", "Latin"];
 export const GOALS = [
+  { id: "showcase", title: "Show off my music", sub: "Old recordings, new releases, the whole journey" },
+  { id: "start_project", title: "Start or rebuild a band", sub: "Find new members or replace one" },
   { id: "join_band", title: "Join a band", sub: "Fill a spot in an existing group" },
-  { id: "start_project", title: "Start a project", sub: "Find people to build something new" },
-  { id: "paid_work", title: "Paid and session work", sub: "Gigs, studio days, tours" },
-  { id: "jam", title: "Jam and co-write", sub: "Low stakes, just play" },
+  { id: "paid_work", title: "Gigs and paid work", sub: "Shows, studio days, tours" },
+  { id: "jam", title: "Network and jam", sub: "Meet local musicians, co-write, just play" },
 ];
 export const COMMITMENT = ["Just for fun", "Weekly", "Gigging", "Touring"];
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

@@ -36,7 +36,7 @@ export default function Location() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="Where and when?" sub="Matches are local first. We only ever show your neighborhood, never your exact location." />
+      <StepTitle title="Where and when?" sub="We start with musicians near you. We only ever show your neighborhood, never your exact location." />
       <div className="px-5 pt-7 flex flex-col gap-7">
         <div className="flex flex-col gap-2.5">
           <Field
