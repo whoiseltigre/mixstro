@@ -12,7 +12,7 @@ export type Artist = { id: string; name: string; image?: string };
 export type Draft = {
   firstName: string;
   username: string;
-  birthday: string; // YYYY-MM-DD
+  adultConfirmedAt?: string; // ISO time the "I'm 18 or older" box was ticked
   avatarUrl?: string;
   instruments: string[];
   mainInstrument?: string;
@@ -31,7 +31,6 @@ export type Draft = {
 export const EMPTY_DRAFT: Draft = {
   firstName: "",
   username: "",
-  birthday: "",
   instruments: [],
   genres: [],
   influences: [],
@@ -43,8 +42,8 @@ export const EMPTY_DRAFT: Draft = {
   clips: [],
 };
 
-/** The numbered steps; sign-in and verify come before, "done" after. */
-export const STEPS = ["basics", "instruments", "music", "influences", "goals", "location", "sound"] as const;
+/** The numbered steps; sign-in and verify come before, "done" after. Influences and the rest are added later from the profile. */
+export const STEPS = ["basics", "play", "sound"] as const;
 export type Step = (typeof STEPS)[number];
 
 export const INSTRUMENTS = ["Guitar", "Bass", "Drums", "Keys", "Vocals", "Producer", "Songwriter", "DJ", "Strings", "Horns"];
@@ -95,12 +94,18 @@ export function useDraft() {
   return { draft, update, ready };
 }
 
-export function isAdult(birthday: string) {
-  if (!birthday) return false;
-  const born = new Date(birthday + "T00:00:00");
-  const cutoff = new Date();
-  cutoff.setFullYear(cutoff.getFullYear() - 18);
-  return born <= cutoff;
+/** Remembers the sign-in screen's 18+ checkbox so it carries through the Google or email round trip. */
+export function confirmAdult(on: boolean) {
+  try {
+    const draft = read();
+    localStorage.setItem(KEY, JSON.stringify({ ...draft, adultConfirmedAt: on ? new Date().toISOString() : undefined }));
+  } catch {
+    // Private mode: onboarding asks again.
+  }
+}
+
+export function adultConfirmed() {
+  return Boolean(read().adultConfirmedAt);
 }
 
 export function toggle<T>(list: T[], item: T) {
@@ -120,7 +125,7 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     id: user.id,
     first_name: draft.firstName.trim(),
     username: draft.username.replace(/^@/, "").trim().toLowerCase(),
-    birthday: draft.birthday,
+    adult_confirmed_at: draft.adultConfirmedAt,
     // TODO: upload the photo to Supabase Storage; local previews are data URLs and are not stored.
     avatar_url: draft.avatarUrl?.startsWith("http") ? draft.avatarUrl : null,
     instruments: draft.instruments,
