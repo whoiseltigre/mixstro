@@ -5,6 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
+  // Only same-site paths, e.g. "/settings" after linking Google from Settings.
+  const next = searchParams.get("next");
+  const safeNext = next?.startsWith("/") && !next.startsWith("//") ? next : null;
   const supabase = await createClient();
   if (!code || !supabase) return NextResponse.redirect(`${origin}/`);
 
@@ -16,5 +19,6 @@ export async function GET(request: NextRequest) {
     .select("onboarded_at")
     .eq("id", auth.user.id)
     .maybeSingle();
-  return NextResponse.redirect(`${origin}${data?.onboarded_at ? "/discover" : "/onboarding/basics"}`);
+  if (!data?.onboarded_at) return NextResponse.redirect(`${origin}/onboarding/basics`);
+  return NextResponse.redirect(`${origin}${safeNext ?? "/discover"}`);
 }

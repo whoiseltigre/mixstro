@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ActivityBadge } from "@/components/activity";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { SafetyMenu } from "@/components/safety-menu";
-import { BackButton, ButtonLink } from "@/components/ui";
+import { BackButton, ButtonLink, VerifiedMark } from "@/components/ui";
 import { findMusician } from "@/lib/mock";
 
 export default async function Profile({ params }: { params: Promise<{ username: string }> }) {
@@ -29,7 +29,11 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
             {m.instrument} · {m.genres} · {m.neighborhood}
           </span>
-          <h1 className="headline text-[44px] leading-[0.98]">{m.name}</h1>
+          <h1 className="headline text-[44px] leading-[0.98] flex items-center gap-2">
+            {m.name}
+            {/* Sample profiles count as verified; real ones show this when profiles.verified_at is set. */}
+            <VerifiedMark size={26} className="text-paper" />
+          </h1>
         </div>
         <div className="flex gap-2 flex-wrap text-[13px]">
           <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>

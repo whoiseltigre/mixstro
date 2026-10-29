@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
-import { ButtonLink } from "@/components/ui";
+import { ButtonLink, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { COMMITMENT, useDraft } from "@/lib/onboarding";
+import { useVerification } from "@/lib/verification";
 
 export default function Me() {
   const { draft, ready } = useDraft();
+  const { verified } = useVerification();
   if (!ready) return null;
 
   if (!draft.firstName) {
@@ -31,7 +33,10 @@ export default function Me() {
           )}
         </span>
         <div className="flex flex-col gap-0.5">
-          <h1 className="headline text-[32px]">{draft.firstName}</h1>
+          <h1 className="headline text-[32px] flex items-center gap-1.5">
+            {draft.firstName}
+            {verified && <VerifiedMark size={22} className="text-paper" />}
+          </h1>
           <span className="text-[14px] text-smoke">@{draft.username.replace(/^@/, "")}</span>
         </div>
       </div>

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { BackButton, Button, ChevronRight } from "@/components/ui";
+import { BackButton, Button, ChevronRight, GoogleIcon, VerifiedMark } from "@/components/ui";
 import { deleteAccount } from "@/lib/safety";
+import { useVerification } from "@/lib/verification";
 
 export default function Settings() {
   const router = useRouter();
@@ -12,6 +13,8 @@ export default function Settings() {
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const verification = useVerification();
+  const [linkError, setLinkError] = useState<string>();
 
   async function remove() {
     setBusy(true);
@@ -27,6 +30,30 @@ export default function Settings() {
         <BackButton href="/me" />
         <h1 className="headline text-[28px]">Settings</h1>
       </header>
+
+      <section className="flex flex-col gap-3 p-4 rounded-[20px] bg-stage">
+        <div className="flex items-center gap-3">
+          <VerifiedMark size={28} className={verification.verified ? "text-paper" : "text-paper/25"} />
+          <span className="flex-1 flex flex-col gap-0.5">
+            <span className="text-[15px] font-semibold">{verification.verified ? "You're verified" : "Get verified"}</span>
+            <span className="text-[13px] text-smoke text-pretty">
+              {verification.verified
+                ? "Your profile shows a check, so people know you're real."
+                : "Link your Google account and your profile gets a check. It's free, and we never post anything."}
+            </span>
+          </span>
+        </div>
+        {verification.ready && !verification.verified && (
+          <Button
+            variant="glass"
+            className="h-12 text-[16px]"
+            onClick={async () => setLinkError((await verification.linkGoogle()).error)}
+          >
+            <GoogleIcon /> Link Google
+          </Button>
+        )}
+        {linkError && <p role="alert" className="text-[13px] text-[#FF453A]">{linkError}</p>}
+      </section>
 
       <ul className="flex flex-col rounded-[20px] bg-stage divide-y divide-paper/8">
         <Row href="/settings/notifications" title="Notifications" sub="Push and email, per type" />

@@ -107,3 +107,39 @@ returns void language sql security definer set search_path = public as $$
 $$;
 revoke all on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- #10 Light verification ------------------------------------------------------
+
+-- Verified = signed in with (or linked) a Google account. Apple counts too once
+-- Sign in with Apple is turned on. Kept on profiles so others can see the check.
+alter table public.profiles add column if not exists verified_at timestamptz;
+
+create or replace function public.verified_since(uid uuid)
+returns timestamptz language sql stable security definer set search_path = public, auth as $$
+  select min(created_at) from auth.identities where user_id = uid and provider in ('google', 'apple');
+$$;
+
+-- Recomputed on every profile write, so people can't set it themselves.
+create or replace function public.profiles_set_verified()
+returns trigger language plpgsql security definer set search_path = public, auth as $$
+begin
+  new.verified_at := public.verified_since(new.id);
+  return new;
+end;
+$$;
+create trigger profiles_set_verified before insert or update on public.profiles
+  for each row execute function public.profiles_set_verified();
+
+-- Linking Google later (from Settings) marks an existing profile verified.
+create or replace function public.identities_touch_profile()
+returns trigger language plpgsql security definer set search_path = public, auth as $$
+declare uid uuid := coalesce(new.user_id, old.user_id);
+begin
+  update public.profiles set verified_at = public.verified_since(uid) where id = uid;
+  return null;
+end;
+$$;
+create trigger identities_touch_profile after insert or delete on auth.identities
+  for each row execute function public.identities_touch_profile();
+
+update public.profiles set verified_at = public.verified_since(id);

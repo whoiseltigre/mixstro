@@ -184,3 +184,16 @@ export function GoogleIcon({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
+
+/** The verified check (#10). Shown next to a name once the profile is tied to a Google account. */
+export function VerifiedMark({ size = 18, className }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" role="img" aria-label="Verified" className={cx("shrink-0", className)}>
+      <path
+        fill="currentColor"
+        d="M12 1.5l2.4 1.9 3-.3 1 2.9 2.7 1.5-.6 3 1.5 2.6-2.2 2.1-.2 3-3 .6L15 21.6l-3-1-3 1-1.6-2.8-3-.6-.2-3-2.2-2.1 1.5-2.6-.6-3L5.6 6l1-2.9 3 .3z"
+      />
+      <path d="M8 12.3l2.6 2.6L16.2 9.3" fill="none" stroke="var(--color-ink)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
