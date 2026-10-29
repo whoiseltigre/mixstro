@@ -1,14 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ButtonLink } from "@/components/ui";
-import { findMusician } from "@/lib/mock";
+import { artistTint } from "@/lib/artists";
+import { getProfile } from "@/lib/people";
+
+export const dynamic = "force-dynamic";
 
 /** Shown when both musicians said yes: the overlap of your sound and theirs. */
 export default async function Connected({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const m = findMusician(username);
-  if (!m) notFound();
+  const view = await getProfile(username);
+  if (!view) notFound();
+  const { person: m, viewerPhoto } = view;
   const first = m.name.split(" ")[0];
+  const overlap = m.distanceMi
+    ? `You're ${m.distanceMi} miles apart and both ${m.commitment.toLowerCase()}.`
+    : m.sameCommitment
+      ? `You're both ${m.commitment.toLowerCase()}.`
+      : `${first} plays ${m.instrument.toLowerCase()} around ${m.neighborhood}.`;
 
   return (
     <main className="relative min-h-dvh flex flex-col px-5 pt-safe pb-safe overflow-hidden">
@@ -24,12 +33,25 @@ export default async function Connected({ params }: { params: Promise<{ username
         <defs>
           <clipPath id="ca"><circle cx="118" cy="125" r="112" /></clipPath>
           <clipPath id="cb"><circle cx="232" cy="125" r="112" /></clipPath>
+          <linearGradient id="you-tint" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#4A4541" /><stop offset="1" stopColor="#1A1816" />
+          </linearGradient>
           <linearGradient id="gel" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#F7BF77" /><stop offset="0.35" stopColor="#FFACBA" /><stop offset="0.7" stopColor="#B5C5FF" /><stop offset="1" stopColor="#67E2DA" />
           </linearGradient>
         </defs>
-        <image href="/photos/you-ibanez.jpg" x="6" y="13" width="224" height="224" preserveAspectRatio="xMidYMin slice" clipPath="url(#ca)" style={{ filter: "grayscale(1) brightness(0.8)" }} />
-        <image href={m.photo} x="120" y="13" width="224" height="224" preserveAspectRatio="xMidYMid slice" clipPath="url(#cb)" style={{ filter: "grayscale(1) brightness(0.8)" }} />
+        {viewerPhoto ? (
+          <image href={viewerPhoto} x="6" y="13" width="224" height="224" preserveAspectRatio="xMidYMin slice" clipPath="url(#ca)" style={{ filter: "grayscale(1) brightness(0.8)" }} />
+        ) : (
+          <circle cx="118" cy="125" r="112" fill="url(#you-tint)" />
+        )}
+        {m.photo ? (
+          <image href={m.photo} x="120" y="13" width="224" height="224" preserveAspectRatio="xMidYMid slice" clipPath="url(#cb)" style={{ filter: "grayscale(1) brightness(0.8)" }} />
+        ) : (
+          <foreignObject x="120" y="13" width="224" height="224" clipPath="url(#cb)">
+            <div style={{ width: "100%", height: "100%", background: artistTint(m.id) }} />
+          </foreignObject>
+        )}
         <g clipPath="url(#ca)"><circle cx="232" cy="125" r="112" fill="url(#gel)" opacity="0.92" /></g>
         <circle cx="118" cy="125" r="112" fill="none" stroke="rgb(245 241 236 / 0.35)" strokeWidth="1.5" />
         <circle cx="232" cy="125" r="112" fill="none" stroke="rgb(245 241 236 / 0.35)" strokeWidth="1.5" />
@@ -42,7 +64,7 @@ export default async function Connected({ params }: { params: Promise<{ username
       <div className="relative mt-4 flex flex-col items-center gap-3 text-center">
         <h1 className="headline text-[40px] leading-none">Time to make<br />something.</h1>
         <p className="text-[15px] leading-[1.5] text-smoke">
-          {first} is in too. You&apos;re {m.distanceMi} miles apart and both {m.commitment.toLowerCase()}.
+          {first} is in too. {overlap}
         </p>
         <div className="flex flex-wrap justify-center gap-1.5">
           {m.shared.map((a) => (

@@ -4,17 +4,21 @@ import type { Artist } from "./onboarding";
 /** Sample musicians and posts so the app is explorable before real data exists. */
 
 export type Musician = {
+  /** Profile id; the username for sample musicians. */
+  id: string;
   username: string;
   name: string;
   instrument: string;
   genres: string;
   neighborhood: string;
-  distanceMi: number;
-  photo: string;
+  distanceMi?: number;
+  photo: string | null;
   photoAlt: string;
   influences: Artist[];
   shared: Artist[];
   commitment: string;
+  /** True when their commitment level matches yours. */
+  sameCommitment?: boolean;
   lookingFor: string;
   bands: { name: string; years: string; role: string; photo: string }[];
 };
@@ -25,6 +29,7 @@ export const ME_INFLUENCES = byName(["Phoebe Bridgers", "The National", "Big Thi
 
 export const MUSICIANS: Musician[] = [
   {
+    id: "eli",
     username: "eli",
     name: "Eli Navarro",
     instrument: "Guitar",
@@ -36,10 +41,12 @@ export const MUSICIANS: Musician[] = [
     influences: byName(["Phoebe Bridgers", "The National", "Big Thief", "Wilco", "Arctic Monkeys", "The Strokes"]),
     shared: byName(["Phoebe Bridgers", "The National", "Big Thief", "Wilco"]),
     commitment: "Gigs monthly",
+    sameCommitment: true,
     lookingFor: "Looking for a bassist",
     bands: [{ name: "Night Shift", years: "2022 to now", role: "Guitar, vocals", photo: "/photos/rock-red.jpg" }],
   },
   {
+    id: "maya",
     username: "maya",
     name: "Maya Torres",
     instrument: "Bass",
@@ -58,6 +65,7 @@ export const MUSICIANS: Musician[] = [
     ],
   },
   {
+    id: "jonah",
     username: "jonah",
     name: "Jonah Reyes",
     instrument: "Guitar",

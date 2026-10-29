@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cx } from "./ui";
 
 const TABS = [
@@ -52,7 +53,8 @@ const TABS = [
   },
 ];
 
-const UNREAD = 2; // TODO: from the messages query once messaging is live.
+// Sample badge in demo mode. TODO: count threads waiting on you once read state is tracked.
+const UNREAD = isSupabaseConfigured ? 0 : 2;
 
 export function TabBar() {
   const path = usePathname();
