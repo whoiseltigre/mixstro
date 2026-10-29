@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityBadge } from "@/components/activity";
 import { ArtistAvatar } from "@/components/artist-avatar";
+import { JourneyTimeline } from "@/components/journey-timeline";
 import { PersonPhoto } from "@/components/person-photo";
 import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton, Button, ButtonLink, VerifiedMark } from "@/components/ui";
+import { getJourney } from "@/lib/journey-server";
 import { getProfile } from "@/lib/people";
 import { ConnectButton } from "./connect-button";
 
@@ -17,6 +19,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
   if (!view) notFound();
   const { person: m, connection, viewerId } = view;
   const first = m.name.split(" ")[0];
+  const journey = await getJourney(m);
   const sharedIds = new Set(m.shared.map((a) => a.id));
   const status = !connection
     ? "none"
@@ -69,6 +72,12 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
           )}
         </div>
+
+        {journey.length > 0 && (
+          <div className="pt-2">
+            <JourneyTimeline entries={journey} />
+          </div>
+        )}
 
         <section className="flex flex-col gap-2.5 pt-2">
           <div className="flex justify-between items-baseline">
