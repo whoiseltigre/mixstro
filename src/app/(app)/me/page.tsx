@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
-import { ButtonLink, VerifiedMark } from "@/components/ui";
+import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { COMMITMENT, useDraft } from "@/lib/onboarding";
 import { useVerification } from "@/lib/verification";
@@ -17,7 +17,9 @@ export default function Me() {
     return (
       <main className="min-h-dvh px-5 pt-safe flex flex-col justify-center gap-4">
         <h1 className="headline text-[34px]">No profile yet</h1>
-        <p className="text-smoke">Set up your profile to start getting matches.</p>
+        <p className="text-smoke">
+          Set up your profile to start meeting musicians.
+        </p>
         <ButtonLink href="/onboarding/basics">Set up my profile</ButtonLink>
       </main>
     );
@@ -29,7 +31,11 @@ export default function Me() {
         <span className="size-20 rounded-full bg-riser overflow-hidden shrink-0">
           {draft.avatarUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={draft.avatarUrl} alt="" className="size-full object-cover" />
+            <img
+              src={draft.avatarUrl}
+              alt=""
+              className="size-full object-cover"
+            />
           )}
         </span>
         <div className="flex flex-col gap-0.5">
@@ -40,23 +46,37 @@ export default function Me() {
           <span className="text-[14px] text-smoke">@{draft.username.replace(/^@/, "")}</span>
         </div>
       </div>
+      <FinishProfile
+        hasInfluences={draft.influences.length > 0}
+        hasTrack={draft.clips.some((c) => c.kind === "clip")}
+      />
       <dl className="grid grid-cols-2 gap-2.5">
         <Fact label="Plays" value={draft.instruments.join(", ")} />
         <Fact label="Genres" value={draft.genres.join(", ")} />
         <Fact label="Commitment" value={COMMITMENT[draft.commitment]} />
-        <Fact label="Where" value={`${draft.neighborhood} · ${draft.radiusMi} mi`} />
+        <Fact
+          label="Where"
+          value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
+        />
       </dl>
-      <section className="flex flex-col gap-2.5">
-        <h2 className="text-[17px] font-semibold">Influences</h2>
-        <div className="hscroll flex gap-4 -mx-5 px-5">
-          {draft.influences.map((a) => (
-            <div key={a.id} className="w-[80px] shrink-0 flex flex-col items-center gap-2">
-              <ArtistAvatar artist={a} size={76} />
-              <span className="text-[12px] font-semibold text-center truncate max-w-full">{a.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      {draft.influences.length > 0 && (
+        <section className="flex flex-col gap-2.5">
+          <h2 className="text-[17px] font-semibold">Influences</h2>
+          <div className="hscroll flex gap-4 -mx-5 px-5">
+            {draft.influences.map((a) => (
+              <div
+                key={a.id}
+                className="w-[80px] shrink-0 flex flex-col items-center gap-2"
+              >
+                <ArtistAvatar artist={a} size={76} />
+                <span className="text-[12px] font-semibold text-center truncate max-w-full">
+                  {a.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
       {draft.clips.some((c) => c.kind === "clip") && (
         <section className="flex flex-col gap-2.5">
           <h2 className="text-[17px] font-semibold">Clips</h2>
@@ -77,6 +97,53 @@ export default function Me() {
         </Link>
       </div>
     </main>
+  );
+}
+
+/** The parts of a profile that onboarding skips, offered one at a time afterwards. */
+function FinishProfile({
+  hasInfluences,
+  hasTrack,
+}: {
+  hasInfluences: boolean;
+  hasTrack: boolean;
+}) {
+  const todo = [
+    !hasTrack && {
+      href: "/onboarding/sound",
+      title: "Add a track",
+      sub: "Profiles with music get far more replies.",
+    },
+    !hasInfluences && {
+      href: "/onboarding/music",
+      title: "Add your influences",
+      sub: "So we can introduce musicians who share them.",
+    },
+  ].filter((x): x is { href: string; title: string; sub: string } =>
+    Boolean(x),
+  );
+  if (!todo.length) return null;
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-[17px] font-semibold">Finish your profile</h2>
+      {todo.map((t) => (
+        <Link
+          key={t.href}
+          href={t.href}
+          className="flex items-center gap-3 p-4 rounded-[18px] bg-stage border border-paper/8 transition hover:border-paper/40"
+        >
+          <span
+            className="size-2 rounded-full bg-tungsten shrink-0"
+            aria-hidden="true"
+          />
+          <span className="flex-1 flex flex-col gap-0.5">
+            <span className="text-[15px] font-semibold">{t.title}</span>
+            <span className="text-[13px] text-smoke">{t.sub}</span>
+          </span>
+          <ChevronRight />
+        </Link>
+      ))}
+    </section>
   );
 }
 

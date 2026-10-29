@@ -90,7 +90,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           </section>
         )}
         <p className="pt-2 text-[13px] text-smoke">
-          Sample profile. <Link href="/discover" className="underline">Back to today&apos;s matches</Link>
+          Sample profile. <Link href="/discover" className="underline">Back to Today</Link>
         </p>
       </div>
     </main>

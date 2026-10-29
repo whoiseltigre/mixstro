@@ -34,7 +34,7 @@ export default function Sound() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="Show how you sound" sub="Record a quick clip, or paste a link from YouTube, TikTok, Instagram, SoundCloud, Spotify or Apple Music. Profiles with a clip get noticed first." />
+      <StepTitle title="Get heard" sub="Record a quick clip, or add a track, new or from years back, from YouTube, SoundCloud, Spotify, Apple Music, TikTok or Instagram. It plays right on your profile." />
       <div className="px-5 pt-7 flex flex-col gap-7">
         <ClipRecorder
           disabled={clips.length >= MAX_CLIPS}

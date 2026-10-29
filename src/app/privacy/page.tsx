@@ -11,8 +11,8 @@ export default function PrivacyPage() {
       <section>
         <h2>What we collect</h2>
         <p>
-          Your email address, or your name and email from Google if you sign in with Google. The profile you build: first name,
-          username, birthday (to confirm you are 18 or older), photo, instruments, genres, influences, goals, general area, and
+          Your email address, or your name, email and profile photo from Google if you sign in with Google. Your confirmation that
+          you are 18 or older, and when you gave it. The profile you build: first name, username, photo, instruments, genres, influences, goals, general area, and
           the links you add to your clips. Messages and connection requests you send, and basic usage data such as when you were
           last active.
         </p>
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
         <h2>What other members see</h2>
         <p>
           Your profile is visible to signed-in members once you finish setting it up. We show your general area, never your exact
-          location. Your birthday and email are never shown. Messages are visible only to the people in the conversation.
+          location. Your email is never shown. Messages are visible only to the people in the conversation.
         </p>
       </section>
       <section>
