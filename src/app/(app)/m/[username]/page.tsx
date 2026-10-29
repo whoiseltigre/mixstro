@@ -3,24 +3,39 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityBadge } from "@/components/activity";
 import { ArtistAvatar } from "@/components/artist-avatar";
+import { PersonPhoto } from "@/components/person-photo";
 import { SafetyMenu } from "@/components/safety-menu";
-import { BackButton, ButtonLink, VerifiedMark } from "@/components/ui";
-import { findMusician } from "@/lib/mock";
+import { BackButton, Button, ButtonLink, VerifiedMark } from "@/components/ui";
+import { getProfile } from "@/lib/people";
+import { ConnectButton } from "./connect-button";
+
+export const dynamic = "force-dynamic";
 
 export default async function Profile({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const m = findMusician(username);
-  if (!m) notFound();
+  const view = await getProfile(username);
+  if (!view) notFound();
+  const { person: m, connection, viewerId } = view;
+  const first = m.name.split(" ")[0];
   const sharedIds = new Set(m.shared.map((a) => a.id));
+  const status = !connection
+    ? "none"
+    : connection.status === "accepted"
+      ? "connected"
+      : connection.status === "passed"
+        ? "passed"
+        : connection.from_id === viewerId
+          ? "sent"
+          : "asked";
 
   return (
     <main className="pb-16">
       <div className="relative h-[330px]">
-        <Image src={m.photo} alt={m.photoAlt} fill priority sizes="440px" className="object-cover object-[50%_40%]" />
+        <PersonPhoto person={m} priority sizes="440px" initialsSize={88} className="object-[50%_40%]" />
         <div className="absolute inset-x-0 bottom-0 h-[170px] bg-gradient-to-b from-ink/0 to-ink" />
         <div className="absolute inset-x-5 top-0 pt-safe mt-2 flex justify-between">
           <BackButton href="/discover" />
-          <SafetyMenu username={m.username} name={m.name} />
+          {!m.sample && <SafetyMenu username={m.username} name={m.name} />}
         </div>
       </div>
 
@@ -31,18 +46,28 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           </span>
           <h1 className="headline text-[44px] leading-[0.98] flex items-center gap-2">
             {m.name}
-            {/* Sample profiles count as verified; real ones show this when profiles.verified_at is set. */}
-            <VerifiedMark size={26} className="text-paper" />
+            {m.verified && <VerifiedMark size={26} className="text-paper" />}
           </h1>
         </div>
         <div className="flex gap-2 flex-wrap text-[13px]">
           <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
-          {/* Sample profiles have no activity yet; real ones pass profiles.last_active_at. */}
-          <ActivityBadge lastActiveAt={new Date()} className="px-3 py-1.5 rounded-full border border-paper/16" />
+          {m.sample ? (
+            <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>
+          ) : (
+            m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
+          )}
         </div>
         <div className="flex gap-2.5">
-          <ButtonLink href={`/connected/${m.username}`} className="h-12 text-[16px]">Connect</ButtonLink>
-          <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
+          {status === "connected" ? (
+            <ButtonLink href={`/messages/${m.username}`} className="h-12 text-[16px]">Message {first}</ButtonLink>
+          ) : status === "sent" ? (
+            <Button disabled className="h-12 text-[16px]">Request sent</Button>
+          ) : status === "passed" ? null : (
+            <ConnectButton id={m.id} username={m.username} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
+          )}
+          {(!viewerId || m.sample) && (
+            <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
+          )}
         </div>
 
         <section className="flex flex-col gap-2.5 pt-2">
@@ -89,9 +114,11 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             </div>
           </section>
         )}
-        <p className="pt-2 text-[13px] text-smoke">
-          Sample profile. <Link href="/discover" className="underline">Back to Today</Link>
-        </p>
+        {m.sample && (
+          <p className="pt-2 text-[13px] text-smoke">
+            Sample profile. <Link href="/discover" className="underline">Back to Today</Link>
+          </p>
+        )}
       </div>
     </main>
   );

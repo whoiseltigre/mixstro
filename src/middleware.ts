@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicOrigin } from "@/lib/redirect";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
 
-const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding"];
+const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/m/", "/connected", "/search"];
 
 export async function middleware(request: NextRequest) {
   if (!isSupabaseConfigured) return NextResponse.next();
