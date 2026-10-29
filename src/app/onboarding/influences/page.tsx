@@ -6,9 +6,10 @@ import { ArtistAvatar } from "@/components/artist-avatar";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon } from "@/components/ui";
 import { DEMO_TOP_ARTISTS, searchArtists } from "@/lib/artists";
-import { type Artist, stepNav, useDraft } from "@/lib/onboarding";
+import { type Artist, saveProfile, useDraft } from "@/lib/onboarding";
 
-const nav = stepNav("influences");
+// Part of "finish your profile", reached from the Profile tab after onboarding.
+const nav = { back: "/onboarding/music", next: "/me" };
 const MIN = 3;
 const MAX = 10;
 
@@ -17,6 +18,16 @@ export default function Influences() {
   const { draft, update } = useDraft();
   const [q, setQ] = useState("");
   const [extra, setExtra] = useState<Artist[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+
+  async function save() {
+    setSaving(true);
+    const r = await saveProfile(draft);
+    setSaving(false);
+    if (r.error) return setError(r.error);
+    router.push(nav.next);
+  }
 
   const picked = draft.influences;
   const pickedIds = new Set(picked.map((a) => a.id));
@@ -39,7 +50,7 @@ export default function Influences() {
 
   return (
     <main className="min-h-dvh flex flex-col">
-      <StepHeader step={nav.number} total={nav.total} back={nav.back} />
+      <StepHeader back={nav.back} />
       <StepTitle
         title="Your influences"
         sub={
@@ -97,8 +108,9 @@ export default function Influences() {
       </div>
       <StepFooter>
         {picked.length < MIN && <p className="text-center text-[12px] text-smoke">Pick at least {MIN}</p>}
-        <Button disabled={picked.length < MIN} onClick={() => router.push(nav.next)}>
-          Continue{picked.length ? ` · ${picked.length} picked` : ""}
+        {error && <p role="alert" className="text-center text-[13px] text-[#FF453A]">{error}</p>}
+        <Button disabled={picked.length < MIN || saving} onClick={save}>
+          {saving ? "Saving…" : `Save${picked.length ? ` · ${picked.length} picked` : ""}`}
         </Button>
       </StepFooter>
     </main>

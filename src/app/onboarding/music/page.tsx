@@ -4,9 +4,10 @@ import { useRouter } from "next/navigation";
 import { StepHeader, StepTitle } from "@/components/step-header";
 import { ChevronRight } from "@/components/ui";
 import { DEMO_TOP_ARTISTS } from "@/lib/artists";
-import { type MusicSource, stepNav, useDraft } from "@/lib/onboarding";
+import { type MusicSource, useDraft } from "@/lib/onboarding";
 
-const nav = stepNav("music");
+// Part of "finish your profile", reached from the Profile tab after onboarding.
+const nav = { back: "/me", next: "/onboarding/influences" };
 
 const SOURCES: { id: MusicSource; title: string; sub: string }[] = [
   { id: "apple_music", title: "Apple Music", sub: "Recommended · your top artists and library" },
@@ -29,7 +30,7 @@ export default function ConnectMusic() {
 
   return (
     <main className="min-h-dvh flex flex-col">
-      <StepHeader step={nav.number} total={nav.total} back={nav.back} />
+      <StepHeader back={nav.back} />
       <StepTitle
         title="Connect your music"
         sub="We read the artists you listen to most, so the musicians we introduce share your influences. We never post or change anything."

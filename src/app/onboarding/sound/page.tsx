@@ -33,7 +33,7 @@ export default function Sound() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="Show how you sound" sub="Paste a link from YouTube, TikTok, Instagram, SoundCloud, Spotify or Apple Music. It plays right on your profile." />
+      <StepTitle title="Get heard" sub="Add a track, new or from years back. Paste a link from YouTube, SoundCloud, Spotify, Apple Music, TikTok or Instagram and it plays right on your profile." />
       <div className="px-5 pt-7 flex flex-col gap-7">
         <form
           onSubmit={(e) => {
