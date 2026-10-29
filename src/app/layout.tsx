@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Inter_Tight, Outfit } from "next/font/google";
+import { Geist, Inter_Tight, Outfit, Roboto } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
@@ -10,6 +10,8 @@ const interTight = Inter_Tight({
 });
 // Wordmark face: Outfit variable, set at weight 550.
 const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
+// Google's sign-in button guidelines call for Roboto Medium.
+const roboto = Roboto({ variable: "--font-roboto", subsets: ["latin"], weight: ["500"] });
 
 export const metadata: Metadata = {
   title: "Mixstro",
@@ -29,7 +31,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${geist.variable} ${interTight.variable} ${outfit.variable}`}>
+      <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
         <div className="mx-auto min-h-dvh w-full max-w-[440px] relative">{children}</div>
       </body>
     </html>
