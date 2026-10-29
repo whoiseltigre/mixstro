@@ -1,8 +1,13 @@
 import type { Artist } from "./onboarding";
 
+/** Provider-independent artist id: a slug of the name, so overlap survives a switch from Deezer to Apple Music. */
+export function artistId(name: string) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 /**
- * Stand-in catalog until Apple Music (MusicKit) is wired up. Real artist images
- * come from the streaming service; until then the UI draws an initials avatar.
+ * Offline catalog for demo-mode suggestions and as a fallback when the search
+ * API (/api/artists) can't be reached. It has no photos, so the UI draws an initials avatar.
  */
 const NAMES = [
   "Thundercat", "Khruangbin", "D'Angelo", "Hiatus Kaiyote", "Esperanza Spalding", "Erykah Badu",
@@ -15,10 +20,7 @@ const NAMES = [
   "Daft Punk", "Bonobo", "Fred again..", "Jacob Collier", "Cory Wong", "Mac DeMarco",
 ];
 
-export const CATALOG: Artist[] = NAMES.map((name) => ({
-  id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
-  name,
-}));
+export const CATALOG: Artist[] = NAMES.map((name) => ({ id: artistId(name), name }));
 
 /** What "Connect Apple Music" returns in demo mode: a plausible top-artists list. */
 export const DEMO_TOP_ARTISTS = CATALOG.slice(0, 12);

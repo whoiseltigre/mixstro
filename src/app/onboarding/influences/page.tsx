@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon } from "@/components/ui";
@@ -33,7 +33,7 @@ export default function Influences() {
   const pickedIds = new Set(picked.map((a) => a.id));
   const suggestions = draft.musicSource === "manual" ? [] : DEMO_TOP_ARTISTS;
   const grid = dedupe([...picked, ...extra, ...suggestions]);
-  const results = searchArtists(q).filter((a) => !pickedIds.has(a.id));
+  const results = useArtistSearch(q).filter((a) => !pickedIds.has(a.id));
 
   function flip(a: Artist) {
     if (pickedIds.has(a.id)) update({ influences: picked.filter((p) => p.id !== a.id) });
@@ -120,4 +120,31 @@ export default function Influences() {
 function dedupe(list: Artist[]) {
   const seen = new Set<string>();
   return list.filter((a) => (seen.has(a.id) ? false : (seen.add(a.id), true)));
+}
+
+/** Searches /api/artists (Deezer or Apple Music, with photos) 250 ms after typing stops; falls back to the offline catalog. */
+function useArtistSearch(q: string) {
+  const [found, setFound] = useState<{ q: string; artists: Artist[] }>({ q: "", artists: [] }); // keeps the last results on screen while the next search runs
+  const term = q.trim();
+
+  useEffect(() => {
+    if (!term) return;
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/artists?q=${encodeURIComponent(term)}`, { signal: ctrl.signal });
+        if (!res.ok) throw new Error(String(res.status));
+        const body = (await res.json()) as { artists: Artist[] };
+        setFound({ q: term, artists: body.artists });
+      } catch {
+        if (!ctrl.signal.aborted) setFound({ q: term, artists: searchArtists(term) });
+      }
+    }, 250);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [term]);
+
+  return term ? found.artists : [];
 }
