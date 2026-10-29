@@ -124,20 +124,21 @@ export async function getToday(): Promise<Today> {
   const exclude = new Set(connections.flatMap((c) => [c.from_id, c.to_id]).filter((id) => !incoming.includes(id)));
   exclude.add(viewer.id);
 
+  // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
   const { data } = await viewer.supabase
-    .from("profiles")
+    .from("discoverable_profiles")
     .select(PROFILE_COLUMNS)
-    .not("onboarded_at", "is", null)
     .order("last_active_at", { ascending: false })
     .limit(200);
   const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
-  const people = await hydrate(viewer, candidates);
-  people.sort(
-    (a, b) =>
-      Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) ||
-      b.shared.length - a.shared.length ||
-      Number(b.sameCommitment) - Number(a.sameCommitment),
-  );
+  const [people, { data: clips }] = await Promise.all([
+    hydrate(viewer, candidates),
+    viewer.supabase.from("clips").select("profile_id").eq("kind", "clip").in("profile_id", candidates.map((r) => r.id)),
+  ]);
+  // Hearing someone first matters, so profiles with a clip get a boost.
+  const hasClip = new Set((clips ?? []).map((c) => c.profile_id as string));
+  const score = (m: Musician) => m.shared.length + (hasClip.has(m.id) ? 2 : 0) + (m.sameCommitment ? 1 : 0);
+  people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a));
   return { people: people.slice(0, TODAY_SIZE), incoming, demo: false };
 }
 
@@ -146,9 +147,8 @@ export async function getSearchable(): Promise<Musician[]> {
   const viewer = await getViewer();
   if (!viewer) return MUSICIANS;
   const { data } = await viewer.supabase
-    .from("profiles")
+    .from("discoverable_profiles")
     .select(PROFILE_COLUMNS)
-    .not("onboarded_at", "is", null)
     .neq("id", viewer.id)
     .order("last_active_at", { ascending: false })
     .limit(200);
