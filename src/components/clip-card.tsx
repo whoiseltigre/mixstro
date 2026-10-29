@@ -13,7 +13,13 @@ export function ClipCard({ clip, onRemove }: { clip: ParsedClip; onRemove?: () =
 
   return (
     <div className={`relative shrink-0 rounded-2xl overflow-hidden bg-stage ${SIZE[clip.shape]}`}>
-      {playing ? (
+      {clip.provider === "upload" ? (
+        <div className="absolute inset-0 flex flex-col justify-end gap-3 p-3" style={{ background: "linear-gradient(160deg, #292624, #0F0D0B)" }}>
+          <Waveform />
+          <audio src={clip.url} controls preload="metadata" className="w-full h-9" />
+          <span className="absolute left-2 top-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-ink/60">{PROVIDER_LABEL.upload}</span>
+        </div>
+      ) : playing ? (
         <iframe
           src={src}
           title={`${PROVIDER_LABEL[clip.provider]} clip`}
@@ -42,6 +48,18 @@ export function ClipCard({ clip, onRemove }: { clip: ParsedClip; onRemove?: () =
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       )}
+    </div>
+  );
+}
+
+const BARS = [8, 14, 22, 12, 26, 18, 10, 20, 28, 14, 9, 22, 25, 13, 8, 19, 24, 12, 16, 26];
+
+function Waveform() {
+  return (
+    <div aria-hidden="true" className="flex-1 flex items-center justify-center gap-[3px]">
+      {BARS.map((h, i) => (
+        <span key={i} className="w-[4px] rounded-full bg-paper/70" style={{ height: h * 2 }} />
+      ))}
     </div>
   );
 }

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ActivityBadge } from "@/components/activity";
 import { ArtistAvatar } from "@/components/artist-avatar";
+import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton, ButtonLink } from "@/components/ui";
 import { findMusician } from "@/lib/mock";
 
@@ -16,8 +18,9 @@ export default async function Profile({ params }: { params: Promise<{ username: 
       <div className="relative h-[330px]">
         <Image src={m.photo} alt={m.photoAlt} fill priority sizes="440px" className="object-cover object-[50%_40%]" />
         <div className="absolute inset-x-0 bottom-0 h-[170px] bg-gradient-to-b from-ink/0 to-ink" />
-        <div className="absolute inset-x-5 top-0 pt-safe mt-2">
+        <div className="absolute inset-x-5 top-0 pt-safe mt-2 flex justify-between">
           <BackButton href="/discover" />
+          <SafetyMenu username={m.username} name={m.name} />
         </div>
       </div>
 
@@ -30,7 +33,8 @@ export default async function Profile({ params }: { params: Promise<{ username: 
         </div>
         <div className="flex gap-2 flex-wrap text-[13px]">
           <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
-          <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>
+          {/* Sample profiles have no activity yet; real ones pass profiles.last_active_at. */}
+          <ActivityBadge lastActiveAt={new Date()} className="px-3 py-1.5 rounded-full border border-paper/16" />
         </div>
         <div className="flex gap-2.5">
           <ButtonLink href={`/connected/${m.username}`} className="h-12 text-[16px]">Connect</ButtonLink>

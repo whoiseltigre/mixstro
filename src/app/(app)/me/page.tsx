@@ -63,9 +63,14 @@ export default function Me() {
           </div>
         </section>
       )}
-      <Link href="/onboarding/basics" className="text-[15px] font-semibold underline underline-offset-2">
-        Edit profile
-      </Link>
+      <div className="flex gap-5">
+        <Link href="/onboarding/basics" className="text-[15px] font-semibold underline underline-offset-2">
+          Edit profile
+        </Link>
+        <Link href="/settings" className="text-[15px] font-semibold underline underline-offset-2">
+          Settings
+        </Link>
+      </div>
     </main>
   );
 }

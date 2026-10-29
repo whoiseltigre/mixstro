@@ -33,13 +33,14 @@ export function Wordmark({ size = 24 }: { size?: number }) {
   );
 }
 
-type Variant = "primary" | "glass" | "gel";
+type Variant = "primary" | "glass" | "danger" | "gel";
 
 const base =
   "h-14 w-full rounded-full text-[17px] flex items-center justify-center gap-2 transition active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none";
 const variants: Record<Exclude<Variant, "gel">, string> = {
   primary: "bg-paper text-ink font-semibold",
   glass: "glass text-paper font-medium",
+  danger: "bg-[#FF453A] text-paper font-semibold",
 };
 
 /** Primary actions. "gel" adds the Gel rim, reserved for Connect-type peak moments. */
