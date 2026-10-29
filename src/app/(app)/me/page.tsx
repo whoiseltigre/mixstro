@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
-import { ButtonLink, ChevronRight } from "@/components/ui";
+import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { COMMITMENT, useDraft } from "@/lib/onboarding";
+import { useVerification } from "@/lib/verification";
 
 export default function Me() {
   const { draft, ready } = useDraft();
+  const { verified } = useVerification();
   if (!ready) return null;
 
   if (!draft.firstName) {
@@ -37,10 +39,11 @@ export default function Me() {
           )}
         </span>
         <div className="flex flex-col gap-0.5">
-          <h1 className="headline text-[32px]">{draft.firstName}</h1>
-          <span className="text-[14px] text-smoke">
-            @{draft.username.replace(/^@/, "")}
-          </span>
+          <h1 className="headline text-[32px] flex items-center gap-1.5">
+            {draft.firstName}
+            {verified && <VerifiedMark size={22} className="text-paper" />}
+          </h1>
+          <span className="text-[14px] text-smoke">@{draft.username.replace(/^@/, "")}</span>
         </div>
       </div>
       <FinishProfile
@@ -85,12 +88,14 @@ export default function Me() {
           </div>
         </section>
       )}
-      <Link
-        href="/onboarding/basics"
-        className="text-[15px] font-semibold underline underline-offset-2"
-      >
-        Edit profile
-      </Link>
+      <div className="flex gap-5">
+        <Link href="/onboarding/basics" className="text-[15px] font-semibold underline underline-offset-2">
+          Edit profile
+        </Link>
+        <Link href="/settings" className="text-[15px] font-semibold underline underline-offset-2">
+          Settings
+        </Link>
+      </div>
     </main>
   );
 }

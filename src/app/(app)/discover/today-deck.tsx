@@ -6,6 +6,7 @@ import { ArtistAvatar } from "@/components/artist-avatar";
 import { PersonPhoto } from "@/components/person-photo";
 import { LogoMark } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
+import { whyYouTwo } from "@/lib/why";
 import { connect, pass } from "../actions";
 
 /** Today's musicians, one at a time. Connect or pass moves to the next. */
@@ -57,6 +58,15 @@ export function TodayDeck({ people, incoming }: { people: Musician[]; incoming: 
           <h1 className="headline text-[52px] leading-[0.95]">
             <Link href={`/m/${m.username}`}>{m.name}</Link>
           </h1>
+          <p className="text-[15px] leading-[1.35] text-paper/80 text-pretty">
+            {whyYouTwo({
+              shared: m.shared.map((a) => a.name),
+              commitment: m.commitment,
+              sameCommitment: m.sameCommitment,
+              sharedDays: m.sharedDays,
+              distanceMi: m.distanceMi,
+            })}
+          </p>
         </div>
 
         <section aria-label="Influence overlap" className="glass mx-4 rounded-[24px] py-3.5 flex flex-col gap-2.5 overflow-hidden">

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ClipCard } from "@/components/clip-card";
+import { ClipRecorder } from "@/components/clip-recorder";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, SectionLabel } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
@@ -33,8 +34,13 @@ export default function Sound() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="Get heard" sub="Add a track, new or from years back. Paste a link from YouTube, SoundCloud, Spotify, Apple Music, TikTok or Instagram and it plays right on your profile." />
+      <StepTitle title="Get heard" sub="Record a quick clip, or add a track, new or from years back, from YouTube, SoundCloud, Spotify, Apple Music, TikTok or Instagram. It plays right on your profile." />
       <div className="px-5 pt-7 flex flex-col gap-7">
+        <ClipRecorder
+          disabled={clips.length >= MAX_CLIPS}
+          onSaved={(url) => update({ clips: [...draft.clips, { kind: "clip", value: url }] })}
+        />
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -43,7 +49,7 @@ export default function Sound() {
           className="flex flex-col gap-2"
         >
           <label htmlFor="clip-link" className="text-[13px] font-semibold text-smoke">
-            Clip link
+            Or paste a link
           </label>
           <div className="flex gap-2">
             <input

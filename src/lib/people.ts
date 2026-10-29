@@ -42,6 +42,7 @@ type ProfileRow = {
   neighborhood: string | null;
   play_days: string[];
   last_active_at: string;
+  verified_at: string | null;
   onboarded_at: string | null;
 };
 
@@ -57,7 +58,7 @@ export type Viewer = {
 };
 
 const PROFILE_COLUMNS =
-  "id, first_name, username, avatar_url, instruments, main_instrument, genres, goals, commitment, neighborhood, play_days, last_active_at, onboarded_at";
+  "id, first_name, username, avatar_url, instruments, main_instrument, genres, goals, commitment, neighborhood, play_days, last_active_at, verified_at, onboarded_at";
 
 /** The signed-in musician, or null in demo mode or when signed out. */
 export async function getViewer(): Promise<Viewer | null> {
@@ -93,6 +94,9 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
     shared: theirs.filter((a) => mine.has(a.id)),
     commitment: COMMITMENT[row.commitment] ?? "Just for fun",
     sameCommitment: viewer.profile ? viewer.profile.commitment === row.commitment : false,
+    sharedDays: row.play_days.filter((d) => viewer.profile?.play_days.includes(d)),
+    lastActiveAt: row.last_active_at,
+    verified: Boolean(row.verified_at),
     lookingFor: LOOKING_FOR[row.goals[0]] ?? "Open to collaborating",
     bands: [],
   };

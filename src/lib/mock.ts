@@ -21,6 +21,12 @@ export type Musician = {
   sample?: boolean;
   /** True when their commitment level matches yours. */
   sameCommitment?: boolean;
+  /** Days you both play, e.g. ["Thu"]. */
+  sharedDays?: string[];
+  /** profiles.last_active_at, for the "Active this week" badge. */
+  lastActiveAt?: string;
+  /** Tied to a Google account (profiles.verified_at). */
+  verified?: boolean;
   lookingFor: string;
   bands: { name: string; years: string; role: string; photo: string }[];
 };

@@ -1,10 +1,10 @@
 /**
- * Clips are pasted links. We recognise the platforms musicians actually post to and
+ * Clips are pasted links, or audio recorded in the app ("upload"). We recognise the platforms musicians actually post to and
  * render each one's official embed player. Shape drives the thumbnail: wide video,
  * tall vertical video, or square audio.
  */
 
-export type ClipProvider = "youtube" | "tiktok" | "instagram" | "soundcloud" | "spotify" | "apple_music";
+export type ClipProvider = "youtube" | "tiktok" | "instagram" | "soundcloud" | "spotify" | "apple_music" | "upload";
 export type ClipShape = "wide" | "tall" | "square";
 
 export type ParsedClip = {
@@ -23,9 +23,14 @@ export const PROVIDER_LABEL: Record<ClipProvider, string> = {
   soundcloud: "SoundCloud",
   spotify: "Spotify",
   apple_music: "Apple Music",
+  upload: "Recording",
 };
 
+/** Recorded clips live in the public "clips" Storage bucket; demo mode keeps them as data URLs. */
+const RECORDING = /^(data:audio\/|https:\/\/[^/]+\/storage\/v1\/object\/public\/clips\/)/;
+
 export function parseClip(raw: string): ParsedClip | null {
+  if (RECORDING.test(raw)) return { provider: "upload", id: raw.slice(-48), url: raw, embed: raw, shape: "square" };
   let u: URL;
   try {
     u = new URL(raw.trim());

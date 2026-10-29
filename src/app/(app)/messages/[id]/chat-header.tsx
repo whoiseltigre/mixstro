@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PersonPhoto } from "@/components/person-photo";
+import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
 
@@ -18,6 +19,7 @@ export function ChatHeader({ person: m, action = true }: { person: Musician; act
         </span>
       </Link>
       {action && <button className="glass h-[34px] px-3 rounded-full text-[13px] font-semibold">Plan a jam</button>}
+      {!m.sample && <SafetyMenu username={m.username} name={m.name} />}
     </header>
   );
 }
