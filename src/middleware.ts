@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { publicOrigin } from "@/lib/redirect";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
 
 const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/m/", "/connected", "/search"];
@@ -25,9 +26,7 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   if (!user && APP_ROUTES.some((r) => path.startsWith(r))) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));
   }
   return response;
 }
