@@ -17,6 +17,8 @@ export type Musician = {
   influences: Artist[];
   shared: Artist[];
   commitment: string;
+  /** A sample musician shown while Mixstro is small. */
+  sample?: boolean;
   /** True when their commitment level matches yours. */
   sameCommitment?: boolean;
   lookingFor: string;
@@ -30,6 +32,7 @@ export const ME_INFLUENCES = byName(["Phoebe Bridgers", "The National", "Big Thi
 export const MUSICIANS: Musician[] = [
   {
     id: "eli",
+    sample: true,
     username: "eli",
     name: "Eli Navarro",
     instrument: "Guitar",
@@ -47,6 +50,7 @@ export const MUSICIANS: Musician[] = [
   },
   {
     id: "maya",
+    sample: true,
     username: "maya",
     name: "Maya Torres",
     instrument: "Bass",
@@ -66,6 +70,7 @@ export const MUSICIANS: Musician[] = [
   },
   {
     id: "jonah",
+    sample: true,
     username: "jonah",
     name: "Jonah Reyes",
     instrument: "Guitar",

@@ -45,7 +45,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
         </div>
         <div className="flex gap-2 flex-wrap text-[13px]">
           <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
-          {!viewerId && <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>}
+          {m.sample && <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>}
         </div>
         <div className="flex gap-2.5">
           {status === "connected" ? (
@@ -55,7 +55,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           ) : status === "passed" ? null : (
             <ConnectButton id={m.id} username={m.username} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
           )}
-          {!viewerId && (
+          {(!viewerId || m.sample) && (
             <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
           )}
         </div>
@@ -104,7 +104,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             </div>
           </section>
         )}
-        {!viewerId && (
+        {m.sample && (
           <p className="pt-2 text-[13px] text-smoke">
             Sample profile. <Link href="/discover" className="underline">Back to Today</Link>
           </p>

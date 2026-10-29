@@ -16,7 +16,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function pairWith(otherId: string) {
   const viewer = await getViewer();
-  if (viewer && !UUID.test(otherId)) throw new Error("Unknown musician");
+  if (viewer && !UUID.test(otherId)) return null; // a sample musician
   if (!viewer) return null;
   const { data } = await viewer.supabase
     .from("connections")

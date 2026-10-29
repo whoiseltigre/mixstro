@@ -18,6 +18,17 @@ const LOOKING_FOR: Record<string, string> = {
 
 const TODAY_SIZE = 5;
 
+/**
+ * While Mixstro is small, sample musicians fill out Today, search and Messages so the app
+ * feels lived in. They're marked `sample` and their Connect and chat stay in demo mode.
+ */
+function withSamples(people: Musician[], size: number) {
+  return [...people, ...MUSICIANS].slice(0, size);
+}
+
+const SAMPLE_THREADS = (): Thread[] =>
+  THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread }));
+
 type ProfileRow = {
   id: string;
   first_name: string;
@@ -140,7 +151,7 @@ export async function getToday(): Promise<Today> {
   const hasClip = new Set((clips ?? []).map((c) => c.profile_id as string));
   const score = (m: Musician) => m.shared.length + (hasClip.has(m.id) ? 2 : 0) + (m.sameCommitment ? 1 : 0);
   people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a));
-  return { people: people.slice(0, TODAY_SIZE), incoming, demo: false };
+  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false };
 }
 
 /** Everyone you can search, most recently active first. */
@@ -153,7 +164,7 @@ export async function getSearchable(): Promise<Musician[]> {
     .neq("id", viewer.id)
     .order("last_active_at", { ascending: false })
     .limit(200);
-  return hydrate(viewer, (data ?? []) as ProfileRow[]);
+  return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...MUSICIANS];
 }
 
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
@@ -170,7 +181,10 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
     .select(PROFILE_COLUMNS)
     .eq("username", username.toLowerCase())
     .maybeSingle<ProfileRow>();
-  if (!data) return null;
+  if (!data) {
+    const sample = findMusician(username);
+    return sample ? { person: sample, connection: null, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null } : null;
+  }
   const [person] = await hydrate(viewer, [data]);
   const connection = (await myConnections(viewer)).find((c) => c.from_id === data.id || c.to_id === data.id) ?? null;
   return { person, connection, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null };
@@ -183,13 +197,10 @@ export type Thread = { username: string; person: Musician; preview: string; at: 
 export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }> {
   const viewer = await getViewer();
   if (!viewer) {
-    return {
-      demo: true,
-      threads: THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread })),
-    };
+    return { demo: true, threads: SAMPLE_THREADS() };
   }
   const accepted = (await myConnections(viewer)).filter((c) => c.status === "accepted");
-  if (!accepted.length) return { threads: [], demo: false };
+  if (!accepted.length) return { threads: SAMPLE_THREADS(), demo: false };
 
   const otherIds = accepted.map((c) => (c.from_id === viewer.id ? c.to_id : c.from_id));
   const [{ data: rows }, { data: messages }] = await Promise.all([
@@ -218,7 +229,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
     ];
   });
   threads.sort((a, b) => b.at.localeCompare(a.at));
-  return { threads, demo: false };
+  return { threads: [...threads, ...SAMPLE_THREADS()], demo: false };
 }
 
 export type ChatMessage = { id: number; mine: boolean; body: string | null; voiceUrl: string | null; createdAt: string };
@@ -232,7 +243,7 @@ export type ChatView =
 export async function getChat(username: string): Promise<ChatView | null> {
   const view = await getProfile(username);
   if (!view) return null;
-  if (!view.viewerId) return { kind: "demo", person: view.person };
+  if (!view.viewerId || view.person.sample) return { kind: "demo", person: view.person };
   if (view.connection?.status !== "accepted") {
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }

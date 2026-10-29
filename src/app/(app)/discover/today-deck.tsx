@@ -42,6 +42,9 @@ export function TodayDeck({ people, incoming }: { people: Musician[]; incoming: 
 
       <div className="absolute inset-x-0 bottom-0 pb-[calc(max(env(safe-area-inset-bottom),16px)+96px)] flex flex-col gap-6">
         <div className="px-5 flex flex-col gap-2">
+          {m.sample && (
+            <span className="self-start glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold text-smoke">Sample profile</span>
+          )}
           {asked && (
             <span className="self-start glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold">
               {first} wants to play with you
