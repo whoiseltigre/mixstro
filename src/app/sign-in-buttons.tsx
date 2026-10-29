@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppleIcon, Button, ButtonLink, GoogleIcon } from "@/components/ui";
@@ -44,7 +45,9 @@ export function SignInButtons() {
         </p>
       )}
       <p className="mt-1.5 text-center text-[12px] leading-[1.4] text-smoke">
-        By continuing you agree to the Mixstro Terms and Privacy Policy.
+        By continuing you agree to the Mixstro{" "}
+        <Link href="/terms" className="underline underline-offset-2">Terms</Link> and{" "}
+        <Link href="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.
       </p>
     </div>
   );
