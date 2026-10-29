@@ -9,8 +9,9 @@ import { createClient } from "./supabase/server";
  */
 
 const LOOKING_FOR: Record<string, string> = {
+  showcase: "Sharing their music",
   join_band: "Looking to join a band",
-  start_project: "Starting a project",
+  start_project: "Building a band",
   paid_work: "Open to paid and session work",
   jam: "Up for jams and co-writing",
 };
