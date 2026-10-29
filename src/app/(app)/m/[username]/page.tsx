@@ -1,13 +1,12 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityBadge } from "@/components/activity";
 import { ArtistAvatar } from "@/components/artist-avatar";
-import { JourneyTimeline } from "@/components/journey-timeline";
+import { ProjectList } from "@/components/project-list";
 import { PersonPhoto } from "@/components/person-photo";
 import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton, Button, ButtonLink, VerifiedMark } from "@/components/ui";
-import { getJourney } from "@/lib/journey-server";
+import { getProjects } from "@/lib/projects-server";
 import { getProfile } from "@/lib/people";
 import { ConnectButton } from "./connect-button";
 
@@ -19,7 +18,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
   if (!view) notFound();
   const { person: m, connection, viewerId } = view;
   const first = m.name.split(" ")[0];
-  const journey = await getJourney(m);
+  const projects = await getProjects(m);
   const sharedIds = new Set(m.shared.map((a) => a.id));
   const status = !connection
     ? "none"
@@ -73,9 +72,9 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           )}
         </div>
 
-        {journey.length > 0 && (
-          <div className="pt-2">
-            <JourneyTimeline entries={journey} />
+        {projects.length > 0 && (
+          <div className="pt-3">
+            <ProjectList projects={projects} />
           </div>
         )}
 
@@ -104,25 +103,6 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           </div>
         </section>
 
-        {m.bands.length > 0 && (
-          <section className="flex flex-col gap-2.5 pt-2">
-            <h2 className="text-[17px] font-semibold">Played in</h2>
-            <div className="hscroll flex gap-2.5 -mx-5 px-5">
-              {m.bands.map((b) => (
-                <div key={b.name} className="w-[286px] shrink-0 flex gap-3 p-2.5 rounded-[20px] bg-stage">
-                  <div className="relative w-[104px] h-[78px] rounded-xl overflow-hidden shrink-0">
-                    <Image src={b.photo} alt="" fill sizes="104px" className="object-cover" />
-                  </div>
-                  <div className="flex flex-col justify-center gap-0.5">
-                    <span className="text-[16px] font-semibold">{b.name}</span>
-                    <span className="text-[13px] text-smoke">{b.years}</span>
-                    <span className="text-[13px] text-smoke">{b.role}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
         {m.sample && (
           <p className="pt-2 text-[13px] text-smoke">
             Sample profile. <Link href="/discover" className="underline">Back to Today</Link>

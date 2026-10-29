@@ -3,17 +3,17 @@
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
-import { JourneyTimeline } from "@/components/journey-timeline";
+import { ProjectList } from "@/components/project-list";
 import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
-import { useMyJourney } from "@/lib/journey-store";
+import { useMyProjects } from "@/lib/projects-store";
 import { COMMITMENT, useDraft } from "@/lib/onboarding";
 import { useVerification } from "@/lib/verification";
 
 export default function Me() {
   const { draft, ready } = useDraft();
   const { verified } = useVerification();
-  const journey = useMyJourney();
+  const projects = useMyProjects();
   if (!ready) return null;
 
   if (!draft.firstName) {
@@ -52,7 +52,7 @@ export default function Me() {
       <FinishProfile
         hasInfluences={draft.influences.length > 0}
         hasTrack={draft.clips.some((c) => c.kind === "clip")}
-        hasJourney={!journey.ready || journey.entries.length > 0}
+        hasProjects={!projects.ready || projects.projects.length > 0}
       />
       <dl className="grid grid-cols-2 gap-2.5">
         <Fact label="Plays" value={draft.instruments.join(", ")} />
@@ -63,14 +63,14 @@ export default function Me() {
           value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
         />
       </dl>
-      {journey.ready && (
-        <JourneyTimeline
-          entries={journey.entries}
-          editHref="/me/journey"
+      {projects.ready && (
+        <ProjectList
+          projects={projects.projects}
+          editHref="/me/projects"
           empty={
-            <Link href="/me/journey" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
-              <span className="text-[15px] font-semibold">Show where you&apos;ve been</span>
-              <span className="text-[13px] text-smoke">Old demos, past bands, the record you&apos;re proudest of. Add tracks by year.</span>
+            <Link href="/me/projects" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
+              <span className="text-[15px] font-semibold">Show what you&apos;ve played in</span>
+              <span className="text-[13px] text-smoke">Every band and project, old or new, with a track or two from each.</span>
             </Link>
           }
         />
@@ -120,11 +120,11 @@ export default function Me() {
 function FinishProfile({
   hasInfluences,
   hasTrack,
-  hasJourney,
+  hasProjects,
 }: {
   hasInfluences: boolean;
   hasTrack: boolean;
-  hasJourney: boolean;
+  hasProjects: boolean;
 }) {
   const todo = [
     !hasTrack && {
@@ -132,10 +132,10 @@ function FinishProfile({
       title: "Add a track",
       sub: "Profiles with music get far more replies.",
     },
-    !hasJourney && {
-      href: "/me/journey",
-      title: "Start your journey",
-      sub: "Add tracks from past years, with a line about each.",
+    !hasProjects && {
+      href: "/me/projects",
+      title: "Add your projects",
+      sub: "The bands you've played in, old and new, with their music.",
     },
     !hasInfluences && {
       href: "/onboarding/music",

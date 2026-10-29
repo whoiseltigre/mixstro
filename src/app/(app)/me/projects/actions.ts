@@ -12,7 +12,7 @@ const OEMBED: Partial<Record<string, (url: string) => string>> = {
 };
 
 /**
- * Fills in a pasted link's title and artwork so adding to your journey is one paste.
+ * Fills in a pasted link's title and artwork so adding a track to a project is one paste.
  * Uses each platform's public oEmbed; Apple Music has none, so we read its og: tags.
  * Any failure just leaves the fields for the person to type.
  */
