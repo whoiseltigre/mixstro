@@ -1,6 +1,6 @@
 # Mixstro
 
-Where musicians meet. A no-swipe matchmaking app for musicians: five curated matches a day based on shared influences, commitment level, and where and when you play.
+Where musicians meet. Mixstro is for three things: showing off your whole musical journey, finding people to start or fill out a band, and networking for gigs and other musicians. No swiping: five musicians worth meeting each day, based on shared influences, goals, and where and when you play.
 
 Installable web app (PWA) built with Next.js 15, Tailwind CSS 4 and Supabase.
 
@@ -14,7 +14,7 @@ npm run dev
 
 Open http://localhost:3000 on a phone-sized window, or add it to your iPhone home screen.
 
-**Demo mode.** With no Supabase keys in `.env.local`, every sign-in button skips straight into onboarding, answers are kept in the browser, and the Matches, Board and Messages tabs show sample musicians. This is handy for design review.
+**Demo mode.** With no Supabase keys in `.env.local`, every sign-in button skips straight into onboarding, answers are kept in the browser, and the Today, Board and Messages tabs show sample musicians. This is handy for design review.
 
 ## Supabase setup
 
@@ -29,7 +29,7 @@ Open http://localhost:3000 on a phone-sized window, or add it to your iPhone hom
 | --- | --- |
 | Welcome and sign in (Apple, Google, email code) | `src/app/page.tsx`, `src/app/auth/*` |
 | Onboarding, 7 steps then "You're in" | `src/app/onboarding/*`, state in `src/lib/onboarding.ts` |
-| Matches, profile, connected, Board, Messages, chat, me | `src/app/(app)/*` (sample data in `src/lib/mock.ts`) |
+| Today, profile, connected, Board, Messages, chat, me | `src/app/(app)/*` (sample data in `src/lib/mock.ts`) |
 | House Lights tokens, glass, Gel | `src/app/globals.css` |
 | Shared UI | `src/components/*` |
 | Database schema with row-level security | `supabase/migrations/` |

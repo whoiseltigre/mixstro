@@ -14,7 +14,7 @@ export default function Goals() {
   return (
     <main className="min-h-dvh flex flex-col">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} />
-      <StepTitle title="What are you after?" sub="Pick any. Matching on this is how we avoid flaky connections." />
+      <StepTitle title="What are you after?" sub="Pick any. It shapes who we introduce you to and what your profile shows first." />
       <div className="px-5 pt-7 flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           {GOALS.map((g) => {

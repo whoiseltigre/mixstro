@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { AppleIcon, Button, ButtonLink, GoogleIcon } from "@/components/ui";
+import { AppleIcon, Button, ButtonLink, GoogleButton } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 
 // Apple sign-in needs a paid Apple Developer membership; it stays hidden until the provider is set up.
@@ -33,9 +33,7 @@ export function SignInButtons() {
           <AppleIcon /> Continue with Apple
         </Button>
       )}
-      <Button variant={APPLE_ENABLED ? "glass" : "primary"} onClick={() => oauth("google")}>
-        <GoogleIcon /> Continue with Google
-      </Button>
+      <GoogleButton onClick={() => oauth("google")} />
       <ButtonLink variant="glass" href="/auth/email">
         Continue with email
       </ButtonLink>
