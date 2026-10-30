@@ -110,7 +110,7 @@ function FinishProfile({
 }) {
   const todo = [
     !hasTrack && {
-      href: "/onboarding/sound",
+      href: "/onboarding/sound?from=profile",
       title: "Add a track",
       sub: "Profiles with music get far more replies.",
     },

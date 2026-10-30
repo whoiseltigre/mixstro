@@ -33,7 +33,9 @@ export function parseClip(raw: string): ParsedClip | null {
   if (RECORDING.test(raw)) return { provider: "upload", id: raw.slice(-48), url: raw, embed: raw, shape: "square" };
   let u: URL;
   try {
-    u = new URL(raw.trim());
+    // People often paste "youtube.com/…" without the scheme.
+    const t = raw.trim();
+    u = new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`);
   } catch {
     return null;
   }
