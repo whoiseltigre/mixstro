@@ -41,6 +41,16 @@ Open http://localhost:3000 on a phone-sized window, or add it to your iPhone hom
 - The Gel sheen (`var(--gel)`) is only for peak moments: Connect and a new connection.
 - Headlines use SF Pro Display / Inter Tight 800 at -0.035em. No serif or italic display type.
 
+## Artist search
+
+Influences search `/api/artists?q=` (`src/app/api/artists/route.ts`, `src/lib/artist-search.ts`). It uses Deezer, free with no key, until the Apple Music key is set; then it switches to Apple Music on its own. Artist ids are a slug of the name on both, so shared influences keep matching after the switch.
+
+To switch to Apple Music (needs the paid Apple Developer Program):
+
+1. Certificates, Identifiers & Profiles → Identifiers → + → Media IDs, register e.g. `media.com.mixstro`.
+2. Keys → + → tick Media Services (MusicKit), link the Media ID, download the `.p8` file (one download only).
+3. Add `APPLE_TEAM_ID`, `APPLE_MUSIC_KEY_ID` and `APPLE_MUSIC_PRIVATE_KEY` (the .p8 text) to `.env.local` and to the hosting provider's environment variables, then redeploy.
+
 ## Not wired up yet
 
 - Apple Music (MusicKit) and Spotify: connecting currently fills in a sample top-artists list.
