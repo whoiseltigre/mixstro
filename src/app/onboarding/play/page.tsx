@@ -13,15 +13,11 @@ export default function Play() {
   const { draft, update } = useDraft();
   const [geoNote, setGeoNote] = useState<string>();
 
+  // A tap only adds or removes. Your first pick is your main until you choose another below.
   function tapInstrument(name: string) {
-    const on = draft.instruments.includes(name);
-    // First tap selects, second tap makes it your main, third tap removes.
-    if (on && draft.mainInstrument !== name) return update({ mainInstrument: name });
     const instruments = toggle(draft.instruments, name);
-    update({
-      instruments,
-      mainInstrument: on ? (draft.mainInstrument === name ? instruments[0] : draft.mainInstrument) : (draft.mainInstrument ?? name),
-    });
+    const main = draft.mainInstrument && instruments.includes(draft.mainInstrument) ? draft.mainInstrument : instruments[0];
+    update({ instruments, mainInstrument: main });
   }
 
   function useMyLocation() {
@@ -42,15 +38,40 @@ export default function Play() {
       <StepTitle title="Your music" sub="What you play, what you're here for, and roughly where." />
       <div className="px-5 pt-7 flex flex-col gap-8">
         <div className="flex flex-col gap-2.5">
-          <SectionLabel>What do you play? Tap twice for your main one.</SectionLabel>
+          <SectionLabel>What do you play? Pick all that apply.</SectionLabel>
           <div className="flex flex-wrap gap-2">
             {INSTRUMENTS.map((name) => (
               <Chip key={name} selected={draft.instruments.includes(name)} onClick={() => tapInstrument(name)}>
                 {name}
-                {draft.mainInstrument === name && <span className="ml-1 text-[11px] font-bold text-ink/60">MAIN</span>}
               </Chip>
             ))}
           </div>
+          {draft.instruments.length > 1 && (
+            <div className="mt-3 flex flex-col gap-2.5" role="radiogroup" aria-label="Your main instrument">
+              <SectionLabel>Which one is your main?</SectionLabel>
+              <div className="flex flex-wrap gap-2">
+                {draft.instruments.map((name) => {
+                  const on = draft.mainInstrument === name;
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      role="radio"
+                      aria-checked={on}
+                      onClick={() => update({ mainInstrument: name })}
+                      className={cx(
+                        "h-9 px-3.5 rounded-full text-[14px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]",
+                        on ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16 text-paper",
+                      )}
+                    >
+                      {on && <StarIcon />}
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2.5">
@@ -103,5 +124,13 @@ export default function Play() {
         </Button>
       </StepFooter>
     </main>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z" />
+    </svg>
   );
 }
