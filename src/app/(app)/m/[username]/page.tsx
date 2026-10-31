@@ -29,9 +29,9 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           : "asked";
 
   return (
-    <main className="pb-16">
-      <div className="relative h-[330px]">
-        <PersonPhoto person={m} priority sizes="440px" initialsSize={88} className="object-[50%_40%]" />
+    <main className="pb-16 md:pt-6 md:max-w-[760px] md:mx-auto">
+      <div className="relative h-[330px] md:h-[420px] md:rounded-[28px] md:overflow-hidden">
+        <PersonPhoto person={m} priority sizes="(min-width: 768px) 760px, 100vw" initialsSize={88} className="object-[50%_40%]" />
         <div className="absolute inset-x-0 bottom-0 h-[170px] bg-gradient-to-b from-ink/0 to-ink" />
         <div className="absolute inset-x-5 top-0 pt-safe mt-2 flex justify-between">
           <BackButton href="/discover" />

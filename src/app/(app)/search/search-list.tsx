@@ -17,7 +17,7 @@ export function SearchList({ people }: { people: Musician[] }) {
     : people;
 
   return (
-    <main className="pt-safe px-5 pb-16 flex flex-col gap-5">
+    <main className="pt-safe md:pt-6 px-5 md:px-0 pb-16 flex flex-col gap-5 md:max-w-[680px] md:mx-auto">
       <div className="mt-2 flex items-center gap-2.5">
         <BackButton href="/discover" />
         <label htmlFor="q" className="sr-only">Search musicians</label>

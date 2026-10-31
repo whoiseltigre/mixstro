@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { cx } from "./ui";
 
-const TABS = [
+export const TABS = [
   {
     href: "/discover",
     label: "Today",
@@ -54,7 +54,7 @@ const TABS = [
 ];
 
 // Sample badge in demo mode. TODO: count threads waiting on you once read state is tracked.
-const UNREAD = isSupabaseConfigured ? 0 : 2;
+export const UNREAD = isSupabaseConfigured ? 0 : 2;
 
 export function TabBar() {
   const path = usePathname();
@@ -62,7 +62,7 @@ export function TabBar() {
   if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
 
   return (
-    <div className="fixed z-20 left-1/2 -translate-x-1/2 bottom-[max(env(safe-area-inset-bottom),16px)] flex gap-2.5">
+    <div className="md:hidden fixed z-20 left-1/2 -translate-x-1/2 bottom-[max(env(safe-area-inset-bottom),16px)] flex gap-2.5">
       <nav aria-label="Main" className="glass w-[286px] h-[62px] rounded-[31px] flex items-center px-[5px]">
         {TABS.map((t) => {
           const active = path === t.href || path.startsWith(t.href + "/");
