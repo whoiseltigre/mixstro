@@ -8,7 +8,7 @@ export function DemoChat({ person: m }: { person: Musician }) {
   const first = m.name.split(" ")[0];
 
   return (
-    <main className="h-dvh flex flex-col">
+    <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={m} />
 
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col justify-end gap-2">
@@ -37,7 +37,7 @@ export function DemoChat({ person: m }: { person: Musician }) {
         </div>
       </div>
 
-      <form className="glass fixed z-20 left-1/2 -translate-x-1/2 w-[calc(min(100%,440px)-24px)] bottom-[max(env(safe-area-inset-bottom),16px)] h-[54px] rounded-[27px] flex items-center gap-2 px-[7px]">
+      <form className="glass fixed md:absolute z-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-4 md:right-4 w-[calc(min(100%,440px)-24px)] md:w-auto bottom-[max(env(safe-area-inset-bottom),16px)] md:bottom-4 h-[54px] rounded-[27px] flex items-center gap-2 px-[7px]">
         <button type="button" aria-label="Attach a clip" className="size-10 rounded-full bg-riser flex items-center justify-center">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         </button>

@@ -32,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
-        <div className="mx-auto min-h-dvh w-full max-w-[440px] relative">{children}</div>
+        {children}
       </body>
     </html>
   );

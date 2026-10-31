@@ -1,52 +1,17 @@
-import Link from "next/link";
-import { PersonPhoto } from "@/components/person-photo";
-import { TimeAgo } from "@/components/time-ago";
-import { getThreads } from "@/lib/people";
-
 export const metadata = { title: "Messages · Mixstro" };
-export const dynamic = "force-dynamic";
 
-export default async function Messages() {
-  const { threads } = await getThreads();
+/** The list itself lives in the layout. This fills the right pane from 768px until a chat is picked. */
+export default function Messages() {
   return (
-    <main className="pt-safe px-5 pb-32 flex flex-col gap-5">
-      <h1 className="mt-3 headline text-[34px]">Messages</h1>
-      {threads.length === 0 ? (
-        <div className="pt-16 flex flex-col items-center gap-2 text-center">
-          <h2 className="text-[20px] font-semibold">No conversations yet</h2>
-          <p className="max-w-[280px] text-[15px] leading-[1.5] text-smoke">
-            When you and another musician both Connect, your chat opens here.
-          </p>
-          <Link href="/discover" className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-[15px] font-semibold flex items-center">
-            See Today
-          </Link>
-        </div>
-      ) : (
-        <ul className="flex flex-col">
-          {threads.map((t) => {
-            const waiting = !t.mine;
-            return (
-              <li key={t.username}>
-                <Link href={`/messages/${t.username}`} className="flex items-center gap-3.5 py-3 border-b border-paper/8">
-                  <div className="relative size-14 rounded-full overflow-hidden shrink-0">
-                    <PersonPhoto person={t.person} sizes="56px" initialsSize={20} />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <div className="flex justify-between gap-2">
-                      <span className="text-[16px] font-semibold">{t.person.name}</span>
-                      <TimeAgo iso={t.at} className="text-[13px] text-smoke" />
-                    </div>
-                    <span className={`text-[14px] truncate ${waiting ? "text-paper" : "text-smoke"}`}>
-                      {t.mine ? `You: ${t.preview}` : t.preview}
-                    </span>
-                  </div>
-                  {waiting && <span className="size-2.5 rounded-full bg-tungsten shrink-0" aria-label="Your turn" />}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+    <main className="hidden md:flex h-full flex-col items-center justify-center gap-2 px-8 text-center">
+      <span aria-hidden="true" className="size-14 rounded-full bg-paper/6 border border-paper/10 flex items-center justify-center text-smoke">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round">
+          <path d="M4 4.5h10.5A1.5 1.5 0 0116 6v6.5a1.5 1.5 0 01-1.5 1.5H9l-3.5 3v-3H4a1.5 1.5 0 01-1.5-1.5V6A1.5 1.5 0 014 4.5z" />
+          <path d="M19 8.5h.5A1.5 1.5 0 0121 10v6.5a1.5 1.5 0 01-1.5 1.5H19v3l-3.5-3H11" />
+        </svg>
+      </span>
+      <h2 className="text-[18px] font-semibold">Pick a conversation</h2>
+      <p className="text-[14px] text-smoke max-w-[280px]">Your chats with musicians you&apos;ve connected with show up on the left.</p>
     </main>
   );
 }

@@ -15,7 +15,7 @@ export default function Me() {
 
   if (!draft.firstName) {
     return (
-      <main className="min-h-dvh px-5 pt-safe flex flex-col justify-center gap-4">
+      <main className="min-h-dvh md:min-h-[calc(100dvh-88px)] px-5 md:px-0 pt-safe flex flex-col justify-center gap-4 md:max-w-[480px] md:mx-auto">
         <h1 className="headline text-[34px]">No profile yet</h1>
         <p className="text-smoke">
           Set up your profile to start meeting musicians.
@@ -26,75 +26,89 @@ export default function Me() {
   }
 
   return (
-    <main className="pt-safe px-5 pb-32 flex flex-col gap-6">
-      <div className="mt-6 flex items-center gap-4">
-        <span className="size-20 rounded-full bg-riser overflow-hidden shrink-0">
-          {draft.avatarUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={draft.avatarUrl}
-              alt=""
-              className="size-full object-cover"
-            />
-          )}
-        </span>
-        <div className="flex flex-col gap-0.5">
-          <h1 className="headline text-[32px] flex items-center gap-1.5">
-            {draft.firstName}
-            {verified && <VerifiedMark size={22} className="text-paper" />}
-          </h1>
-          <span className="text-[14px] text-smoke">@{draft.username.replace(/^@/, "")}</span>
+    <main className="pt-safe md:pt-6 px-5 md:px-0 pb-32 md:pb-16 flex flex-col gap-6 md:grid md:grid-cols-[minmax(280px,360px)_1fr] md:gap-x-10 lg:gap-x-14 md:items-start">
+      {/* From 768px the photo and basics stay pinned on the left while the rest scrolls on the right. */}
+      <div className="flex flex-col gap-6 md:sticky md:top-[96px]">
+        <div className="mt-6 md:mt-0 flex items-center md:items-start md:flex-col gap-4 md:gap-5">
+          <span className="size-20 md:size-auto md:w-full md:aspect-[9/10] rounded-full md:rounded-[28px] bg-riser overflow-hidden shrink-0">
+            {draft.avatarUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={draft.avatarUrl}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="size-full object-cover"
+              />
+            )}
+          </span>
+          <div className="flex flex-col gap-0.5 md:gap-1.5">
+            <h1 className="headline text-[32px] md:text-[44px] flex items-center gap-1.5">
+              {draft.firstName}
+              {verified && <VerifiedMark size={22} className="text-paper" />}
+            </h1>
+            <span className="text-[14px] md:text-[15px] text-smoke">
+              @{draft.username.replace(/^@/, "")}
+            </span>
+          </div>
         </div>
+        <dl className="grid grid-cols-2 gap-2.5">
+          <Fact label="Plays" value={draft.instruments.join(", ")} />
+          <Fact label="Genres" value={draft.genres.join(", ")} />
+          <Fact label="Commitment" value={COMMITMENT[draft.commitment]} />
+          <Fact
+            label="Where"
+            value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
+          />
+        </dl>
       </div>
-      <FinishProfile
-        hasInfluences={draft.influences.length > 0}
-        hasTrack={draft.clips.some((c) => c.kind === "clip")}
-      />
-      <dl className="grid grid-cols-2 gap-2.5">
-        <Fact label="Plays" value={draft.instruments.join(", ")} />
-        <Fact label="Genres" value={draft.genres.join(", ")} />
-        <Fact label="Commitment" value={COMMITMENT[draft.commitment]} />
-        <Fact
-          label="Where"
-          value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
+      <div className="flex flex-col gap-6 md:gap-8 min-w-0">
+        <FinishProfile
+          hasInfluences={draft.influences.length > 0}
+          hasTrack={draft.clips.some((c) => c.kind === "clip")}
         />
-      </dl>
-      {draft.influences.length > 0 && (
-        <section className="flex flex-col gap-2.5">
-          <h2 className="text-[17px] font-semibold">Influences</h2>
-          <div className="hscroll flex gap-4 -mx-5 px-5">
-            {draft.influences.map((a) => (
-              <div
-                key={a.id}
-                className="w-[80px] shrink-0 flex flex-col items-center gap-2"
-              >
-                <ArtistAvatar artist={a} size={76} />
-                <span className="text-[12px] font-semibold text-center truncate max-w-full">
-                  {a.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-      {draft.clips.some((c) => c.kind === "clip") && (
-        <section className="flex flex-col gap-2.5">
-          <h2 className="text-[17px] font-semibold">Clips</h2>
-          <div className="hscroll flex gap-2.5 -mx-5 px-5 items-start">
-            {draft.clips.map((c) => {
-              const p = c.kind === "clip" ? parseClip(c.value) : null;
-              return p ? <ClipCard key={c.value} clip={p} /> : null;
-            })}
-          </div>
-        </section>
-      )}
-      <div className="flex gap-5">
-        <Link href="/onboarding/basics" className="text-[15px] font-semibold underline underline-offset-2">
-          Edit profile
-        </Link>
-        <Link href="/settings" className="text-[15px] font-semibold underline underline-offset-2">
-          Settings
-        </Link>
+        {draft.influences.length > 0 && (
+          <section className="flex flex-col gap-2.5">
+            <h2 className="text-[17px] font-semibold">Influences</h2>
+            <div className="hscroll flex gap-4 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap">
+              {draft.influences.map((a) => (
+                <div
+                  key={a.id}
+                  className="w-[80px] shrink-0 flex flex-col items-center gap-2"
+                >
+                  <ArtistAvatar artist={a} size={76} />
+                  <span className="text-[12px] font-semibold text-center truncate max-w-full">
+                    {a.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        {draft.clips.some((c) => c.kind === "clip") && (
+          <section className="flex flex-col gap-2.5">
+            <h2 className="text-[17px] font-semibold">Clips</h2>
+            <div className="hscroll flex gap-2.5 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap items-start">
+              {draft.clips.map((c) => {
+                const p = c.kind === "clip" ? parseClip(c.value) : null;
+                return p ? <ClipCard key={c.value} clip={p} /> : null;
+              })}
+            </div>
+          </section>
+        )}
+        <div className="flex gap-5">
+          <Link
+            href="/onboarding/basics"
+            className="text-[15px] font-semibold underline underline-offset-2"
+          >
+            Edit profile
+          </Link>
+          <Link
+            href="/settings"
+            className="text-[15px] font-semibold underline underline-offset-2"
+          >
+            Settings
+          </Link>
+        </div>
       </div>
     </main>
   );
@@ -110,7 +124,7 @@ function FinishProfile({
 }) {
   const todo = [
     !hasTrack && {
-      href: "/onboarding/sound",
+      href: "/onboarding/sound?from=profile",
       title: "Add a track",
       sub: "Profiles with music get far more replies.",
     },

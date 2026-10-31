@@ -25,7 +25,7 @@ export default function Settings() {
   }
 
   return (
-    <main className="pt-safe px-5 pb-32 flex flex-col gap-6">
+    <main className="pt-safe md:pt-6 px-5 md:px-0 pb-32 md:pb-16 flex flex-col gap-6 md:max-w-[680px] md:mx-auto">
       <header className="mt-3 flex items-center gap-3">
         <BackButton href="/me" />
         <h1 className="headline text-[28px]">Settings</h1>
