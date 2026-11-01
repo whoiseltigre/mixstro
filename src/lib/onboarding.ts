@@ -42,9 +42,18 @@ export const EMPTY_DRAFT: Draft = {
   clips: [],
 };
 
-/** The numbered steps; sign-in and verify come before, "done" after. Influences and the rest are added later from the profile. */
-export const STEPS = ["basics", "play", "sound"] as const;
+/** The numbered steps, one question each; sign-in comes before, "done" after. Influences and the rest are added later from the profile. */
+export const STEPS = ["basics", "play", "why", "where", "sound"] as const;
 export type Step = (typeof STEPS)[number];
+
+/** Each step's stage-spill color, so every screen feels like its own moment. */
+export const STEP_GLOW: Record<Step, string> = {
+  basics: "#FFB245",
+  play: "#B5C5FF",
+  why: "#67E2DA",
+  where: "#FFACBA",
+  sound: "#F7BF77",
+};
 
 export const INSTRUMENTS = ["Guitar", "Bass", "Drums", "Keys", "Vocals", "Producer", "Songwriter", "DJ", "Strings", "Horns"];
 export const GENRES = ["Indie", "Rock", "Neo-soul", "Funk", "Jazz", "Hip-hop", "R&B", "Folk", "Electronic", "Punk", "Metal", "Country", "Pop", "Latin"];
@@ -54,6 +63,30 @@ export const GOALS = [
   { id: "join_band", title: "Join a band", sub: "Fill a spot in an existing group" },
   { id: "paid_work", title: "Gigs and paid work", sub: "Shows, studio days, tours" },
   { id: "jam", title: "Network and jam", sub: "Meet local musicians, co-write, just play" },
+];
+/** The three reasons from the welcome screen, each grouping the goals we store. */
+export const REASONS = [
+  { id: "showcase", title: "Show off my music", sub: "Your whole journey, old songs included", color: "#FFB245", goals: [{ id: "showcase", label: "" }] },
+  {
+    id: "bandmates",
+    title: "Find bandmates",
+    sub: "Start a band, replace a member, or join one",
+    color: "#B5C5FF",
+    goals: [
+      { id: "start_project", label: "Start or rebuild a band" },
+      { id: "join_band", label: "Join a band" },
+    ],
+  },
+  {
+    id: "network",
+    title: "Gigs and networking",
+    sub: "Shows, studio days, other musicians",
+    color: "#67E2DA",
+    goals: [
+      { id: "paid_work", label: "Gigs and paid work" },
+      { id: "jam", label: "Meet and jam" },
+    ],
+  },
 ];
 export const COMMITMENT = ["Just for fun", "Weekly", "Gigging", "Touring"];
 export const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

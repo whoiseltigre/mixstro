@@ -6,8 +6,10 @@ import type { Musician } from "@/lib/mock";
 
 export function ChatHeader({ person: m, action = true }: { person: Musician; action?: boolean }) {
   return (
-    <header className="glass rounded-b-[26px] border-t-0 pt-safe px-3.5 pb-3 flex items-center gap-2.5 z-10">
-      <BackButton href="/messages" />
+    <header className="glass rounded-b-[26px] md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-x-0 md:border-b md:border-paper/8 border-t-0 pt-safe md:pt-3 px-3.5 md:px-5 pb-3 flex items-center gap-2.5 z-10">
+      <span className="md:hidden">
+        <BackButton href="/messages" />
+      </span>
       <div className="relative size-10 rounded-full overflow-hidden shrink-0">
         <PersonPhoto person={m} sizes="40px" initialsSize={15} />
       </div>

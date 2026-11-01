@@ -20,7 +20,7 @@ export default async function Connected({ params }: { params: Promise<{ username
       : `${first} plays ${m.instrument.toLowerCase()} around ${m.neighborhood}.`;
 
   return (
-    <main className="relative min-h-dvh flex flex-col px-5 pt-safe pb-safe overflow-hidden">
+    <main className="relative min-h-dvh md:min-h-[calc(100dvh-88px)] flex flex-col px-5 pt-safe pb-safe overflow-hidden md:max-w-[560px] md:mx-auto">
       <div aria-hidden="true" className="absolute left-1/2 top-[190px] -translate-x-1/2 w-[200px] h-[240px] rounded-full opacity-25 blur-[70px]" style={{ background: "var(--gel)" }} />
       <div className="relative flex items-center justify-between h-12 mt-2">
         <span className="text-[13px] font-medium text-smoke">New collaboration</span>

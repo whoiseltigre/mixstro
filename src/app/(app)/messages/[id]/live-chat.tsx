@@ -63,7 +63,7 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
   }
 
   return (
-    <main className="h-dvh flex flex-col">
+    <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={person} />
 
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
@@ -99,7 +99,7 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
 
       <form
         onSubmit={submit}
-        className="glass fixed z-20 left-1/2 -translate-x-1/2 w-[calc(min(100%,440px)-24px)] bottom-[max(env(safe-area-inset-bottom),16px)] h-[54px] rounded-[27px] flex items-center gap-2 pl-4 pr-[7px]"
+        className="glass fixed md:absolute z-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-4 md:right-4 w-[calc(min(100%,440px)-24px)] md:w-auto bottom-[max(env(safe-area-inset-bottom),16px)] md:bottom-4 h-[54px] rounded-[27px] flex items-center gap-2 pl-4 pr-[7px]"
       >
         <label htmlFor="msg" className="sr-only">Message</label>
         <input

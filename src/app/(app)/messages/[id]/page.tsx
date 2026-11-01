@@ -17,7 +17,7 @@ export default async function Chat({ params }: { params: Promise<{ id: string }>
   const first = chat.person.name.split(" ")[0];
   const sent = chat.connection?.from_id === chat.viewerId && chat.connection.status === "pending";
   return (
-    <main className="h-dvh flex flex-col">
+    <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={chat.person} action={false} />
       <div className="flex-1 flex flex-col items-center justify-center gap-2 px-8 text-center">
         <h1 className="text-[20px] font-semibold">{sent ? `Waiting on ${first}` : `Connect with ${first} first`}</h1>

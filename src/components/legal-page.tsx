@@ -4,7 +4,7 @@ import { BackButton, Wordmark } from "@/components/ui";
 /** Shared shell for the Privacy Policy and Terms pages. */
 export function LegalPage({ title, updated, children }: { title: string; updated: string; children: ReactNode }) {
   return (
-    <main className="pt-safe pb-safe px-5">
+    <main className="pt-safe pb-safe px-5 mx-auto w-full max-w-[680px]">
       <div className="flex items-center justify-between py-2">
         <BackButton href="/" />
         <Wordmark size={18} />
