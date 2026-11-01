@@ -1,9 +1,9 @@
 ---
-title: "The Best Blues Guitar Players"
-slug: best-blues-guitar-players
+title: "The Best Blues Guitarists of All Time"
+slug: best-blues-guitarists
 date: 2024-05-23
 updated: 2026-11-01
-description: "The best blues guitar players, from Delta pioneers Charley Patton and Robert Johnson to B.B. King, Stevie Ray Vaughan and Joe Bonamassa."
+description: "The best blues guitarists of all time, from Delta pioneers Charley Patton and Robert Johnson to B.B. King, Stevie Ray Vaughan and Joe Bonamassa."
 excerpt: "From the Mississippi Delta to Texas and beyond: the players who defined blues guitar, and who to listen to next."
 cover:
 cover_alt:
@@ -12,11 +12,11 @@ author: Mixstro
 old_urls: [/best-blues-guitar-players/]
 ---
 
-Not everyone is a blues fan, but these players might change that. Put them on while you read, then pick up your guitar and steal a lick or two.
+Not everyone is a blues fan, but the best blues guitarists have a way of changing that. Put them on while you read, then pick up your guitar and steal a lick or two.
 
 The earliest rural blues was mostly vocal music. It wasn't built to tell a story so much as to express a deep sadness, born out of hard lives and hard labor. Work songs kept time to the plow and the cotton sack, and when the work was done, guitar, banjo and harmonica came out to entertain. That's where this story starts.
 
-## Delta blues pioneers
+## Delta blues guitarists
 
 ### Charley Patton
 
@@ -34,16 +34,18 @@ The "Godmother of Rock and Roll," Sister Rosetta Tharpe fused gospel and blues, 
 
 Self-taught and from the Mississippi Delta, B.B. King brought new sophistication to the blues with his string bends, singing vibrato and a voice as expressive as his playing. He switched to electric guitar after hearing T-Bone Walker, first hit the R&B charts with "3 O'Clock Blues" in 1952, and later crossed over with "The Thrill Is Gone." He played more than 200 shows a year well into his seventies. He won 15 Grammys and received the Kennedy Center Honors, the National Medal of Arts and the Presidential Medal of Freedom. There's a reason they called him the King of the Blues.
 
-## Texas blues and the modern era
+## Texas and modern blues guitarists
 
 ### Stevie Ray Vaughan
 
-Stevie Ray Vaughan's major-label career lasted only seven years, but in that time he released four studio albums, won six Grammys, and led the blues revival of the 1980s. He taught himself by listening to blues, rock and jazz greats, quit school to play, and jammed with Buddy Guy, Albert King and Lightnin' Hopkins. After his band Double Trouble played Montreux in 1982, David Bowie asked him to play on *Let's Dance*. *Texas Flood* followed in 1983, with "Pride and Joy" and "Love Struck Baby." He died in a helicopter crash in 1990, at 35. He's in both the Blues and [Rock & Roll](https://rockhall.com/inductees/stevie-ray-vaughan-double-trouble/) Halls of Fame, and his sound still defines modern blues guitar.
+Stevie Ray Vaughan's major-label career lasted only seven years, but in that time he released four studio albums, won six Grammys, and led the blues revival of the 1980s. He taught himself by listening to blues, rock and jazz greats, quit school to play, and jammed with Buddy Guy, Albert King and Lightnin' Hopkins. After his band Double Trouble played Montreux in 1982, David Bowie asked him to play on *Let's Dance*. *Texas Flood* followed in 1983, with "Pride and Joy" and "Love Struck Baby." He died in a helicopter crash in 1990, at 35. He's in both the Blues and [Rock & Roll](https://rockhall.com/inductees/stevie-ray-vaughan-double-trouble/) Halls of Fame, and his sound still defines modern blues guitar. He also makes our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time), in any genre.
 
 ### Joe Bonamassa
 
 At 12, Joe Bonamassa opened for B.B. King. That's quite a way to start a career. Decades later he's one of the most popular blues guitarists of his generation, with a long run of number one albums on the [Billboard Blues chart](https://www.billboard.com/artist/joe-bonamassa/), most released on his own independent label. He plays like a mix of every great who came before him, and he has shared the stage with most of them.
 
-## Who to listen to next
+## More blues guitarists to listen to
 
 There are many more greats we could have included. Muddy Waters, Albert King, Freddie King, Buddy Guy and Albert Collins all deserve a deep listen. For the new generation, check out Christone "Kingfish" Ingram, Ally Venable, Eric Gales, Jackie Venson, Joanne Shaw Taylor and Marcus King.
+
+Want to chase that sound yourself? Most of these players got their tone from a small amp turned up loud, and a few of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) get you surprisingly close.

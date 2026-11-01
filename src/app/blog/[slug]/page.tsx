@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BackButton, Wordmark } from "@/components/ui";
-import { formatDate, getAllPosts, getPost } from "@/lib/blog";
+import { SITE_URL, formatDate, getAllPosts, getPost } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -15,10 +15,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPost((await params).slug);
   if (!post) return {};
   return {
+    metadataBase: new URL(SITE_URL),
     title: `${post.title} · Mixstro`,
     description: post.description,
     alternates: { canonical: `/blog/${post.slug}` },
-    openGraph: { type: "article", title: post.title, description: post.description, publishedTime: post.date },
+    openGraph: {
+      type: "article",
+      url: `/blog/${post.slug}`,
+      title: post.title,
+      description: post.description,
+      publishedTime: post.date,
+      modifiedTime: post.updated ?? post.date,
+      tags: post.tags,
+    },
   };
 }
 
@@ -26,8 +35,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPost({ params }: Props) {
   const post = getPost((await params).slug);
   if (!post) notFound();
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+    author: { "@type": "Organization", name: post.author },
+    publisher: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
+    mainEntityOfPage: `${SITE_URL}/blog/${post.slug}`,
+    keywords: post.tags.join(", "),
+  };
   return (
     <main className="pt-safe pb-safe px-5">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <div className="flex items-center justify-between py-2">
         <BackButton href="/blog" />
         <Wordmark size={18} />

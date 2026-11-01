@@ -1,9 +1,9 @@
 ---
-title: "A Tour of Metal Genres for the Brave and Uninitiated"
-slug: different-metal-genres
+title: "Metal Genres Explained: A Guide for the Brave and Uninitiated"
+slug: metal-genres
 date: 2024-10-30
 updated: 2026-11-01
-description: "A guide to the main metal genres, from heavy metal and thrash to death, black, doom, power, nu and progressive metal, with tracks to start each one."
+description: "Metal genres explained, from heavy metal and thrash to death, black, doom, power, nu and progressive metal, with two tracks to start each one."
 excerpt: "Eight metal genres, two tracks each, and the mood that goes with them. Earplugs recommended."
 cover:
 cover_alt:
@@ -12,7 +12,7 @@ author: Mixstro
 old_urls: [/different-metal-genres/]
 ---
 
-Metal splinters into new genres faster than a Les Paul breaks a string under a rock god. Today we're touring the whole universe, genre by genre, like seasoned guides in earplugs and leather vests. Earplugs in? Let's go.
+Metal splinters into new genres faster than a Les Paul breaks a string under a rock god. If you've ever wondered what actually separates thrash from death metal, or doom from black metal, this guide to the main metal genres is for you. Each one gets a short explanation, two tracks to start with, and the mood it goes with. Earplugs in? Let's go.
 
 ## Heavy Metal: The Grandfather of All Metal
 
@@ -28,7 +28,7 @@ Where it all began. Heavy metal was born back in the ’70s with bands like Blac
 
 ## Thrash Metal: Faster, Louder, Angrier
 
-If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just discovered caffeine and is taking it *way too far.*
+If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just discovered caffeine and is taking it *way too far.* Metallica took thrash to stadiums, and their 1991 show in Moscow is one of the [greatest live performances](/blog/greatest-live-performances) in rock history.
 
 - **Start with:**
   - [Metallica – Master of Puppets](https://www.youtube.com/watch?v=xnKhsTXoKCI)
@@ -110,6 +110,6 @@ Progressive metal is heavy but experimental, often with changing time signatures
   - [Tool Official](https://www.toolband.com)
 - **The vibe:** Graph paper, existential philosophy, and maybe a Rubik’s cube
 
-## Where to next
+## Which metal genre should you start with?
 
-That's the map. Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore-subgenres) breaks down one of heavy music's biggest modern branches.
+Of all the metal genres, heavy metal and thrash are the easiest way in, so start there then follow whatever grabs you. Guitar players should also check out the shredders in our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time). Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore-subgenres) breaks down one of heavy music's biggest modern branches.

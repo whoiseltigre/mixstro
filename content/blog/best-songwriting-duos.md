@@ -1,9 +1,9 @@
 ---
 title: "The Best Songwriting Duos of All Time"
-slug: best-songwriting-duos-of-all-time
+slug: best-songwriting-duos
 date: 2024-05-28
 updated: 2026-11-01
-description: "The greatest songwriting duos of all time, from Lennon and McCartney to Elton John and Bernie Taupin, and what their partnerships teach about finding a co-writer."
+description: "The best songwriting duos of all time, from Lennon-McCartney to Elton John and Bernie Taupin, and what their partnerships teach you about finding a co-writer."
 excerpt: "Lennon and McCartney, John and Taupin, Goffin and King: what the greatest songwriting partnerships teach anyone looking for a co-writer."
 cover:
 cover_alt:
@@ -12,13 +12,15 @@ author: Mixstro
 old_urls: [/best-songwriting-duos-of-all-time/]
 ---
 
-Writing a song is hard. Writing one that millions of people love is harder. Finding someone you can write with for years, through clashing personalities, different tastes and shifting priorities, might be the hardest part of all. Yet some partnerships have not only worked, they've shaped popular music. Here are some of the greatest songwriting duos of all time, and what they show about finding the right person to write with.
+Writing a song is hard. Writing one that millions of people love is harder. Finding someone you can write with for years, through clashing egos, different tastes and real life getting in the way, might be the hardest part of all.
+
+The best songwriting duos of all time pulled it off anyway, and between them they wrote a huge share of the songs you know by heart. Here's who they were, how they worked, and what they can teach you about finding your own co-writer.
 
 ## John Lennon and Paul McCartney
 
 There may be no more celebrated songwriting pair. The two Beatles co-wrote around 180 songs, dozens of them hits. "Yesterday" was once listed by [Guinness World Records](https://www.guinnessworldrecords.com/world-records/519210-most-covered-track) as the most covered song in history, with an estimated 2,200 versions. Fans still argue about who wrote what, but both contributed music and lyrics across the catalog, from "I Want to Hold Your Hand" and "She Loves You" to "Come Together" and "Let It Be."
 
-They started writing together as teenagers and kept at it for about a dozen years. They also wrote hits for other artists: Billy J. Kramer with The Dakotas ("Bad to Me"), Peter and Gordon ("A World Without Love," a 1964 number one in the UK and US), and an early UK hit for the Rolling Stones, "I Wanna Be Your Man."
+They started writing together as teenagers and kept at it for about a dozen years, through Shea Stadium and all the way to the rooftop, two of the [greatest live performances](/blog/greatest-live-performances) ever. They also wrote hits for other artists: Billy J. Kramer with The Dakotas ("Bad to Me"), Peter and Gordon ("A World Without Love," a 1964 number one in the UK and US), and an early UK hit for the Rolling Stones, "I Wanna Be Your Man."
 
 ## Elton John and Bernie Taupin
 
@@ -42,20 +44,20 @@ Ashford and Simpson met in a Harlem church in the early 1960s and became one of 
 
 Even if you don't know their names, you know their songs: "Supercalifragilisticexpialidocious," "Chim Chim Cher-ee," "I Wan'na Be Like You," "Chitty Chitty Bang Bang" and "It's a Small World (After All)." Richard and Robert Sherman started with pop hits like "Tall Paul" and "You're Sixteen," then became staff songwriters at Disney, writing for *Mary Poppins*, *The Jungle Book*, *The Aristocats* and *Bedknobs and Broomsticks*. They won two Oscars for *Mary Poppins* and received the [National Medal of Arts](https://www.arts.gov/honors/medals/sherman-brothers) in 2008. Richard Sherman died in 2024 at 95.
 
-## Honorable mentions
+## More great songwriting duos
 
 - **Mick Jagger and Keith Richards:** "(I Can't Get No) Satisfaction," "Paint It Black," "Gimme Shelter," "Brown Sugar" and decades more.
 - **Jimmy Page and Robert Plant:** the core of Led Zeppelin's songwriting.
 - **Jerry Leiber and Mike Stoller:** "Hound Dog," "Jailhouse Rock," and co-writing "Stand by Me" with Ben E. King.
 - **Barry Mann and Cynthia Weil:** "You've Lost That Lovin' Feelin'," "On Broadway."
-- **Nile Rodgers and Bernard Edwards:** "Le Freak" and "Good Times" for Chic, "We Are Family" for Sister Sledge, "I'm Coming Out" for Diana Ross.
+- **Nile Rodgers and Bernard Edwards:** Rodgers is also one of the [best guitarists of all time](/blog/best-guitarists-of-all-time) on rhythm alone. Together they wrote "Le Freak" and "Good Times" for Chic, "We Are Family" for Sister Sledge, and "I'm Coming Out" for Diana Ross.
 - **Norman Whitfield and Barrett Strong:** "I Heard It Through the Grapevine," "War," "Just My Imagination."
 - **Jimmy Jam and Terry Lewis:** the sound behind Janet Jackson's biggest records.
 - **Richard Rodgers and Oscar Hammerstein II:** *Oklahoma!*, *Carousel*, *South Pacific*, *The King and I* and *The Sound of Music*.
 
 And one modern pair: Billie Eilish and her brother Finneas O'Connell, who write and produce together in their own rooms and have already won multiple Grammys and two Oscars.
 
-## What these partnerships have in common
+## What the best songwriting duos have in common
 
 Look across these pairs and a few patterns show up:
 
@@ -64,4 +66,4 @@ Look across these pairs and a few patterns show up:
 - **Their strengths were different.** The best partners cover each other's blind spots rather than duplicating them.
 - **Many met by chance.** A newspaper ad, a church, a shared publisher's office. Most great partnerships start because two people simply ended up in the same place.
 
-If you're looking for your own co-writer, the lesson is to put yourself where other writers are, try writing with a few people, and pay attention when it clicks.
+If you're looking for your own co-writer, put yourself where other writers are, try writing with a few different people, and pay attention when it clicks. You don't need a label's studio to start, either: a simple [home studio setup](/blog/home-studio-setup-for-beginners) is enough to get your first songs recorded, and a few modern [music production tools](/blog/music-production-tools) make it easy to send ideas back and forth.

@@ -1,9 +1,9 @@
 ---
-title: "The Greatest Live Performances, and What Every Band Can Learn From Them"
+title: "The Greatest Live Performances of All Time (and What Bands Can Learn)"
 slug: greatest-live-performances
 date: 2024-10-27
 updated: 2026-11-01
-description: "The greatest live music performances of all time, from Queen at Live Aid to Prince in the rain, and the stagecraft lessons every band can take from them."
+description: "The greatest live performances of all time, from Queen at Live Aid to Prince in the rain, and the stagecraft lessons every band can take from them."
 excerpt: "Queen at Live Aid, Hendrix at Monterey, Prince in the rain: the shows people still talk about, and what made them work."
 cover:
 cover_alt:
@@ -12,7 +12,7 @@ author: Mixstro
 old_urls: [/top-live-music-performances/, /best-live-performances/, /best-stage-performances/, /epic-concert-moments/, /greatest-live-performances-of-all-time/]
 ---
 
-A great record can sound perfect. A great show can change your life. Here are the live performances people still talk about decades later, and what working bands can learn from each one.
+A great record can sound perfect. A great show can change your life. These are the greatest live performances of all time, the shows people still talk about decades later, along with one thing every working band can learn from each.
 
 ## Queen at Live Aid (1985)
 
@@ -22,13 +22,13 @@ Wembley Stadium, 72,000 people in the crowd and an estimated TV audience of well
 
 ## Jimi Hendrix at Monterey Pop (1967)
 
-Hendrix was a near-unknown in America when he walked onstage at Monterey. He played with his teeth and behind his back, tore through "Killing Floor," "Hey Joe" and "Wild Thing," then set his guitar on fire. He left as a star. Two years later, his "Star-Spangled Banner" at Woodstock became one of the defining moments of the decade.
+Hendrix, now on every list of the [best guitarists of all time](/blog/best-guitarists-of-all-time), was a near-unknown in America when he walked onstage at Monterey. He played with his teeth and behind his back, tore through "Killing Floor," "Hey Joe" and "Wild Thing," then set his guitar on fire. He left as a star. Two years later, his "Star-Spangled Banner" at Woodstock became one of the defining moments of the decade.
 
 **The lesson:** have a moment. Not every band should torch a Strat, but every set should have something the audience will describe to their friends the next day.
 
 ## The Beatles at Shea Stadium (1965)
 
-More than 55,000 fans packed a baseball stadium for what's often called the first major stadium rock concert. The screaming was so loud that the band could barely hear themselves through the ballpark's PA. It showed that rock could fill stadiums, and it pushed the industry to invent the sound systems that make stadium shows possible today.
+Lennon and McCartney were already among the [best songwriting duos](/blog/best-songwriting-duos) in pop when more than 55,000 fans packed a baseball stadium for what's often called the first major stadium rock concert. The screaming was so loud that the band could barely hear themselves through the ballpark's PA. It showed that rock could fill stadiums, and it pushed the industry to invent the sound systems that make stadium shows possible today.
 
 **The lesson:** know your rig. If you can't hear yourselves, you can't play together. Sort out your monitor mix before it sorts you out.
 
@@ -40,7 +40,7 @@ The Beatles' last public performance was unannounced: a lunchtime set on the roo
 
 ## Metallica in Moscow (1991)
 
-About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up.
+About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up. (New to thrash? Our guide to [metal genres](/blog/metal-genres) starts there.)
 
 **The lesson:** context matters. The same set can mean much more depending on when and where you play it.
 
@@ -68,7 +68,7 @@ Kendrick Lamar's performance of "The Blacker the Berry" and "Alright" at the 58t
 
 **The lesson:** say something. Audiences remember performances that mean something to the people performing them.
 
-## What great live performers have in common
+## What the greatest live performances have in common
 
 Look across these shows and a few habits keep coming up:
 

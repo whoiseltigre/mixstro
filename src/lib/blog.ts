@@ -27,6 +27,9 @@ export type Post = PostMeta & { html: string };
 
 const DIR = path.join(process.cwd(), "content", "blog");
 
+/** Public origin of the marketing site, where the blog lives (mixstro.com/blog). */
+export const SITE_URL = "https://mixstro.com";
+
 /** Minimal YAML frontmatter parser: `key: value` strings and `key: [a, b]` or `- item` lists. */
 function parseFrontmatter(raw: string): { data: Record<string, string | string[]>; body: string } {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BackButton, Wordmark } from "@/components/ui";
-import { formatDate, getAllPosts } from "@/lib/blog";
+import { SITE_URL, formatDate, getAllPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/blog" },
   title: "Blog · Mixstro",
   description: "Gear, songwriting, scenes and stories for musicians, from the team behind Mixstro.",
 };

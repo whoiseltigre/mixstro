@@ -6,8 +6,7 @@ import { getAllPosts } from "./src/lib/blog";
  * paths in `old_urls` frontmatter; posts we dropped point at the closest new page.
  */
 const DROPPED_POSTS: Record<string, string> = {
-  "/the-best-modern-guitar-players": "/blog/best-guitarists-of-all-time",
-  "/10-best-music-collaborations-of-all-time": "/blog/best-songwriting-duos-of-all-time",
+  "/10-best-music-collaborations-of-all-time": "/blog/best-songwriting-duos",
   "/best-selling-albums-of-all-time": "/blog",
   "/best-albums-of-the-1970s": "/blog",
   "/musicians-that-died-too-young": "/blog",
