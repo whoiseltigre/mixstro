@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
+import { ProjectList } from "@/components/project-list";
 import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
+import { useMyProjects } from "@/lib/projects-store";
 import { COMMITMENT, useDraft } from "@/lib/onboarding";
 import { useVerification } from "@/lib/verification";
 
 export default function Me() {
   const { draft, ready } = useDraft();
   const { verified } = useVerification();
+  const projects = useMyProjects();
   if (!ready) return null;
 
   if (!draft.firstName) {
@@ -49,6 +52,7 @@ export default function Me() {
       <FinishProfile
         hasInfluences={draft.influences.length > 0}
         hasTrack={draft.clips.some((c) => c.kind === "clip")}
+        hasProjects={!projects.ready || projects.projects.length > 0}
       />
       <dl className="grid grid-cols-2 gap-2.5">
         <Fact label="Plays" value={draft.instruments.join(", ")} />
@@ -59,6 +63,18 @@ export default function Me() {
           value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
         />
       </dl>
+      {projects.ready && (
+        <ProjectList
+          projects={projects.projects}
+          editHref="/me/projects"
+          empty={
+            <Link href="/me/projects" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
+              <span className="text-[15px] font-semibold">Show what you&apos;ve played in</span>
+              <span className="text-[13px] text-smoke">Every band and project, old or new, with a track or two from each.</span>
+            </Link>
+          }
+        />
+      )}
       {draft.influences.length > 0 && (
         <section className="flex flex-col gap-2.5">
           <h2 className="text-[17px] font-semibold">Influences</h2>
@@ -104,15 +120,22 @@ export default function Me() {
 function FinishProfile({
   hasInfluences,
   hasTrack,
+  hasProjects,
 }: {
   hasInfluences: boolean;
   hasTrack: boolean;
+  hasProjects: boolean;
 }) {
   const todo = [
     !hasTrack && {
       href: "/onboarding/sound",
       title: "Add a track",
       sub: "Profiles with music get far more replies.",
+    },
+    !hasProjects && {
+      href: "/me/projects",
+      title: "Add your projects",
+      sub: "The bands you've played in, old and new, with their music.",
     },
     !hasInfluences && {
       href: "/onboarding/music",
