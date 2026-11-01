@@ -30,6 +30,7 @@ Open http://localhost:3000 on a phone-sized window, or add it to your iPhone hom
 | Welcome and sign in (Apple, Google, email code) | `src/app/page.tsx`, `src/app/auth/*` |
 | Onboarding, 7 steps then "You're in" | `src/app/onboarding/*`, state in `src/lib/onboarding.ts` |
 | Today, profile, connected, Board, Messages, chat, me | `src/app/(app)/*` (sample data in `src/lib/mock.ts`) |
+| Projects (the Journey): bands and projects with role, years and linked tracks | `src/app/(app)/me/projects/*`, `src/components/project-list.tsx`, `src/lib/projects*.ts` |
 | House Lights tokens, glass, Gel | `src/app/globals.css` |
 | Shared UI | `src/components/*` |
 | Database schema with row-level security | `supabase/migrations/` |
