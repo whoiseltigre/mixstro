@@ -1,6 +1,6 @@
 ---
 title: "The Best Blues Guitarists of All Time"
-slug: best-blues-guitarists
+slug: blues-guitarists
 date: 2024-05-23
 updated: 2026-11-01
 description: "The best blues guitarists of all time, from Delta pioneers Charley Patton and Robert Johnson to B.B. King, Stevie Ray Vaughan and Joe Bonamassa."
@@ -12,7 +12,7 @@ author: Mixstro
 old_urls: [/best-blues-guitar-players/]
 ---
 
-Not everyone is a blues fan, but the best blues guitarists have a way of changing that. Put them on while you read, then pick up your guitar and steal a lick or two.
+Not everyone is a blues fan, but great blues guitarists have a way of changing that. These are the best blues guitarists of all time, from the Delta pioneers to the players filling theaters today. Put them on while you read, then pick up your guitar and steal a lick or two.
 
 The earliest rural blues was mostly vocal music. It wasn't built to tell a story so much as to express a deep sadness, born out of hard lives and hard labor. Work songs kept time to the plow and the cotton sack, and when the work was done, guitar, banjo and harmonica came out to entertain. That's where this story starts.
 
@@ -49,3 +49,13 @@ At 12, Joe Bonamassa opened for B.B. King. That's quite a way to start a career.
 There are many more greats we could have included. Muddy Waters, Albert King, Freddie King, Buddy Guy and Albert Collins all deserve a deep listen. For the new generation, check out Christone "Kingfish" Ingram, Ally Venable, Eric Gales, Jackie Venson, Joanne Shaw Taylor and Marcus King.
 
 Want to chase that sound yourself? Most of these players got their tone from a small amp turned up loud, and a few of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) get you surprisingly close.
+
+## FAQ
+
+### Who is the greatest blues guitarist of all time?
+
+B.B. King is the most common answer. He shaped electric blues guitar more than anyone, and he played well over 200 shows a year for decades. Robert Johnson and Stevie Ray Vaughan are the other names that come up most.
+
+### Who are the most famous blues guitarists today?
+
+Joe Bonamassa, Christone "Kingfish" Ingram, Gary Clark Jr., Eric Gales and Marcus King.

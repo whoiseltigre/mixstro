@@ -1,10 +1,10 @@
 ---
-title: "Metalcore Subgenres: A Listening Guide"
-slug: metalcore-subgenres
+title: "What Is Metalcore? Subgenres, Bands and Where to Start"
+slug: metalcore
 date: 2024-11-05
 updated: 2026-11-01
-description: "A listening guide to metalcore subgenres: classic metalcore, melodic metalcore, deathcore and progressive metalcore, with key bands and tracks for each."
-excerpt: "Classic, melodic, deathcore and progressive: the main branches of metalcore, with five bands and a track to start each one."
+description: "What is metalcore? A guide to the genre and its subgenres (classic, melodic, deathcore and progressive), with the key bands and a track to start each one."
+excerpt: "Where metalcore came from, how it splits into classic, melodic, deathcore and progressive, and five bands to start each one."
 cover:
 cover_alt:
 tags: [Metal]
@@ -12,7 +12,11 @@ author: Mixstro
 old_urls: [/metalcore-subgenres/]
 ---
 
-Breakdowns, riffs and raw emotion. Metalcore started in hardcore basements in the '90s and has since split into a handful of very different sounds. This guide covers the four main metalcore subgenres, the bands that defined each one, and a track to start with.
+Breakdowns, riffs and raw emotion. Metalcore started in hardcore basements in the '90s and has since split into a handful of very different sounds. This guide covers what metalcore is, the four main metalcore subgenres, the bands that defined each one, and a track to start with.
+
+## What is metalcore?
+
+Metalcore is a fusion of extreme metal and hardcore punk. It takes metal's riffs and technicality and pairs them with hardcore's urgency, shouted vocals and, above all, breakdowns: the slow, heavy sections built for the pit. Later bands added sung choruses, which is a big part of why metalcore became one of the most popular heavy genres of the 2000s.
 
 ## Classic metalcore
 
@@ -70,6 +74,20 @@ Progressive metalcore pushes musical boundaries, using technical complexity, unu
 
 **The vibe:** Experimental sounds, technical riffs, and intricate, layered compositions.
 
+## Metalcore vs deathcore
+
+Deathcore is technically a branch of metalcore, but it sounds very different. Metalcore leans on hardcore, with melodic riffs and, often, clean choruses. Deathcore leans on death metal, with lower tunings, guttural vocals and much heavier breakdowns. If a band sounds like it's trying to shake the building apart, it's probably deathcore.
+
 ## Which metalcore subgenre is for you?
 
-From classic metalcore's raw power to melodic anthems, crushing deathcore and technical progressive sounds, the metalcore subgenres have something for every kind of heavy music fan. If you want to play it, you'll need serious gain: a couple of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) handle it well. New to heavy music altogether? Start with our tour of [metal genres](/blog/metal-genres).
+From classic metalcore's raw power to melodic anthems, crushing deathcore and technical progressive sounds, the metalcore subgenres have something for every kind of heavy music fan. If you want to play it, you'll need serious gain: a couple of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) handle it well. New to heavy music altogether? Start with our tour of [metal genres](/blog/types-of-metal).
+
+## FAQ
+
+### Are there subgenres of metalcore?
+
+Yes. The main ones are classic metalcore, melodic metalcore, deathcore and progressive metalcore, and there's plenty of overlap between them.
+
+### Who are the biggest metalcore bands?
+
+Killswitch Engage, Parkway Drive, Architects, August Burns Red and Bullet for My Valentine are among the best-known.

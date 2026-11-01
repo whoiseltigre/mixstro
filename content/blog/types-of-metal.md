@@ -1,9 +1,9 @@
 ---
-title: "Metal Genres Explained: A Guide for the Brave and Uninitiated"
-slug: metal-genres
+title: "Types of Metal: Every Major Metal Genre Explained"
+slug: types-of-metal
 date: 2024-10-30
 updated: 2026-11-01
-description: "Metal genres explained, from heavy metal and thrash to death, black, doom, power, nu and progressive metal, with two tracks to start each one."
+description: "The main types of metal explained, from heavy metal and thrash to death, black, doom, power, nu and progressive metal, with two tracks to start each genre."
 excerpt: "Eight metal genres, two tracks each, and the mood that goes with them. Earplugs recommended."
 cover:
 cover_alt:
@@ -12,7 +12,7 @@ author: Mixstro
 old_urls: [/different-metal-genres/]
 ---
 
-Metal splinters into new genres faster than a Les Paul breaks a string under a rock god. If you've ever wondered what actually separates thrash from death metal, or doom from black metal, this guide to the main metal genres is for you. Each one gets a short explanation, two tracks to start with, and the mood it goes with. Earplugs in? Let's go.
+Metal splinters into new genres faster than a Les Paul breaks a string under a rock god. If you've ever wondered what actually separates thrash from death metal, or doom from black metal, this guide to the main types of metal is for you. Each one gets a short explanation, two tracks to start with, and the mood it goes with. Earplugs in? Let's go.
 
 ## Heavy Metal: The Grandfather of All Metal
 
@@ -110,6 +110,20 @@ Progressive metal is heavy but experimental, often with changing time signatures
   - [Tool Official](https://www.toolband.com)
 - **The vibe:** Graph paper, existential philosophy, and maybe a Rubik’s cube
 
-## Which metal genre should you start with?
+## Which type of metal should you start with?
 
-Of all the metal genres, heavy metal and thrash are the easiest way in, so start there then follow whatever grabs you. Guitar players should also check out the shredders in our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time). Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore-subgenres) breaks down one of heavy music's biggest modern branches.
+Of all the types of metal, heavy metal and thrash are the easiest way in, so start there then follow whatever grabs you. Guitar players should also check out the shredders in our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time). Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore) breaks down one of heavy music's biggest modern branches.
+
+## FAQ
+
+### What are the Big Four of metal?
+
+The Big Four are the thrash bands Metallica, Slayer, Megadeth and Anthrax, who defined the genre in the 1980s.
+
+### What genre is Slipknot?
+
+Slipknot usually gets filed under nu metal, though their heaviest songs owe a lot to thrash and death metal too.
+
+### What's the difference between metal and metalcore?
+
+Metalcore mixes metal riffs with hardcore punk energy and breakdowns. Our [metalcore guide](/blog/metalcore) explains the genre and its subgenres.

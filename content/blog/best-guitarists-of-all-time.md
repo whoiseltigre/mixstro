@@ -12,7 +12,7 @@ author: Mixstro
 old_urls: [/best-guitarists-of-all-time/, /the-best-modern-guitar-players/]
 ---
 
-Every guitarist has a list of the best guitarists of all time, and no two lists agree. That's half the fun. Ours is split into four groups: the legends everyone names, the virtuosos who pushed technique, the pioneers who invented whole styles, and the modern players taking the instrument somewhere new.
+Every guitarist has a list of the best guitarists of all time (or the greatest guitar players of all time, depending on who's arguing), and no two lists agree. That's half the fun. Ours is split into four groups: the legends everyone names, the virtuosos who pushed technique, the pioneers who invented whole styles, and the modern players taking the instrument somewhere new.
 
 ## The legends
 
@@ -34,7 +34,7 @@ From the Yardbirds and Cream to Derek and the Dominos and a long solo career, Cl
 
 ### Stevie Ray Vaughan
 
-Stevie Ray Vaughan brought raw emotion and blistering technique back to the blues in the 1980s. *Texas Flood* and *Couldn't Stand the Weather* still sound urgent, and "Pride and Joy" shows how much groove he packed into every bar. He's one of many players in our list of the [best blues guitarists](/blog/best-blues-guitarists).
+Stevie Ray Vaughan brought raw emotion and blistering technique back to the blues in the 1980s. *Texas Flood* and *Couldn't Stand the Weather* still sound urgent, and "Pride and Joy" shows how much groove he packed into every bar. He's one of many players in our list of the [best blues guitarists](/blog/blues-guitarists).
 
 ## The virtuosos
 
@@ -44,7 +44,7 @@ Steve Vai earned his reputation as the guitarist who can do anything, starting i
 
 ### Yngwie Malmsteen
 
-The Swedish guitarist broke through with his debut, *Rising Force*. Heavily influenced by J.S. Bach and Niccolò Paganini, Malmsteen fused classical music with metal through lightning-fast arpeggios, sweep picking and scalloped fretboards, and more or less founded neoclassical metal. It's one of many branches covered in our guide to [metal genres](/blog/metal-genres).
+The Swedish guitarist broke through with his debut, *Rising Force*. Heavily influenced by J.S. Bach and Niccolò Paganini, Malmsteen fused classical music with metal through lightning-fast arpeggios, sweep picking and scalloped fretboards, and more or less founded neoclassical metal. It's one of many branches covered in our guide to [metal genres](/blog/types-of-metal).
 
 ## The pioneers
 
@@ -73,3 +73,13 @@ Brazilian guitarist Mateus Asato built a huge following online with fluid, melod
 ## What the best guitarists have in common
 
 Look past the gear and the technique and the same thing shows up again and again: every one of these players sounds like themselves within a few notes. They got there by playing constantly, usually with other musicians pushing them. If you're working on your own sound, start with your hands, then your amp. Our guide to the [best guitar amps under $500](/blog/best-guitar-amps-under-500) is a good place to begin.
+
+## FAQ
+
+### Who is considered the greatest guitar player ever?
+
+Jimi Hendrix tops most lists, including Rolling Stone's. Eddie Van Halen, Jimmy Page, Eric Clapton and B.B. King are close behind on most rankings.
+
+### Who are the 10 greatest guitarists of all time?
+
+There's no official list, but a typical top ten includes Jimi Hendrix, Eddie Van Halen, Jimmy Page, Eric Clapton, Chuck Berry, B.B. King, Stevie Ray Vaughan, Jeff Beck, David Gilmour and Prince.

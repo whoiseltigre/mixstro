@@ -40,7 +40,7 @@ The Beatles' last public performance was unannounced: a lunchtime set on the roo
 
 ## Metallica in Moscow (1991)
 
-About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up. (New to thrash? Our guide to [metal genres](/blog/metal-genres) starts there.)
+About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up. (New to thrash? Our guide to [metal genres](/blog/types-of-metal) starts there.)
 
 **The lesson:** context matters. The same set can mean much more depending on when and where you play it.
 
@@ -68,7 +68,7 @@ Kendrick Lamar's performance of "The Blacker the Berry" and "Alright" at the 58t
 
 **The lesson:** say something. Audiences remember performances that mean something to the people performing them.
 
-## What the greatest live performances have in common
+## What the best live performances of all time have in common
 
 Look across these shows and a few habits keep coming up:
 
@@ -78,3 +78,13 @@ Look across these shows and a few habits keep coming up:
 - **They play as a band.** Every one of these performers had people around them who were locked in. Great shows come from players who know each other's playing inside out.
 
 Great live moments start with the right people on stage together. Find them, rehearse hard, and go make a show people will talk about.
+
+## FAQ
+
+### Who are the greatest live performers of all time?
+
+Freddie Mercury, Prince, James Brown, Bruce Springsteen, Tina Turner and Beyoncé come up on almost every list.
+
+### What's the greatest concert of all time?
+
+Queen at Live Aid in 1985 is the most common answer, and it regularly tops polls of the best live performances ever.
