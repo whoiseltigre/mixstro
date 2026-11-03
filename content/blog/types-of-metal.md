@@ -8,7 +8,7 @@ excerpt: "Eight metal genres, two tracks each, and the mood that goes with them.
 cover:
 cover_alt:
 tags: [Metal]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/different-metal-genres/]
 ---
 

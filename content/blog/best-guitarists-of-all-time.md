@@ -8,7 +8,7 @@ excerpt: "Legends, virtuosos, pioneers and modern players: the guitarists who ch
 cover:
 cover_alt:
 tags: [Guitar]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/best-guitarists-of-all-time/, /the-best-modern-guitar-players/]
 ---
 

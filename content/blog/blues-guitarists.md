@@ -8,7 +8,7 @@ excerpt: "From the Mississippi Delta to Texas and beyond: the players who define
 cover:
 cover_alt:
 tags: [Guitar, Blues]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/best-blues-guitar-players/]
 ---
 

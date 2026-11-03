@@ -8,7 +8,7 @@ excerpt: "Lennon and McCartney, John and Taupin, Goffin and King: what the great
 cover:
 cover_alt:
 tags: [Songwriting]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/best-songwriting-duos-of-all-time/]
 ---
 

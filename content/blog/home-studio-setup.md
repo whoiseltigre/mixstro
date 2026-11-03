@@ -8,7 +8,7 @@ excerpt: "Ten pieces of gear that take you from voice memos to real recordings, 
 cover:
 cover_alt:
 tags: [Gear, Recording]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/beginner-home-studio-gear/]
 ---
 

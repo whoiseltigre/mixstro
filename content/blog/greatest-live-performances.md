@@ -8,7 +8,7 @@ excerpt: "Queen at Live Aid, Hendrix at Monterey, Prince in the rain: the shows 
 cover:
 cover_alt:
 tags: [Live]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/top-live-music-performances/, /best-live-performances/, /best-stage-performances/, /epic-concert-moments/, /greatest-live-performances-of-all-time/]
 ---
 

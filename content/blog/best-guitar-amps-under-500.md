@@ -8,7 +8,7 @@ excerpt: "Four amps that sound far bigger than their price, and what actually sh
 cover:
 cover_alt:
 tags: [Gear, Guitar]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/top-guitar-amps-under-500/]
 ---
 

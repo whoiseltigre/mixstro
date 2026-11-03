@@ -8,7 +8,7 @@ excerpt: "From AI stem splitting to standalone grooveboxes, these are the tools 
 cover:
 cover_alt:
 tags: [Production, Gear]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/exploring-the-latest-music-production-tools-of-2024/]
 ---
 

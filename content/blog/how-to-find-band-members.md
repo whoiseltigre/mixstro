@@ -7,22 +7,22 @@ excerpt: "Local shows, open mics, your own group chat, and the right app: where 
 cover:
 cover_alt:
 tags: [Bands, Networking]
-author: Mixstro
+author: Taylor Greigh
 old_urls: []
 ---
 
 **The short answer:** the best way to find band members is to look in a few places at once. Go to local shows and open mics, tell friends and family you're looking, ask at music shops and rehearsal studios, and post a specific "musician wanted" ad on a musician app like Mixstro. Then jam before you commit.
 
-Finding bandmates is harder than it should be. Plenty of musicians want to play, but the ones who like the same music, share your goals and actually show up to rehearsal can take months to find. The good news is that they're out there, and most of them are looking for you too. If you're starting a band from scratch, this is step one.
+Finding bandmates is harder than it should be. Plenty of musicians want to play, but the ones who like the same music, share your goals and actually show up to rehearsal can take months to find. The good news is that they're out there, and most of them are looking for you too. If you're [starting a band](/blog/how-to-start-a-band) from scratch, this is step one.
 
 ## Before you start: know what you're looking for
 
 The fastest way to waste a month is to start searching before you know what you want. Answer these first, and write the answers down:
 
-- **What do you want to play?** Originals or covers? Which genre, and which bands do you want to sound like?
-- **How serious is this?** A weekly jam for fun, a gigging covers band, or an original project you want to record and tour?
-- **How much time can you give it?** One rehearsal a week? Weekends only? Can you travel for shows?
-- **Which roles do you need?** A drummer and a bassist, or just a singer to finish the lineup?
+- What do you want to play? Originals or covers? Which genre, and which bands do you want to sound like?
+- How serious is this? A weekly jam for fun, a gigging covers band, or an original project you want to record and tour?
+- How much time can you give it? One rehearsal a week? Weekends only? Can you travel for shows?
+- Which roles do you need? A drummer and a bassist, or just a singer to finish the lineup?
 
 Most bands that fall apart don't break up over music. They break up because one person wanted to play bars every weekend and another wanted a fun Tuesday jam. Getting clear on goals up front saves everyone time.
 
@@ -66,11 +66,11 @@ Local Facebook groups and city subreddits for your scene are also worth joining,
 
 Wherever you post, a good ad gets better replies. Include:
 
-- **The role:** "Drummer," not "musicians."
-- **Your sound:** two or three bands you sound like, and a link to a demo if you have one.
-- **Your goals:** "Original project, aiming to gig monthly and record an EP this year."
-- **The commitment:** rehearsal night, location and how often.
-- **A little about you:** your experience and the bands you've played in.
+- The role: "Drummer," not "musicians."
+- Your sound: two or three bands you sound like, and a link to a demo if you have one.
+- Your goals: "Original project, aiming to gig monthly and record an EP this year."
+- The commitment: rehearsal night, location and how often.
+- A little about you: your experience and the bands you've played in.
 
 For example: *"Indie rock project looking for a drummer. Think Wet Leg meets Pixies. We have five songs and a rough demo. Rehearsing Thursdays in East Austin, goal is monthly gigs and an EP by summer. We've all played in local bands before."*
 
@@ -78,10 +78,10 @@ For example: *"Indie rock project looking for a drummer. Think Wet Leg meets Pix
 
 Once you've found someone, don't just ask them to join. Meet up and play first. A first jam tells you more than any conversation:
 
-- **Do they show up on time, and prepared?** Lateness on day one rarely improves.
-- **Do they listen?** Great bandmates play for the song, not over it.
-- **Do your goals line up?** Talk about gigs, recording, money and time openly at the start.
-- **Do you like hanging out with them?** You'll spend a lot of time together in vans and rehearsal rooms.
+- Do they show up on time, and prepared? Lateness on day one rarely improves.
+- Do they listen? Great bandmates play for the song, not over it.
+- Do your goals line up? Talk about gigs, recording, money and time openly at the start.
+- Do you like hanging out with them? You'll spend a lot of time together in vans and rehearsal rooms.
 
 Try a few sessions before you make it official. And if it doesn't click, say so kindly and move on. It's not personal; it's just not the right fit.
 

@@ -23,7 +23,31 @@ export type PostMeta = {
   readingMinutes: number;
 };
 
-export type Post = PostMeta & { html: string };
+export type Faq = { question: string; answer: string };
+export type Post = PostMeta & { html: string; faqs: Faq[] };
+
+/** Author bylines. Keep bios factual: they feed the Person schema on every post. */
+export const AUTHORS: Record<string, { bio: string; jobTitle: string }> = {
+  "Taylor Greigh": {
+    jobTitle: "Guitarist",
+    bio: "Taylor Greigh is a guitarist who has been playing for more than 20 years, across a wide range of gear, bands and gigs. Taylor builds Mixstro.",
+  },
+};
+
+/** Pulls question/answer pairs from a trailing "## FAQ" section (### question, then answer paragraphs). */
+function extractFaqs(body: string): Faq[] {
+  const m = body.match(/^## FAQ\s*$([\s\S]*?)(?=^## |(?![\s\S]))/m);
+  if (!m) return [];
+  return m[1]
+    .split(/^### /m)
+    .slice(1)
+    .map((chunk) => {
+      const [q, ...rest] = chunk.split("\n");
+      const answer = rest.join(" ").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/[*_`]/g, "").replace(/\s+/g, " ").trim();
+      return { question: q.trim(), answer };
+    })
+    .filter((f) => f.question && f.answer);
+}
 
 const DIR = path.join(process.cwd(), "content", "blog");
 
@@ -86,6 +110,7 @@ function load(file: string): Post {
     old_urls: list(data.old_urls),
     readingMinutes: Math.max(1, Math.round(words / 230)),
     html: marked.parse(body, { async: false }),
+    faqs: extractFaqs(body),
   };
 }
 
@@ -98,7 +123,7 @@ export function getAllPosts(): PostMeta[] {
   return files()
     .map((f) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { html, ...meta } = load(f);
+      const { html, faqs, ...meta } = load(f);
       return meta;
     })
     .sort((a, b) => (a.date < b.date ? 1 : -1));

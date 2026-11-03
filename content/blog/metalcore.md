@@ -8,7 +8,7 @@ excerpt: "Where metalcore came from, how it splits into classic, melodic, deathc
 cover:
 cover_alt:
 tags: [Metal]
-author: Mixstro
+author: Taylor Greigh
 old_urls: [/metalcore-subgenres/]
 ---
 
