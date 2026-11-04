@@ -24,7 +24,7 @@ const TODAY_SIZE = 5;
  * feels lived in. They're marked `sample` and their Connect and chat stay in demo mode.
  * Set NEXT_PUBLIC_SAMPLE_PEOPLE=off (and redeploy) to show signed-in people only real musicians.
  */
-const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
+export const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
 const SAMPLES = (): Musician[] => (SHOW_SAMPLES ? MUSICIANS : []);
 
 function withSamples(people: Musician[], size: number) {
@@ -118,8 +118,16 @@ async function hydrate(viewer: Viewer, rows: ProfileRow[]): Promise<Musician[]> 
   return rows.map((r) => ({ ...toMusician(r, (data ?? []) as InfluenceRow[], viewer), distanceMi: miles.get(r.id) }));
 }
 
+/** Musicians by profile id, in the order given, with shared influences and distance. */
+export async function getMusicians(viewer: Viewer, ids: string[]): Promise<Musician[]> {
+  if (!ids.length) return [];
+  const { data } = await viewer.supabase.from("profiles").select(PROFILE_COLUMNS).in("id", ids);
+  const people = await hydrate(viewer, (data ?? []) as ProfileRow[]);
+  return ids.flatMap((id) => people.find((m) => m.id === id) ?? []);
+}
+
 /** Fills in your own point first (once per neighborhood) so distances to everyone else work. */
-async function locate(viewer: Viewer) {
+export async function locate(viewer: Viewer) {
   if (viewer.profile) await ensureLocation(viewer.supabase, viewer.id, viewer.profile.neighborhood).catch(() => {});
 }
 
