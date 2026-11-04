@@ -359,6 +359,25 @@ h2{font-family:var(--display);font-weight:600;font-size:clamp(38px,5vw,68px);lin
 main{padding-bottom:20px}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.js [data-r],.js .hero *,.js .find .row,.js .find .flab,.js .chat .m,.js .gigs .post{opacity:1!important;transform:none!important;filter:none!important}.fan .c{transform:translateX(-50%)!important}.fan .l{transform:translateX(-128%) translateY(70px) rotate(-7deg)!important}.fan .r{transform:translateX(28%) translateY(70px) rotate(7deg)!important}}
+/* ---------- phones and touch screens ---------- */
+@media (max-width:900px),(hover:none){
+.grain{display:none}
+.nav .bar{transition:background .3s,border-color .3s,box-shadow .3s}
+.nav.stuck .bar{background:rgba(26,24,22,.94);-webkit-backdrop-filter:none;backdrop-filter:none}
+.hero .glow i:nth-child(n){animation:none;will-change:auto}
+.fan .pw{will-change:auto}
+}
+@media (hover:none){.card:hover,.feat:hover,.card:hover .sheet{transform:none}}
+@media (max-width:600px){
+.sec{padding-top:96px}
+.hero+.sec{padding-top:64px}
+.cards{margin-top:32px}
+.card{padding:24px 22px 0;border-radius:28px}
+.how{padding:22px 18px;gap:28px;border-radius:30px;margin-top:32px}
+.pick button.more:not([aria-pressed="true"]){display:none}
+.join{margin-top:96px;border-radius:32px}
+.foot{margin-top:72px}
+}
 </style>
 <script>document.documentElement.classList.add("js")</script>
 </head>
@@ -497,6 +516,8 @@ main{padding-bottom:20px}
 <script>
 (function(){
   var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Phones and touch screens skip scroll-linked and always-on effects so scrolling stays smooth
+  var coarse=matchMedia("(hover: none), (max-width: 900px)").matches;
   var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
 
   // Hero headline: split into words for the entrance
@@ -507,8 +528,8 @@ main{padding-bottom:20px}
 
   // Hero phone parallax
   var pws=$$("#fan .pw"),fan=$("#fan");
-  function onPar(){if(reduce)return;var y=Math.min(scrollY,900);pws.forEach(function(p,i){var k=+p.dataset.k;var dir=i===0?-1:i===1?1:0;p.style.transform="translate3d("+(dir*y*.06)+"px,"+(-y*k)+"px,0) rotate("+(dir*y*.006)+"deg)"})}
-  addEventListener("scroll",function(){onNav();requestAnimationFrame(onPar)},{passive:true});
+  function onPar(){if(reduce||coarse)return;var y=Math.min(scrollY,900);pws.forEach(function(p,i){var k=+p.dataset.k;var dir=i===0?-1:i===1?1:0;p.style.transform="translate3d("+(dir*y*.06)+"px,"+(-y*k)+"px,0) rotate("+(dir*y*.006)+"deg)"})}
+  var navT=0;addEventListener("scroll",function(){if(coarse){if(!navT)navT=requestAnimationFrame(function(){navT=0;onNav()});return}onNav();requestAnimationFrame(onPar)},{passive:true});
 
   // Scroll reveals and one-shot scene playback
   var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;var t=e.target;io.unobserve(t);
@@ -552,7 +573,7 @@ main{padding-bottom:20px}
   var chips={};
   function addChip(a,fresh){var b=document.createElement("button");b.type="button";b.style.setProperty("--a",a[1]);b.innerHTML="<i>"+ini(a[0])+"</i>"+a[0];b.setAttribute("aria-pressed",picked.indexOf(a[0])>-1?"true":"false");if(fresh&&!reduce)b.classList.add("new");
     b.addEventListener("click",function(){var i=picked.indexOf(a[0]);if(i>-1)picked.splice(i,1);else picked.push(a[0]);b.setAttribute("aria-pressed",i>-1?"false":"true");render()});pick.appendChild(b);chips[a[0]]=b;return b}
-  ARTISTS.forEach(function(a){addChip(a)});
+  ARTISTS.forEach(function(a,i){var b=addChip(a);if(i>7)b.classList.add("more")});
   function choose(name){var a=CATALOG.filter(function(c){return c[0]===name})[0];var b=chips[name]||addChip(a,true);if(picked.indexOf(name)<0)picked.push(name);b.setAttribute("aria-pressed","true");render()}
 
   // Artist search with suggestions
@@ -618,7 +639,7 @@ main{padding-bottom:20px}
     var host=c.closest("a");function tick(){rot+=.012;draw(rot);if(spin)raf=requestAnimationFrame(tick)}
     if(!reduce){host.addEventListener("pointerenter",function(){spin=true;cancelAnimationFrame(raf);tick()});host.addEventListener("pointerleave",function(){spin=false})}});
   var ja=$("#joinart"),jd=grooves(ja,9,innerWidth<900?.5:.75,innerWidth<900?1.05:1.1,.055,"245,241,236","rgba(255,178,69,0)"),jr=0,jv=false;jd(0);
-  if(!reduce){new IntersectionObserver(function(es){jv=es[0].isIntersecting;if(jv)requestAnimationFrame(function l(){jr+=.002;jd(jr);if(jv)requestAnimationFrame(l)})}).observe(ja)}
+  if(!reduce&&!coarse){new IntersectionObserver(function(es){jv=es[0].isIntersecting;if(jv)requestAnimationFrame(function l(){jr+=.002;jd(jr);if(jv)requestAnimationFrame(l)})}).observe(ja)}
   var lz=$$(".lz");if("IntersectionObserver" in window){var lio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.remove("lz");lio.unobserve(e.target)}})},{rootMargin:"800px 0px"});lz.forEach(function(el){lio.observe(el)})}else lz.forEach(function(el){el.classList.remove("lz")});
 })();
 </script>
