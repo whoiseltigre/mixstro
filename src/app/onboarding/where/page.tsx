@@ -24,7 +24,7 @@ export default function Where() {
       async ({ coords }) => {
         const place = await neighborhoodAt(coords.latitude, coords.longitude);
         setLocating(false);
-        if (place) update({ neighborhood: place });
+        if (place) update({ neighborhood: place, point: { lat: Math.round(coords.latitude * 100) / 100, lng: Math.round(coords.longitude * 100) / 100 } });
         else setNote("We couldn't name that spot. Type your neighborhood instead.");
       },
       () => {
@@ -38,7 +38,7 @@ export default function Where() {
   return (
     <main className="min-h-dvh flex flex-col isolate">
       <StepHeader step={nav.number} total={nav.total} back={nav.back} glow={GLOW} />
-      <StepTitle title="Where are you based?" sub="So musicians nearby can find you. Only your neighborhood is ever shown." />
+      <StepTitle title="Where are you based?" sub="So musicians nearby can find you. Others only see your neighborhood and how many miles away you are." />
       <div className="px-5 pt-7 flex flex-col gap-4">
         <div
           aria-hidden="true"
@@ -66,7 +66,7 @@ export default function Where() {
           placeholder="Echo Park, Los Angeles"
           autoComplete="address-level2"
           value={draft.neighborhood}
-          onChange={(e) => update({ neighborhood: e.target.value })}
+          onChange={(e) => update({ neighborhood: e.target.value, point: undefined })}
           hint={note}
         />
       </div>

@@ -1,5 +1,6 @@
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
+import { distancesFromMe, ensureLocation } from "./geo";
 import { createClient } from "./supabase/server";
 
 /**
@@ -21,13 +22,17 @@ const TODAY_SIZE = 5;
 /**
  * While Mixstro is small, sample musicians fill out Today, search and Messages so the app
  * feels lived in. They're marked `sample` and their Connect and chat stay in demo mode.
+ * Set NEXT_PUBLIC_SAMPLE_PEOPLE=off (and redeploy) to show signed-in people only real musicians.
  */
+const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
+const SAMPLES = (): Musician[] => (SHOW_SAMPLES ? MUSICIANS : []);
+
 function withSamples(people: Musician[], size: number) {
-  return [...people, ...MUSICIANS].slice(0, size);
+  return [...people, ...SAMPLES()].slice(0, size);
 }
 
 const SAMPLE_THREADS = (): Thread[] =>
-  THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread }));
+  SHOW_SAMPLES ? THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread })) : [];
 
 type ProfileRow = {
   id: string;
@@ -40,6 +45,7 @@ type ProfileRow = {
   goals: string[];
   commitment: number;
   neighborhood: string | null;
+  radius_mi: number;
   play_days: string[];
   last_active_at: string;
   verified_at: string | null;
@@ -58,7 +64,7 @@ export type Viewer = {
 };
 
 const PROFILE_COLUMNS =
-  "id, first_name, username, avatar_url, instruments, main_instrument, genres, goals, commitment, neighborhood, play_days, last_active_at, verified_at, onboarded_at";
+  "id, first_name, username, avatar_url, instruments, main_instrument, genres, goals, commitment, neighborhood, radius_mi, play_days, last_active_at, verified_at, onboarded_at";
 
 /** The signed-in musician, or null in demo mode or when signed out. */
 export async function getViewer(): Promise<Viewer | null> {
@@ -104,12 +110,21 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
 
 async function hydrate(viewer: Viewer, rows: ProfileRow[]): Promise<Musician[]> {
   if (!rows.length) return [];
-  const { data } = await viewer.supabase
-    .from("influences")
-    .select("profile_id, artist_id, artist_name, image_url, rank")
-    .in("profile_id", rows.map((r) => r.id));
-  return rows.map((r) => toMusician(r, (data ?? []) as InfluenceRow[], viewer));
+  const ids = rows.map((r) => r.id);
+  const [{ data }, miles] = await Promise.all([
+    viewer.supabase.from("influences").select("profile_id, artist_id, artist_name, image_url, rank").in("profile_id", ids),
+    distancesFromMe(viewer.supabase, ids),
+  ]);
+  return rows.map((r) => ({ ...toMusician(r, (data ?? []) as InfluenceRow[], viewer), distanceMi: miles.get(r.id) }));
 }
+
+/** Fills in your own point first (once per neighborhood) so distances to everyone else work. */
+async function locate(viewer: Viewer) {
+  if (viewer.profile) await ensureLocation(viewer.supabase, viewer.id, viewer.profile.neighborhood).catch(() => {});
+}
+
+/** People within your radius. Anyone without a known distance yet stays in. */
+const withinRadius = (viewer: Viewer) => (m: Musician) => m.distanceMi === undefined || m.distanceMi <= (viewer.profile?.radius_mi ?? 25);
 
 /** Every connection row you're part of, in either direction. */
 async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
@@ -135,7 +150,7 @@ export async function getToday(): Promise<Today> {
   const viewer = await getViewer();
   if (!viewer) return { people: MUSICIANS, incoming: [], demo: true };
 
-  const connections = await myConnections(viewer);
+  const [connections] = await Promise.all([myConnections(viewer), locate(viewer)]);
   const incoming = connections.filter((c) => c.to_id === viewer.id && c.status === "pending").map((c) => c.from_id);
   const exclude = new Set(connections.flatMap((c) => [c.from_id, c.to_id]).filter((id) => !incoming.includes(id)));
   exclude.add(viewer.id);
@@ -147,14 +162,18 @@ export async function getToday(): Promise<Today> {
     .order("last_active_at", { ascending: false })
     .limit(200);
   const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
-  const [people, { data: clips }] = await Promise.all([
+  const [nearby, { data: clips }] = await Promise.all([
     hydrate(viewer, candidates),
     viewer.supabase.from("clips").select("profile_id").eq("kind", "clip").in("profile_id", candidates.map((r) => r.id)),
   ]);
   // Hearing someone first matters, so profiles with a clip get a boost.
   const hasClip = new Set((clips ?? []).map((c) => c.profile_id as string));
+  // Someone who already asked to play with you shows up even if they're a bit further out.
+  const people = nearby.filter((m) => incoming.includes(m.id) || withinRadius(viewer)(m));
   const score = (m: Musician) => m.shared.length + (hasClip.has(m.id) ? 2 : 0) + (m.sameCommitment ? 1 : 0);
-  people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a));
+  // Ties go to whoever is closer.
+  const near = (m: Musician) => m.distanceMi ?? Infinity;
+  people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a) || near(a) - near(b));
   return { people: withSamples(people, TODAY_SIZE), incoming, demo: false };
 }
 
@@ -162,13 +181,14 @@ export async function getToday(): Promise<Today> {
 export async function getSearchable(): Promise<Musician[]> {
   const viewer = await getViewer();
   if (!viewer) return MUSICIANS;
+  await locate(viewer);
   const { data } = await viewer.supabase
     .from("discoverable_profiles")
     .select(PROFILE_COLUMNS)
     .neq("id", viewer.id)
     .order("last_active_at", { ascending: false })
     .limit(200);
-  return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...MUSICIANS];
+  return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...SAMPLES()];
 }
 
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
@@ -186,7 +206,7 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
     .eq("username", username.toLowerCase())
     .maybeSingle<ProfileRow>();
   if (!data) {
-    const sample = findMusician(username);
+    const sample = SHOW_SAMPLES ? findMusician(username) : undefined;
     return sample ? { person: sample, connection: null, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null } : null;
   }
   const [person] = await hydrate(viewer, [data]);

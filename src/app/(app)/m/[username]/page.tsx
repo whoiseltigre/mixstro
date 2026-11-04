@@ -44,7 +44,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
       <div className="relative -mt-20 px-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
-            {m.instrument} · {m.genres} · {m.neighborhood}
+            {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
           </span>
           <h1 className="headline text-[44px] leading-[0.98] flex items-center gap-2">
             {m.name}
