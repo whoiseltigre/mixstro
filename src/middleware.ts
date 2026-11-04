@@ -20,8 +20,8 @@ function siteRouting(request: NextRequest): NextResponse | null {
   if (host === `www.${SITE_HOST}`) return NextResponse.redirect(`https://${SITE_HOST}${pathname}${search}`, 308);
   if (host !== SITE_HOST) return null;
   if (pathname === "/") {
-    // Static homepage (public/site/index.html). No auth lookup, so it can be served from the CDN cache.
-    const res = NextResponse.rewrite(new URL("/site/index.html", request.url));
+    // Static homepage (src/app/site-home). No auth lookup, so it can be served from the CDN cache.
+    const res = NextResponse.rewrite(new URL("/site-home", request.url));
     res.headers.set("Cache-Control", "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400");
     return res;
   }
