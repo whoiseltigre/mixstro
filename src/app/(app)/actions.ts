@@ -62,3 +62,15 @@ export async function sendMessage(connectionId: number, body: string) {
   revalidatePath("/messages");
   return {};
 }
+
+/** A voice note already uploaded to voice/<connection>/<you>/…; this posts it to the chat. */
+export async function sendVoice(connectionId: number, path: string, seconds: number) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(connectionId) || !path.startsWith(`${connectionId}/${viewer.id}/`) || path.includes("..")) return { error: "That didn't send. Try again." };
+  const voice_seconds = Math.min(120, Math.max(1, Math.round(seconds)));
+  const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, voice_url: path, voice_seconds });
+  if (error) return { error: "That didn't send. Try again." };
+  revalidatePath("/messages");
+  return {};
+}

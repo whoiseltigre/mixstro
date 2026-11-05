@@ -264,7 +264,8 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
   return { threads: [...threads, ...SAMPLE_THREADS()], demo: false };
 }
 
-export type ChatMessage = { id: number; mine: boolean; body: string | null; voiceUrl: string | null; createdAt: string };
+/** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */
+export type ChatMessage = { id: number; mine: boolean; body: string | null; voiceUrl: string | null; voiceSeconds?: number | null; createdAt: string };
 
 export type ChatView =
   | { kind: "demo"; person: Musician }
@@ -280,16 +281,26 @@ export async function getChat(username: string): Promise<ChatView | null> {
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }
   const supabase = (await createClient())!;
-  const { data } = await supabase
-    .from("messages")
-    .select("id, sender_id, body, voice_url, created_at")
-    .eq("connection_id", view.connection.id)
-    .order("created_at")
-    .limit(500);
+  // "*" so the chat still loads before newer columns (voice_seconds) exist.
+  const { data } = await supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500);
+  const rows = (data ?? []) as { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string }[];
+  const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
+  const signed = new Map<string, string>();
+  if (paths.length) {
+    const { data: links } = await supabase.storage.from("voice").createSignedUrls(paths, 60 * 60 * 6);
+    for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
+  }
   return {
     kind: "live",
     person: view.person,
     connectionId: view.connection.id,
-    messages: (data ?? []).map((m) => ({ id: m.id, mine: m.sender_id === view.viewerId, body: m.body, voiceUrl: m.voice_url, createdAt: m.created_at })),
+    messages: rows.map((m) => ({
+      id: m.id,
+      mine: m.sender_id === view.viewerId,
+      body: m.body,
+      voiceUrl: m.voice_url ? (signed.get(m.voice_url) ?? null) : null,
+      voiceSeconds: m.voice_seconds ?? null,
+      createdAt: m.created_at,
+    })),
   };
 }
