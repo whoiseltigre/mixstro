@@ -340,3 +340,54 @@ export async function getChat(username: string): Promise<ChatView | null> {
     })),
   };
 }
+
+/** Starting or rebuilding a band? Drummers and bassists are the classic hard finds. */
+export const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
+
+/** The roles you want alerts for (#12): what you picked, or a suggestion from your goals. */
+export async function getAlertRoles(viewer: Viewer): Promise<{ roles: string[]; picked: boolean }> {
+  const { data, error } = await viewer.supabase.from("profiles").select("alert_roles").eq("id", viewer.id).maybeSingle<{ alert_roles: string[] | null }>();
+  if (!error && data?.alert_roles) return { roles: data.alert_roles, picked: true };
+  return { roles: viewer.profile?.goals.includes("start_project") ? DEFAULT_ALERT_ROLES : [], picked: false };
+}
+
+export type RoleAlert = { person: Musician; role: string; why: string };
+
+/**
+ * #12 "A drummer into your kind of music just joined 6 mi away." Someone who finished
+ * signup in the last 3 days, plays a role you want, is within your radius, shares an
+ * influence or genre with you, and isn't already in your Connects.
+ */
+export async function getRoleAlert(): Promise<RoleAlert | null> {
+  const viewer = await getViewer();
+  if (!viewer?.profile) return null;
+  const { roles } = await getAlertRoles(viewer);
+  if (!roles.length) return null;
+  const since = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+  const [{ data }, connections] = await Promise.all([
+    viewer.supabase
+      .from("discoverable_profiles")
+      .select(PROFILE_COLUMNS)
+      .neq("id", viewer.id)
+      .gte("onboarded_at", since)
+      .overlaps("instruments", roles)
+      .order("onboarded_at", { ascending: false })
+      .limit(30),
+    myConnections(viewer),
+  ]);
+  const known = new Set(connections.flatMap((c) => [c.from_id, c.to_id]));
+  const myGenres = new Set(viewer.profile.genres);
+  const rows = ((data ?? []) as ProfileRow[]).filter((r) => !known.has(r.id));
+  const people = await hydrate(viewer, rows);
+  const radius = viewer.profile.radius_mi ?? 25;
+  for (const row of rows) {
+    const m = people.find((p) => p.id === row.id);
+    if (!m || m.distanceMi === undefined || m.distanceMi > radius) continue;
+    const genre = row.genres.find((g) => myGenres.has(g));
+    if (!m.shared.length && !genre) continue;
+    const role = row.instruments.find((i) => roles.includes(i)) ?? m.instrument;
+    const why = m.shared.length ? `into ${m.shared[0].name}` : `into ${genre!.toLowerCase()}`;
+    return { person: m, role, why };
+  }
+  return null;
+}

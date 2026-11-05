@@ -1,14 +1,20 @@
 import Link from "next/link";
-import { YOUR_TURN_LIMIT, getToday } from "@/lib/people";
+import { RoleAlertCard } from "@/components/role-alert";
+import { YOUR_TURN_LIMIT, getRoleAlert, getToday } from "@/lib/people";
 import { TodayDeck } from "./today-deck";
 
 export const metadata = { title: "Today · Mixstro" };
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
-  const { people, incoming, yourTurn } = await getToday();
+  const [{ people, incoming, yourTurn }, alert] = await Promise.all([getToday(), getRoleAlert().catch(() => null)]);
   if (yourTurn >= YOUR_TURN_LIMIT) return <YourTurnPause count={yourTurn} />;
-  return <TodayDeck people={people} incoming={incoming} />;
+  return (
+    <>
+      {alert && <RoleAlertCard alert={alert} />}
+      <TodayDeck people={people} incoming={incoming} />
+    </>
+  );
 }
 
 /** #4 Hinge-style pause: answer some chats (or close them with a one-tap reply) and Today comes back. */
