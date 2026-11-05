@@ -1,5 +1,6 @@
 "use client";
 
+import { QuickReplies } from "@/components/quick-replies";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { ArtistAvatar } from "@/components/artist-avatar";
@@ -146,6 +147,11 @@ export function TodayDeck({
             </div>
           </section>
 
+          {asked && sentTo !== m.id && (
+            <div className="px-5">
+              <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={next} />
+            </div>
+          )}
           {sentTo === m.id ? (
             <div className="px-5 flex items-center gap-3">
               <p className="flex-1 text-[15px] leading-[1.4]">
@@ -331,6 +337,7 @@ function Gallery({
                   </span>
                 ))}
             </div>
+            {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={onNext} />}
             {sent ? (
               <div className="flex items-center gap-3 pt-1">
                 <p className="flex-1 text-[15px]">

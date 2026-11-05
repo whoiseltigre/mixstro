@@ -126,6 +126,20 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
             {person.shared[0] ? ` Ask what they love about ${person.shared[0].name}.` : " Say hi and share a clip."}
           </p>
         )}
+        {timeline.length === 0 && (
+          <div className="self-center flex flex-wrap justify-center gap-2 max-w-[340px]" role="group" aria-label="Conversation starters">
+            {starters(person).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setDraft(t)}
+                className="h-9 px-3.5 rounded-full border border-paper/20 text-[13px] hover:bg-paper/10 transition"
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        )}
         {timeline.map((item, i) => {
           const prev = timeline[i - 1];
           const gap = !prev || new Date(item.at).getTime() - new Date(prev.at).getTime() > 3_600_000;
@@ -274,4 +288,15 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
       )}
     </main>
   );
+}
+
+/** #3 Openers for an empty chat, built from what you both listen to. Tapping one fills the box to edit or send. */
+function starters(person: Musician) {
+  const [a, b] = person.shared;
+  return [
+    a ? `What do you love most about ${a.name}?` : `What are you listening to lately?`,
+    b ? `${a!.name} and ${b.name}! Ever play any of their stuff?` : null,
+    "Down to jam this week?",
+    "Send me a clip of what you've been playing?",
+  ].filter((x): x is string => Boolean(x));
 }

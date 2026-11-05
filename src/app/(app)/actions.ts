@@ -47,7 +47,8 @@ export async function pass(otherId: string) {
   const pair = await pairWith(otherId);
   if (!pair) return;
   const { viewer, outgoing, incoming } = pair;
-  if (incoming?.status === "pending") await viewer.supabase.from("connections").update({ status: "passed" }).eq("id", incoming.id);
+  // Passing on someone who asked you is a kind "not the right fit" they get told about.
+  if (incoming?.status === "pending") await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
   else if (!outgoing) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId, status: "passed" });
   revalidatePath("/discover");
 }
@@ -122,4 +123,27 @@ export async function checkInJam(jamId: number, played: boolean) {
   if (error && error.code !== "23505") return { error: "That didn't save. Try again." };
   revalidatePath("/messages", "layout");
   return {};
+}
+
+const QUICK = { jam: "Down to jam!", clip: "Love it. Send me a clip of what you've been playing?" } as const;
+
+/**
+ * #3 One-tap answers to a Connect someone sent you. "Down to jam" and "Send me a clip"
+ * accept and open the chat with that line; "Not the right fit" closes it kindly.
+ */
+export async function quickReply(otherId: string, username: string, kind: "jam" | "clip" | "no") {
+  const pair = await pairWith(otherId);
+  if (!pair) return { error: "Try again." };
+  const { viewer, incoming } = pair;
+  if (incoming?.status !== "pending") return { error: "That Connect isn't open anymore." };
+  if (kind === "no") {
+    await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
+    revalidatePath("/", "layout");
+    return { closed: true };
+  }
+  const { error } = await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
+  if (error) return { error: "Try again." };
+  await viewer.supabase.from("messages").insert({ connection_id: incoming.id, sender_id: viewer.id, body: QUICK[kind] });
+  revalidatePath("/", "layout");
+  redirect(`/messages/${username}`);
 }

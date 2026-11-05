@@ -55,7 +55,10 @@ type ProfileRow = {
 
 type InfluenceRow = { profile_id: string; artist_id: string; artist_name: string; image_url: string | null; rank: number };
 
-export type ConnectionRow = { id: number; from_id: string; to_id: string; status: "pending" | "accepted" | "passed"; created_at: string };
+export type ConnectionRow = { id: number; from_id: string; to_id: string; status: "pending" | "accepted" | "passed" | "declined"; created_at: string };
+
+/** A Connect nobody answered within a week quietly closes for both people (#3). */
+export const isExpired = (createdAt: string) => Date.now() - new Date(createdAt).getTime() > 7 * 24 * 60 * 60 * 1000;
 
 export type Viewer = {
   supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>;
@@ -160,7 +163,7 @@ export async function getToday(): Promise<Today> {
   if (!viewer) return { people: MUSICIANS, incoming: [], demo: true };
 
   const [connections] = await Promise.all([myConnections(viewer), locate(viewer)]);
-  const incoming = connections.filter((c) => c.to_id === viewer.id && c.status === "pending").map((c) => c.from_id);
+  const incoming = connections.filter((c) => c.to_id === viewer.id && c.status === "pending" && !isExpired(c.created_at)).map((c) => c.from_id);
   const exclude = new Set(connections.flatMap((c) => [c.from_id, c.to_id]).filter((id) => !incoming.includes(id)));
   exclude.add(viewer.id);
 
