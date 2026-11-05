@@ -45,8 +45,8 @@ export const EMPTY_DRAFT: Draft = {
   clips: [],
 };
 
-/** The numbered steps, one question each; sign-in comes before, "done" after. Influences and the rest are added later from the profile. */
-export const STEPS = ["basics", "play", "why", "where", "sound"] as const;
+/** The numbered steps, one question each; sign-in comes before, "done" after. Projects are added later from the profile. */
+export const STEPS = ["basics", "play", "why", "where", "influences", "sound"] as const;
 export type Step = (typeof STEPS)[number];
 
 /** Each step's stage-spill color, so every screen feels like its own moment. */
@@ -55,6 +55,7 @@ export const STEP_GLOW: Record<Step, string> = {
   play: "#B5C5FF",
   why: "#67E2DA",
   where: "#FFACBA",
+  influences: "#C9B6FF",
   sound: "#F7BF77",
 };
 
