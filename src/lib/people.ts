@@ -33,7 +33,7 @@ function withSamples(people: Musician[], size: number) {
 }
 
 const SAMPLE_THREADS = (): Thread[] =>
-  SHOW_SAMPLES ? THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread })) : [];
+  SHOW_SAMPLES ? THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread, yourTurn: t.unread })) : [];
 
 type ProfileRow = {
   id: string;
@@ -147,7 +147,27 @@ async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
   return (data ?? []) as ConnectionRow[];
 }
 
+/** Past this many chats waiting on you, Today pauses until you answer some (#4). */
+export const YOUR_TURN_LIMIT = 8;
+
+/** How many accepted conversations end with a message from the other person. */
+async function yourTurnCount(viewer: Viewer, connections: ConnectionRow[]) {
+  const accepted = connections.filter((c) => c.status === "accepted").map((c) => c.id);
+  if (accepted.length < YOUR_TURN_LIMIT) return 0;
+  const { data } = await viewer.supabase
+    .from("messages")
+    .select("connection_id, sender_id")
+    .in("connection_id", accepted)
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  const last = new Map<number, string>();
+  for (const m of (data ?? []) as { connection_id: number; sender_id: string }[]) if (!last.has(m.connection_id)) last.set(m.connection_id, m.sender_id);
+  return [...last.values()].filter((sender) => sender !== viewer.id).length;
+}
+
 export type Today = {
+  /** Chats waiting on you; Today pauses at YOUR_TURN_LIMIT. */
+  yourTurn: number;
   people: Musician[];
   /** Ids of people who already said they want to play with you. */
   incoming: string[];
@@ -160,7 +180,7 @@ export type Today = {
  */
 export async function getToday(): Promise<Today> {
   const viewer = await getViewer();
-  if (!viewer) return { people: MUSICIANS, incoming: [], demo: true };
+  if (!viewer) return { people: MUSICIANS, incoming: [], demo: true, yourTurn: 0 };
 
   const [connections] = await Promise.all([myConnections(viewer), locate(viewer)]);
   const incoming = connections.filter((c) => c.to_id === viewer.id && c.status === "pending" && !isExpired(c.created_at)).map((c) => c.from_id);
@@ -186,7 +206,7 @@ export async function getToday(): Promise<Today> {
   // Ties go to whoever is closer.
   const near = (m: Musician) => m.distanceMi ?? Infinity;
   people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a) || near(a) - near(b));
-  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false };
+  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false, yourTurn: await yourTurnCount(viewer, connections) };
 }
 
 /** Everyone you can search, most recently active first. */
@@ -227,7 +247,8 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
 }
 
 /** `at` is an ISO timestamp, or preformatted text for sample threads. */
-export type Thread = { username: string; person: Musician; preview: string; at: string; mine: boolean; checkin?: boolean };
+/** `yourTurn`: they wrote last (or a "Did you jam?" is waiting), so it's in your private Your turn tray (#4). */
+export type Thread = { username: string; person: Musician; preview: string; at: string; mine: boolean; checkin?: boolean; yourTurn?: boolean };
 
 /** Your accepted connections, newest conversation first. */
 export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }> {
@@ -269,6 +290,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
         at,
         mine: checkins.has(c.id) ? false : last?.sender_id === viewer.id,
         checkin: checkins.has(c.id),
+        yourTurn: checkins.has(c.id) || (Boolean(last) && last!.sender_id !== viewer.id),
       },
     ];
   });
