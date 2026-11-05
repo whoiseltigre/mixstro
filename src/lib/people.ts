@@ -1,6 +1,7 @@
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
 import { distancesFromMe, ensureLocation } from "./geo";
+import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
 
 /**
@@ -223,7 +224,7 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
 }
 
 /** `at` is an ISO timestamp, or preformatted text for sample threads. */
-export type Thread = { username: string; person: Musician; preview: string; at: string; mine: boolean };
+export type Thread = { username: string; person: Musician; preview: string; at: string; mine: boolean; checkin?: boolean };
 
 /** Your accepted connections, newest conversation first. */
 export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }> {
@@ -244,7 +245,10 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
       .order("created_at", { ascending: false })
       .limit(500),
   ]);
-  const people = await hydrate(viewer, (rows ?? []) as ProfileRow[]);
+  const [people, checkins] = await Promise.all([
+    hydrate(viewer, (rows ?? []) as ProfileRow[]),
+    pendingCheckins(viewer.supabase, accepted.map((c) => c.id), viewer.id),
+  ]);
   const threads = accepted.flatMap((c) => {
     const person = people.find((p) => p.id === (c.from_id === viewer.id ? c.to_id : c.from_id));
     if (!person) return [];
@@ -254,9 +258,14 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
       {
         username: person.username,
         person,
-        preview: last ? (last.body ?? "Voice note") : `You're connected. Say hi to ${person.name}.`,
+        preview: checkins.has(c.id)
+          ? `Did you end up playing with ${person.name}?`
+          : last
+            ? (last.body ?? "Voice note")
+            : `You're connected. Say hi to ${person.name}.`,
         at,
-        mine: last?.sender_id === viewer.id,
+        mine: checkins.has(c.id) ? false : last?.sender_id === viewer.id,
+        checkin: checkins.has(c.id),
       },
     ];
   });
@@ -269,7 +278,7 @@ export type ChatMessage = { id: number; mine: boolean; body: string | null; voic
 
 export type ChatView =
   | { kind: "demo"; person: Musician }
-  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[] }
+  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[] }
   | { kind: "not-connected"; person: Musician; connection: ConnectionRow | null; viewerId: string };
 
 /** The conversation with one musician. Messages only exist inside an accepted connection. */
@@ -283,6 +292,7 @@ export async function getChat(username: string): Promise<ChatView | null> {
   const supabase = (await createClient())!;
   // "*" so the chat still loads before newer columns (voice_seconds) exist.
   const { data } = await supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500);
+  const jams = await getJams(supabase, view.connection.id, view.viewerId);
   const rows = (data ?? []) as { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string }[];
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();
@@ -294,6 +304,7 @@ export async function getChat(username: string): Promise<ChatView | null> {
     kind: "live",
     person: view.person,
     connectionId: view.connection.id,
+    jams,
     messages: rows.map((m) => ({
       id: m.id,
       mine: m.sender_id === view.viewerId,

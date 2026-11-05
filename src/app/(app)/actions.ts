@@ -74,3 +74,52 @@ export async function sendVoice(connectionId: number, path: string, seconds: num
   revalidatePath("/messages");
   return {};
 }
+
+/** #7 Propose a jam. With `replacesId`, this is "Another time" on an invite they sent you. */
+export async function proposeJam(connectionId: number, startsAt: string, place: string, note: string, replacesId?: number) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  const when = new Date(startsAt);
+  if (!Number.isInteger(connectionId) || Number.isNaN(when.getTime())) return { error: "Pick a day and time." };
+  if (when.getTime() < Date.now() - 60 * 60 * 1000) return { error: "Pick a time that hasn't happened yet." };
+  const where = place.replace(/\s+/g, " ").trim().slice(0, 120);
+  if (where.length < 2) return { error: "Say where you'll play." };
+
+  if (replacesId !== undefined) {
+    const { error } = await viewer.supabase.from("jams").update({ status: "replaced" }).eq("id", replacesId).eq("connection_id", connectionId);
+    if (error) return { error: "That invite was already answered." };
+  }
+  const { error } = await viewer.supabase.from("jams").insert({
+    connection_id: connectionId,
+    proposed_by: viewer.id,
+    starts_at: when.toISOString(),
+    place: where,
+    note: note.trim().slice(0, 280) || null,
+    replaces_id: replacesId ?? null,
+  });
+  if (error) return { error: "That invite didn't send. Try again." };
+  revalidatePath("/messages", "layout");
+  return {};
+}
+
+/** #7 Answer an invite someone sent you, or cancel your own. */
+export async function answerJam(jamId: number, status: "accepted" | "declined" | "cancelled") {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(jamId) || !["accepted", "declined", "cancelled"].includes(status)) return { error: "Try again." };
+  const { error } = await viewer.supabase.from("jams").update({ status }).eq("id", jamId);
+  if (error) return { error: "That invite was already answered." };
+  revalidatePath("/messages", "layout");
+  return {};
+}
+
+/** #8 "Did you end up playing together?" Private until you both answer. */
+export async function checkInJam(jamId: number, played: boolean) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(jamId)) return { error: "Try again." };
+  const { error } = await viewer.supabase.from("jam_checkins").insert({ jam_id: jamId, profile_id: viewer.id, played: Boolean(played) });
+  if (error && error.code !== "23505") return { error: "That didn't save. Try again." };
+  revalidatePath("/messages", "layout");
+  return {};
+}

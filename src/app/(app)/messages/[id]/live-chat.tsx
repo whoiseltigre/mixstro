@@ -4,14 +4,16 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { TimeAgo } from "@/components/time-ago";
 import type { Musician } from "@/lib/mock";
+import type { Jam } from "@/lib/jams";
 import type { ChatMessage } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, sendVoice } from "../../actions";
 import { ChatHeader } from "./chat-header";
+import { JamCard, PlanJamSheet } from "./jam";
 import { VoiceBubble, clock, uploadVoice, useVoiceRecorder, type Recording } from "./voice";
 
 /** A real conversation. New messages arrive over Supabase Realtime; sending goes through a server action. */
-export function LiveChat({ person, connectionId, messages }: { person: Musician; connectionId: number; messages: ChatMessage[] }) {
+export function LiveChat({ person, connectionId, messages, jams }: { person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[] }) {
   const router = useRouter();
   const first = person.name.split(" ")[0];
   const [draft, setDraft] = useState("");
@@ -20,8 +22,17 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
   const [pending, start] = useTransition();
   const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
+  const [planning, setPlanning] = useState<{ replacing: Jam | null } | null>(null);
 
   const shown = [...messages, ...optimistic];
+  // Messages and jam invites share one timeline, in the order they happened.
+  type Item = { at: string; key: string; message?: ChatMessage; jam?: Jam };
+  const timeline: Item[] = [
+    ...shown.map((m) => ({ at: m.createdAt, key: `m${m.id}`, message: m })),
+    ...jams.map((j) => ({ at: j.createdAt, key: `j${j.id}`, jam: j })),
+  ].sort((a, b) => a.at.localeCompare(b.at));
+  // After a few messages back and forth with no plans yet, nudge toward actually playing.
+  const suggestJam = jams.length === 0 && messages.length >= 6;
 
   // A refresh brings the server's copy of anything we just sent, so drop the optimistic bubbles.
   useEffect(() => setOptimistic([]), [messages]);
@@ -41,6 +52,7 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
         },
         () => router.refresh(),
       )
+      .on("postgres_changes", { event: "*", schema: "public", table: "jams", filter: `connection_id=eq.${connectionId}` }, () => router.refresh())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -49,7 +61,7 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [shown.length]);
+  }, [timeline.length]);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -104,23 +116,26 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
 
   return (
     <main className="relative h-dvh md:h-full flex flex-col">
-      <ChatHeader person={person} />
+      <ChatHeader person={person} onPlanJam={() => setPlanning({ replacing: null })} />
 
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
         <div className="mt-auto" />
-        {shown.length === 0 && (
+        {timeline.length === 0 && (
           <p className="self-center max-w-[260px] text-center text-[14px] leading-[1.5] text-smoke py-6">
             You and {first} are connected.
             {person.shared[0] ? ` Ask what they love about ${person.shared[0].name}.` : " Say hi and share a clip."}
           </p>
         )}
-        {shown.map((m, i) => {
-          const prev = shown[i - 1];
-          const gap = !prev || new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() > 3_600_000;
+        {timeline.map((item, i) => {
+          const prev = timeline[i - 1];
+          const gap = !prev || new Date(item.at).getTime() - new Date(prev.at).getTime() > 3_600_000;
+          const m = item.message;
           return (
-            <div key={m.id} className="contents">
-              {gap && <TimeAgo iso={m.createdAt} className="self-center text-[12px] text-smoke py-1" />}
-              {m.voiceUrl !== null || m.voiceSeconds ? (
+            <div key={item.key} className="contents">
+              {gap && <TimeAgo iso={item.at} className="self-center text-[12px] text-smoke py-1" />}
+              {item.jam ? (
+                <JamCard jam={item.jam} first={first} onAnotherTime={(jam) => setPlanning({ replacing: jam })} />
+              ) : !m ? null : m.voiceUrl !== null || m.voiceSeconds ? (
                 <VoiceBubble url={m.voiceUrl} seconds={m.voiceSeconds} mine={m.mine} sending={m.id < 0} />
               ) : (
                 <div
@@ -137,6 +152,15 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
             </div>
           );
         })}
+        {suggestJam && (
+          <button
+            type="button"
+            onClick={() => setPlanning({ replacing: null })}
+            className="self-center mt-2 h-9 px-4 rounded-full border border-tungsten/50 text-[13px] font-semibold text-tungsten hover:bg-tungsten/10 transition"
+          >
+            Sounds like a fit. Plan a jam with {first}?
+          </button>
+        )}
         {(error || voice.error) && (
           <p role="alert" className="self-end text-[12px] text-[#FF453A]">
             {error ?? voice.error}
@@ -236,6 +260,18 @@ export function LiveChat({ person, connectionId, messages }: { person: Musician;
           </>
         )}
       </form>
+      {planning && (
+        <PlanJamSheet
+          connectionId={connectionId}
+          first={first}
+          replacing={planning.replacing}
+          onClose={() => setPlanning(null)}
+          onSent={() => {
+            setPlanning(null);
+            router.refresh();
+          }}
+        />
+      )}
     </main>
   );
 }
