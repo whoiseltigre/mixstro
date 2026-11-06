@@ -8,6 +8,8 @@ import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton, Button, ButtonLink, VerifiedMark } from "@/components/ui";
 import { getProjects } from "@/lib/projects-server";
 import { getProfile } from "@/lib/people";
+import { QuickReplies } from "@/components/quick-replies";
+import { isExpired } from "@/lib/people";
 import { ConnectButton } from "./connect-button";
 
 export const dynamic = "force-dynamic";
@@ -20,20 +22,29 @@ export default async function Profile({ params }: { params: Promise<{ username: 
   const first = m.name.split(" ")[0];
   const projects = await getProjects(m);
   const sharedIds = new Set(m.shared.map((a) => a.id));
+  const expired = connection?.status === "pending" && isExpired(connection.created_at);
   const status = !connection
     ? "none"
     : connection.status === "accepted"
       ? "connected"
-      : connection.status === "passed"
-        ? "passed"
-        : connection.from_id === viewerId
-          ? "sent"
-          : "asked";
+      : connection.status === "declined"
+        ? connection.from_id === viewerId
+          ? "declined"
+          : "passed"
+        : connection.status === "passed"
+          ? "passed"
+        : expired
+          ? connection.from_id === viewerId
+            ? "expired"
+            : "passed"
+          : connection.from_id === viewerId
+            ? "sent"
+            : "asked";
 
   return (
-    <main className="pb-16">
-      <div className="relative h-[330px]">
-        <PersonPhoto person={m} priority sizes="440px" initialsSize={88} className="object-[50%_40%]" />
+    <main className="pb-16 md:pt-6 md:max-w-[760px] md:mx-auto">
+      <div className="relative h-[330px] md:h-[420px] md:rounded-[28px] md:overflow-hidden">
+        <PersonPhoto person={m} priority sizes="(min-width: 768px) 760px, 100vw" initialsSize={88} className="object-[50%_40%]" />
         <div className="absolute inset-x-0 bottom-0 h-[170px] bg-gradient-to-b from-ink/0 to-ink" />
         <div className="absolute inset-x-5 top-0 pt-safe mt-2 flex justify-between">
           <BackButton href="/discover" />
@@ -44,7 +55,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
       <div className="relative -mt-20 px-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
-            {m.instrument} · {m.genres} · {m.neighborhood}
+            {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
           </span>
           <h1 className="headline text-[44px] leading-[0.98] flex items-center gap-2">
             {m.name}
@@ -59,12 +70,15 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
           )}
         </div>
+        {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} />}
+        {status === "expired" && <p className="text-[14px] text-smoke">{first} didn&apos;t answer within a week, so that Connect closed. No hard feelings.</p>}
+        {status === "declined" && <p className="text-[14px] text-smoke">{first} said it&apos;s not the right fit this time. Good luck out there.</p>}
         <div className="flex gap-2.5">
           {status === "connected" ? (
             <ButtonLink href={`/messages/${m.username}`} className="h-12 text-[16px]">Message {first}</ButtonLink>
           ) : status === "sent" ? (
             <Button disabled className="h-12 text-[16px]">Request sent</Button>
-          ) : status === "passed" ? null : (
+          ) : status === "passed" || status === "declined" || status === "expired" ? null : (
             <ConnectButton id={m.id} username={m.username} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
           )}
           {(!viewerId || m.sample) && (

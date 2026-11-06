@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { AdultCheck } from "@/components/adult-check";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, Field } from "@/components/ui";
-import { stepNav, useDraft } from "@/lib/onboarding";
+import { STEP_GLOW, stepNav, useDraft } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/client";
 
 const nav = stepNav("basics");
@@ -66,8 +66,8 @@ export default function Basics() {
   }
 
   return (
-    <main className="min-h-dvh flex flex-col">
-      <StepHeader step={nav.number} total={nav.total} back={nav.back} />
+    <main className="min-h-dvh flex flex-col isolate">
+      <StepHeader step={nav.number} total={nav.total} back={nav.back} glow={STEP_GLOW.basics} />
       <StepTitle title="This is you" sub={fromGoogle ? "We brought your name and photo over from Google. Change anything you like." : "Musicians connect faster with a real photo and name."} />
       <div className="px-5 pt-7 flex flex-col gap-5">
         <button type="button" onClick={() => fileRef.current?.click()} className="group flex items-center gap-4 text-left">

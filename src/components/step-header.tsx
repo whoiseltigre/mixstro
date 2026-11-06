@@ -3,10 +3,18 @@
 import { useRouter } from "next/navigation";
 import { BackButton } from "./ui";
 
-export function StepHeader({ step, total, back }: { step?: number; total?: number; back?: string }) {
+export function StepHeader({ step, total, back, glow }: { step?: number; total?: number; back?: string; glow?: string }) {
   const router = useRouter();
   return (
-    <div className="pt-safe px-5 flex items-center gap-3.5 h-[calc(max(env(safe-area-inset-top),16px)+48px)]">
+    <div className="relative pt-safe px-5 flex items-center gap-3.5 h-[calc(max(env(safe-area-inset-top),16px)+48px)]">
+      {glow && (
+        // Stage spill: a soft wash of the step's color behind the header and title.
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[380px] -z-10 opacity-30"
+          style={{ background: `radial-gradient(70% 60% at 50% 0%, ${glow}, transparent)` }}
+        />
+      )}
       {back ? <BackButton href={back} /> : <BackButton onClick={() => router.back()} />}
       {step && total && (
         <>
@@ -19,7 +27,11 @@ export function StepHeader({ step, total, back }: { step?: number; total?: numbe
             className="flex-1 flex gap-1"
           >
             {Array.from({ length: total }, (_, i) => (
-              <span key={i} className={`h-1 flex-1 rounded-full transition-colors ${i < step ? "bg-paper" : "bg-paper/15"}`} />
+              <span
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors ${i < step ? (glow ? "" : "bg-paper") : "bg-paper/15"}`}
+                style={i < step && glow ? { background: glow } : undefined}
+              />
             ))}
           </div>
           <span className="text-[12px] text-smoke tabular-nums">

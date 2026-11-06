@@ -17,7 +17,7 @@ export function SearchList({ people }: { people: Musician[] }) {
     : people;
 
   return (
-    <main className="pt-safe px-5 pb-16 flex flex-col gap-5">
+    <main className="pt-safe md:pt-6 px-5 md:px-0 pb-16 flex flex-col gap-5 md:max-w-[680px] md:mx-auto">
       <div className="mt-2 flex items-center gap-2.5">
         <BackButton href="/discover" />
         <label htmlFor="q" className="sr-only">Search musicians</label>
@@ -40,13 +40,17 @@ export function SearchList({ people }: { people: Musician[] }) {
               <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                 <span className="text-[16px] font-semibold">{m.name}</span>
                 <span className="text-[13px] text-smoke truncate">
-                  {m.instrument} · {m.genres} · {m.neighborhood}
+                  {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
                 </span>
               </div>
             </Link>
           </li>
         ))}
-        {results.length === 0 && <li className="py-10 text-center text-smoke">No musicians match &ldquo;{q}&rdquo; yet.</li>}
+        {results.length === 0 && (
+          <li className="py-10 text-center text-smoke">
+            {s ? <>No musicians match &ldquo;{q}&rdquo; yet.</> : "No one else is here yet. Musicians show up as they join."}
+          </li>
+        )}
       </ul>
     </main>
   );

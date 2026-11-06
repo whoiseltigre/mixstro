@@ -47,7 +47,8 @@ export async function pass(otherId: string) {
   const pair = await pairWith(otherId);
   if (!pair) return;
   const { viewer, outgoing, incoming } = pair;
-  if (incoming?.status === "pending") await viewer.supabase.from("connections").update({ status: "passed" }).eq("id", incoming.id);
+  // Passing on someone who asked you is a kind "not the right fit" they get told about.
+  if (incoming?.status === "pending") await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
   else if (!outgoing) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId, status: "passed" });
   revalidatePath("/discover");
 }
@@ -61,4 +62,88 @@ export async function sendMessage(connectionId: number, body: string) {
   if (error) return { error: "That didn't send. Try again." };
   revalidatePath("/messages");
   return {};
+}
+
+/** A voice note already uploaded to voice/<connection>/<you>/…; this posts it to the chat. */
+export async function sendVoice(connectionId: number, path: string, seconds: number) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(connectionId) || !path.startsWith(`${connectionId}/${viewer.id}/`) || path.includes("..")) return { error: "That didn't send. Try again." };
+  const voice_seconds = Math.min(120, Math.max(1, Math.round(seconds)));
+  const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, voice_url: path, voice_seconds });
+  if (error) return { error: "That didn't send. Try again." };
+  revalidatePath("/messages");
+  return {};
+}
+
+/** #7 Propose a jam. With `replacesId`, this is "Another time" on an invite they sent you. */
+export async function proposeJam(connectionId: number, startsAt: string, place: string, note: string, replacesId?: number) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  const when = new Date(startsAt);
+  if (!Number.isInteger(connectionId) || Number.isNaN(when.getTime())) return { error: "Pick a day and time." };
+  if (when.getTime() < Date.now() - 60 * 60 * 1000) return { error: "Pick a time that hasn't happened yet." };
+  const where = place.replace(/\s+/g, " ").trim().slice(0, 120);
+  if (where.length < 2) return { error: "Say where you'll play." };
+
+  if (replacesId !== undefined) {
+    const { error } = await viewer.supabase.from("jams").update({ status: "replaced" }).eq("id", replacesId).eq("connection_id", connectionId);
+    if (error) return { error: "That invite was already answered." };
+  }
+  const { error } = await viewer.supabase.from("jams").insert({
+    connection_id: connectionId,
+    proposed_by: viewer.id,
+    starts_at: when.toISOString(),
+    place: where,
+    note: note.trim().slice(0, 280) || null,
+    replaces_id: replacesId ?? null,
+  });
+  if (error) return { error: "That invite didn't send. Try again." };
+  revalidatePath("/messages", "layout");
+  return {};
+}
+
+/** #7 Answer an invite someone sent you, or cancel your own. */
+export async function answerJam(jamId: number, status: "accepted" | "declined" | "cancelled") {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(jamId) || !["accepted", "declined", "cancelled"].includes(status)) return { error: "Try again." };
+  const { error } = await viewer.supabase.from("jams").update({ status }).eq("id", jamId);
+  if (error) return { error: "That invite was already answered." };
+  revalidatePath("/messages", "layout");
+  return {};
+}
+
+/** #8 "Did you end up playing together?" Private until you both answer. */
+export async function checkInJam(jamId: number, played: boolean) {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out." };
+  if (!Number.isInteger(jamId)) return { error: "Try again." };
+  const { error } = await viewer.supabase.from("jam_checkins").insert({ jam_id: jamId, profile_id: viewer.id, played: Boolean(played) });
+  if (error && error.code !== "23505") return { error: "That didn't save. Try again." };
+  revalidatePath("/messages", "layout");
+  return {};
+}
+
+const QUICK = { jam: "Down to jam!", clip: "Love it. Send me a clip of what you've been playing?" } as const;
+
+/**
+ * #3 One-tap answers to a Connect someone sent you. "Down to jam" and "Send me a clip"
+ * accept and open the chat with that line; "Not the right fit" closes it kindly.
+ */
+export async function quickReply(otherId: string, username: string, kind: "jam" | "clip" | "no") {
+  const pair = await pairWith(otherId);
+  if (!pair) return { error: "Try again." };
+  const { viewer, incoming } = pair;
+  if (incoming?.status !== "pending") return { error: "That Connect isn't open anymore." };
+  if (kind === "no") {
+    await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
+    revalidatePath("/", "layout");
+    return { closed: true };
+  }
+  const { error } = await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
+  if (error) return { error: "Try again." };
+  await viewer.supabase.from("messages").insert({ connection_id: incoming.id, sender_id: viewer.id, body: QUICK[kind] });
+  revalidatePath("/", "layout");
+  redirect(`/messages/${username}`);
 }
