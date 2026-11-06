@@ -9,6 +9,7 @@ import { parseClip } from "@/lib/clips";
 import { useMyProjects } from "@/lib/projects-store";
 import { useEffect, useRef, useState } from "react";
 import { SharePage } from "@/components/share-page";
+import { BandInvites } from "@/components/band-invites";
 import { COMMITMENT, savePhoto, useDraft } from "@/lib/onboarding";
 import { shrinkPhoto } from "@/lib/photo";
 import { useVerification } from "@/lib/verification";
@@ -70,6 +71,7 @@ export default function Me() {
         </dl>
       </div>
       <div className="flex flex-col gap-6 md:gap-8 min-w-0">
+        <BandInvites />
         <FinishProfile
           hasInfluences={draft.influences.length > 0}
           hasTrack={draft.clips.some((c) => c.kind === "clip")}

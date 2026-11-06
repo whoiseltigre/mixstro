@@ -2,6 +2,7 @@ import { cache } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { findMusician, type Musician } from "./mock";
 import { LOOKING_FOR } from "./people";
+import { playedWith, withBandmates } from "./bands";
 import { SAMPLE_PROJECTS, fromRow, sortProjects, type Project, type ProjectRow } from "./projects";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "./supabase/config";
 
@@ -44,9 +45,11 @@ export const getPublicPage = cache(async (username: string): Promise<PublicPage 
     return person ? { person, projects: SAMPLE_PROJECTS[name] ?? [], instruments: [person.instrument] } : null;
   }
 
-  const { data, error } = await anon().rpc("public_profile", { p_username: name });
+  const db = anon();
+  const { data, error } = await db.rpc("public_profile", { p_username: name });
   if (error || !data) return null;
   const r = data as Row;
+  const mates = await playedWith(db, r.id);
   const instrument = r.main_instrument ?? r.instruments[0] ?? "Musician";
   const influences = r.influences.map((a) => ({ id: a.id, name: a.name, image: a.image ?? undefined }));
   const person: Musician = {
@@ -68,7 +71,7 @@ export const getPublicPage = cache(async (username: string): Promise<PublicPage 
     goals: r.goals,
     bands: [],
   };
-  return { person, projects: sortProjects(r.projects.map(fromRow)), instruments: r.instruments.length ? r.instruments : [instrument] };
+  return { person, projects: withBandmates(sortProjects(r.projects.map(fromRow)), mates), instruments: r.instruments.length ? r.instruments : [instrument] };
 });
 
 /** "Guitar and vocals", "Guitar, bass and keys". */

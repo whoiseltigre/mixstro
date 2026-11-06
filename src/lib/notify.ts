@@ -241,3 +241,25 @@ export async function notifyBoardReply(postId: number, fromId: string, authorId:
     cta: { label: "See who answered", path: `/board/${postId}` },
   });
 }
+
+/** Someone tagged you as a bandmate: confirm your spot. */
+export async function notifyBandInvite(fromId: string, toId: string, token: string) {
+  if (!emailEnabled()) return;
+  const db = adminClient()!;
+  const [{ data: inv }, map] = await Promise.all([
+    db.from("band_invites").select("bands(name)").eq("token", token).maybeSingle<{ bands: { name: string } | null }>(),
+    people([fromId]),
+  ]);
+  const from = map.get(fromId);
+  const band = inv?.bands?.name;
+  if (!from || !band) return;
+  await notify(toId, {
+    type: "connect",
+    ref: `band:${token}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: `${from.first_name} added you to ${band}`,
+    headline: `${from.first_name} added you to ${band}`,
+    body: `Confirm your spot and ${band} shows on your Mixstro profile too, with everyone who played in it.`,
+    cta: { label: "Confirm your spot", path: `/join/${token}` },
+  });
+}

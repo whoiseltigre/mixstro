@@ -74,6 +74,10 @@ export async function middleware(request: NextRequest) {
     return rewritten;
   }
 
+  // A "Confirm your spot" link: remember it through signup so onboarding can bring them back.
+  const join = path.match(/^\/join\/([0-9a-f]{32})\/?$/)?.[1];
+  if (join) response.cookies.set("mx_join", join, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+
   if (!user && (APP_ROUTES.some((r) => path.startsWith(r)) || path.startsWith("/m/"))) {
     return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));
   }

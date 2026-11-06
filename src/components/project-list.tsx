@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { PROVIDER_LABEL } from "@/lib/clips";
-import { artworkOf, firstYear, isCurrent, nameWash, trackPlayer, yearsLabel, type Project, type Track } from "@/lib/projects";
+import { artistTint } from "@/lib/artists";
+import { artworkOf, firstYear, isCurrent, nameWash, trackPlayer, yearsLabel, type Bandmate, type Project, type Track } from "@/lib/projects";
 
 type Playing = { track: Track; project: Project };
 
@@ -104,6 +105,7 @@ function ProjectRow({
           {yearsLabel(p)}
           {compact && ` · ${p.tracks.length} ${p.tracks.length === 1 ? "track" : "tracks"}`}
         </span>
+        {p.bandmates && p.bandmates.length > 0 && <PlayedWith mates={p.bandmates} linked={!compact} />}
         {!compact && p.tracks.length > 0 && (
           <div className="hscroll flex gap-1.5 mt-2 -mr-5 pr-5">
             {p.tracks.map((t) => (
@@ -124,6 +126,40 @@ function ProjectRow({
           </svg>
         </button>
       )}
+    </div>
+  );
+}
+
+/** "With Maya and Jo": the band's other confirmed members, each linking to their page. */
+function PlayedWith({ mates, linked }: { mates: Bandmate[]; linked: boolean }) {
+  const shown = mates.slice(0, 3);
+  return (
+    <div className="flex items-center gap-2 mt-1.5 min-w-0">
+      <span className="flex -space-x-1.5 shrink-0">
+        {shown.map((m) => (
+          <span key={m.username} className="relative size-[22px] rounded-full overflow-hidden border-2 border-ink bg-riser flex items-center justify-center text-[10px] font-bold" style={m.photo ? undefined : { background: artistTint(m.username) }}>
+            {m.photo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+            ) : (
+              m.name.slice(0, 1)
+            )}
+          </span>
+        ))}
+      </span>
+      <span className="text-[13px] text-smoke truncate">
+        With{" "}
+        {mates.map((m, i) => (
+          <span key={m.username}>
+            {i > 0 && (i === mates.length - 1 ? " and " : ", ")}
+            {linked ? (
+              <Link href={`/m/${m.username}`} className="text-paper/90 font-semibold hover:underline underline-offset-2">{m.name}</Link>
+            ) : (
+              <span className="text-paper/90 font-semibold">{m.name}</span>
+            )}
+          </span>
+        ))}
+      </span>
     </div>
   );
 }
