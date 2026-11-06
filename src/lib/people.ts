@@ -108,6 +108,9 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
     lastActiveAt: row.last_active_at,
     verified: Boolean(row.verified_at),
     lookingFor: LOOKING_FOR[row.goals[0]] ?? "Open to collaborating",
+    instruments: row.instruments,
+    genreList: row.genres,
+    goals: row.goals,
     bands: [],
   };
 }

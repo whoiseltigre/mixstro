@@ -28,6 +28,10 @@ export type Musician = {
   /** Tied to a Google account (profiles.verified_at). */
   verified?: boolean;
   lookingFor: string;
+  /** For search filters. Samples fall back to `instrument` and `genres`. */
+  instruments?: string[];
+  genreList?: string[];
+  goals?: string[];
   bands: { name: string; years: string; role: string; photo: string }[];
 };
 
