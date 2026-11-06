@@ -6,6 +6,7 @@ import { AdultCheck } from "@/components/adult-check";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, Field } from "@/components/ui";
 import { STEP_GLOW, stepNav, useDraft } from "@/lib/onboarding";
+import { shrinkPhoto } from "@/lib/photo";
 import { createClient } from "@/lib/supabase/client";
 
 const nav = stepNav("basics");
@@ -17,6 +18,7 @@ export default function Basics() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [fromGoogle, setFromGoogle] = useState(false);
   const [taken, setTaken] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
   const [askAdult, setAskAdult] = useState(false);
   const username = draft.username.replace(/^@/, "").toLowerCase();
   const usernameOk = USERNAME.test(username);
@@ -54,15 +56,15 @@ export default function Basics() {
     return () => clearTimeout(t);
   }, [username, usernameOk]);
 
-  function pickPhoto(file?: File) {
+  async function pickPhoto(file?: File) {
     if (!file) return;
-    // Preview only for now; uploading to Supabase Storage happens on finish.
-    const reader = new FileReader();
-    reader.onload = () => {
-      update({ avatarUrl: String(reader.result) });
+    setPhotoError(false);
+    try {
+      update({ avatarUrl: await shrinkPhoto(file) });
       setFromGoogle(false);
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      setPhotoError(true); // e.g. a HEIC file in a browser that can't read it
+    }
   }
 
   return (
@@ -82,11 +84,15 @@ export default function Basics() {
           <span className="flex flex-col gap-1">
             <span className="text-[16px] font-semibold">{draft.avatarUrl ? "Change photo" : "Add a photo"}</span>
             <span className="text-[13px] text-smoke">
-              {fromGoogle ? "This is your Google photo. A shot of you with your instrument works even better." : "A clear photo of you, ideally with your instrument."}
+              {photoError
+                ? "That photo didn't open. Try a JPEG or PNG."
+                : fromGoogle
+                  ? "This is your Google photo. A shot of you with your instrument works even better."
+                  : "A clear photo of you, ideally with your instrument."}
             </span>
           </span>
         </button>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => pickPhoto(e.target.files?.[0])} />
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { pickPhoto(e.target.files?.[0]); e.target.value = ""; }} />
 
         <Field id="first" label="First name" autoComplete="given-name" value={draft.firstName} onChange={(e) => update({ firstName: e.target.value })} />
         <Field

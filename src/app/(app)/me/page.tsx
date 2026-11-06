@@ -7,11 +7,13 @@ import { ProjectList } from "@/components/project-list";
 import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { useMyProjects } from "@/lib/projects-store";
-import { COMMITMENT, useDraft } from "@/lib/onboarding";
+import { useRef, useState } from "react";
+import { COMMITMENT, savePhoto, useDraft } from "@/lib/onboarding";
+import { shrinkPhoto } from "@/lib/photo";
 import { useVerification } from "@/lib/verification";
 
 export default function Me() {
-  const { draft, ready } = useDraft();
+  const { draft, update, ready } = useDraft();
   const { verified } = useVerification();
   const projects = useMyProjects();
   if (!ready) return null;
@@ -33,17 +35,7 @@ export default function Me() {
       {/* From 768px the photo and basics stay pinned on the left while the rest scrolls on the right. */}
       <div className="flex flex-col gap-6 md:sticky md:top-[96px]">
         <div className="mt-6 md:mt-0 flex items-center md:items-start md:flex-col gap-4 md:gap-5">
-          <span className="size-20 md:size-auto md:w-full md:aspect-[9/10] rounded-full md:rounded-[28px] bg-riser overflow-hidden shrink-0">
-            {draft.avatarUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={draft.avatarUrl}
-                alt=""
-                referrerPolicy="no-referrer"
-                className="size-full object-cover"
-              />
-            )}
-          </span>
+          <PhotoPicker url={draft.avatarUrl} onSaved={(avatarUrl) => update({ avatarUrl })} />
           <div className="flex flex-col gap-0.5 md:gap-1.5">
             <h1 className="headline text-[32px] md:text-[44px] flex items-center gap-1.5">
               {draft.firstName}
@@ -190,5 +182,52 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dt className="text-[12px] text-smoke">{label}</dt>
       <dd className="text-[15px] font-medium">{value || "—"}</dd>
     </div>
+  );
+}
+
+/** Tap your photo to change it. It uploads and saves straight away. */
+function PhotoPicker({ url, onSaved }: { url?: string; onSaved: (url: string) => void }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  async function pick(file?: File) {
+    if (!file) return;
+    setBusy(true);
+    setError("");
+    try {
+      const r = await savePhoto(await shrinkPhoto(file));
+      if (r.url) onSaved(r.url);
+      else setError(r.error ?? "Try again.");
+    } catch {
+      setError("That photo didn't open. Try a JPEG or PNG.");
+    }
+    setBusy(false);
+  }
+
+  return (
+    <span className="relative shrink-0 md:w-full flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={() => input.current?.click()}
+        disabled={busy}
+        aria-label={url ? "Change your photo" : "Add a photo"}
+        className="group relative block size-20 md:size-auto md:w-full md:aspect-[9/10] rounded-full md:rounded-[28px] bg-riser overflow-hidden"
+      >
+        {url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt="" referrerPolicy="no-referrer" className={`size-full object-cover transition ${busy ? "opacity-40" : ""}`} />
+        ) : (
+          <span className="absolute inset-0 flex items-center justify-center text-smoke">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+          </span>
+        )}
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-3 md:right-3 rounded-full bg-ink/80 backdrop-blur px-2 py-1 md:px-3 md:py-1.5 text-[11px] md:text-[13px] font-semibold opacity-90 md:opacity-0 md:group-hover:opacity-100 md:group-focus-visible:opacity-100 transition">
+          {busy ? "Saving…" : url ? "Change" : "Add"}
+        </span>
+      </button>
+      {error && <span role="alert" className="text-[12px] text-smoke md:text-[13px]">{error}</span>}
+      <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
+    </span>
   );
 }
