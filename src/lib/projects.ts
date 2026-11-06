@@ -16,6 +16,9 @@ export type Track = {
   thumb?: string;
 };
 
+/** Someone who confirmed they played in the same band. */
+export type Bandmate = { username: string; name: string; photo: string | null };
+
 export type Project = {
   id: string;
   name: string;
@@ -26,6 +29,8 @@ export type Project = {
   /** Sample profiles only; real projects use their first track's artwork. */
   artwork?: string;
   tracks: Track[];
+  /** "Played with": the band's other confirmed members. */
+  bandmates?: Bandmate[];
 };
 
 export type ProjectRow = {
@@ -105,9 +110,9 @@ export function nameWash(name: string) {
 /** Sample musicians' projects. Their tracks have no links, so they show but don't play. */
 export const SAMPLE_PROJECTS: Record<string, Project[]> = {
   eli: [
-    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }] },
+    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }], bandmates: [{ username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg" }] },
     { id: "eli-2", name: "Basement demos", role: "Everything", startYear: 2018, endYear: 2019, tracks: [{ id: "e3", provider: "soundcloud", title: "Vol. 2" }] },
-    { id: "eli-3", name: "Second Period", role: "Rhythm guitar", startYear: 2012, endYear: 2014, tracks: [{ id: "e4", provider: "youtube", title: "Battle of the bands" }] },
+    { id: "eli-3", name: "Second Period", role: "Rhythm guitar", startYear: 2012, endYear: 2014, tracks: [{ id: "e4", provider: "youtube", title: "Battle of the bands" }], bandmates: [{ username: "jonah", name: "Jonah", photo: "/photos/acoustic-amber.jpg" }] },
   ],
   maya: [
     { id: "maya-1", name: "Low Tide Trio", role: "Bass, backing vocals", startYear: 2021, artwork: "/photos/rock-red.jpg", tracks: [{ id: "m1", provider: "youtube", title: "Live at the Echo" }, { id: "m2", provider: "spotify", title: "Undertow" }] },

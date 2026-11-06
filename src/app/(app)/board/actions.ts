@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyBoardReply } from "@/lib/notify";
 import { redirect } from "next/navigation";
 import { KINDS, type BoardKind } from "@/lib/board-kinds";
 import { getViewer } from "@/lib/people";
@@ -69,6 +71,8 @@ export async function answerPost(postId: number, authorId: string, note: string)
     .select("id")
     .or(`and(from_id.eq.${viewer.id},to_id.eq.${authorId}),and(from_id.eq.${authorId},to_id.eq.${viewer.id})`);
   if (!pair?.length) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: authorId });
+  const said = note.trim().slice(0, 280) || null;
+  after(() => notifyBoardReply(postId, viewer.id, authorId, said));
 
   revalidatePath("/board", "layout");
   revalidatePath("/discover");

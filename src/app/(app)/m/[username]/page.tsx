@@ -11,6 +11,8 @@ import { getProfile } from "@/lib/people";
 import { QuickReplies } from "@/components/quick-replies";
 import { isExpired } from "@/lib/people";
 import { ConnectButton } from "./connect-button";
+import { SharePage } from "@/components/share-page";
+import { requestOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +76,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
         {status === "expired" && <p className="text-[14px] text-smoke">{first} didn&apos;t answer within a week, so that Connect closed. No hard feelings.</p>}
         {status === "declined" && <p className="text-[14px] text-smoke">{first} said it&apos;s not the right fit this time. Good luck out there.</p>}
         <div className="flex gap-2.5">
-          {status === "connected" ? (
+          {m.id === viewerId ? null : status === "connected" ? (
             <ButtonLink href={`/messages/${m.username}`} className="h-12 text-[16px]">Message {first}</ButtonLink>
           ) : status === "sent" ? (
             <Button disabled className="h-12 text-[16px]">Request sent</Button>
@@ -83,6 +85,9 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           )}
           {(!viewerId || m.sample) && (
             <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>
+          )}
+          {!m.sample && (
+            <SharePage username={m.username} firstName={first} mine={m.id === viewerId} url={`${await requestOrigin()}/@${m.username}`} label={m.id === viewerId ? "Share your page" : undefined} className="h-12 shrink-0" />
           )}
         </div>
 

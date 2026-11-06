@@ -11,6 +11,12 @@ export default function Done() {
   const { draft, ready } = useDraft();
   const [state, setState] = useState<"saving" | "saved" | "error">("saving");
   const [error, setError] = useState<string>();
+  // Came in through a bandmate's "Confirm your spot" link: take them back to it.
+  const [joinToken, setJoinToken] = useState<string>();
+  useEffect(() => {
+    const t = document.cookie.split("; ").find((c) => c.startsWith("mx_join="))?.slice(8);
+    if (t && /^[0-9a-f]{32}$/.test(t)) setJoinToken(t);
+  }, []);
 
   useEffect(() => {
     if (!ready) return;
@@ -70,6 +76,11 @@ export default function Done() {
         </div>
       </div>
       <div className="mt-auto pt-6 pb-safe flex flex-col gap-2.5">
+        {joinToken && state === "saved" && (
+          <ButtonLink href={`/join/${joinToken}`} className="mb-1">
+            Now confirm your spot in the band
+          </ButtonLink>
+        )}
         <Button variant="gel" onClick={enableNotifications} disabled={state === "saving"}>
           {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
         </Button>

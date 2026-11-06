@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Fonts and the logo for the share cards, read from disk at request time.
+  outputFileTracingIncludes: {
+    "/p/[username]/og": ["./src/assets/og/**"],
+    "/p/[username]/story": ["./src/assets/og/**"],
+  },
 };
 
 export default nextConfig;
