@@ -109,7 +109,7 @@ As soon as you have three songs you're proud of. A demo doesn't need to be polis
 Start small and local. Open mics, house shows, friends' parties and the opening slot on a local bill are all good first gigs. Here's how to land one:
 
 1. Go to shows at the venue first. Learn who books it and what kind of bands play there.
-2. Send a short, specific email with your demo, two or three similar bands, your draw (how many people you'll realistically bring) and your available dates.
+2. Send a short, specific email with your demo or [electronic press kit](/blog/electronic-press-kit), two or three similar bands, your draw (how many people you'll realistically bring) and your available dates.
 3. Offer to open for a local band you like. They get a fuller room, you get an audience.
 4. Bring people. For a new band, the number of people you bring matters more than anything else.
 

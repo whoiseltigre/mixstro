@@ -70,7 +70,7 @@ Wherever you post, a good ad gets better replies. Include:
 - Your sound: two or three bands you sound like, and a link to a demo if you have one.
 - Your goals: "Original project, aiming to gig monthly and record an EP this year."
 - The commitment: rehearsal night, location and how often.
-- A little about you: your experience and the bands you've played in.
+- A little about you: your experience and the bands you've played in. A short [musician resume](/blog/musician-resume) works well here.
 
 For example: *"Indie rock project looking for a drummer. Think Wet Leg meets Pixies. We have five songs and a rough demo. Rehearsing Thursdays in East Austin, goal is monthly gigs and an EP by summer. We've all played in local bands before."*
 

@@ -88,7 +88,7 @@ export default async function BlogPost({ params }: Props) {
         By {post.author} · {post.updated ? `Updated ${formatDate(post.updated)}` : formatDate(post.date)} · {post.readingMinutes} min read
       </p>
       <article
-        className="mt-8 text-[16px] leading-[1.6] text-paper/85 [&_a]:text-tungsten [&_a]:underline [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:text-[21px] [&_h2]:font-semibold [&_h2]:text-paper [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:text-[17px] [&_h3]:font-semibold [&_h3]:text-paper [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mt-4 [&_ul]:list-disc [&_ul]:pl-5"
+        className="mt-8 text-[16px] leading-[1.6] text-paper/85 [&_a]:text-tungsten [&_a]:underline [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:text-[21px] [&_h2]:font-semibold [&_h2]:text-paper [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:text-[17px] [&_h3]:font-semibold [&_h3]:text-paper [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_pre]:mt-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-stage [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:leading-[1.5] [&_blockquote]:mt-4 [&_blockquote]:border-l-2 [&_blockquote]:border-riser [&_blockquote]:pl-4 [&_blockquote]:text-paper/75"
         dangerouslySetInnerHTML={{ __html: post.html }}
       />
       {author && (
