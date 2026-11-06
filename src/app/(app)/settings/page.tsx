@@ -6,6 +6,7 @@ import { useState } from "react";
 import { BackButton, Button, ChevronRight, GoogleIcon, VerifiedMark } from "@/components/ui";
 import { deleteAccount } from "@/lib/safety";
 import { useVerification } from "@/lib/verification";
+import { PublicPageToggle } from "./public-page";
 
 export default function Settings() {
   const router = useRouter();
@@ -54,6 +55,8 @@ export default function Settings() {
         )}
         {linkError && <p role="alert" className="text-[13px] text-[#FF453A]">{linkError}</p>}
       </section>
+
+      <PublicPageToggle />
 
       <ul className="flex flex-col rounded-[20px] bg-stage divide-y divide-paper/8">
         <Row href="/settings/notifications" title="Notifications" sub="Push and email, per type" />

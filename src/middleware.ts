@@ -3,13 +3,18 @@ import { NextResponse, type NextRequest } from "next/server";
 import { publicOrigin } from "@/lib/redirect";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
 
-const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/m/", "/connected", "/search", "/settings"];
+const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/connected", "/search", "/settings"];
+
+/** app.mixstro.com/@name is the short link to someone's music page. */
+const VANITY = /^\/@([A-Za-z0-9_.]{3,24})\/?$/;
+const PROFILE = /^\/m\/([A-Za-z0-9_.]{3,24})\/?$/;
+const REF_COOKIE = "mx_ref";
 
 // The public website lives on the apex domain; the app lives on app.mixstro.com.
 const SITE_HOST = "mixstro.com";
 const APP_ORIGIN = "https://app.mixstro.com";
 // Paths on mixstro.com that belong to the app, sent over to app.mixstro.com.
-const APP_ONLY = [...APP_ROUTES, "/auth"];
+const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/join"];
 
 function siteRouting(request: NextRequest): NextResponse | null {
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")
@@ -32,7 +37,12 @@ function siteRouting(request: NextRequest): NextResponse | null {
 export async function middleware(request: NextRequest) {
   const site = siteRouting(request);
   if (site) return site;
-  if (!isSupabaseConfigured) return NextResponse.next();
+  const path = request.nextUrl.pathname;
+  const vanity = path.match(VANITY)?.[1];
+
+  if (!isSupabaseConfigured) {
+    return vanity ? NextResponse.rewrite(new URL(`/m/${vanity.toLowerCase()}`, request.url)) : NextResponse.next();
+  }
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -50,8 +60,21 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  if (!user && APP_ROUTES.some((r) => path.startsWith(r))) {
+  // Music pages: members get the full profile, everyone else the public page.
+  const profile = vanity ?? path.match(PROFILE)?.[1];
+  if (profile) {
+    const name = profile.toLowerCase();
+    const rewritten = NextResponse.rewrite(new URL(user ? `/m/${name}` : `/p/${name}`, request.url), { request });
+    response.cookies.getAll().forEach((c) => rewritten.cookies.set(c));
+    // Remember whose page brought a visitor here, so their signup can say so.
+    if (!user && !request.cookies.get(REF_COOKIE)) {
+      const source = request.nextUrl.searchParams.get("s") === "invite" ? "invite" : "page";
+      rewritten.cookies.set(REF_COOKIE, `${name}:${source}`, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+    }
+    return rewritten;
+  }
+
+  if (!user && (APP_ROUTES.some((r) => path.startsWith(r)) || path.startsWith("/m/"))) {
     return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));
   }
   return response;

@@ -143,6 +143,24 @@ export function confirmAdult(on: boolean) {
   }
 }
 
+/**
+ * If someone's music page (or invite) brought you here, note it once on your profile
+ * (profiles.invited_by), for the first-100-users numbers. Never overwrites.
+ */
+async function creditInvite(supabase: NonNullable<ReturnType<typeof createClient>>, userId: string) {
+  const raw = document.cookie.split("; ").find((c) => c.startsWith("mx_ref="))?.slice(7);
+  if (!raw) return;
+  const [username, source] = decodeURIComponent(raw).split(":");
+  document.cookie = "mx_ref=; Max-Age=0; path=/";
+  const { data } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle<{ id: string }>();
+  if (!data || data.id === userId) return;
+  await supabase
+    .from("profiles")
+    .update({ invited_by: data.id, invite_source: ["page", "share", "tag", "invite"].includes(source) ? source : "page" })
+    .eq("id", userId)
+    .is("invited_by", null);
+}
+
 /** Changes just your photo (from your profile), without re-saving everything else. */
 export async function savePhoto(dataUrl: string): Promise<{ url?: string; error?: string }> {
   const supabase = createClient();
@@ -216,6 +234,8 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     rememberPhoto(avatarUrl);
     pruneOldPhotos(supabase, user.id, avatarUrl).catch(() => {});
   }
+
+  await creditInvite(supabase, user.id).catch(() => {});
 
   // Distances are a nice-to-have: a failure here never fails the save.
   await saveMyLocation(draft.neighborhood, draft.point).catch(() => {});

@@ -7,7 +7,8 @@ import { ProjectList } from "@/components/project-list";
 import { ButtonLink, ChevronRight, VerifiedMark } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { useMyProjects } from "@/lib/projects-store";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { SharePage } from "@/components/share-page";
 import { COMMITMENT, savePhoto, useDraft } from "@/lib/onboarding";
 import { shrinkPhoto } from "@/lib/photo";
 import { useVerification } from "@/lib/verification";
@@ -16,6 +17,8 @@ export default function Me() {
   const { draft, update, ready } = useDraft();
   const { verified } = useVerification();
   const projects = useMyProjects();
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
   if (!ready) return null;
 
   if (!draft.firstName) {
@@ -46,6 +49,16 @@ export default function Me() {
             </span>
           </div>
         </div>
+        {origin && (
+          <SharePage
+            username={draft.username.replace(/^@/, "")}
+            firstName={draft.firstName}
+            mine
+            url={`${origin}/@${draft.username.replace(/^@/, "")}`}
+            variant="solid"
+            className="w-full"
+          />
+        )}
         <dl className="grid grid-cols-2 gap-2.5">
           <Fact label="Plays" value={draft.instruments.join(", ")} />
           <Fact label="Genres" value={draft.genres.join(", ")} />

@@ -10,7 +10,7 @@ import { createClient } from "./supabase/server";
  * mode they fall back to the sample musicians in mock.ts.
  */
 
-const LOOKING_FOR: Record<string, string> = {
+export const LOOKING_FOR: Record<string, string> = {
   showcase: "Sharing their music",
   join_band: "Looking to join a band",
   start_project: "Building a band",
