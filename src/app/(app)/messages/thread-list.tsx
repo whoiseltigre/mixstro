@@ -18,46 +18,48 @@ export function ThreadList({ threads }: { threads: Thread[] }) {
       {threads.length === 0 ? (
         <div className="pt-16 md:pt-8 flex flex-col items-center gap-2 text-center">
           <h2 className="text-[20px] font-semibold">No conversations yet</h2>
-          <p className="max-w-[280px] text-[15px] leading-[1.5] text-smoke">
-            When you and another musician both Connect, your chat opens here.
-          </p>
+          <p className="max-w-[280px] text-[15px] leading-[1.5] text-smoke">When you and another musician both Connect, your chat opens here.</p>
           <Link href="/discover" className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-[15px] font-semibold flex items-center">
             See Today
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col md:gap-1">
-          {threads.map((t) => {
-            const waiting = !t.mine;
-            const open = path === `/messages/${t.username}`;
-            return (
-              <li key={t.username}>
-                <Link
-                  href={`/messages/${t.username}`}
-                  aria-current={open ? "page" : undefined}
-                  className={cx(
-                    "flex items-center gap-3.5 py-3 border-b border-paper/8 md:border-0 md:px-2.5 md:rounded-2xl transition",
-                    open ? "md:bg-paper/10" : "md:hover:bg-paper/5",
-                  )}
-                >
-                  <div className="relative size-14 md:size-12 rounded-full overflow-hidden shrink-0">
-                    <PersonPhoto person={t.person} sizes="56px" initialsSize={20} />
-                  </div>
-                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <div className="flex justify-between gap-2">
-                      <span className="text-[16px] font-semibold">{t.person.name}</span>
-                      <TimeAgo iso={t.at} className="text-[13px] text-smoke" />
+        <>
+          {threads.some((t) => t.yourTurn) && (
+            <p className="md:px-2 -mb-2 text-[13px] font-semibold text-tungsten">Your turn · {threads.filter((t) => t.yourTurn).length} waiting on you</p>
+          )}
+          <ul className="flex flex-col md:gap-1">
+            {[...threads.filter((t) => t.yourTurn), ...threads.filter((t) => !t.yourTurn)].map((t, i, all) => {
+              const waiting = Boolean(t.yourTurn);
+              const divider = i > 0 && all[i - 1].yourTurn && !t.yourTurn;
+              const open = path === `/messages/${t.username}`;
+              return (
+                <li key={t.username} className={divider ? "mt-4 md:mt-3" : undefined}>
+                  <Link
+                    href={`/messages/${t.username}`}
+                    aria-current={open ? "page" : undefined}
+                    className={cx(
+                      "flex items-center gap-3.5 py-3 border-b border-paper/8 md:border-0 md:px-2.5 md:rounded-2xl transition",
+                      open ? "md:bg-paper/10" : "md:hover:bg-paper/5",
+                    )}
+                  >
+                    <div className="relative size-14 md:size-12 rounded-full overflow-hidden shrink-0">
+                      <PersonPhoto person={t.person} sizes="56px" initialsSize={20} />
                     </div>
-                    <span className={`text-[14px] truncate ${waiting ? "text-paper" : "text-smoke"}`}>
-                      {t.mine ? `You: ${t.preview}` : t.preview}
-                    </span>
-                  </div>
-                  {waiting && <span className="size-2.5 rounded-full bg-tungsten shrink-0" aria-label="Your turn" />}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                    <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-[16px] font-semibold">{t.person.name}</span>
+                        <TimeAgo iso={t.at} className="text-[13px] text-smoke" />
+                      </div>
+                      <span className={`text-[14px] truncate ${waiting ? "text-paper" : "text-smoke"}`}>{t.mine ? `You: ${t.preview}` : t.preview}</span>
+                    </div>
+                    {waiting && <span className="size-2.5 rounded-full bg-tungsten shrink-0" aria-label="Your turn" />}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </div>
   );

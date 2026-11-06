@@ -6,7 +6,7 @@ import { BackButton, Button, Field } from "@/components/ui";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Project, type Track } from "@/lib/projects";
 import { useMyProjects } from "@/lib/projects-store";
-import { lookupTrack } from "./actions";
+import { lookupTrack, type TrackInfo } from "./actions";
 
 type Form = { id?: string; name: string; role: string; startYear: number; endYear: number; current: boolean; tracks: Track[] };
 
@@ -90,15 +90,15 @@ function ProjectSheet({
 
   async function addTrack(raw: string) {
     const clip = parseClip(raw);
-    if (!clip) return setError("That link isn't one we can play yet. Try YouTube, SoundCloud, Spotify or Apple Music.");
+    if (!clip) return setError("That link isn't one we can play yet. Try YouTube, SoundCloud, Spotify, Apple Music or Bandcamp.");
     if (form.tracks.some((t) => t.url && parseClip(t.url)?.id === clip.id)) return setError("You already added that one.");
     setError(undefined);
     setLink("");
     const id = crypto.randomUUID();
     update((f) => ({ ...f, tracks: [...f.tracks, { id, provider: clip.provider, url: clip.url, thumb: clip.thumb }] }));
-    const info = await lookupTrack(clip.url).catch(() => ({ title: undefined, thumb: undefined }));
+    const info: TrackInfo = await lookupTrack(clip.url).catch(() => ({}));
     // Fill in what the platform knows without overwriting a title typed meanwhile.
-    update((f) => ({ ...f, tracks: f.tracks.map((t) => (t.id === id ? { ...t, title: t.title || info.title, thumb: info.thumb ?? t.thumb } : t)) }));
+    update((f) => ({ ...f, tracks: f.tracks.map((t) => (t.id === id ? { ...t, url: info.url ?? t.url, title: t.title || info.title, thumb: info.thumb ?? t.thumb } : t)) }));
   }
 
   async function run(action: () => Promise<{ error?: string }>) {

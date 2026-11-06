@@ -6,15 +6,18 @@ import { ArtistAvatar } from "@/components/artist-avatar";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon } from "@/components/ui";
 import { DEMO_TOP_ARTISTS, searchArtists } from "@/lib/artists";
-import { type Artist, saveProfile, useDraft } from "@/lib/onboarding";
+import { type Artist, STEP_GLOW, saveProfile, stepNav, useDraft } from "@/lib/onboarding";
 
-// Part of "finish your profile", reached from the Profile tab after onboarding.
-const nav = { back: "/onboarding/music", next: "/me" };
+// A signup step ("Tap the artists you sound like"), and also reachable from the Profile tab (?from=profile).
+const nav = stepNav("influences");
+const GLOW = STEP_GLOW.influences;
 const MIN = 3;
 const MAX = 10;
 
 export default function Influences() {
   const router = useRouter();
+  const [fromProfile, setFromProfile] = useState(false);
+  useEffect(() => setFromProfile(new URLSearchParams(location.search).get("from") === "profile"), []);
   const { draft, update } = useDraft();
   const [q, setQ] = useState("");
   const [extra, setExtra] = useState<Artist[]>([]);
@@ -22,16 +25,18 @@ export default function Influences() {
   const [error, setError] = useState<string>();
 
   async function save() {
+    if (!fromProfile) return router.push(nav.next);
     setSaving(true);
     const r = await saveProfile(draft);
     setSaving(false);
     if (r.error) return setError(r.error);
-    router.push(nav.next);
+    router.push("/me");
   }
 
   const picked = draft.influences;
   const pickedIds = new Set(picked.map((a) => a.id));
-  const suggestions = draft.musicSource === "manual" ? [] : DEMO_TOP_ARTISTS;
+  // A starter grid of well-known artists to tap; search finds anyone else.
+  const suggestions = DEMO_TOP_ARTISTS;
   const grid = dedupe([...picked, ...extra, ...suggestions]);
   const results = useArtistSearch(q).filter((a) => !pickedIds.has(a.id));
 
@@ -46,18 +51,12 @@ export default function Influences() {
     setQ("");
   }
 
-  const source = draft.musicSource === "spotify" ? "Spotify" : "Apple Music";
-
   return (
     <main className="min-h-dvh flex flex-col">
-      <StepHeader back={nav.back} />
+      {fromProfile ? <StepHeader back="/me" glow={GLOW} /> : <StepHeader step={nav.number} total={nav.total} back={nav.back} glow={GLOW} />}
       <StepTitle
-        title="Your influences"
-        sub={
-          draft.musicSource === "manual"
-            ? "Add the artists that shape how you play. Pick at least three."
-            : `We found these in ${source}. Keep the ones that shape how you play.`
-        }
+        title="Tap the artists you sound like"
+        sub="Anyone works, from The Beatles to your friend's band. Musicians nearby who love the same stuff show up first. Pick at least three."
       />
       <div className="px-5 pt-6 flex flex-col gap-5">
         <div className="relative">
@@ -66,7 +65,7 @@ export default function Influences() {
             id="artist-search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Add another artist"
+            placeholder="Search any artist"
             autoComplete="off"
             className="h-11 w-full rounded-xl bg-stage pl-10 pr-3 text-[16px] placeholder:text-smoke outline-none border border-transparent focus:border-paper/30"
           />
@@ -110,7 +109,7 @@ export default function Influences() {
         {picked.length < MIN && <p className="text-center text-[12px] text-smoke">Pick at least {MIN}</p>}
         {error && <p role="alert" className="text-center text-[13px] text-[#FF453A]">{error}</p>}
         <Button disabled={picked.length < MIN || saving} onClick={save}>
-          {saving ? "Saving…" : `Save${picked.length ? ` · ${picked.length} picked` : ""}`}
+          {saving ? "Saving…" : `${fromProfile ? "Save" : "Continue"}${picked.length ? ` · ${picked.length} picked` : ""}`}
         </Button>
       </StepFooter>
     </main>

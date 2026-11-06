@@ -7,6 +7,7 @@ import { ClipRecorder } from "@/components/clip-recorder";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
+import { lookupTrack } from "@/app/(app)/me/projects/actions";
 import { STEP_GLOW, saveProfile, stepNav, useDraft } from "@/lib/onboarding";
 
 const nav = stepNav("sound");
@@ -30,11 +31,17 @@ export default function Sound() {
   function addClip(raw: string) {
     if (!raw.trim()) return;
     const parsed = parseClip(raw);
-    if (!parsed) return setError("We can't play that link yet. Try YouTube, SoundCloud, Spotify, Apple Music, TikTok or Instagram.");
+    if (!parsed) return setError("We can't play that link yet. Try YouTube, SoundCloud, Spotify, Apple Music, Bandcamp, TikTok or Instagram.");
     if (clips.some((c) => parseClip(c.value)?.id === parsed.id)) return setError("You already added that one.");
     setError(undefined);
     update({ clips: [...draft.clips, { kind: "clip", value: parsed.url }] });
     setLink("");
+    // Bandcamp's player needs an id that only the page has; swap it in once we know it.
+    if (!parsed.embed) {
+      lookupTrack(parsed.url)
+        .then(({ url }) => url && update((d) => ({ clips: d.clips.map((c) => (c.value === parsed.url ? { ...c, value: url } : c)) })))
+        .catch(() => {});
+    }
   }
 
   async function finish() {

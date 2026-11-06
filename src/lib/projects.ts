@@ -80,7 +80,7 @@ export const firstYear = (projects: Project[]) => (projects.length ? Math.min(..
 /** The player for a track: compact audio embeds so the mini player stays small. */
 export function trackPlayer(track: Track): (ParsedClip & { height?: number }) | null {
   const clip = track.url ? parseClip(track.url) : null;
-  if (!clip) return null;
+  if (!clip?.embed) return null;
   switch (clip.provider) {
     case "spotify":
       return { ...clip, height: 152 };
@@ -88,6 +88,8 @@ export function trackPlayer(track: Track): (ParsedClip & { height?: number }) | 
       return { ...clip, embed: clip.embed.replace("visual=true", "visual=false"), height: 166 };
     case "apple_music":
       return { ...clip, height: 175 };
+    case "bandcamp":
+      return { ...clip, height: 120 };
     default:
       return clip;
   }

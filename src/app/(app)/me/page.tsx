@@ -152,7 +152,7 @@ function FinishProfile({
       sub: "The bands you've played in, old and new, with their music.",
     },
     !hasInfluences && {
-      href: "/onboarding/music",
+      href: "/onboarding/influences?from=profile",
       title: "Add your influences",
       sub: "So we can introduce musicians who share them.",
     },

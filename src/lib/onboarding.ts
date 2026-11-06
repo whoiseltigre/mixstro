@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { parseClip } from "@/lib/clips";
+import { saveMyLocation } from "@/app/onboarding/actions";
 import { createClient } from "@/lib/supabase/client";
 
 export type Level = "learning" | "solid" | "pro";
@@ -23,6 +24,8 @@ export type Draft = {
   goals: string[];
   commitment: number; // index into COMMITMENT
   neighborhood: string;
+  /** From "Use my location", rounded; dropped when you type a neighborhood instead. */
+  point?: { lat: number; lng: number };
   radiusMi: number;
   playDays: string[];
   clips: { kind: "clip" | "band"; value: string }[]; // clip = YouTube/TikTok URL
@@ -42,8 +45,8 @@ export const EMPTY_DRAFT: Draft = {
   clips: [],
 };
 
-/** The numbered steps, one question each; sign-in comes before, "done" after. Influences and the rest are added later from the profile. */
-export const STEPS = ["basics", "play", "why", "where", "sound"] as const;
+/** The numbered steps, one question each; sign-in comes before, "done" after. Projects are added later from the profile. */
+export const STEPS = ["basics", "play", "why", "where", "influences", "sound"] as const;
 export type Step = (typeof STEPS)[number];
 
 /** Each step's stage-spill color, so every screen feels like its own moment. */
@@ -52,6 +55,7 @@ export const STEP_GLOW: Record<Step, string> = {
   play: "#B5C5FF",
   why: "#67E2DA",
   where: "#FFACBA",
+  influences: "#C9B6FF",
   sound: "#F7BF77",
 };
 
@@ -112,9 +116,10 @@ export function useDraft() {
     setReady(true);
   }, []);
 
-  const update = useCallback((patch: Partial<Draft>) => {
+  /** A patch, or a function of the latest draft for updates that land after an await. */
+  const update = useCallback((patch: Partial<Draft> | ((prev: Draft) => Partial<Draft>)) => {
     setDraft((prev) => {
-      const next = { ...prev, ...patch };
+      const next = { ...prev, ...(typeof patch === "function" ? patch(prev) : patch) };
       try {
         localStorage.setItem(KEY, JSON.stringify(next));
       } catch {
@@ -174,6 +179,9 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     onboarded_at: new Date().toISOString(),
   });
   if (error) return { error: error.code === "23505" ? "That username is taken." : error.message };
+
+  // Distances are a nice-to-have: a failure here never fails the save.
+  await saveMyLocation(draft.neighborhood, draft.point).catch(() => {});
 
   await supabase.from("influences").delete().eq("profile_id", user.id);
   if (draft.influences.length) {

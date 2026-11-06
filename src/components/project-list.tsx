@@ -132,6 +132,23 @@ function ProjectRow({
 function TrackChip({ track, on, onPlay }: { track: Track; on: boolean; onPlay: () => void }) {
   const playable = Boolean(trackPlayer(track));
   const title = track.title || `${PROVIDER_LABEL[track.provider]} track`;
+  if (!playable && track.url) {
+    // No in-app player for this link (yet): open it on the platform instead.
+    return (
+      <a
+        href={track.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="h-[34px] shrink-0 flex items-center gap-[7px] pl-1 pr-3 rounded-full border border-paper/14 hover:border-paper/30 text-[13px] font-semibold transition"
+      >
+        <span className="size-[26px] rounded-full flex items-center justify-center bg-paper/16 text-paper">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
+        </span>
+        {title}
+        <span className="font-medium text-smoke">{PROVIDER_LABEL[track.provider]}</span>
+      </a>
+    );
+  }
   return (
     <button
       type="button"

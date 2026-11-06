@@ -2,6 +2,7 @@
 
 import { BackButton } from "@/components/ui";
 import { type Channel, NOTIFICATION_TYPES, useNotificationPrefs, wants } from "@/lib/notifications";
+import { AlertRoles } from "./roles";
 
 export default function NotificationSettings() {
   const { prefs, set, ready } = useNotificationPrefs();
@@ -38,6 +39,7 @@ export default function NotificationSettings() {
           </li>
         ))}
       </ul>
+      <AlertRoles />
     </main>
   );
 }

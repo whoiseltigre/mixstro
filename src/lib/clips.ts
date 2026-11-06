@@ -4,13 +4,14 @@
  * tall vertical video, or square audio.
  */
 
-export type ClipProvider = "youtube" | "tiktok" | "instagram" | "soundcloud" | "spotify" | "apple_music" | "upload";
+export type ClipProvider = "youtube" | "tiktok" | "instagram" | "soundcloud" | "spotify" | "apple_music" | "bandcamp" | "upload";
 export type ClipShape = "wide" | "tall" | "square";
 
 export type ParsedClip = {
   provider: ClipProvider;
   id: string;
   url: string;
+  /** Empty when there's no player yet (a Bandcamp link we haven't resolved): show a link out instead. */
   embed: string;
   shape: ClipShape;
   thumb?: string;
@@ -23,6 +24,7 @@ export const PROVIDER_LABEL: Record<ClipProvider, string> = {
   soundcloud: "SoundCloud",
   spotify: "Spotify",
   apple_music: "Apple Music",
+  bandcamp: "Bandcamp",
   upload: "Recording",
 };
 
@@ -98,6 +100,22 @@ export function parseClip(raw: string): ParsedClip | null {
       id: u.pathname + u.search,
       url: u.toString(),
       embed: `https://embed.music.apple.com${u.pathname}${u.search}`,
+      shape: "square",
+    };
+  }
+
+  // Bandcamp's player needs the numeric track or album id, which only the page knows.
+  // lookupTrack() reads it and keeps it in the link's hash: artist.bandcamp.com/track/song#track=123.
+  if (host.endsWith(".bandcamp.com")) {
+    const kind = u.pathname.match(/^\/(track|album)\/[\w-]+/)?.[1];
+    if (!kind) return null;
+    const clean = `https://${host}${u.pathname.replace(/\/$/, "")}`;
+    const id = u.hash.match(new RegExp(`^#${kind}=(\\d+)$`))?.[1];
+    return {
+      provider: "bandcamp",
+      id: clean,
+      url: id ? `${clean}#${kind}=${id}` : clean,
+      embed: id ? `https://bandcamp.com/EmbeddedPlayer/${kind}=${id}/size=large/bgcol=1a1816/linkcol=ffb245/tracklist=false/artwork=small/transparent=true/` : "",
       shape: "square",
     };
   }

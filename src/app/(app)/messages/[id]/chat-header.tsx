@@ -4,7 +4,8 @@ import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
 
-export function ChatHeader({ person: m, action = true }: { person: Musician; action?: boolean }) {
+/** `onPlanJam` opens the jam invite sheet in a real chat; the demo chat shows the button without it. */
+export function ChatHeader({ person: m, action = true, onPlanJam }: { person: Musician; action?: boolean; onPlanJam?: () => void }) {
   return (
     <header className="glass rounded-b-[26px] md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-x-0 md:border-b md:border-paper/8 border-t-0 pt-safe md:pt-3 px-3.5 md:px-5 pb-3 flex items-center gap-2.5 z-10">
       <span className="md:hidden">
@@ -20,7 +21,11 @@ export function ChatHeader({ person: m, action = true }: { person: Musician; act
           {m.shared.length ? ` · ${m.shared.length} shared influence${m.shared.length === 1 ? "" : "s"}` : ""}
         </span>
       </Link>
-      {action && <button className="glass h-[34px] px-3 rounded-full text-[13px] font-semibold">Plan a jam</button>}
+      {action && (
+        <button type="button" onClick={onPlanJam} className="glass h-[34px] px-3 rounded-full text-[13px] font-semibold">
+          Plan a jam
+        </button>
+      )}
       {!m.sample && <SafetyMenu username={m.username} name={m.name} />}
     </header>
   );
