@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { parseClip } from "@/lib/clips";
 import { saveMyLocation } from "@/app/onboarding/actions";
 import { createClient } from "@/lib/supabase/client";
+import { pruneOldPhotos, uploadPhoto } from "@/lib/photo";
 
 export type Level = "learning" | "solid" | "pro";
 export type MusicSource = "apple_music" | "spotify" | "manual";
@@ -142,6 +143,49 @@ export function confirmAdult(on: boolean) {
   }
 }
 
+/**
+ * If someone's music page (or invite) brought you here, note it once on your profile
+ * (profiles.invited_by), for the first-100-users numbers. Never overwrites.
+ */
+async function creditInvite(supabase: NonNullable<ReturnType<typeof createClient>>, userId: string) {
+  const raw = document.cookie.split("; ").find((c) => c.startsWith("mx_ref="))?.slice(7);
+  if (!raw) return;
+  const [username, source] = decodeURIComponent(raw).split(":");
+  document.cookie = "mx_ref=; Max-Age=0; path=/";
+  const { data } = await supabase.from("profiles").select("id").eq("username", username).maybeSingle<{ id: string }>();
+  if (!data || data.id === userId) return;
+  await supabase
+    .from("profiles")
+    .update({ invited_by: data.id, invite_source: ["page", "share", "tag", "invite"].includes(source) ? source : "page" })
+    .eq("id", userId)
+    .is("invited_by", null);
+}
+
+/** Changes just your photo (from your profile), without re-saving everything else. */
+export async function savePhoto(dataUrl: string): Promise<{ url?: string; error?: string }> {
+  const supabase = createClient();
+  if (!supabase) return { url: dataUrl }; // demo mode keeps the local preview
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "You're signed out." };
+  const url = await uploadPhoto(supabase, user.id, dataUrl).catch(() => null);
+  if (!url) return { error: "Your photo didn't upload. Try again." };
+  const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+  if (error) return { error: "Your photo didn't save. Try again." };
+  pruneOldPhotos(supabase, user.id, url).catch(() => {});
+  return { url };
+}
+
+/** Swap the local preview for the uploaded URL, so the next save doesn't upload it again. */
+function rememberPhoto(url: string) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ ...read(), avatarUrl: url }));
+  } catch {
+    // Private mode: harmless, the next save just uploads again.
+  }
+}
+
 export function adultConfirmed() {
   return Boolean(read().adultConfirmedAt);
 }
@@ -159,13 +203,20 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "You're signed out. Sign in again to save your profile." };
 
+  // A newly picked photo is a local data URL until it's uploaded here.
+  let avatarUrl = draft.avatarUrl?.startsWith("http") ? draft.avatarUrl : null;
+  const newPhoto = draft.avatarUrl?.startsWith("data:image/");
+  if (newPhoto) {
+    avatarUrl = await uploadPhoto(supabase, user.id, draft.avatarUrl!).catch(() => null);
+    if (!avatarUrl) return { error: "Your photo didn't upload. Try again, or pick a smaller one." };
+  }
+
   const { error } = await supabase.from("profiles").upsert({
     id: user.id,
     first_name: draft.firstName.trim(),
     username: draft.username.replace(/^@/, "").trim().toLowerCase(),
     adult_confirmed_at: draft.adultConfirmedAt,
-    // TODO: upload the photo to Supabase Storage; local previews are data URLs and are not stored.
-    avatar_url: draft.avatarUrl?.startsWith("http") ? draft.avatarUrl : null,
+    avatar_url: avatarUrl,
     instruments: draft.instruments,
     main_instrument: draft.mainInstrument ?? draft.instruments[0] ?? null,
     level: draft.level ?? null,
@@ -179,6 +230,12 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     onboarded_at: new Date().toISOString(),
   });
   if (error) return { error: error.code === "23505" ? "That username is taken." : error.message };
+  if (newPhoto && avatarUrl) {
+    rememberPhoto(avatarUrl);
+    pruneOldPhotos(supabase, user.id, avatarUrl).catch(() => {});
+  }
+
+  await creditInvite(supabase, user.id).catch(() => {});
 
   // Distances are a nice-to-have: a failure here never fails the save.
   await saveMyLocation(draft.neighborhood, draft.point).catch(() => {});

@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProjectList } from "@/components/project-list";
 import { BackButton, Button, Field } from "@/components/ui";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
-import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Project, type Track } from "@/lib/projects";
+import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Bandmate, type Project, type Track } from "@/lib/projects";
+import { findBandmates, inviteBandmate, type Candidate } from "./band-actions";
 import { useMyProjects } from "@/lib/projects-store";
 import { lookupTrack, type TrackInfo } from "./actions";
 
-type Form = { id?: string; name: string; role: string; startYear: number; endYear: number; current: boolean; tracks: Track[] };
+type Form = { id?: string; name: string; role: string; startYear: number; endYear: number; current: boolean; tracks: Track[]; bandmates: Bandmate[] };
 
-const blank = (): Form => ({ name: "", role: "", startYear: thisYear(), endYear: thisYear(), current: true, tracks: [] });
+const blank = (): Form => ({ name: "", role: "", startYear: thisYear(), endYear: thisYear(), current: true, tracks: [], bandmates: [] });
 const fromProject = (p: Project): Form => ({
   id: p.id,
   name: p.name,
@@ -19,6 +20,7 @@ const fromProject = (p: Project): Form => ({
   endYear: p.endYear ?? thisYear(),
   current: p.endYear === undefined,
   tracks: p.tracks,
+  bandmates: p.bandmates ?? [],
 });
 
 const selectCls = "h-[50px] w-full rounded-2xl bg-ink border border-paper/12 px-3.5 text-[16px] text-paper outline-none focus:border-paper/50";
@@ -236,6 +238,8 @@ function ProjectSheet({
           <span className="text-[12px] text-smoke text-center">YouTube · SoundCloud · Spotify · Apple Music</span>
         </div>
 
+        {form.id && <Bandmates projectId={form.id} projectName={form.name} mates={form.bandmates} />}
+
         {error && (
           <p role="alert" className="text-[13px] text-[#FF453A]">
             {error}
@@ -247,6 +251,127 @@ function ProjectSheet({
           </button>
         )}
       </form>
+    </div>
+  );
+}
+
+/**
+ * Tag the people you played with. A member gets an invite in the app; anyone else gets a
+ * "Confirm your spot" link from you. Once they confirm, the band shows on both profiles.
+ */
+function Bandmates({ projectId, projectName, mates }: { projectId: string; projectName: string; mates: Bandmate[] }) {
+  const [q, setQ] = useState("");
+  const [found, setFound] = useState<Candidate[]>([]);
+  const [invited, setInvited] = useState<string[]>([]);
+  const [error, setError] = useState<string>();
+  const [note, setNote] = useState<string>();
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 2) return setFound([]);
+    let live = true;
+    const t = setTimeout(async () => {
+      const res = await findBandmates(term).catch(() => []);
+      if (live) setFound(res.filter((c) => !mates.some((m) => m.username === c.username)));
+    }, 250);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [q, mates]);
+
+  async function tag(c: Candidate) {
+    setError(undefined);
+    const res = await inviteBandmate(projectId, c.id);
+    if (res.error) return setError(res.error);
+    setInvited((list) => [...list, c.id]);
+  }
+
+  async function shareLink() {
+    setBusy(true);
+    setError(undefined);
+    setNote(undefined);
+    const res = await inviteBandmate(projectId);
+    setBusy(false);
+    if (res.error || !res.link) return setError(res.error ?? "Try again.");
+    const text = `I added you to ${projectName} on Mixstro. Confirm your spot: ${res.link}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch {
+      return; // Cancelled the share sheet.
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setNote("Link copied. Send it to your bandmate. Each link works for one person.");
+    } catch {
+      window.prompt("Copy this and send it to your bandmate", text);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-[13px] font-semibold text-smoke">Bandmates</span>
+      {mates.length > 0 && (
+        <ul className="flex flex-wrap gap-1.5">
+          {mates.map((m) => (
+            <li key={m.username} className="h-8 pl-1 pr-3 rounded-full bg-ink border border-paper/10 flex items-center gap-2 text-[13px] font-semibold">
+              <span className="relative size-6 rounded-full overflow-hidden bg-riser">
+                {m.photo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                )}
+              </span>
+              {m.name}
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="h-12 rounded-full bg-ink border border-paper/12 flex items-center px-4 focus-within:border-paper/50">
+        <label htmlFor="bandmate-q" className="sr-only">Find a bandmate on Mixstro</label>
+        <input
+          id="bandmate-q"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          autoComplete="off"
+          placeholder="Find a bandmate on Mixstro"
+          className="flex-1 min-w-0 bg-transparent text-[15px] outline-none placeholder:text-smoke/60"
+        />
+      </div>
+      {found.length > 0 && (
+        <ul className="flex flex-col rounded-2xl bg-ink border border-paper/8 divide-y divide-paper/8">
+          {found.map((c) => {
+            const done = invited.includes(c.id);
+            return (
+              <li key={c.id} className="flex items-center gap-3 px-3 py-2">
+                <span className="relative size-9 rounded-full overflow-hidden bg-riser shrink-0">
+                  {c.photo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                  )}
+                </span>
+                <span className="flex-1 min-w-0 flex flex-col">
+                  <span className="text-[14px] font-semibold truncate">{c.name}</span>
+                  <span className="text-[12px] text-smoke truncate">@{c.username} · {c.instrument}</span>
+                </span>
+                <button type="button" disabled={done} onClick={() => tag(c)} className="h-8 px-3 rounded-full bg-paper text-ink text-[13px] font-semibold disabled:bg-paper/14 disabled:text-paper">
+                  {done ? "Invited" : "Tag"}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <button type="button" onClick={shareLink} disabled={busy} className="h-11 rounded-full border border-paper/16 text-[14px] font-semibold hover:border-paper/40 disabled:opacity-40">
+        Not on Mixstro? Send them a link
+      </button>
+      {(note || invited.length > 0) && (
+        <p className="text-[12px] text-smoke text-center">{note ?? "They'll get an invite to confirm. The band shows on both profiles once they do."}</p>
+      )}
+      {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
     </div>
   );
 }

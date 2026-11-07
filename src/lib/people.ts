@@ -10,7 +10,7 @@ import { createClient } from "./supabase/server";
  * mode they fall back to the sample musicians in mock.ts.
  */
 
-const LOOKING_FOR: Record<string, string> = {
+export const LOOKING_FOR: Record<string, string> = {
   showcase: "Sharing their music",
   join_band: "Looking to join a band",
   start_project: "Building a band",
@@ -108,6 +108,9 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
     lastActiveAt: row.last_active_at,
     verified: Boolean(row.verified_at),
     lookingFor: LOOKING_FOR[row.goals[0]] ?? "Open to collaborating",
+    instruments: row.instruments,
+    genreList: row.genres,
+    goals: row.goals,
     bands: [],
   };
 }

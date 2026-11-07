@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { parseClip } from "./clips";
 import { PROJECT_SELECT, fromRow, sortProjects, type Project, type ProjectRow, type Track } from "./projects";
 import { createClient } from "./supabase/client";
+import { playedWith, withBandmates } from "./bands";
 
 const KEY = "mixstro:projects";
 
@@ -41,10 +42,10 @@ export function useMyProjects() {
       if (!supabase || !user) {
         if (live) setProjects(sortProjects(readLocal()));
       } else {
-        const { data } = await supabase.from("projects").select(PROJECT_SELECT).eq("profile_id", user.id);
+        const [{ data }, mates] = await Promise.all([supabase.from("projects").select(PROJECT_SELECT).eq("profile_id", user.id), playedWith(supabase, user.id)]);
         if (live) {
           setUserId(user.id);
-          setProjects(sortProjects(((data ?? []) as ProjectRow[]).map(fromRow)));
+          setProjects(withBandmates(sortProjects(((data ?? []) as ProjectRow[]).map(fromRow)), mates));
         }
       }
       if (live) setReady(true);
@@ -94,7 +95,7 @@ export function useMyProjects() {
       const { data } = await supabase.from("projects").select(PROJECT_SELECT).eq("id", row.id).single<ProjectRow>();
       if (data) {
         const saved = fromRow(data);
-        setProjects((prev) => sortProjects(id ? prev.map((p) => (p.id === id ? saved : p)) : [...prev, saved]));
+        setProjects((prev) => sortProjects(id ? prev.map((p) => (p.id === id ? { ...saved, bandmates: p.bandmates } : p)) : [...prev, saved]));
       }
       return {};
     },

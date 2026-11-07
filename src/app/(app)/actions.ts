@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { notifyConnect, notifyConnectBack, notifyJamAccepted, notifyJamInvite, notifyMessage } from "@/lib/notify";
 import { getViewer } from "@/lib/people";
 
 /**
@@ -34,10 +36,14 @@ export async function connect(otherId: string, username: string) {
   const { viewer, outgoing, incoming } = pair;
   if (incoming?.status === "pending") {
     await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
+    after(() => notifyConnectBack(viewer.id, otherId));
     revalidatePath("/", "layout");
     redirect(`/connected/${username}`);
   }
-  if (!outgoing) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId });
+  if (!outgoing) {
+    const { error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId });
+    if (!error) after(() => notifyConnect(viewer.id, otherId));
+  }
   revalidatePath("/", "layout");
   return { sent: true };
 }
@@ -60,6 +66,7 @@ export async function sendMessage(connectionId: number, body: string) {
   if (!viewer) return { error: "You're signed out." };
   const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, body: text });
   if (error) return { error: "That didn't send. Try again." };
+  after(() => notifyMessage(connectionId, viewer.id, text));
   revalidatePath("/messages");
   return {};
 }
@@ -72,6 +79,7 @@ export async function sendVoice(connectionId: number, path: string, seconds: num
   const voice_seconds = Math.min(120, Math.max(1, Math.round(seconds)));
   const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, voice_url: path, voice_seconds });
   if (error) return { error: "That didn't send. Try again." };
+  after(() => notifyMessage(connectionId, viewer.id, null));
   revalidatePath("/messages");
   return {};
 }
@@ -99,6 +107,7 @@ export async function proposeJam(connectionId: number, startsAt: string, place: 
     replaces_id: replacesId ?? null,
   });
   if (error) return { error: "That invite didn't send. Try again." };
+  after(() => notifyJamInvite(connectionId, viewer.id, when.toISOString(), where, replacesId !== undefined));
   revalidatePath("/messages", "layout");
   return {};
 }
@@ -110,6 +119,7 @@ export async function answerJam(jamId: number, status: "accepted" | "declined" |
   if (!Number.isInteger(jamId) || !["accepted", "declined", "cancelled"].includes(status)) return { error: "Try again." };
   const { error } = await viewer.supabase.from("jams").update({ status }).eq("id", jamId);
   if (error) return { error: "That invite was already answered." };
+  if (status === "accepted") after(() => notifyJamAccepted(jamId, viewer.id));
   revalidatePath("/messages", "layout");
   return {};
 }
@@ -144,6 +154,7 @@ export async function quickReply(otherId: string, username: string, kind: "jam" 
   const { error } = await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
   if (error) return { error: "Try again." };
   await viewer.supabase.from("messages").insert({ connection_id: incoming.id, sender_id: viewer.id, body: QUICK[kind] });
+  after(() => notifyConnectBack(viewer.id, otherId));
   revalidatePath("/", "layout");
   redirect(`/messages/${username}`);
 }
