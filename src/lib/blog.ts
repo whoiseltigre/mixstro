@@ -49,6 +49,20 @@ function extractFaqs(body: string): Faq[] {
     .filter((f) => f.question && f.answer);
 }
 
+/** Anchors on H2s (for links to a section) and a class on the opening "short answer" paragraph. */
+function decorate(html: string) {
+  const used = new Set<string>();
+  return html
+    .replace(/^<p><strong>The short answer:?<\/strong>\s*([a-z])/, (_, c: string) => `<p class="mxb-answer"><strong>The short answer</strong>${c.toUpperCase()}`)
+    .replace(/<h2>([\s\S]*?)<\/h2>/g, (_, inner: string) => {
+      const base = inner.replace(/<[^>]+>/g, "").toLowerCase().replace(/&[a-z#0-9]+;/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
+      let id = base;
+      for (let i = 2; used.has(id); i++) id = `${base}-${i}`;
+      used.add(id);
+      return `<h2 id="${id}">${inner}</h2>`;
+    });
+}
+
 const DIR = path.join(process.cwd(), "content", "blog");
 
 /** Public origin of the marketing site, where the blog lives (mixstro.com/blog). */
@@ -85,7 +99,9 @@ function parseFrontmatter(raw: string): { data: Record<string, string | string[]
 
 function unquote(s: string) {
   const t = s.trim();
-  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) return t.slice(1, -1);
+  // Double-quoted YAML strings can escape quotes and backslashes (\" and \\).
+  if (t.length >= 2 && t.startsWith('"') && t.endsWith('"')) return t.slice(1, -1).replace(/\\(["\\])/g, "$1");
+  if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) return t.slice(1, -1).replace(/''/g, "'");
   return t;
 }
 
@@ -109,7 +125,7 @@ function load(file: string): Post {
     author: str(data.author) ?? "Mixstro",
     old_urls: list(data.old_urls),
     readingMinutes: Math.max(1, Math.round(words / 230)),
-    html: marked.parse(body, { async: false }),
+    html: decorate(marked.parse(body, { async: false })),
     faqs: extractFaqs(body),
   };
 }
@@ -135,4 +151,19 @@ export function getPost(slug: string): Post | undefined {
 
 export function formatDate(iso: string) {
   return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+/** The first tag is the post's category: it drives the cover art and the topic filter. */
+export function category(p: Pick<PostMeta, "tags">) {
+  return p.tags[0] ?? "Music";
+}
+
+/** Up to n other posts, same category first, then the newest. */
+export function relatedPosts(slug: string, n = 3): PostMeta[] {
+  const all = getAllPosts();
+  const me = all.find((p) => p.slug === slug);
+  const others = all.filter((p) => p.slug !== slug);
+  if (!me) return others.slice(0, n);
+  const score = (p: PostMeta) => p.tags.filter((t) => me.tags.includes(t)).length;
+  return [...others].sort((a, b) => score(b) - score(a)).slice(0, n);
 }

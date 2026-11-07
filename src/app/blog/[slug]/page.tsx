@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BackButton, Wordmark } from "@/components/ui";
-import { AUTHORS, SITE_URL, formatDate, getAllPosts, getPost } from "@/lib/blog";
+import Link from "next/link";
+import { accentOf } from "@/components/blog/cover";
+import { AUTHORS, SITE_URL, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
       tags: post.tags,
+      images: ["/site/v1/og-card.jpg"],
     },
   };
 }
@@ -73,30 +75,65 @@ export default async function BlogPost({ params }: Props) {
       })),
     });
   }
+  const cat = category(post);
+  const related = relatedPosts(post.slug, 3);
+  const initials = post.author.split(" ").map((w) => w[0]).join("").slice(0, 2);
   return (
-    <main className="pt-safe pb-safe px-5">
+    <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
-      <div className="flex items-center justify-between py-2">
-        <BackButton href="/blog" />
-        <Wordmark size={18} />
-        <span className="size-10" />
+      <div className="mxb-glow" aria-hidden="true" />
+      <div className="mxb-wrap">
+        <header className="mxb-post-hero">
+          <nav className="mxb-crumb" aria-label="Breadcrumb">
+            <Link href="/blog">Blog</Link>
+            <span aria-hidden="true">/</span>
+            <span>{cat}</span>
+            <span aria-hidden="true">·</span>
+            <span>{post.readingMinutes} min read</span>
+          </nav>
+          <h1>{post.title}</h1>
+          {post.excerpt && <p className="dek">{post.excerpt}</p>}
+          <p className="mxb-byline">
+            By <b>{post.author}</b> · {post.updated ? `Updated ${formatDate(post.updated)}` : formatDate(post.date)}
+          </p>
+        </header>
+
+        <article className="mxb-article" dangerouslySetInnerHTML={{ __html: post.html }} />
+
+        {author && (
+          <aside className="mxb-author">
+            <span className="av" aria-hidden="true">{initials}</span>
+            <span>
+              <b>About {post.author}</b>
+              {author.bio}
+            </span>
+          </aside>
+        )}
+
+        <section className="mxb-join">
+          <h2>Find the people for your next band</h2>
+          <p>Put every band you&apos;ve played in on one profile, then find the next one. Free.</p>
+          <a className="mxb-btn paper" href="https://app.mixstro.com">Join free</a>
+        </section>
+
+        {related.length > 0 && (
+          <section>
+            <h2 className="mxb-h2" style={{ fontSize: "clamp(32px,4vw,40px)", marginTop: 96 }}>Keep reading</h2>
+            <div className="mxb-cards" style={{ marginTop: 24 }}>
+              {related.map((p) => {
+                const c = category(p);
+                const { accent, glow } = accentOf(c);
+                return (
+                  <Link key={p.slug} href={`/blog/${p.slug}`} className="mxb-card" style={{ "--accent": accent, "--glow": glow, minHeight: 220 } as React.CSSProperties}>
+                    <span className="meta">{c} · {p.readingMinutes} min read</span>
+                    <h3>{p.title}</h3>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
-      <h1 className="headline mt-8 text-[32px]" style={{ fontWeight: 700 }}>
-        {post.title}
-      </h1>
-      <p className="mt-2 text-[13px] text-smoke">
-        By {post.author} · {post.updated ? `Updated ${formatDate(post.updated)}` : formatDate(post.date)} · {post.readingMinutes} min read
-      </p>
-      <article
-        className="mt-8 text-[16px] leading-[1.6] text-paper/85 [&_a]:text-tungsten [&_a]:underline [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:text-[21px] [&_h2]:font-semibold [&_h2]:text-paper [&_h3]:mt-6 [&_h3]:mb-1.5 [&_h3]:text-[17px] [&_h3]:font-semibold [&_h3]:text-paper [&_li]:mt-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_pre]:mt-4 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-stage [&_pre]:p-4 [&_pre]:text-[13px] [&_pre]:leading-[1.5] [&_blockquote]:mt-4 [&_blockquote]:border-l-2 [&_blockquote]:border-riser [&_blockquote]:pl-4 [&_blockquote]:text-paper/75"
-        dangerouslySetInnerHTML={{ __html: post.html }}
-      />
-      {author && (
-        <aside className="mt-12 rounded-2xl bg-stage p-5 text-[14px] leading-[1.55] text-paper/80">
-          <p className="font-semibold text-paper">About {post.author}</p>
-          <p className="mt-1.5">{author.bio}</p>
-        </aside>
-      )}
     </main>
   );
 }
