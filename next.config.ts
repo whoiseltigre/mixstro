@@ -24,6 +24,11 @@ function blogRedirects() {
 }
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Keep pages you just saw in the browser's router cache for 30s, so hopping back and forth
+    // between tabs is instant. Any save (server action + revalidatePath) clears it right away.
+    staleTimes: { dynamic: 30, static: 300 },
+  },
   async redirects() {
     return blogRedirects();
   },

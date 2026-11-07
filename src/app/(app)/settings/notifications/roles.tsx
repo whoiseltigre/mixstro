@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Chip } from "@/components/ui";
 import { INSTRUMENTS } from "@/lib/onboarding";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, sessionUser } from "@/lib/supabase/client";
 
 const SUGGESTED = ["Drums", "Bass"];
 
@@ -17,7 +17,7 @@ export function AlertRoles() {
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const user = supabase ? await sessionUser(supabase) : null;
       if (supabase && user) {
         const { data } = await supabase.from("profiles").select("alert_roles, goals").eq("id", user.id).maybeSingle<{ alert_roles: string[] | null; goals: string[] }>();
         if (data?.alert_roles) setRoles(data.alert_roles);

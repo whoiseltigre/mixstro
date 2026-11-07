@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
 import { distancesFromMe, ensureLocation } from "./geo";
@@ -71,19 +72,20 @@ const PROFILE_COLUMNS =
   "id, first_name, username, avatar_url, instruments, main_instrument, genres, goals, commitment, neighborhood, radius_mi, play_days, last_active_at, verified_at, onboarded_at";
 
 /** The signed-in musician, or null in demo mode or when signed out. */
-export async function getViewer(): Promise<Viewer | null> {
+// cache(): one lookup per request, however many loaders on the page ask (Today asks twice).
+export const getViewer = cache(async (): Promise<Viewer | null> => {
   const supabase = await createClient();
   if (!supabase) return null;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Verified locally from the session token (see middleware); every query below is still checked by RLS.
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims.sub ? { id: claims.claims.sub } : null;
   if (!user) return null;
   const [{ data: profile }, { data: influences }] = await Promise.all([
     supabase.from("profiles").select(PROFILE_COLUMNS).eq("id", user.id).maybeSingle<ProfileRow>(),
     supabase.from("influences").select("profile_id, artist_id, artist_name, image_url, rank").eq("profile_id", user.id).order("rank"),
   ]);
   return { supabase, id: user.id, profile, influences: ((influences ?? []) as InfluenceRow[]).map(toArtist) };
-}
+});
 
 const toArtist = (r: InfluenceRow): Artist => ({ id: r.artist_id, name: r.artist_name, image: r.image_url ?? undefined });
 
@@ -190,6 +192,8 @@ export async function getToday(): Promise<Today> {
   const exclude = new Set(connections.flatMap((c) => [c.from_id, c.to_id]).filter((id) => !incoming.includes(id)));
   exclude.add(viewer.id);
 
+  // Only needs the connections, so it runs alongside the rest instead of after it.
+  const yourTurn = yourTurnCount(viewer, connections);
   // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
   const { data } = await viewer.supabase
     .from("discoverable_profiles")
@@ -209,20 +213,18 @@ export async function getToday(): Promise<Today> {
   // Ties go to whoever is closer.
   const near = (m: Musician) => m.distanceMi ?? Infinity;
   people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a) || near(a) - near(b));
-  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false, yourTurn: await yourTurnCount(viewer, connections) };
+  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false, yourTurn: await yourTurn };
 }
 
 /** Everyone you can search, most recently active first. */
 export async function getSearchable(): Promise<Musician[]> {
   const viewer = await getViewer();
   if (!viewer) return MUSICIANS;
-  await locate(viewer);
-  const { data } = await viewer.supabase
-    .from("discoverable_profiles")
-    .select(PROFILE_COLUMNS)
-    .neq("id", viewer.id)
-    .order("last_active_at", { ascending: false })
-    .limit(200);
+  // Saving your location and fetching the list don't depend on each other; distances need both.
+  const [{ data }] = await Promise.all([
+    viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).neq("id", viewer.id).order("last_active_at", { ascending: false }).limit(200),
+    locate(viewer),
+  ]);
   return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...SAMPLES()];
 }
 
@@ -244,8 +246,8 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
     const sample = SHOW_SAMPLES ? findMusician(username) : undefined;
     return sample ? { person: sample, connection: null, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null } : null;
   }
-  const [person] = await hydrate(viewer, [data]);
-  const connection = (await myConnections(viewer)).find((c) => c.from_id === data.id || c.to_id === data.id) ?? null;
+  const [[person], connections] = await Promise.all([hydrate(viewer, [data]), myConnections(viewer)]);
+  const connection = connections.find((c) => c.from_id === data.id || c.to_id === data.id) ?? null;
   return { person, connection, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null };
 }
 
@@ -319,8 +321,10 @@ export async function getChat(username: string): Promise<ChatView | null> {
   }
   const supabase = (await createClient())!;
   // "*" so the chat still loads before newer columns (voice_seconds) exist.
-  const { data } = await supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500);
-  const jams = await getJams(supabase, view.connection.id, view.viewerId);
+  const [{ data }, jams] = await Promise.all([
+    supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500),
+    getJams(supabase, view.connection.id, view.viewerId),
+  ]);
   const rows = (data ?? []) as { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string }[];
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();

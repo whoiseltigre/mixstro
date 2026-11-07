@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { parseClip } from "./clips";
 import { PROJECT_SELECT, fromRow, sortProjects, type Project, type ProjectRow, type Track } from "./projects";
-import { createClient } from "./supabase/client";
+import { createClient, sessionUser } from "./supabase/client";
 import { playedWith, withBandmates } from "./bands";
 
 const KEY = "mixstro:projects";
@@ -38,7 +38,7 @@ export function useMyProjects() {
     let live = true;
     (async () => {
       const supabase = createClient();
-      const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const user = supabase ? await sessionUser(supabase) : null;
       if (!supabase || !user) {
         if (live) setProjects(sortProjects(readLocal()));
       } else {
