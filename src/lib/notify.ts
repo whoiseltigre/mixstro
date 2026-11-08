@@ -18,6 +18,24 @@ const FROM = process.env.NOTIFY_FROM || "Mixstro <no-reply@mail.mixstro.com>";
 
 export type NotifyType = "connect" | "message" | "jam" | "board" | "alerts";
 
+/** The pieces an email is built from, top to bottom inside the card (see the "Mixstro emails" design). */
+export type Block =
+  /** Who it's from: photo (or initial), name, and what they play and where. */
+  | { kind: "who"; photo: string | null; name: string; line: string }
+  | { kind: "badge"; text: string }
+  | { kind: "headline"; text: string }
+  | { kind: "text"; text: string }
+  | { kind: "fine"; text: string }
+  /** Shared influences. */
+  | { kind: "chips"; items: string[] }
+  /** Their message, as a chat bubble. */
+  | { kind: "bubble"; text: string }
+  | { kind: "voice"; seconds: number | null }
+  | { kind: "jam"; startsAt: string; place: string; note?: string | null }
+  /** A Board post, as a small outlined card. */
+  | { kind: "post"; label: string; title: string; line: string }
+  | { kind: "band"; name: string; line: string };
+
 export type Email = {
   /** Which setting governs it (Settings > Notifications). */
   type: NotifyType;
@@ -26,10 +44,13 @@ export type Email = {
   /** Skip if we already sent this type+ref within this many minutes. */
   throttleMinutes?: number;
   subject: string;
-  /** One short line above the button. */
-  headline: string;
-  body: string;
+  /** The grey line inboxes show after the subject. */
+  preheader: string;
+  blocks: Block[];
+  /** One main button, and optionally a quiet text link for the other answer. */
   cta: { label: string; path: string };
+  alt?: { label: string; path: string };
+  attachments?: { filename: string; content: string; content_type?: string }[];
 };
 
 let admin: SupabaseClient | null | undefined;
@@ -78,7 +99,8 @@ export async function notify(recipientId: string, email: Email): Promise<void> {
         to,
         subject: email.subject,
         html: render(email),
-        text: `${email.headline}\n\n${email.body}\n\n${email.cta.label}: ${APP_URL}${email.cta.path}\n\nChange what we email you: ${APP_URL}/settings/notifications`,
+        text: plain(email),
+        ...(email.attachments ? { attachments: email.attachments } : {}),
         headers: { "List-Unsubscribe": `<${APP_URL}/settings/notifications>` },
       }),
       signal: AbortSignal.timeout(8000),
@@ -92,42 +114,145 @@ export async function notify(recipientId: string, email: Email): Promise<void> {
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** The same dark, Tungsten-striped card as the sign-in code email. */
+/* ---------- The look: dark card, color stripe, Inter Tight headlines (approved 2026-11-08) ---------- */
+
+const C = { ink: "#0F0D0B", stage: "#1A1816", riser: "#26231F", paper: "#F5F1EC", smoke: "#A8A49E", dim: "#6F6B66", tungsten: "#FFB245", line: "#34302C" };
+const BODY = "Geist,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
+const DISPLAY = "'Inter Tight','Helvetica Neue',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif";
+const TZ = "America/Los_Angeles";
+
+const part = (iso: string, o: Intl.DateTimeFormatOptions) => new Date(iso).toLocaleString("en-US", { ...o, timeZone: TZ });
+const clock = (iso: string) => `${part(iso, { hour: "numeric", minute: "2-digit" })} PT`;
+const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+
+/** One row inside the card. Every block is its own table row so Outlook and Gmail keep the spacing. */
+function block(b: Block): string {
+  const row = (inner: string, pad = "0 28px 16px") => `<tr><td style="padding:${pad};font-family:${BODY};">${inner}</td></tr>`;
+  switch (b.kind) {
+    case "who": {
+      const pic = b.photo
+        ? `<img src="${esc(b.photo)}" width="52" height="52" alt="" style="display:block;width:52px;height:52px;border-radius:26px;object-fit:cover;border:0;">`
+        : `<div style="width:52px;height:52px;border-radius:26px;background:#3A2E22;color:${C.paper};font-family:${DISPLAY};font-weight:800;font-size:22px;line-height:52px;text-align:center;">${esc(b.name.slice(0, 1).toUpperCase())}</div>`;
+      return row(
+        `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="52" style="width:52px;">${pic}</td><td style="padding-left:12px;font-family:${BODY};"><div style="font-size:15px;font-weight:600;color:${C.paper};">${esc(b.name)}</div><div style="font-size:13px;color:${C.smoke};padding-top:2px;">${esc(b.line)}</div></td></tr></table>`,
+        "0 28px 18px",
+      );
+    }
+    case "badge":
+      return row(`<span style="display:inline-block;font-size:12px;font-weight:600;padding:5px 10px;border-radius:999px;background:#173332;color:#67E2DA;">${esc(b.text)}</span>`, "0 28px 12px");
+    case "headline":
+      return row(`<h1 style="margin:0;font-family:${DISPLAY};font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-0.01em;color:${C.paper};">${esc(b.text)}</h1>`, "0 28px 12px");
+    case "text":
+      return row(`<p style="margin:0;font-size:15px;line-height:1.55;color:${C.smoke};">${esc(b.text)}</p>`);
+    case "fine":
+      return row(`<p style="margin:0;font-size:13px;line-height:1.5;color:${C.dim};">${esc(b.text)}</p>`);
+    case "chips":
+      return row(
+        b.items
+          .map((t) => `<span style="display:inline-block;margin:0 6px 6px 0;font-size:12px;padding:5px 10px;border-radius:999px;background:#33281A;color:#FFD08A;">${esc(t)}</span>`)
+          .join(""),
+        "0 28px 10px",
+      );
+    case "bubble":
+      return row(`<div style="background:${C.riser};border-radius:18px 18px 18px 6px;padding:12px 14px;font-size:15px;line-height:1.5;color:${C.paper};">${esc(b.text)}</div>`);
+    case "voice":
+      return row(
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.riser};border-radius:18px;"><tr><td width="26" style="padding:10px 0 10px 14px;width:26px;"><div style="width:26px;height:26px;border-radius:13px;background:${C.tungsten};color:${C.ink};font-size:11px;line-height:26px;text-align:center;">&#9654;</div></td><td style="padding:10px 14px 10px 10px;font-family:${BODY};font-size:14px;color:${C.paper};">Voice note${b.seconds ? `<span style="color:${C.smoke};"> &middot; ${mmss(b.seconds)}</span>` : ""}</td></tr></table>`,
+      );
+    case "jam": {
+      const month = part(b.startsAt, { month: "short" }).toUpperCase();
+      const day = part(b.startsAt, { day: "numeric" });
+      const wd = part(b.startsAt, { weekday: "short" }).toUpperCase();
+      const note = b.note ? `<div style="font-size:13px;color:${C.smoke};font-style:italic;padding-top:2px;">&ldquo;${esc(b.note)}&rdquo;</div>` : "";
+      return row(
+        `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.riser};border-radius:18px;"><tr>
+<td width="58" style="padding:12px 0 12px 12px;width:58px;" valign="middle"><table role="presentation" width="58" cellpadding="0" cellspacing="0" border="0" style="background:${C.ink};border-radius:12px;"><tr><td align="center" style="padding:6px 0;font-family:${BODY};"><div style="font-size:10px;letter-spacing:0.1em;color:${C.tungsten};">${month}</div><div style="font-family:${DISPLAY};font-weight:800;font-size:24px;line-height:1.1;color:${C.paper};">${day}</div><div style="font-size:10px;letter-spacing:0.1em;color:${C.tungsten};">${wd}</div></td></tr></table></td>
+<td style="padding:12px 14px;font-family:${BODY};" valign="middle"><div style="font-size:15px;font-weight:600;color:${C.paper};">${clock(b.startsAt)}</div><div style="font-size:13px;color:${C.smoke};padding-top:2px;">${esc(b.place)}</div>${note}</td>
+</tr></table>`,
+      );
+    }
+    case "post":
+      return row(
+        `<div style="border:1px solid ${C.line};border-radius:16px;padding:12px 14px;"><div style="font-size:11px;letter-spacing:0.1em;color:${C.dim};text-transform:uppercase;">${esc(b.label)}</div><div style="font-size:15px;font-weight:600;color:${C.paper};padding-top:2px;">${esc(b.title)}</div>${b.line ? `<div style="font-size:13px;color:${C.smoke};padding-top:2px;">${esc(b.line)}</div>` : ""}</div>`,
+      );
+    case "band":
+      return row(
+        `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="76" style="width:76px;"><div style="width:76px;height:76px;border-radius:16px;background:#3A2E22;background-image:linear-gradient(140deg,#6B4A2A,#1A1816);color:${C.paper};font-family:${DISPLAY};font-weight:800;font-size:30px;line-height:76px;text-align:center;">${esc(b.name.slice(0, 1).toUpperCase())}</div></td><td style="padding-left:14px;font-family:${BODY};"><div style="font-size:12px;color:${C.smoke};">${esc(b.line)}</div><div style="font-family:${DISPLAY};font-weight:800;font-size:22px;line-height:1.2;color:${C.paper};">${esc(b.name)}</div></td></tr></table>`,
+        "0 28px 18px",
+      );
+  }
+}
+
 function render(e: Email) {
-  const font = "-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Helvetica,Arial,sans-serif";
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>${esc(e.subject)}</title></head>
-<body style="margin:0;padding:0;background:#0F0D0B;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(e.body)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0F0D0B;"><tr><td align="center" style="padding:40px 16px;">
+  const alt = e.alt ? `<td style="padding-left:18px;font-family:${BODY};"><a href="${APP_URL}${e.alt.path}" style="color:${C.smoke};font-size:14px;text-decoration:underline;">${esc(e.alt.label)}</a></td>` : "";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><meta name="supported-color-schemes" content="dark"><title>${esc(e.subject)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@800&family=Geist:wght@400;600&display=swap" rel="stylesheet"></head>
+<body style="margin:0;padding:0;background:${C.ink};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(e.preheader)}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.ink};"><tr><td align="center" style="padding:36px 16px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
-<tr><td align="center" style="padding:0 0 28px;"><img src="${APP_URL}/email/mixstro-lockup.png" width="161" height="32" alt="mixstro" style="display:block;border:0;width:161px;height:32px;"></td></tr>
-<tr><td style="background:#1A1816;border-radius:24px;overflow:hidden;">
+<tr><td align="center" style="padding:0 0 22px;"><img src="${APP_URL}/email/mixstro-lockup.png" width="122" height="24" alt="mixstro" style="display:block;border:0;width:122px;height:24px;"></td></tr>
+<tr><td style="background:${C.stage};border-radius:22px;overflow:hidden;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-<tr><td height="4" style="height:4px;line-height:4px;font-size:0;background:#FFB245;background-image:linear-gradient(90deg,#F7BF77,#FFB245 30%,#FFACBA 60%,#B5C5FF 80%,#67E2DA);">&nbsp;</td></tr>
-<tr><td style="padding:32px 32px 8px;font-family:${font};">
-<h1 style="margin:0 0 12px;font-size:24px;line-height:1.25;font-weight:700;color:#F5F1EC;">${esc(e.headline)}</h1>
-<p style="margin:0;font-size:16px;line-height:1.55;color:#A8A49E;">${esc(e.body)}</p>
-</td></tr>
-<tr><td style="padding:24px 32px 32px;font-family:${font};">
-<a href="${APP_URL}${e.cta.path}" style="display:inline-block;background:#F5F1EC;color:#0F0D0B;font-size:16px;font-weight:600;text-decoration:none;padding:14px 24px;border-radius:999px;">${esc(e.cta.label)}</a>
-</td></tr></table></td></tr>
-<tr><td align="center" style="padding:24px 8px 0;font-family:${font};font-size:12px;line-height:1.6;color:#6F6B66;">
-You're getting this because of your Mixstro notification settings.<br><a href="${APP_URL}/settings/notifications" style="color:#A8A49E;">Change what we email you</a>
+<tr><td height="4" style="height:4px;line-height:4px;font-size:0;background:${C.tungsten};background-image:linear-gradient(90deg,#F7BF77,#FFB245 30%,#FFACBA 60%,#B5C5FF 80%,#67E2DA);">&nbsp;</td></tr>
+<tr><td height="26" style="height:26px;line-height:26px;font-size:0;">&nbsp;</td></tr>
+${e.blocks.map(block).join("\n")}
+<tr><td style="padding:8px 28px 28px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="background:${C.paper};border-radius:999px;"><a href="${APP_URL}${e.cta.path}" style="display:inline-block;padding:13px 22px;font-family:${BODY};font-size:15px;font-weight:600;color:${C.ink};text-decoration:none;border-radius:999px;">${esc(e.cta.label)}</a></td>${alt}
+</tr></table></td></tr>
+</table></td></tr>
+<tr><td align="center" style="padding:18px 8px 0;font-family:${BODY};font-size:12px;line-height:1.6;color:${C.dim};">
+You're getting this because of your Mixstro notification settings.<br><a href="${APP_URL}/settings/notifications" style="color:${C.smoke};">Change what we email you</a>
 </td></tr></table></td></tr></table></body></html>`;
+}
+
+/** The plain-text part, for clients that don't show HTML (and for spam filters). */
+function plain(e: Email) {
+  const lines = e.blocks.map((b) => {
+    switch (b.kind) {
+      case "who":
+        return `${b.name} (${b.line})`;
+      case "chips":
+        return b.items.join(", ");
+      case "bubble":
+        return `“${b.text}”`;
+      case "voice":
+        return `Voice note${b.seconds ? ` (${mmss(b.seconds)})` : ""}`;
+      case "jam":
+        return `${part(b.startsAt, { weekday: "long", month: "short", day: "numeric" })}, ${clock(b.startsAt)} at ${b.place}${b.note ? `\n“${b.note}”` : ""}`;
+      case "post":
+        return `${b.label}: ${b.title}${b.line ? ` (${b.line})` : ""}`;
+      case "band":
+        return `${b.name} (${b.line})`;
+      default:
+        return b.text;
+    }
+  });
+  const alt = e.alt ? `\n${e.alt.label}: ${APP_URL}${e.alt.path}` : "";
+  return `${lines.join("\n\n")}\n\n${e.cta.label}: ${APP_URL}${e.cta.path}${alt}\n\nChange what we email you: ${APP_URL}/settings/notifications`;
 }
 
 /* ---------- Events: what each action tells the other person ---------- */
 
-type Person = { id: string; first_name: string; username: string; main_instrument: string | null; instruments: string[] };
+type Person = { id: string; first_name: string; username: string; main_instrument: string | null; instruments: string[]; neighborhood: string | null; avatar_url: string | null };
 
 async function people(ids: string[]) {
   const db = adminClient();
   if (!db) return new Map<string, Person>();
-  const { data } = await db.from("profiles").select("id, first_name, username, main_instrument, instruments").in("id", ids);
+  const { data } = await db.from("profiles").select("id, first_name, username, main_instrument, instruments, neighborhood, avatar_url").in("id", ids);
   return new Map(((data ?? []) as Person[]).map((p) => [p.id, p]));
 }
 
 const plays = (p: Person) => (p.main_instrument ?? p.instruments?.[0] ?? "musician").toLowerCase();
+
+/** "Bass, guitar · Echo Park" */
+function line(p: Person) {
+  const inst = [p.main_instrument, ...(p.instruments ?? [])].filter((x, i, a): x is string => Boolean(x) && a.indexOf(x) === i).slice(0, 2);
+  const what = inst.length ? inst.map((x, i) => (i ? x.toLowerCase() : x[0].toUpperCase() + x.slice(1))).join(", ") : "Musician";
+  return [what, p.neighborhood].filter(Boolean).join(" · ");
+}
+
+const who = (p: Person): Block => ({ kind: "who", photo: p.avatar_url?.startsWith("https://") ? p.avatar_url : null, name: p.first_name, line: line(p) });
 
 /** The other person in a connection, and who's sending. */
 async function across(connectionId: number, senderId: string) {
@@ -141,19 +266,35 @@ async function across(connectionId: number, senderId: string) {
   return from ? { from, otherId } : null;
 }
 
+/** Influences two people share, in the sender's order. */
+async function sharedInfluences(a: string, b: string) {
+  const { data } = await adminClient()!.from("influences").select("profile_id, artist_id, artist_name, rank").in("profile_id", [a, b]).order("rank");
+  const rows = (data ?? []) as { profile_id: string; artist_id: string; artist_name: string }[];
+  const theirs = new Set(rows.filter((r) => r.profile_id === b).map((r) => r.artist_id));
+  return rows.filter((r) => r.profile_id === a && theirs.has(r.artist_id)).map((r) => r.artist_name);
+}
+
 /** Someone sent you a Connect. */
 export async function notifyConnect(fromId: string, toId: string) {
   if (!emailEnabled()) return;
-  const from = (await people([fromId])).get(fromId);
+  const [map, shared] = await Promise.all([people([fromId]), sharedInfluences(fromId, toId)]);
+  const from = map.get(fromId);
   if (!from) return;
+  const n = shared.length;
   await notify(toId, {
     type: "connect",
     ref: fromId,
     throttleMinutes: 60 * 24 * 7,
     subject: `${from.first_name} wants to play with you`,
-    headline: `${from.first_name} wants to play with you`,
-    body: `${from.first_name} (${plays(from)}) sent you a Connect on Mixstro. Have a listen and answer with one tap.`,
+    preheader: n ? `${line(from)}. You both love ${shared[0]}.` : `${line(from)}. Have a listen and answer with one tap.`,
+    blocks: [
+      who(from),
+      { kind: "headline", text: `${from.first_name} wants to play with you` },
+      { kind: "text", text: n ? `${from.first_name} sent you a Connect, and you share ${n} influence${n === 1 ? "" : "s"}.` : `${from.first_name} sent you a Connect. Have a listen and answer with one tap.` },
+      ...(n ? [{ kind: "chips" as const, items: [...shared.slice(0, 3), ...(n > 3 ? [`+${n - 3}`] : [])] }] : []),
+    ],
     cta: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
+    alt: { label: "Not the right fit", path: `/m/${from.username}` },
   });
 }
 
@@ -166,45 +307,73 @@ export async function notifyConnectBack(fromId: string, toId: string) {
     type: "connect",
     ref: `back:${fromId}`,
     throttleMinutes: 60 * 24 * 7,
-    subject: `${from.first_name} connected back`,
-    headline: `You and ${from.first_name} are connected`,
-    body: `${from.first_name} said yes. Say hi, send a clip, or plan a jam.`,
+    subject: `${from.first_name} said yes`,
+    preheader: "You're connected. Say hi, send a clip, or plan a jam.",
+    blocks: [
+      who(from),
+      { kind: "headline", text: `You and ${from.first_name} are connected` },
+      { kind: "text", text: "Most good bands start with one message. Say hi, send a clip, or plan a jam." },
+    ],
     cta: { label: "Open the chat", path: `/messages/${from.username}` },
   });
 }
 
 /** A new message or voice note. At most one email per chat every 30 minutes. */
-export async function notifyMessage(connectionId: number, senderId: string, preview: string | null) {
+export async function notifyMessage(connectionId: number, senderId: string, preview: string | null, voiceSeconds: number | null = null) {
   if (!emailEnabled()) return;
   const x = await across(connectionId, senderId);
   if (!x) return;
-  const text = preview ? (preview.length > 140 ? `${preview.slice(0, 137)}…` : preview) : "Sent you a voice note.";
+  const text = preview ? (preview.length > 280 ? `${preview.slice(0, 277)}…` : preview) : null;
+  const short = text && text.length > 48 ? `${text.slice(0, 46).trimEnd()}…` : text;
   await notify(x.otherId, {
     type: "message",
     ref: String(connectionId),
     throttleMinutes: 30,
-    subject: `New message from ${x.from.first_name}`,
-    headline: `${x.from.first_name} wrote to you`,
-    body: preview ? `“${text}”` : `${x.from.first_name} sent you a voice note.`,
+    subject: short ? `${x.from.first_name}: “${short}”` : `${x.from.first_name} sent you a voice note`,
+    preheader: "Reply on Mixstro.",
+    blocks: [who(x.from), text ? { kind: "bubble", text } : { kind: "voice", seconds: voiceSeconds }],
     cta: { label: "Reply", path: `/messages/${x.from.username}` },
   });
 }
 
-const when = (iso: string) =>
-  new Date(iso).toLocaleString("en-US", { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" });
+const short = (iso: string) => `${part(iso, { weekday: "short" })} ${part(iso, { hour: "numeric", minute: "2-digit" })}`;
 
 /** A jam invite (or a new time for one). */
-export async function notifyJamInvite(connectionId: number, senderId: string, startsAt: string, place: string, newTime: boolean) {
+export async function notifyJamInvite(connectionId: number, senderId: string, startsAt: string, place: string, newTime: boolean, note: string | null = null) {
   if (!emailEnabled()) return;
   const x = await across(connectionId, senderId);
   if (!x) return;
+  const name = x.from.first_name;
   await notify(x.otherId, {
     type: "jam",
-    subject: newTime ? `${x.from.first_name} suggested another time` : `${x.from.first_name} invited you to jam`,
-    headline: newTime ? `${x.from.first_name} suggested another time` : `${x.from.first_name} wants to jam`,
-    body: `${when(startsAt)} (Pacific) at ${place}. Say yes, or suggest another time.`,
-    cta: { label: "Answer the invite", path: `/messages/${x.from.username}` },
+    subject: newTime ? `${name} suggested another time · ${short(startsAt)}` : `Jam with ${name} · ${short(startsAt)}`,
+    preheader: `${place}. I'm in, or suggest a time.`,
+    blocks: [who(x.from), { kind: "headline", text: newTime ? `${name} suggested another time` : `${name} wants to jam` }, { kind: "jam", startsAt, place, note }],
+    cta: { label: "I'm in", path: `/messages/${x.from.username}` },
+    alt: { label: "Suggest a time", path: `/messages/${x.from.username}` },
   });
+}
+
+/** A calendar file for an accepted jam (two hours, Pacific time shown by the calendar itself). */
+function ics(jamId: number, startsAt: string, place: string, title: string) {
+  const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const start = new Date(startsAt);
+  const txt = (s: string) => s.replace(/[\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Mixstro//Jams//EN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:jam-${jamId}@mixstro.com`,
+    `DTSTAMP:${stamp(new Date())}`,
+    `DTSTART:${stamp(start)}`,
+    `DTEND:${stamp(new Date(start.getTime() + 2 * 3600_000))}`,
+    `SUMMARY:${txt(title)}`,
+    `LOCATION:${txt(place)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
 }
 
 /** They said yes to your jam. */
@@ -215,20 +384,33 @@ export async function notifyJamAccepted(jamId: number, accepterId: string) {
   if (!jam) return;
   const x = await across(jam.connection_id, accepterId);
   if (!x) return;
+  const name = x.from.first_name;
   await notify(x.otherId, {
     type: "jam",
-    subject: `${x.from.first_name} is in for the jam`,
-    headline: `It's on: you're jamming with ${x.from.first_name}`,
-    body: `${when(jam.starts_at)} (Pacific) at ${jam.place}. Add it to your calendar from the chat.`,
-    cta: { label: "See the jam", path: `/messages/${x.from.username}` },
+    subject: `It's on: jam with ${name} ${part(jam.starts_at, { weekday: "long" })}`,
+    preheader: `${short(jam.starts_at)} · ${jam.place}. The calendar invite is attached.`,
+    blocks: [
+      { kind: "badge", text: "It's on" },
+      { kind: "headline", text: `You're jamming with ${name}` },
+      { kind: "jam", startsAt: jam.starts_at, place: jam.place },
+      { kind: "text", text: "We'll ask you both afterwards how it went. Only you two see the answers." },
+      { kind: "fine", text: "Open the attached invite to add it to your calendar." },
+    ],
+    cta: { label: "Open the chat", path: `/messages/${x.from.username}` },
+    attachments: [{ filename: "jam.ics", content: Buffer.from(ics(jamId, jam.starts_at, jam.place, `Jam with ${name}`)).toString("base64"), content_type: "text/calendar" }],
   });
 }
+
+const KIND: Record<string, string> = { band_seeking: "Band seeking", session: "Session", collab: "Collab" };
 
 /** Someone answered your Board post. */
 export async function notifyBoardReply(postId: number, fromId: string, authorId: string, note: string | null) {
   if (!emailEnabled()) return;
   const db = adminClient();
-  const [{ data: post }, map] = await Promise.all([db!.from("board_posts").select("title").eq("id", postId).maybeSingle<{ title: string }>(), people([fromId])]);
+  const [{ data: post }, map] = await Promise.all([
+    db!.from("board_posts").select("title, kind, neighborhood, paid, pay").eq("id", postId).maybeSingle<{ title: string; kind: string; neighborhood: string | null; paid: boolean; pay: string | null }>(),
+    people([fromId]),
+  ]);
   const from = map.get(fromId);
   if (!post || !from) return;
   await notify(authorId, {
@@ -236,9 +418,14 @@ export async function notifyBoardReply(postId: number, fromId: string, authorId:
     ref: String(postId),
     throttleMinutes: 60,
     subject: `${from.first_name} answered “${post.title}”`,
-    headline: `${from.first_name} answered your post`,
-    body: note ? `On “${post.title}”: “${note}”` : `${from.first_name} (${plays(from)}) answered “${post.title}” with their profile.`,
-    cta: { label: "See who answered", path: `/board/${postId}` },
+    preheader: line(from),
+    blocks: [
+      { kind: "post", label: `Your post · ${KIND[post.kind] ?? "Board"}`, title: post.title, line: [post.neighborhood, post.paid ? post.pay || "Paid" : null].filter(Boolean).join(" · ") },
+      who(from),
+      note ? { kind: "bubble", text: note } : { kind: "text", text: `${from.first_name} (${plays(from)}) answered with their profile.` },
+    ],
+    cta: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
+    alt: { label: "All answers", path: `/board/${postId}` },
   });
 }
 
@@ -247,19 +434,29 @@ export async function notifyBandInvite(fromId: string, toId: string, token: stri
   if (!emailEnabled()) return;
   const db = adminClient()!;
   const [{ data: inv }, map] = await Promise.all([
-    db.from("band_invites").select("bands(name)").eq("token", token).maybeSingle<{ bands: { name: string } | null }>(),
+    db.from("band_invites").select("band_id, bands(name)").eq("token", token).maybeSingle<{ band_id: number; bands: { name: string } | null }>(),
     people([fromId]),
   ]);
   const from = map.get(fromId);
   const band = inv?.bands?.name;
-  if (!from || !band) return;
+  if (!from || !band || !inv) return;
+  const { data: members } = await db.from("band_members").select("profile_id, projects(start_year, end_year)").eq("band_id", inv.band_id);
+  const rows = (members ?? []) as unknown as { profile_id: string; projects: { start_year: number; end_year: number | null } | null }[];
+  const yrs = rows.find((m) => m.profile_id === fromId)?.projects;
+  const years = yrs ? (yrs.end_year == null ? `${yrs.start_year} to now` : yrs.end_year === yrs.start_year ? String(yrs.start_year) : `${yrs.start_year} to ${yrs.end_year}`) : null;
+  const count = rows.length ? `${rows.length} member${rows.length === 1 ? "" : "s"}` : null;
   await notify(toId, {
     type: "connect",
     ref: `band:${token}`,
     throttleMinutes: 60 * 24 * 30,
     subject: `${from.first_name} added you to ${band}`,
-    headline: `${from.first_name} added you to ${band}`,
-    body: `Confirm your spot and ${band} shows on your Mixstro profile too, with everyone who played in it.`,
+    preheader: "Confirm your spot and it shows on your profile too.",
+    blocks: [
+      { kind: "band", name: band, line: [years, count].filter(Boolean).join(" · ") || "Band" },
+      { kind: "headline", text: `${from.first_name} added you to ${band}` },
+      { kind: "text", text: "Confirm your spot and the band shows on your profile too, with everyone who played in it." },
+    ],
     cta: { label: "Confirm your spot", path: `/join/${token}` },
+    alt: { label: "I wasn't in this band", path: `/join/${token}` },
   });
 }

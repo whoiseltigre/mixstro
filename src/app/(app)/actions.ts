@@ -79,7 +79,7 @@ export async function sendVoice(connectionId: number, path: string, seconds: num
   const voice_seconds = Math.min(120, Math.max(1, Math.round(seconds)));
   const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, voice_url: path, voice_seconds });
   if (error) return { error: "That didn't send. Try again." };
-  after(() => notifyMessage(connectionId, viewer.id, null));
+  after(() => notifyMessage(connectionId, viewer.id, null, voice_seconds));
   revalidatePath("/messages");
   return {};
 }
@@ -107,7 +107,7 @@ export async function proposeJam(connectionId: number, startsAt: string, place: 
     replaces_id: replacesId ?? null,
   });
   if (error) return { error: "That invite didn't send. Try again." };
-  after(() => notifyJamInvite(connectionId, viewer.id, when.toISOString(), where, replacesId !== undefined));
+  after(() => notifyJamInvite(connectionId, viewer.id, when.toISOString(), where, replacesId !== undefined, note.trim().slice(0, 280) || null));
   revalidatePath("/messages", "layout");
   return {};
 }
