@@ -2,16 +2,19 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Inter_Tight, Outfit, Roboto } from "next/font/google";
 import "./globals.css";
 
-const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
+// Apple devices use SF first (see globals.css), so Geist, Inter Tight and Roboto are only fetched
+// when a page actually needs them instead of being preloaded on every first visit.
+const geist = Geist({ variable: "--font-geist", subsets: ["latin"], preload: false });
 const interTight = Inter_Tight({
   variable: "--font-inter-tight",
   subsets: ["latin"],
   weight: ["700", "800"],
+  preload: false,
 });
 // Wordmark face: Outfit variable, set at weight 550.
 const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 // Google's sign-in button guidelines call for Roboto Medium.
-const roboto = Roboto({ variable: "--font-roboto", subsets: ["latin"], weight: ["500"] });
+const roboto = Roboto({ variable: "--font-roboto", subsets: ["latin"], weight: ["500"], preload: false });
 
 export const metadata: Metadata = {
   title: "Mixstro",

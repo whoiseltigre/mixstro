@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, sessionUser } from "@/lib/supabase/client";
 
 /** Notification settings (#9). Every sender checks `wants(prefs, type, channel)` before sending. */
 
@@ -19,7 +19,7 @@ export function useNotificationPrefs() {
   useEffect(() => {
     (async () => {
       const supabase = createClient();
-      const user = supabase ? (await supabase.auth.getUser()).data.user : null;
+      const user = supabase ? await sessionUser(supabase) : null;
       if (supabase && user) {
         const { data } = await supabase.from("notification_prefs").select("prefs").eq("profile_id", user.id).maybeSingle();
         setPrefs((data?.prefs as Prefs) ?? {});

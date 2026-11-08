@@ -168,15 +168,18 @@ export type BoardView = {
 export async function getBoard(): Promise<BoardView> {
   const viewer = await getViewer();
   if (!viewer) return { posts: samples(), area: "Los Angeles · within 25 mi", demo: true };
-  await locate(viewer);
   const today = new Date().toISOString().slice(0, 10);
-  const { data } = await viewer.supabase
-    .from("board_posts")
-    .select(POST_COLUMNS)
-    .is("closed_at", null)
-    .or(`closes_on.is.null,closes_on.gte.${today}`)
-    .order("created_at", { ascending: false })
-    .limit(150);
+  // Saving your location and fetching posts don't depend on each other; distances need both.
+  const [{ data }] = await Promise.all([
+    viewer.supabase
+      .from("board_posts")
+      .select(POST_COLUMNS)
+      .is("closed_at", null)
+      .or(`closes_on.is.null,closes_on.gte.${today}`)
+      .order("created_at", { ascending: false })
+      .limit(150),
+    locate(viewer),
+  ]);
   const radius = viewer.profile?.radius_mi ?? 25;
   const posts = (await decorate(viewer, (data ?? []) as PostRow[])).filter((p) => p.mine || p.distanceMi === undefined || p.distanceMi <= radius);
   const hood = viewer.profile?.neighborhood?.split(",")[0]?.trim();

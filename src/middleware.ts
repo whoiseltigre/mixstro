@@ -56,9 +56,11 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims checks the session token's signature locally (keys cached in memory), so most
+  // requests skip the round trip to Supabase Auth that getUser() makes. It refreshes an expired
+  // session the same way. With legacy shared-secret keys it falls back to getUser().
+  const { data: claims } = await supabase.auth.getClaims();
+  const user = claims?.claims.sub ? { id: claims.claims.sub } : null;
 
   // Music pages: members get the full profile, everyone else the public page.
   const profile = vanity ?? path.match(PROFILE)?.[1];

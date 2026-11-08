@@ -74,6 +74,18 @@ body {
   padding-bottom: max(env(safe-area-inset-bottom), 20px);
 }
 
+/* Loading placeholders: a soft glow drifting across, appearing after a beat so quick loads never flash. */
+@keyframes skeleton-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+@keyframes skeleton-in {
+  from { opacity: 0; }
+}
+.skeleton-shimmer {
+  animation: skeleton-in 0.25s ease-out 0.08s backwards, skeleton-glow 1.6s ease-in-out 0.33s infinite;
+}
+
 :focus-visible {
   outline: 2px solid var(--color-tungsten);
   outline-offset: 2px;

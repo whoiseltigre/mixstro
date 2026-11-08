@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, sessionUser } from "@/lib/supabase/client";
 
 /** On by default: your music page opens for anyone with the link, signed in or not. */
 export function PublicPageToggle() {
@@ -11,7 +11,7 @@ export function PublicPageToggle() {
   useEffect(() => {
     const supabase = createClient();
     if (!supabase) return setOn(true);
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    sessionUser(supabase).then(async (user) => {
       if (!user) return;
       const { data } = await supabase.from("profiles").select("public_page").eq("id", user.id).maybeSingle<{ public_page: boolean }>();
       setOn(data?.public_page ?? true);

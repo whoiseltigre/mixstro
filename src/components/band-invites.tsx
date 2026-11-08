@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { myBandInvites, type BandInvite } from "@/lib/bands";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, sessionUser } from "@/lib/supabase/client";
 
 /** Bandmate tags waiting on you, at the top of your profile. */
 export function BandInvites() {
@@ -12,7 +12,7 @@ export function BandInvites() {
   useEffect(() => {
     const supabase = createClient();
     if (!supabase) return;
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    sessionUser(supabase).then(async (user) => {
       if (user) setInvites(await myBandInvites(supabase, user.id));
     });
   }, []);
