@@ -2,6 +2,7 @@
 
 import { BackButton } from "@/components/ui";
 import { type Channel, NOTIFICATION_TYPES, useNotificationPrefs, wants } from "@/lib/notifications";
+import { usePush } from "@/lib/push-client";
 import { AlertRoles } from "./roles";
 
 export default function NotificationSettings() {
@@ -14,6 +15,7 @@ export default function NotificationSettings() {
         <h1 className="headline text-[28px]">Notifications</h1>
       </header>
       <p className="text-[15px] text-smoke text-pretty -mt-2">Pick what reaches you and how. You can change this any time.</p>
+      <ThisDevice />
 
       <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 text-[12px] font-semibold text-smoke px-1">
         <span />
@@ -41,6 +43,30 @@ export default function NotificationSettings() {
       </ul>
       <AlertRoles />
     </main>
+  );
+}
+
+/** Whether this phone or computer gets push, with the one fix that applies. */
+function ThisDevice() {
+  const { state, enable, disable } = usePush();
+  if (state === "unavailable") return null;
+  const copy: Record<string, { title: string; sub: string }> = {
+    loading: { title: "Push on this device", sub: "Checking…" },
+    on: { title: "Push is on for this device", sub: "Pick which ones below." },
+    off: { title: "Push is off on this device", sub: "Turn it on to hear about Connects and messages right away." },
+    blocked: { title: "Push is blocked on this device", sub: "Your browser is set to block Mixstro. Allow notifications for app.mixstro.com in its site settings." },
+    install: { title: "Add Mixstro to your Home Screen", sub: "On iPhone and iPad, push works once Mixstro is on your Home Screen. Tap Share, then Add to Home Screen, and open it from there." },
+  };
+  const c = copy[state];
+  return (
+    <section className="flex items-center gap-3 p-4 rounded-[20px] bg-stage border border-paper/8">
+      <span className={`size-2.5 rounded-full shrink-0 ${state === "on" ? "bg-[#30D158]" : "bg-tungsten"}`} aria-hidden="true" />
+      <span className="flex-1 flex flex-col gap-0.5 min-w-0">
+        <span className="text-[15px] font-semibold">{c.title}</span>
+        <span className="text-[13px] text-smoke text-pretty">{c.sub}</span>
+      </span>
+      {(state === "on" || state === "off") && <Toggle label="Push on this device" on={state === "on"} onChange={(on) => (on ? enable() : disable())} />}
+    </section>
   );
 }
 

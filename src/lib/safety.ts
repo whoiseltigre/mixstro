@@ -66,8 +66,11 @@ export async function deleteAccount(): Promise<{ error?: string }> {
     }
     return {};
   }
-  const { data: files } = await s.supabase.storage.from("clips").list(s.user.id);
-  if (files?.length) await s.supabase.storage.from("clips").remove(files.map((f) => `${s.user.id}/${f.name}`));
+  // Your recordings and photos go too (each lives in a folder named after you).
+  for (const bucket of ["clips", "avatars"]) {
+    const { data: files } = await s.supabase.storage.from(bucket).list(s.user.id, { limit: 1000 });
+    if (files?.length) await s.supabase.storage.from(bucket).remove(files.map((f) => `${s.user.id}/${f.name}`));
+  }
   const { error } = await s.supabase.rpc("delete_my_account");
   if (error) return { error: error.message };
   await s.supabase.auth.signOut();
