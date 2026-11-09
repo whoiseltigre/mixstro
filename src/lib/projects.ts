@@ -31,6 +31,8 @@ export type Project = {
   tracks: Track[];
   /** "Played with": the band's other confirmed members. */
   bandmates?: Bandmate[];
+  /** Set once someone else confirmed they played in it too: links to its band page. */
+  bandId?: string;
 };
 
 export type ProjectRow = {
@@ -110,7 +112,7 @@ export function nameWash(name: string) {
 /** Sample musicians' projects. Their tracks have no links, so they show but don't play. */
 export const SAMPLE_PROJECTS: Record<string, Project[]> = {
   eli: [
-    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }], bandmates: [{ username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg" }] },
+    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }], bandmates: [{ username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg" }], bandId: "night-shift" },
     { id: "eli-2", name: "Basement demos", role: "Everything", startYear: 2018, endYear: 2019, tracks: [{ id: "e3", provider: "soundcloud", title: "Vol. 2" }] },
     { id: "eli-3", name: "Second Period", role: "Rhythm guitar", startYear: 2012, endYear: 2014, tracks: [{ id: "e4", provider: "youtube", title: "Battle of the bands" }], bandmates: [{ username: "jonah", name: "Jonah", photo: "/photos/acoustic-amber.jpg" }] },
   ],
