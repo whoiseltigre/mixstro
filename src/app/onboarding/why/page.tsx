@@ -3,13 +3,24 @@
 import { useRouter } from "next/navigation";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
-import { REASONS, STEP_GLOW, stepNav, toggle, useDraft } from "@/lib/onboarding";
+import { useState } from "react";
+import { REASONS, STEP_GLOW, saveProfile, toggle, useDraft } from "@/lib/onboarding";
 
-const nav = stepNav("why");
+/** "What are you here for?", from "Finish your profile" (no longer a signup step). */
 
 export default function Why() {
   const router = useRouter();
   const { draft, update } = useDraft();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>();
+
+  async function save() {
+    setSaving(true);
+    const r = await saveProfile(draft);
+    setSaving(false);
+    if (r.error) return setError(r.error);
+    router.push("/me");
+  }
 
   // Turning a reason on picks all of its goals; the chips underneath narrow it down.
   function tapReason(ids: string[]) {
@@ -19,7 +30,7 @@ export default function Why() {
 
   return (
     <main className="min-h-dvh flex flex-col isolate">
-      <StepHeader step={nav.number} total={nav.total} back={nav.back} glow={STEP_GLOW.why} />
+      <StepHeader back="/me" glow={STEP_GLOW.why} />
       <StepTitle title="What are you here for?" sub="Pick any. You can change this later." />
       <div className="px-5 pt-7 flex flex-col gap-3">
         {REASONS.map((r) => {
@@ -75,8 +86,13 @@ export default function Why() {
         })}
       </div>
       <StepFooter>
-        <Button disabled={!draft.goals.length} onClick={() => router.push(nav.next)}>
-          Continue
+        {error && (
+          <p role="alert" className="text-[13px] text-[#FF453A]">
+            {error}
+          </p>
+        )}
+        <Button disabled={!draft.goals.length || saving} onClick={save}>
+          {saving ? "Saving…" : "Save"}
         </Button>
       </StepFooter>
     </main>

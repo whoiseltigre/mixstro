@@ -81,7 +81,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           ) : status === "sent" ? (
             <Button disabled className="h-12 text-[16px]">Request sent</Button>
           ) : status === "passed" || status === "declined" || status === "expired" ? null : (
-            <ConnectButton id={m.id} username={m.username} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
+            <ConnectButton id={m.id} username={m.username} firstName={first} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
           )}
           {(!viewerId || m.sample) && (
             <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>

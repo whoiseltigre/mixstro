@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ClipCard } from "@/components/clip-card";
 import { ClipRecorder } from "@/components/clip-recorder";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
 import { lookupTrack } from "@/app/(app)/me/projects/actions";
-import { STEP_GLOW, saveProfile, stepNav, useDraft } from "@/lib/onboarding";
+import { STEP_GLOW, saveProfile, useDraft } from "@/lib/onboarding";
 
-const nav = stepNav("sound");
+// "Add a track" from "Finish your profile" (no longer a signup step).
 const MAX_CLIPS = 6;
 const PLATFORMS = ["YouTube", "SoundCloud", "Spotify", "Apple Music", "TikTok", "Instagram"];
 
@@ -19,10 +19,7 @@ export default function Sound() {
   const { draft, update } = useDraft();
   const [link, setLink] = useState("");
   const [error, setError] = useState<string>();
-  // "Add a track" on the Profile tab reuses this screen outside onboarding.
-  const [fromProfile, setFromProfile] = useState(false);
   const [saving, setSaving] = useState(false);
-  useEffect(() => setFromProfile(new URLSearchParams(location.search).get("from") === "profile"), []);
 
   const clips = draft.clips.filter((c) => c.kind === "clip");
   const full = clips.length >= MAX_CLIPS;
@@ -45,7 +42,6 @@ export default function Sound() {
   }
 
   async function finish() {
-    if (!fromProfile) return router.push(nav.next);
     setSaving(true);
     const r = await saveProfile(draft);
     setSaving(false);
@@ -55,11 +51,7 @@ export default function Sound() {
 
   return (
     <main className="min-h-dvh flex flex-col isolate">
-      {fromProfile ? (
-        <StepHeader back="/me" glow={STEP_GLOW.sound} />
-      ) : (
-        <StepHeader step={nav.number} total={nav.total} back={nav.back} glow={STEP_GLOW.sound} />
-      )}
+      <StepHeader back="/me" glow={STEP_GLOW.sound} />
       <StepTitle title="Let people hear you" sub="One track is enough, new or from years back. It plays right on your profile." />
       <div className="px-5 pt-7 flex flex-col gap-6">
         {clips.length > 0 && (
@@ -148,13 +140,9 @@ export default function Sound() {
         <ClipRecorder disabled={full} onSaved={(url) => update({ clips: [...draft.clips, { kind: "clip", value: url }] })} />
       </div>
       <StepFooter>
-        {fromProfile ? (
-          <Button disabled={!clips.length || saving} onClick={finish}>
-            {saving ? "Saving…" : "Save"}
-          </Button>
-        ) : (
-          <Button onClick={finish}>{clips.length ? "Finish" : "Skip for now"}</Button>
-        )}
+        <Button disabled={!clips.length || saving} onClick={finish}>
+          {saving ? "Saving…" : "Save"}
+        </Button>
       </StepFooter>
     </main>
   );

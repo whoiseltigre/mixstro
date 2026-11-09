@@ -1,15 +1,18 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
+import { sendPush } from "./push";
 
 /**
- * Sends the email side of notifications through Resend (mail.mixstro.com).
+ * Sends notifications: email through Resend (mail.mixstro.com) and web push (src/lib/push.ts).
  *
  * Needs two server-only env vars: RESEND_API_KEY, and SUPABASE_SERVICE_ROLE_KEY to look
  * up the recipient's email address and settings (people can't read each other's emails).
  * Without them this quietly does nothing, so local dev and demo mode keep working.
  *
- * Every send checks the recipient's notification settings and a per-type throttle,
+ * Push needs no extra setup (its keys live in Supabase); email needs the Resend key.
+ *
+ * Every send checks the recipient's notification settings and a per-type throttle per channel,
  * and never throws: a failed email must never fail the action that triggered it.
  */
 
@@ -51,34 +54,32 @@ export type Email = {
   cta: { label: string; path: string };
   alt?: { label: string; path: string };
   attachments?: { filename: string; content: string; content_type?: string }[];
+  /** The phone notification. Defaults to the subject and preheader, opening the main button's page. */
+  push?: { title?: string; body?: string };
 };
 
 let admin: SupabaseClient | null | undefined;
-function adminClient() {
+export function adminClient() {
   if (admin !== undefined) return admin;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   admin = key && SUPABASE_URL ? createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } }) : null;
   return admin;
 }
 
-export const emailEnabled = () => Boolean(process.env.RESEND_API_KEY && adminClient());
+/** Anything to send with: the service role key is the only must (push keys come from Supabase). */
+export const emailEnabled = () => Boolean(adminClient());
 
 export async function notify(recipientId: string, email: Email): Promise<void> {
   try {
     const db = adminClient();
+    if (!db) return;
     const key = process.env.RESEND_API_KEY;
-    if (!db || !key) return;
-
-    const [{ data: prefsRow }, { data: user }] = await Promise.all([
-      db.from("notification_prefs").select("prefs").eq("profile_id", recipientId).maybeSingle(),
-      db.auth.admin.getUserById(recipientId),
-    ]);
-    if (!wants(((prefsRow?.prefs as Prefs) ?? {}) as Prefs, email.type, "email")) return;
-    const to = user?.user?.email;
-    if (!to) return;
-
+    const { data: prefsRow } = await db.from("notification_prefs").select("prefs").eq("profile_id", recipientId).maybeSingle();
+    const prefs = ((prefsRow?.prefs as Prefs) ?? {}) as Prefs;
     const ref = email.ref ?? "";
-    if (email.throttleMinutes) {
+
+    const recentlySent = async (channel: "email" | "push") => {
+      if (!email.throttleMinutes) return false;
       const since = new Date(Date.now() - email.throttleMinutes * 60_000).toISOString();
       const { count } = await db
         .from("notification_log")
@@ -86,27 +87,49 @@ export async function notify(recipientId: string, email: Email): Promise<void> {
         .eq("recipient_id", recipientId)
         .eq("type", email.type)
         .eq("ref", ref)
-        .eq("channel", "email")
+        .eq("channel", channel)
         .gte("sent_at", since);
-      if (count) return;
-    }
+      return Boolean(count);
+    };
+    const log = (channel: "email" | "push") => db.from("notification_log").insert({ recipient_id: recipientId, type: email.type, ref, channel });
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from: FROM,
-        to,
-        subject: email.subject,
-        html: render(email),
-        text: plain(email),
-        ...(email.attachments ? { attachments: email.attachments } : {}),
-        headers: { "List-Unsubscribe": `<${APP_URL}/settings/notifications>` },
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-    if (res.ok) await db.from("notification_log").insert({ recipient_id: recipientId, type: email.type, ref, channel: "email" });
-    else console.error("notify: Resend", res.status, await res.text().catch(() => ""));
+    const sendPushSide = async () => {
+      if (!wants(prefs, email.type, "push") || (await recentlySent("push"))) return;
+      const who = email.blocks.find((b) => b.kind === "who");
+      const ok = await sendPush(db, recipientId, {
+        title: email.push?.title ?? email.subject,
+        body: email.push?.body ?? email.preheader,
+        url: email.cta.path,
+        tag: `${email.type}:${ref}`,
+        icon: who?.kind === "who" ? who.photo : null,
+      });
+      if (ok) await log("push");
+    };
+
+    const sendEmailSide = async () => {
+      if (!key || !wants(prefs, email.type, "email") || (await recentlySent("email"))) return;
+      const { data: user } = await db.auth.admin.getUserById(recipientId);
+      const to = user?.user?.email;
+      if (!to) return;
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: FROM,
+          to,
+          subject: email.subject,
+          html: render(email),
+          text: plain(email),
+          ...(email.attachments ? { attachments: email.attachments } : {}),
+          headers: { "List-Unsubscribe": `<${APP_URL}/settings/notifications>` },
+        }),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) await log("email");
+      else console.error("notify: Resend", res.status, await res.text().catch(() => ""));
+    };
+
+    await Promise.all([sendPushSide().catch((e) => console.error("notify push:", e)), sendEmailSide().catch((e) => console.error("notify email:", e))]);
   } catch (e) {
     console.error("notify:", e);
   }
@@ -333,6 +356,7 @@ export async function notifyMessage(connectionId: number, senderId: string, prev
     preheader: "Reply on Mixstro.",
     blocks: [who(x.from), text ? { kind: "bubble", text } : { kind: "voice", seconds: voiceSeconds }],
     cta: { label: "Reply", path: `/messages/${x.from.username}` },
+    push: { title: x.from.first_name, body: text ?? (voiceSeconds ? `Voice note · ${mmss(voiceSeconds)}` : "Voice note") },
   });
 }
 
@@ -458,5 +482,66 @@ export async function notifyBandInvite(fromId: string, toId: string, token: stri
     ],
     cta: { label: "Confirm your spot", path: `/join/${token}` },
     alt: { label: "I wasn't in this band", path: `/join/${token}` },
+  });
+}
+
+/* ---------- Reminders (sent by the scheduled job, src/lib/reminders.ts) ---------- */
+
+/** #4 Your turn: their message has waited 48 hours for an answer. Once per message. */
+export async function notifyYourTurn(connectionId: number, messageId: number, senderId: string, preview: string | null) {
+  const x = await across(connectionId, senderId);
+  if (!x) return;
+  const name = x.from.first_name;
+  const text = preview ? (preview.length > 140 ? `${preview.slice(0, 137)}…` : preview) : null;
+  await notify(x.otherId, {
+    type: "message",
+    ref: `nudge:${messageId}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: `${name} is waiting on your reply`,
+    preheader: "A quick answer keeps things moving, even if it's a no.",
+    blocks: [
+      who(x.from),
+      { kind: "headline", text: `Your turn with ${name}` },
+      text ? { kind: "bubble", text } : { kind: "voice", seconds: null },
+      { kind: "text", text: "A quick answer keeps things moving, even if it's a no. Easy replies are one tap away in the chat." },
+    ],
+    cta: { label: "Reply", path: `/messages/${x.from.username}` },
+    push: { title: `Your turn with ${name}`, body: text ? `“${text}”` : `${name} sent you a voice note 2 days ago.` },
+  });
+}
+
+/** #12 A musician you're looking for just joined nearby. At most one a day (the job checks). */
+export async function notifyRoleAlert(recipientId: string, joinerId: string, role: string, why: string, miles: number) {
+  const from = (await people([joinerId])).get(joinerId);
+  if (!from) return;
+  const where = miles < 1 ? "nearby" : `${Math.round(miles)} mi away`;
+  const r = role.toLowerCase();
+  const what = r === "drums" ? "drummer" : r === "bass" ? "bassist" : r === "keys" ? "keys player" : r === "vocals" ? "singer" : r === "strings" ? "string player" : r === "horns" ? "horn player" : r;
+  const head = `${/^[aeiou]/.test(what) ? "An" : "A"} ${what} ${why} just joined ${where}`;
+  await notify(recipientId, {
+    type: "alerts",
+    ref: `who:${joinerId}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: head,
+    preheader: `${from.first_name} · ${line(from)}`,
+    blocks: [{ kind: "badge", text: "New nearby" }, who(from), { kind: "headline", text: head }],
+    cta: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
+    alt: { label: "Change these alerts", path: "/settings/notifications" },
+  });
+}
+
+/** An accepted jam starts in about two hours. Sent to both players. */
+export async function notifyJamSoon(jamId: number, recipientId: string, otherId: string, startsAt: string, place: string) {
+  const other = (await people([otherId])).get(otherId);
+  if (!other) return;
+  await notify(recipientId, {
+    type: "jam",
+    ref: `soon:${jamId}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: `Jam with ${other.first_name} at ${clock(startsAt)}`,
+    preheader: `${place}. Running late? Let them know in the chat.`,
+    blocks: [who(other), { kind: "headline", text: `Jam with ${other.first_name} today` }, { kind: "jam", startsAt, place }],
+    cta: { label: "Open the chat", path: `/messages/${other.username}` },
+    push: { title: `Jam with ${other.first_name} at ${clock(startsAt)}`, body: place },
   });
 }

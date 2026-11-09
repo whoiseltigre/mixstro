@@ -1,5 +1,6 @@
 "use client";
 
+import { announceConnect } from "@/components/push-prompt";
 import { QuickReplies } from "@/components/quick-replies";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
@@ -38,7 +39,10 @@ export function TodayDeck({
   const doConnect = () =>
     start(async () => {
       const res = await connect(m.id, m.username);
-      if (res?.sent) setSentTo(m.id);
+      if (res?.sent) {
+        setSentTo(m.id);
+        announceConnect(first);
+      }
     });
   const doPass = () =>
     start(async () => {

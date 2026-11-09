@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { Button, ButtonLink } from "@/components/ui";
 import { saveProfile, useDraft } from "@/lib/onboarding";
+import { enablePush } from "@/lib/push-client";
 
 export default function Done() {
   const router = useRouter();
@@ -31,9 +32,7 @@ export default function Done() {
   }, [ready]);
 
   async function enableNotifications() {
-    if ("Notification" in window && Notification.permission === "default") {
-      await Notification.requestPermission();
-    }
+    await enablePush().catch(() => {});
     router.push("/discover");
   }
 

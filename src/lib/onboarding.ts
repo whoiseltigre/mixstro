@@ -46,12 +46,18 @@ export const EMPTY_DRAFT: Draft = {
   clips: [],
 };
 
-/** The numbered steps, one question each; sign-in comes before, "done" after. Projects are added later from the profile. */
-export const STEPS = ["basics", "play", "why", "where", "influences", "sound"] as const;
+/**
+ * The numbered signup steps, kept to three so signing up takes about two minutes: you and where
+ * you are, what you play, your influences. Sign-in comes before, "done" after. What you're here
+ * for, tracks and projects are added afterwards from "Finish your profile".
+ */
+export const STEPS = ["basics", "play", "influences"] as const;
 export type Step = (typeof STEPS)[number];
+/** Screens you reach from your profile, outside the numbered steps. */
+export type ProfileScreen = "why" | "sound";
 
-/** Each step's stage-spill color, so every screen feels like its own moment. */
-export const STEP_GLOW: Record<Step, string> = {
+/** Each screen's stage-spill color, so every screen feels like its own moment. */
+export const STEP_GLOW: Record<Step | ProfileScreen | "where", string> = {
   basics: "#FFB245",
   play: "#B5C5FF",
   why: "#67E2DA",

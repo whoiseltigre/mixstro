@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { announceConnect } from "@/components/push-prompt";
 import { Button } from "@/components/ui";
 import { connect } from "../../actions";
 
-export function ConnectButton({ id, username, label }: { id: string; username: string; label: string }) {
+export function ConnectButton({ id, username, label, firstName }: { id: string; username: string; label: string; firstName?: string }) {
   const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
   return (
@@ -14,7 +15,10 @@ export function ConnectButton({ id, username, label }: { id: string; username: s
       onClick={() =>
         start(async () => {
           const res = await connect(id, username);
-          if (res?.sent) setSent(true);
+          if (res?.sent) {
+            setSent(true);
+            announceConnect(firstName);
+          }
         })
       }
     >
