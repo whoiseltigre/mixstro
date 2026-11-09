@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AdultCheck } from "@/components/adult-check";
+import { LocationField } from "@/components/location-field";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, Field } from "@/components/ui";
 import { STEP_GLOW, stepNav, useDraft } from "@/lib/onboarding";
@@ -22,7 +23,7 @@ export default function Basics() {
   const [askAdult, setAskAdult] = useState(false);
   const username = draft.username.replace(/^@/, "").toLowerCase();
   const usernameOk = USERNAME.test(username);
-  const ok = draft.firstName.trim() && usernameOk && !taken && draft.adultConfirmedAt;
+  const ok = draft.firstName.trim() && usernameOk && !taken && draft.adultConfirmedAt && draft.neighborhood.trim().length > 1;
 
   // Google sign-ins arrive with a name and photo; use them as a starting point.
   useEffect(() => {
@@ -111,6 +112,7 @@ export default function Basics() {
                 : undefined
           }
         />
+        <LocationField draft={draft} update={update} />
         {/* Shown when the sign-in screen's checkbox didn't carry over, e.g. an email link opened in another browser. */}
         {askAdult && (
           <AdultCheck checked={Boolean(draft.adultConfirmedAt)} onChange={(on) => update({ adultConfirmedAt: on ? new Date().toISOString() : undefined })} />

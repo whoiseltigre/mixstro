@@ -76,6 +76,7 @@ export default function Me() {
           hasInfluences={draft.influences.length > 0}
           hasTrack={draft.clips.some((c) => c.kind === "clip")}
           hasProjects={!projects.ready || projects.projects.length > 0}
+          hasGoals={draft.goals.length > 0}
         />
         {projects.ready && (
           <ProjectList
@@ -142,14 +143,16 @@ function FinishProfile({
   hasInfluences,
   hasTrack,
   hasProjects,
+  hasGoals,
 }: {
   hasInfluences: boolean;
   hasTrack: boolean;
   hasProjects: boolean;
+  hasGoals: boolean;
 }) {
   const todo = [
     !hasTrack && {
-      href: "/onboarding/sound?from=profile",
+      href: "/onboarding/sound",
       title: "Add a track",
       sub: "Profiles with music get far more replies.",
     },
@@ -157,6 +160,11 @@ function FinishProfile({
       href: "/me/projects",
       title: "Add your projects",
       sub: "The bands you've played in, old and new, with their music.",
+    },
+    !hasGoals && {
+      href: "/onboarding/why",
+      title: "Say what you're here for",
+      sub: "Finding bandmates, gigs, or showing off your music.",
     },
     !hasInfluences && {
       href: "/onboarding/influences?from=profile",
