@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
-import { pushEnabled, sendPush } from "./push";
+import { sendPush } from "./push";
 
 /**
  * Sends notifications: email through Resend (mail.mixstro.com) and web push (src/lib/push.ts).
@@ -10,7 +10,7 @@ import { pushEnabled, sendPush } from "./push";
  * up the recipient's email address and settings (people can't read each other's emails).
  * Without them this quietly does nothing, so local dev and demo mode keep working.
  *
- * Push needs the VAPID keys too; each channel works on its own if the other isn't set up.
+ * Push needs no extra setup (its keys live in Supabase); email needs the Resend key.
  *
  * Every send checks the recipient's notification settings and a per-type throttle per channel,
  * and never throws: a failed email must never fail the action that triggered it.
@@ -66,7 +66,8 @@ export function adminClient() {
   return admin;
 }
 
-export const emailEnabled = () => Boolean(adminClient() && (process.env.RESEND_API_KEY || pushEnabled()));
+/** Anything to send with: the service role key is the only must (push keys come from Supabase). */
+export const emailEnabled = () => Boolean(adminClient());
 
 export async function notify(recipientId: string, email: Email): Promise<void> {
   try {
@@ -93,7 +94,7 @@ export async function notify(recipientId: string, email: Email): Promise<void> {
     const log = (channel: "email" | "push") => db.from("notification_log").insert({ recipient_id: recipientId, type: email.type, ref, channel });
 
     const sendPushSide = async () => {
-      if (!pushEnabled() || !wants(prefs, email.type, "push") || (await recentlySent("push"))) return;
+      if (!wants(prefs, email.type, "push") || (await recentlySent("push"))) return;
       const who = email.blocks.find((b) => b.kind === "who");
       const ok = await sendPush(db, recipientId, {
         title: email.push?.title ?? email.subject,

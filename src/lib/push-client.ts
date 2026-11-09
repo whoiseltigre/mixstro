@@ -11,7 +11,19 @@ import { createClient } from "@/lib/supabase/client";
  * so there the state is "install" until it's opened from the Home Screen.
  */
 
-const VAPID = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+/** The server's public push key (env at build time, else /api/push/key). */
+let vapid: Promise<string> | null = null;
+function publicKey() {
+  if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return Promise.resolve(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+  vapid ??= fetch("/api/push/key")
+    .then((r) => (r.ok ? r.json() : {}))
+    .then((j: { key?: string }) => j.key ?? "")
+    .catch(() => "");
+  return vapid.then((k) => {
+    if (!k) vapid = null;
+    return k;
+  });
+}
 
 export type PushState =
   | "loading"
@@ -46,7 +58,7 @@ export async function currentPushState(): Promise<PushState> {
   if (typeof window === "undefined") return "loading";
   const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
   if (!supported) return isIOS() && !standalone() ? "install" : "unavailable";
-  if (!VAPID) return "unavailable";
+  if (!(await publicKey())) return "unavailable";
   if (Notification.permission === "denied") return "blocked";
   if (Notification.permission !== "granted") return "off";
   const reg = await navigator.serviceWorker.getRegistration("/");
@@ -62,7 +74,7 @@ export async function enablePush(): Promise<PushState> {
   if (permission !== "granted") return permission === "denied" ? "blocked" : "off";
   const reg = await registration();
   await navigator.serviceWorker.ready;
-  const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(VAPID) }));
+  const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(await publicKey()) }));
   const json = sub.toJSON();
   const supabase = createClient();
   if (supabase && json.endpoint && json.keys?.p256dh && json.keys?.auth) {
