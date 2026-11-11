@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { notifyConnect, notifyConnectBack, notifyJamAccepted, notifyJamInvite, notifyMessage } from "@/lib/notify";
-import { getViewer } from "@/lib/people";
+import { getViewer, withMusic } from "@/lib/people";
 
 /**
  * Connect, pass and send. Each action re-checks who you are; row-level security in
@@ -28,8 +28,21 @@ async function pairWith(otherId: string) {
   return { viewer, outgoing: rows.find((r) => r.from_id === viewer.id), incoming: rows.find((r) => r.to_id === viewer.id) };
 }
 
-/** Say you'd like to play together. If they already asked you, this opens the conversation. */
-export async function connect(otherId: string, username: string) {
+/** Notes on a Connect: a few words at least, a short paragraph at most. */
+const NOTE_MAX = 280;
+
+/** Can you send a Connect? You need at least one song (a clip, or a track on a project). */
+export async function connectReady(): Promise<{ hasMusic: boolean }> {
+  const viewer = await getViewer();
+  if (!viewer) return { hasMusic: true }; // demo mode
+  return { hasMusic: (await withMusic(viewer.supabase, [viewer.id])).has(viewer.id) };
+}
+
+/**
+ * Say you'd like to play together, with a short note. If they already asked you, this
+ * accepts instead (their note becomes the first message in your chat).
+ */
+export async function connect(otherId: string, username: string, note?: string) {
   const pair = await pairWith(otherId);
   if (!pair) redirect(`/connected/${username}`); // demo mode
 
@@ -41,8 +54,14 @@ export async function connect(otherId: string, username: string) {
     redirect(`/connected/${username}`);
   }
   if (!outgoing) {
-    const { error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId });
-    if (!error) after(() => notifyConnect(viewer.id, otherId));
+    const text = (note ?? "").replace(/\s+/g, " ").trim().slice(0, NOTE_MAX);
+    if (text.length < 2) return { error: "Add a short note first." };
+    if (!(await withMusic(viewer.supabase, [viewer.id])).has(viewer.id)) return { needSong: true };
+    let { error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId, note: text });
+    // Before the connect-notes SQL runs there's no note column: still send the Connect.
+    if (error?.code === "PGRST204" || error?.code === "42703") ({ error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId }));
+    if (error) return { error: "That didn't send. Try again." };
+    after(() => notifyConnect(viewer.id, otherId, text));
   }
   revalidatePath("/", "layout");
   return { sent: true };

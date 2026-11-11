@@ -72,7 +72,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
           )}
         </div>
-        {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} />}
+        {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} note={connection?.note} />}
         {status === "expired" && <p className="text-[14px] text-smoke">{first} didn&apos;t answer within a week, so that Connect closed. No hard feelings.</p>}
         {status === "declined" && <p className="text-[14px] text-smoke">{first} said it&apos;s not the right fit this time. Good luck out there.</p>}
         <div className="flex gap-2.5">
@@ -81,7 +81,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           ) : status === "sent" ? (
             <Button disabled className="h-12 text-[16px]">Request sent</Button>
           ) : status === "passed" || status === "declined" || status === "expired" ? null : (
-            <ConnectButton id={m.id} username={m.username} firstName={first} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
+            <ConnectButton person={m} asked={status === "asked"} label={status === "asked" ? `Connect with ${first}` : "Connect"} />
           )}
           {(!viewerId || m.sample) && (
             <ButtonLink href={`/messages/${m.username}`} variant="glass" className="h-12 text-[16px]">Message</ButtonLink>

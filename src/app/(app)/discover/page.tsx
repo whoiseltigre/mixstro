@@ -9,7 +9,7 @@ export const metadata = { title: "Today · Mixstro" };
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
-  const [{ people, incoming, yourTurn }, alert, started] = await Promise.all([
+  const [{ people, incoming, notes, yourTurn }, alert, started] = await Promise.all([
     getToday(),
     getRoleAlert().catch(() => null),
     getGetStarted().catch(() => null),
@@ -20,7 +20,7 @@ export default async function Discover() {
     <>
       {/* One card at a time at the top: a new musician you're looking for beats the checklist. */}
       {alert ? <RoleAlertCard alert={alert} /> : start && <GetStartedCard state={start} />}
-      <TodayDeck people={people} incoming={incoming} />
+      <TodayDeck people={people} incoming={incoming} notes={notes} />
     </>
   );
 }
