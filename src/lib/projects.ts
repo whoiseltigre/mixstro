@@ -103,11 +103,18 @@ export function trackPlayer(track: Track): (ParsedClip & { height?: number }) | 
 }
 
 /** A warm wash for projects without artwork, so the list still has some color. */
+// Warm House Lights hues only (tungsten, peach, pink, ember), never greens or blues.
+const WARM = ["#FFB245", "#F7BF77", "#FFACBA", "#E8794A"];
+
 export function nameWash(name: string) {
   let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
-  return `linear-gradient(150deg, hsl(${h} 50% 40%), hsl(${(h + 40) % 360} 40% 16%))`;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 997;
+  const tint = WARM[h % WARM.length];
+  return `linear-gradient(150deg, color-mix(in srgb, ${tint} 62%, #0F0D0B), color-mix(in srgb, ${tint} 14%, #0F0D0B))`;
 }
+
+/** The stage spill at the top of a band page: a warm tungsten glow over Ink. */
+export const BAND_GLOW = "radial-gradient(120% 90% at 50% 0%, rgb(255 178 69 / 0.38), rgb(255 178 69 / 0.08) 55%, transparent 80%)";
 
 /** Sample musicians' projects. Their tracks have no links, so they show but don't play. */
 export const SAMPLE_PROJECTS: Record<string, Project[]> = {

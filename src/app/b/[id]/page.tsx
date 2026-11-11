@@ -7,7 +7,7 @@ import { bandYears, getBandPage, type BandMember } from "@/lib/band-page";
 import { PROVIDER_LABEL } from "@/lib/clips";
 import { APP_ORIGIN } from "@/lib/public-profile";
 import { JsonLd } from "@/components/json-ld";
-import { nameWash } from "@/lib/projects";
+import { BAND_GLOW } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -47,7 +47,7 @@ export default async function BandPage({ params }: Params) {
 
   return (
     <div className="isolate relative min-h-dvh w-full">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] -z-10 opacity-60" style={{ background: nameWash(band.name) }} />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] -z-10" style={{ background: BAND_GLOW }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[420px] -z-10 bg-gradient-to-b from-ink/30 to-ink" />
       <div className="w-full mx-auto max-w-[560px] md:max-w-[1000px] px-5 md:px-10 pb-32 md:pb-20">
 
