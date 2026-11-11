@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { PersonPhoto } from "@/components/person-photo";
 import { ProjectList } from "@/components/project-list";
+import { HighlightList, OpenToChips } from "@/components/profile-extras";
 import { SharePage } from "@/components/share-page";
 import { ButtonLink, VerifiedMark, Wordmark } from "@/components/ui";
 import { requestOrigin } from "@/lib/origin";
@@ -48,7 +49,7 @@ export default async function PublicProfile({ params }: Params) {
   const { username } = await params;
   const page = await getPublicPage(username);
   if (!page) notFound();
-  const { person: m, projects, instruments } = page;
+  const { person: m, projects, instruments, openTo, highlights } = page;
   const first = m.name.split(" ")[0];
   const origin = await requestOrigin();
   const join = "/";
@@ -82,6 +83,7 @@ export default async function PublicProfile({ params }: Params) {
             <div className="flex gap-2 flex-wrap text-[13px] pt-1">
               <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
             </div>
+            <OpenToChips ids={openTo} className="pt-1" />
           </div>
 
           <div className="flex gap-2.5">
@@ -98,6 +100,8 @@ export default async function PublicProfile({ params }: Params) {
           ) : (
             <p className="text-[15px] text-smoke">{first} hasn&apos;t added their bands yet.</p>
           )}
+
+          <HighlightList items={highlights} />
 
           {m.influences.length > 0 && (
             <section className="flex flex-col gap-2.5 pt-2">

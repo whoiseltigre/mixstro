@@ -7,6 +7,8 @@ import { PersonPhoto } from "@/components/person-photo";
 import { SafetyMenu } from "@/components/safety-menu";
 import { BackButton, Button, ButtonLink, VerifiedMark } from "@/components/ui";
 import { getProjects } from "@/lib/projects-server";
+import { getProfileExtras } from "@/lib/profile-extras";
+import { HighlightList, OpenToChips } from "@/components/profile-extras";
 import { getProfile } from "@/lib/people";
 import { QuickReplies } from "@/components/quick-replies";
 import { isExpired } from "@/lib/people";
@@ -22,7 +24,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
   if (!view) notFound();
   const { person: m, connection, viewerId } = view;
   const first = m.name.split(" ")[0];
-  const projects = await getProjects(m);
+  const [projects, extras] = await Promise.all([getProjects(m), getProfileExtras(m)]);
   const sharedIds = new Set(m.shared.map((a) => a.id));
   const expired = connection?.status === "pending" && isExpired(connection.created_at);
   const status = !connection
@@ -72,6 +74,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
           )}
         </div>
+        <OpenToChips ids={extras.openTo} />
         {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} />}
         {status === "expired" && <p className="text-[14px] text-smoke">{first} didn&apos;t answer within a week, so that Connect closed. No hard feelings.</p>}
         {status === "declined" && <p className="text-[14px] text-smoke">{first} said it&apos;s not the right fit this time. Good luck out there.</p>}
@@ -94,6 +97,12 @@ export default async function Profile({ params }: { params: Promise<{ username: 
         {projects.length > 0 && (
           <div className="pt-3">
             <ProjectList projects={projects} />
+          </div>
+        )}
+
+        {extras.highlights.length > 0 && (
+          <div className="pt-2">
+            <HighlightList items={extras.highlights} />
           </div>
         )}
 
