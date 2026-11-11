@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logEvent } from "@/app/(app)/pmf-actions";
 import { BRAND_PATHS } from "./brand-icons";
 
 type Props = {
@@ -41,6 +42,11 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  /** Counts shares of your own page for Pulse (the share loop). */
+  const counted = (how: string) => {
+    if (mine) logEvent("shared_profile", { how });
+  };
+
   async function storyFile() {
     const blob = await (await fetch(story)).blob();
     return new File([blob], `${username}-mixstro.png`, { type: "image/png" });
@@ -51,6 +57,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
     try {
       if (canShareFiles) await navigator.share({ files: [await storyFile()], text: `${text} ${url}` });
       else await navigator.share({ title: `${firstName} on Mixstro`, text, url });
+      counted(canShareFiles ? "story" : "native");
     } catch {
       // Cancelled.
     }
@@ -59,6 +66,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
+      counted("copy");
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -119,7 +127,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
                       {canShareFiles ? "Share to a story" : "Share"}
                     </button>
                   )}
-                  <a href={story} download={`${username}-mixstro.png`} className="h-10 rounded-full px-4 border border-paper/16 text-[14px] font-semibold inline-flex items-center hover:border-paper/40">
+                  <a href={story} download={`${username}-mixstro.png`} onClick={() => counted("card")} className="h-10 rounded-full px-4 border border-paper/16 text-[14px] font-semibold inline-flex items-center hover:border-paper/40">
                     Save card
                   </a>
                 </div>
@@ -129,7 +137,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
             <ul className="grid grid-cols-4 gap-y-4 gap-x-2">
               {links.map((l) => (
                 <li key={l.id}>
-                  <a href={l.href} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-1.5 group">
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" onClick={() => counted(l.id)} className="flex flex-col items-center gap-1.5 group">
                     <span className="size-12 rounded-full bg-paper/8 flex items-center justify-center transition group-hover:bg-paper/16">
                       <Mark id={l.id} size={20} />
                     </span>

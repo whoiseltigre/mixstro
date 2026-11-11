@@ -6,22 +6,24 @@ export const metadata: Metadata = { title: "Privacy Policy · Mixstro" };
 // Plain-language draft. Have it reviewed before public launch.
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="October 29, 2026">
+    <LegalPage title="Privacy Policy" updated="November 11, 2026">
       <p>Mixstro helps musicians find each other. This page explains what we collect, why, and the choices you have.</p>
       <section>
         <h2>What we collect</h2>
         <p>
           Your email address, or your name, email and profile photo from Google if you sign in with Google. Your confirmation that
           you are 18 or older, and when you gave it. The profile you build: first name, username, photo, instruments, genres, influences, goals, general area, and
-          the links you add to your clips. Messages and connection requests you send, and basic usage data such as when you were
-          last active.
+          the links you add to your clips. Messages and connection requests you send, feedback and survey answers you give us, and
+          basic usage data such as which days you open the app and when you share your page.
         </p>
       </section>
       <section>
         <h2>How we use it</h2>
         <p>
           To run your account, suggest musicians you might want to play with, show your profile to other members, deliver your
-          messages, keep Mixstro safe, and send sign-in codes. We do not sell your personal information.
+          messages, keep Mixstro safe, and send sign-in codes. We also count how Mixstro is used (for example, how many new members
+          get a reply in their first week) to decide what to improve. Those counts stay with us: no ad trackers, and we do not
+          sell your personal information.
         </p>
       </section>
       <section>

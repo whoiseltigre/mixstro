@@ -118,7 +118,10 @@ export function SearchList({ people }: { people: Musician[] }) {
                 <PersonPhoto person={m} sizes="56px" initialsSize={20} />
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                <span className="text-[16px] font-semibold">{m.name}</span>
+                <span className="text-[16px] font-semibold">
+                  {m.name}
+                  {m.sample && <SampleTag />}
+                </span>
                 <span className="text-[13px] text-smoke truncate">
                   {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi !== undefined ? ` · ${m.distanceMi} mi` : ""}
                 </span>
@@ -169,4 +172,9 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
       {children}
     </button>
   );
+}
+
+/** Sample people fill the app while it's small; the tag keeps anyone from waiting on a reply. */
+function SampleTag() {
+  return <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-[11px] font-semibold text-smoke">Sample</span>;
 }

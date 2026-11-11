@@ -29,6 +29,10 @@ const TODAY_SIZE = 5;
 export const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
 const SAMPLES = (): Musician[] => (SHOW_SAMPLES ? MUSICIANS : []);
 
+/** Once this many real musicians show up for you, sample people step aside in search and Messages. */
+export const ENOUGH_REAL = 20;
+const ENOUGH_REAL_CHATS = 3;
+
 function withSamples(people: Musician[], size: number) {
   return [...people, ...SAMPLES()].slice(0, size);
 }
@@ -225,7 +229,8 @@ export async function getSearchable(): Promise<Musician[]> {
     viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).neq("id", viewer.id).order("last_active_at", { ascending: false }).limit(200),
     locate(viewer),
   ]);
-  return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...SAMPLES()];
+  const real = await hydrate(viewer, (data ?? []) as ProfileRow[]);
+  return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES()];
 }
 
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
@@ -300,7 +305,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
     ];
   });
   threads.sort((a, b) => b.at.localeCompare(a.at));
-  return { threads: [...threads, ...SAMPLE_THREADS()], demo: false };
+  return { threads: threads.length >= ENOUGH_REAL_CHATS ? threads : [...threads, ...SAMPLE_THREADS()], demo: false };
 }
 
 /** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */

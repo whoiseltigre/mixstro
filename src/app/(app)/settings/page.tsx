@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BackButton, Button, ChevronRight, GoogleIcon, VerifiedMark } from "@/components/ui";
 import { deleteAccount } from "@/lib/safety";
+import { createClient } from "@/lib/supabase/client";
 import { useVerification } from "@/lib/verification";
 import { PublicPageToggle } from "./public-page";
 
@@ -16,6 +17,10 @@ export default function Settings() {
   const [error, setError] = useState<string>();
   const verification = useVerification();
   const [linkError, setLinkError] = useState<string>();
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    createClient()?.rpc("can_view_pulse").then(({ data }) => setPulse(data === true), () => {});
+  }, []);
 
   async function remove() {
     setBusy(true);
@@ -60,6 +65,8 @@ export default function Settings() {
 
       <ul className="flex flex-col rounded-[20px] bg-stage divide-y divide-paper/8">
         <Row href="/settings/notifications" title="Notifications" sub="Push and email, per type" />
+        <Row href="/settings/feedback" title="Send feedback" sub="Tell us what's broken, missing or great" />
+        {pulse && <Row href="/pulse" title="Pulse" sub="How Mixstro is doing (only you see this)" />}
         <Row href="/privacy" title="Privacy Policy" />
         <Row href="/terms" title="Terms" />
       </ul>

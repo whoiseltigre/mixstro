@@ -48,7 +48,10 @@ export function ThreadList({ threads }: { threads: Thread[] }) {
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                       <div className="flex justify-between gap-2">
-                        <span className="text-[16px] font-semibold">{t.person.name}</span>
+                        <span className="text-[16px] font-semibold">
+                          {t.person.name}
+                          {t.person.sample && <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-[11px] font-semibold text-smoke">Sample</span>}
+                        </span>
                         <TimeAgo iso={t.at} className="text-[13px] text-smoke" />
                       </div>
                       <span className={`text-[14px] truncate ${waiting ? "text-paper" : "text-smoke"}`}>{t.mine ? `You: ${t.preview}` : t.preview}</span>
