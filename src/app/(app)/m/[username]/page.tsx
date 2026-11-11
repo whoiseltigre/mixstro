@@ -10,6 +10,8 @@ import { getProjects } from "@/lib/projects-server";
 import { getProfileExtras } from "@/lib/profile-extras";
 import { HighlightList, OpenToChips } from "@/components/profile-extras";
 import { getProfile } from "@/lib/people";
+import { getMutuals } from "@/lib/network";
+import { MutualsRow } from "@/components/network";
 import { QuickReplies } from "@/components/quick-replies";
 import { isExpired } from "@/lib/people";
 import { ConnectButton } from "./connect-button";
@@ -24,7 +26,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
   if (!view) notFound();
   const { person: m, connection, viewerId } = view;
   const first = m.name.split(" ")[0];
-  const [projects, extras] = await Promise.all([getProjects(m), getProfileExtras(m)]);
+  const [projects, extras, mutuals] = await Promise.all([getProjects(m), getProfileExtras(m), getMutuals(m)]);
   const sharedIds = new Set(m.shared.map((a) => a.id));
   const expired = connection?.status === "pending" && isExpired(connection.created_at);
   const status = !connection
@@ -75,6 +77,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           )}
         </div>
         <OpenToChips ids={extras.openTo} />
+        <MutualsRow mutuals={mutuals} first={first} />
         {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} />}
         {status === "expired" && <p className="text-[14px] text-smoke">{first} didn&apos;t answer within a week, so that Connect closed. No hard feelings.</p>}
         {status === "declined" && <p className="text-[14px] text-smoke">{first} said it&apos;s not the right fit this time. Good luck out there.</p>}

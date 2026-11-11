@@ -8,7 +8,8 @@ import { HighlightList, OpenToChips } from "@/components/profile-extras";
 import { SharePage } from "@/components/share-page";
 import { ButtonLink, VerifiedMark, Wordmark } from "@/components/ui";
 import { requestOrigin } from "@/lib/origin";
-import { getPublicPage, plays } from "@/lib/public-profile";
+import { APP_ORIGIN, getPublicPage, plays } from "@/lib/public-profile";
+import { JsonLd } from "@/components/json-ld";
 
 /**
  * Someone's music page for people without a Mixstro account: what a shared
@@ -39,8 +40,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: { canonical: `${origin}/@${p.username}` },
-    openGraph: { type: "profile", title, description, url: `${origin}/@${p.username}`, siteName: "Mixstro", images: [image] },
+    alternates: { canonical: `${APP_ORIGIN}/@${p.username}` },
+    openGraph: { type: "profile", title, description, url: `${APP_ORIGIN}/@${p.username}`, siteName: "Mixstro", images: [image] },
     twitter: { card: "summary_large_image", title, description, images: [image.url] },
   };
 }
@@ -65,6 +66,24 @@ export default async function PublicProfile({ params }: Params) {
         </ButtonLink>
       </header>
 
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          url: `${APP_ORIGIN}/@${m.username}`,
+          mainEntity: {
+            "@type": "Person",
+            name: m.name,
+            alternateName: `@${m.username}`,
+            url: `${APP_ORIGIN}/@${m.username}`,
+            ...(m.photo && { image: m.photo.startsWith("/") ? `${APP_ORIGIN}${m.photo}` : m.photo }),
+            jobTitle: "Musician",
+            knowsAbout: instruments,
+            ...(m.neighborhood && { homeLocation: { "@type": "Place", name: m.neighborhood } }),
+            memberOf: projects.filter((x) => x.bandId).map((x) => ({ "@type": "MusicGroup", name: x.name, url: `${APP_ORIGIN}/b/${x.bandId}` })),
+          },
+        }}
+      />
       <main className="pb-36 md:pb-20 md:pt-8 md:grid md:grid-cols-[minmax(300px,400px)_1fr] md:gap-x-12 md:items-start">
         <div className="relative h-[420px] md:h-auto md:aspect-[9/10] md:rounded-[28px] md:overflow-hidden md:sticky md:top-8">
           <PersonPhoto person={m} priority sizes="(min-width: 768px) 400px, 100vw" initialsSize={88} className="object-[50%_35%]" />

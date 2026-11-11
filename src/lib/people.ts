@@ -144,7 +144,7 @@ export async function locate(viewer: Viewer) {
 const withinRadius = (viewer: Viewer) => (m: Musician) => m.distanceMi === undefined || m.distanceMi <= (viewer.profile?.radius_mi ?? 25);
 
 /** Every connection row you're part of, in either direction. */
-async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
+export async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
   const { data } = await viewer.supabase
     .from("connections")
     .select("id, from_id, to_id, status, created_at")

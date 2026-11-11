@@ -109,6 +109,13 @@ export default function Me() {
               <span className="text-[13px] text-smoke">A release, a show you&apos;re proud of, press, an award. What you&apos;d want someone to know first.</span>
             </Link>
           ))}
+        <Link href="/me/network" className="flex items-center gap-3 p-4 rounded-[18px] bg-stage border border-paper/8 transition hover:border-paper/40">
+          <span className="flex-1 flex flex-col gap-0.5">
+            <span className="text-[15px] font-semibold">Your network</span>
+            <span className="text-[13px] text-smoke">Your connections, and people you may know through your bands.</span>
+          </span>
+          <ChevronRight />
+        </Link>
         {draft.influences.length > 0 && (
           <section className="flex flex-col gap-2.5">
             <h2 className="text-[17px] font-semibold">Influences</h2>

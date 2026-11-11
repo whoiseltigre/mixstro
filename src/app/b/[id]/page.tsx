@@ -5,7 +5,8 @@ import { ButtonLink, VerifiedMark, Wordmark } from "@/components/ui";
 import { artistTint } from "@/lib/artists";
 import { bandYears, getBandPage, type BandMember } from "@/lib/band-page";
 import { PROVIDER_LABEL } from "@/lib/clips";
-import { requestOrigin } from "@/lib/origin";
+import { APP_ORIGIN } from "@/lib/public-profile";
+import { JsonLd } from "@/components/json-ld";
 import { nameWash } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/server";
 
@@ -23,15 +24,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const band = await getBandPage(id);
   if (!band) return { title: "Mixstro" };
-  const origin = await requestOrigin();
   const names = band.members.map((m) => m.name);
   const title = `${band.name} on Mixstro`;
   const description = `${band.name} (${bandYears(band)}): ${names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`}. Listen and meet the band on Mixstro.`;
   return {
     title,
     description,
-    alternates: { canonical: `${origin}/b/${band.id}` },
-    openGraph: { type: "website", title, description, url: `${origin}/b/${band.id}`, siteName: "Mixstro" },
+    alternates: { canonical: `${APP_ORIGIN}/b/${band.id}` },
+    openGraph: { type: "website", title, description, url: `${APP_ORIGIN}/b/${band.id}`, siteName: "Mixstro" },
     twitter: { card: "summary", title, description },
   };
 }
@@ -62,6 +62,22 @@ export default async function BandPage({ params }: Params) {
         )}
       </header>
 
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "MusicGroup",
+          name: band.name,
+          url: `${APP_ORIGIN}/b/${band.id}`,
+          foundingDate: String(band.startYear),
+          member: band.members.map((m) => ({
+            "@type": "OrganizationRole",
+            ...(m.role && { roleName: m.role }),
+            startDate: String(m.startYear),
+            ...(m.endYear !== undefined && { endDate: String(m.endYear) }),
+            member: { "@type": "Person", name: m.name, url: `${APP_ORIGIN}/@${m.username}` },
+          })),
+        }}
+      />
       <main className="pt-14 md:pt-20 flex flex-col gap-8">
         <div className="flex flex-col gap-2.5">
           <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
