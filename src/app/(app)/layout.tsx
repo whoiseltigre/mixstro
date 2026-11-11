@@ -1,4 +1,5 @@
 import { ActivityPing } from "@/components/activity";
+import { PmfSurvey } from "@/components/pmf-survey";
 import { PushPrompt } from "@/components/push-prompt";
 import { TabBar } from "@/components/tab-bar";
 import { TopBar } from "@/components/top-bar";
@@ -12,6 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <TabBar />
       <ActivityPing />
       <PushPrompt />
+      <PmfSurvey />
     </div>
   );
 }

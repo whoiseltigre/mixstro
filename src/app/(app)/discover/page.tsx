@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { GetStartedCard } from "@/components/get-started";
 import { RoleAlertCard } from "@/components/role-alert";
+import { getGetStarted, nobodyNearby } from "@/lib/get-started";
 import { YOUR_TURN_LIMIT, getRoleAlert, getToday } from "@/lib/people";
 import { TodayDeck } from "./today-deck";
 
@@ -7,12 +9,18 @@ export const metadata = { title: "Today · Mixstro" };
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
-  const [{ people, incoming, yourTurn }, alert] = await Promise.all([getToday(), getRoleAlert().catch(() => null)]);
+  const [{ people, incoming, notes, yourTurn }, alert, started] = await Promise.all([
+    getToday(),
+    getRoleAlert().catch(() => null),
+    getGetStarted().catch(() => null),
+  ]);
   if (yourTurn >= YOUR_TURN_LIMIT) return <YourTurnPause count={yourTurn} />;
+  const start = started && (people.some((m) => !m.sample) ? started : nobodyNearby(started));
   return (
     <>
-      {alert && <RoleAlertCard alert={alert} />}
-      <TodayDeck people={people} incoming={incoming} />
+      {/* One card at a time at the top: a new musician you're looking for beats the checklist. */}
+      {alert ? <RoleAlertCard alert={alert} /> : start && <GetStartedCard state={start} />}
+      <TodayDeck people={people} incoming={incoming} notes={notes} />
     </>
   );
 }

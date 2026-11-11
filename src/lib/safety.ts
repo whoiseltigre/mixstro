@@ -1,5 +1,6 @@
 "use client";
 
+import { alertSafetyTeam } from "@/app/(app)/safety-actions";
 import { createClient } from "@/lib/supabase/client";
 
 /** Block, report and delete account (#11). Demo mode keeps blocks locally. */
@@ -41,7 +42,9 @@ export async function blockUser(username: string): Promise<{ error?: string }> {
     return {};
   }
   const { error } = await s.supabase.from("blocks").upsert({ blocker_id: s.user.id, blocked_id: s.id });
-  return error ? { error: error.message } : {};
+  if (error) return { error: error.message };
+  alertSafetyTeam("block", s.id).catch(() => {});
+  return {};
 }
 
 export async function reportUser(username: string, reason: ReportReason, details: string): Promise<{ error?: string }> {
@@ -50,7 +53,9 @@ export async function reportUser(username: string, reason: ReportReason, details
   const { error } = await s.supabase
     .from("reports")
     .insert({ reporter_id: s.user.id, reported_id: s.id, reason, details: details.trim() || null });
-  return error ? { error: error.message } : {};
+  if (error) return { error: error.message };
+  alertSafetyTeam("report", s.id).catch(() => {});
+  return {};
 }
 
 /** Removes uploaded clips, then the account itself; the profile and everything under it cascades. */

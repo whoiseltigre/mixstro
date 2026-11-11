@@ -29,6 +29,10 @@ const TODAY_SIZE = 5;
 export const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
 const SAMPLES = (): Musician[] => (SHOW_SAMPLES ? MUSICIANS : []);
 
+/** Once this many real musicians show up for you, sample people step aside in search and Messages. */
+export const ENOUGH_REAL = 20;
+const ENOUGH_REAL_CHATS = 3;
+
 function withSamples(people: Musician[], size: number) {
   return [...people, ...SAMPLES()].slice(0, size);
 }
@@ -56,7 +60,15 @@ type ProfileRow = {
 
 type InfluenceRow = { profile_id: string; artist_id: string; artist_name: string; image_url: string | null; rank: number };
 
-export type ConnectionRow = { id: number; from_id: string; to_id: string; status: "pending" | "accepted" | "passed" | "declined"; created_at: string };
+export type ConnectionRow = {
+  id: number;
+  from_id: string;
+  to_id: string;
+  status: "pending" | "accepted" | "passed" | "declined";
+  created_at: string;
+  /** The short note sent with the Connect. */
+  note?: string | null;
+};
 
 /** A Connect nobody answered within a week quietly closes for both people (#3). */
 export const isExpired = (createdAt: string) => Date.now() - new Date(createdAt).getTime() > 7 * 24 * 60 * 60 * 1000;
@@ -140,16 +152,33 @@ export async function locate(viewer: Viewer) {
   if (viewer.profile) await ensureLocation(viewer.supabase, viewer.id, viewer.profile.neighborhood).catch(() => {});
 }
 
+/**
+ * Who has music to hear: a clip, or a track on one of their projects. Music-first
+ * ranking puts people with a photo and music ahead; empty profiles go last, never hidden.
+ */
+export async function withMusic(supabase: Viewer["supabase"], ids: string[]): Promise<Set<string>> {
+  if (!ids.length) return new Set();
+  const [{ data: clips }, { data: tracks }] = await Promise.all([
+    supabase.from("clips").select("profile_id").eq("kind", "clip").in("profile_id", ids),
+    supabase.from("project_tracks").select("profile_id").in("profile_id", ids),
+  ]);
+  return new Set([...(clips ?? []), ...(tracks ?? [])].map((r) => r.profile_id as string));
+}
+
+/** 0: photo and music. 1: one of the two. 2: neither. Lower ranks first. */
+export const profileTier = (m: Musician, music: Set<string>) => (m.photo ? 0 : 1) + (music.has(m.id) ? 0 : 1);
+
 /** People within your radius. Anyone without a known distance yet stays in. */
 const withinRadius = (viewer: Viewer) => (m: Musician) => m.distanceMi === undefined || m.distanceMi <= (viewer.profile?.radius_mi ?? 25);
 
 /** Every connection row you're part of, in either direction. */
 async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
-  const { data } = await viewer.supabase
-    .from("connections")
-    .select("id, from_id, to_id, status, created_at")
-    .or(`from_id.eq.${viewer.id},to_id.eq.${viewer.id}`);
-  return (data ?? []) as ConnectionRow[];
+  const mine = `from_id.eq.${viewer.id},to_id.eq.${viewer.id}`;
+  const { data, error } = await viewer.supabase.from("connections").select("id, from_id, to_id, status, created_at, note").or(mine);
+  if (!error) return (data ?? []) as ConnectionRow[];
+  // Before the connect-notes SQL runs there's no note column.
+  const { data: rows } = await viewer.supabase.from("connections").select("id, from_id, to_id, status, created_at").or(mine);
+  return (rows ?? []) as ConnectionRow[];
 }
 
 /** Past this many chats waiting on you, Today pauses until you answer some (#4). */
@@ -176,6 +205,8 @@ export type Today = {
   people: Musician[];
   /** Ids of people who already said they want to play with you. */
   incoming: string[];
+  /** The note each of them sent, by their id. */
+  notes?: Record<string, string>;
   demo: boolean;
 };
 
@@ -201,22 +232,28 @@ export async function getToday(): Promise<Today> {
     .order("last_active_at", { ascending: false })
     .limit(200);
   const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
-  const [nearby, { data: clips }] = await Promise.all([
+  const [nearby, music] = await Promise.all([
     hydrate(viewer, candidates),
-    viewer.supabase.from("clips").select("profile_id").eq("kind", "clip").in("profile_id", candidates.map((r) => r.id)),
+    withMusic(viewer.supabase, candidates.map((r) => r.id)),
   ]);
-  // Hearing someone first matters, so profiles with a clip get a boost.
-  const hasClip = new Set((clips ?? []).map((c) => c.profile_id as string));
   // Someone who already asked to play with you shows up even if they're a bit further out.
   const people = nearby.filter((m) => incoming.includes(m.id) || withinRadius(viewer)(m));
-  const score = (m: Musician) => m.shared.length + (hasClip.has(m.id) ? 2 : 0) + (m.sameCommitment ? 1 : 0);
+  const score = (m: Musician) => m.shared.length + (m.sameCommitment ? 1 : 0);
   // Ties go to whoever is closer.
   const near = (m: Musician) => m.distanceMi ?? Infinity;
-  people.sort((a, b) => Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) || score(b) - score(a) || near(a) - near(b));
-  return { people: withSamples(people, TODAY_SIZE), incoming, demo: false, yourTurn: await yourTurn };
+  // Music first: people with a photo and something to hear lead, empty profiles go last.
+  people.sort(
+    (a, b) =>
+      Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) ||
+      profileTier(a, music) - profileTier(b, music) ||
+      score(b) - score(a) ||
+      near(a) - near(b),
+  );
+  const notes = Object.fromEntries(connections.filter((c) => incoming.includes(c.from_id) && c.note).map((c) => [c.from_id, c.note as string]));
+  return { people: withSamples(people, TODAY_SIZE), incoming, notes, demo: false, yourTurn: await yourTurn };
 }
 
-/** Everyone you can search, most recently active first. */
+/** Everyone you can search: photo and music first, then most recently active. */
 export async function getSearchable(): Promise<Musician[]> {
   const viewer = await getViewer();
   if (!viewer) return MUSICIANS;
@@ -225,7 +262,11 @@ export async function getSearchable(): Promise<Musician[]> {
     viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).neq("id", viewer.id).order("last_active_at", { ascending: false }).limit(200),
     locate(viewer),
   ]);
-  return [...(await hydrate(viewer, (data ?? []) as ProfileRow[])), ...SAMPLES()];
+  const rows = (data ?? []) as ProfileRow[];
+  const [real, music] = await Promise.all([hydrate(viewer, rows), withMusic(viewer.supabase, rows.map((r) => r.id))]);
+  // Stable sort keeps "most recently active" within each tier.
+  real.sort((a, b) => profileTier(a, music) - profileTier(b, music));
+  return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES()];
 }
 
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
@@ -300,7 +341,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
     ];
   });
   threads.sort((a, b) => b.at.localeCompare(a.at));
-  return { threads: [...threads, ...SAMPLE_THREADS()], demo: false };
+  return { threads: threads.length >= ENOUGH_REAL_CHATS ? threads : [...threads, ...SAMPLE_THREADS()], demo: false };
 }
 
 /** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */

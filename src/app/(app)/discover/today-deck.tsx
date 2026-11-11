@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectSheet } from "@/components/connect-sheet";
 import { announceConnect } from "@/components/push-prompt";
 import { QuickReplies } from "@/components/quick-replies";
 import Link from "next/link";
@@ -15,10 +16,14 @@ import { connect, pass } from "../actions";
 export function TodayDeck({
   people,
   incoming,
+  notes = {},
 }: {
   people: Musician[];
   incoming: string[];
+  /** The note each person who asked you sent, by their id. */
+  notes?: Record<string, string>;
 }) {
+  const [sheetFor, setSheetFor] = useState<Musician>();
   const [done, setDone] = useState<string[]>([]);
   const [currentId, setCurrentId] = useState<string>();
   const [sentTo, setSentTo] = useState<string>();
@@ -36,14 +41,17 @@ export function TodayDeck({
     setCurrentId(undefined);
     setDone((d) => [...d, m.id]);
   };
+  // A new Connect opens the note sheet; answering someone who asked you connects straight away.
   const doConnect = () =>
-    start(async () => {
-      const res = await connect(m.id, m.username);
-      if (res?.sent) {
-        setSentTo(m.id);
-        announceConnect(first);
-      }
-    });
+    asked
+      ? start(async () => {
+          const res = await connect(m.id, m.username);
+          if (res && "sent" in res && res.sent) {
+            setSentTo(m.id);
+            announceConnect(first);
+          }
+        })
+      : setSheetFor(m);
   const doPass = () =>
     start(async () => {
       await pass(m.id);
@@ -59,7 +67,19 @@ export function TodayDeck({
 
   return (
     <>
+      {sheetFor && (
+        <ConnectSheet
+          person={sheetFor}
+          onClose={() => setSheetFor(undefined)}
+          onSent={() => {
+            setSentTo(sheetFor.id);
+            announceConnect(sheetFor.name.split(" ")[0]);
+            setSheetFor(undefined);
+          }}
+        />
+      )}
       <Gallery
+        note={asked ? notes[m.id] : undefined}
         people={remaining}
         current={m}
         total={people.length}
@@ -153,7 +173,7 @@ export function TodayDeck({
 
           {asked && sentTo !== m.id && (
             <div className="px-5">
-              <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={next} />
+              <QuickReplies otherId={m.id} username={m.username} first={first} note={notes[m.id]} onClosed={next} />
             </div>
           )}
           {sentTo === m.id ? (
@@ -228,6 +248,7 @@ function Gallery({
   total,
   why,
   asked,
+  note,
   sent,
   pending,
   onPick,
@@ -240,6 +261,7 @@ function Gallery({
   total: number;
   why: string;
   asked: boolean;
+  note?: string;
   sent: boolean;
   pending: boolean;
   onPick: (id: string) => void;
@@ -341,7 +363,7 @@ function Gallery({
                   </span>
                 ))}
             </div>
-            {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={onNext} />}
+            {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} note={note} onClosed={onNext} />}
             {sent ? (
               <div className="flex items-center gap-3 pt-1">
                 <p className="flex-1 text-[15px]">

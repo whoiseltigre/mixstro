@@ -298,7 +298,7 @@ async function sharedInfluences(a: string, b: string) {
 }
 
 /** Someone sent you a Connect. */
-export async function notifyConnect(fromId: string, toId: string) {
+export async function notifyConnect(fromId: string, toId: string, note?: string | null) {
   if (!emailEnabled()) return;
   const [map, shared] = await Promise.all([people([fromId]), sharedInfluences(fromId, toId)]);
   const from = map.get(fromId);
@@ -309,10 +309,11 @@ export async function notifyConnect(fromId: string, toId: string) {
     ref: fromId,
     throttleMinutes: 60 * 24 * 7,
     subject: `${from.first_name} wants to play with you`,
-    preheader: n ? `${line(from)}. You both love ${shared[0]}.` : `${line(from)}. Have a listen and answer with one tap.`,
+    preheader: note ? `"${note.length > 90 ? `${note.slice(0, 88)}…` : note}"` : n ? `${line(from)}. You both love ${shared[0]}.` : `${line(from)}. Have a listen and answer with one tap.`,
     blocks: [
       who(from),
       { kind: "headline", text: `${from.first_name} wants to play with you` },
+      ...(note ? [{ kind: "bubble" as const, text: note }] : []),
       { kind: "text", text: n ? `${from.first_name} sent you a Connect, and you share ${n} influence${n === 1 ? "" : "s"}.` : `${from.first_name} sent you a Connect. Have a listen and answer with one tap.` },
       ...(n ? [{ kind: "chips" as const, items: [...shared.slice(0, 3), ...(n > 3 ? [`+${n - 3}`] : [])] }] : []),
     ],
@@ -544,4 +545,84 @@ export async function notifyJamSoon(jamId: number, recipientId: string, otherId:
     cta: { label: "Open the chat", path: `/messages/${other.username}` },
     push: { title: `Jam with ${other.first_name} at ${clock(startsAt)}`, body: place },
   });
+}
+
+/* ---------- Safety alerts to the Mixstro team ---------- */
+
+const REASON: Record<string, string> = {
+  fake: "Fake profile or impersonation",
+  harassment: "Harassment or threats",
+  spam: "Spam or scams",
+  inappropriate: "Inappropriate content",
+  other: "Something else",
+};
+
+/**
+ * Someone blocked or reported a member: email the team right away. The team is whoever is in
+ * public.pulse_viewers (plus SAFETY_ALERT_TO, if set). Ignores notification settings and
+ * throttles on purpose. Never throws.
+ */
+export async function notifySafety(kind: "block" | "report", reporterId: string, reportedId: string) {
+  try {
+    const db = adminClient();
+    const key = process.env.RESEND_API_KEY;
+    if (!db || !key) return;
+    // Only for a row that really exists, filed in the last 10 minutes, so this can't be used to spam the team.
+    const since = new Date(Date.now() - 10 * 60_000).toISOString();
+    let reason: string | undefined;
+    let details: string | null = null;
+    if (kind === "block") {
+      const { data } = await db.from("blocks").select("blocked_id").eq("blocker_id", reporterId).eq("blocked_id", reportedId).maybeSingle();
+      if (!data) return;
+    } else {
+      const { data } = await db
+        .from("reports")
+        .select("reason, details")
+        .eq("reporter_id", reporterId)
+        .eq("reported_id", reportedId)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle<{ reason: string; details: string | null }>();
+      if (!data) return;
+      reason = data.reason;
+      details = data.details;
+    }
+    const [map, { data: team }] = await Promise.all([people([reporterId, reportedId]), db.from("pulse_viewers").select("profile_id")]);
+    const reporter = map.get(reporterId);
+    const reported = map.get(reportedId);
+    if (!reporter || !reported) return;
+
+    const emails = new Set((process.env.SAFETY_ALERT_TO ?? "").split(",").map((s) => s.trim()).filter(Boolean));
+    for (const row of (team ?? []) as { profile_id: string }[]) {
+      const { data } = await db.auth.admin.getUserById(row.profile_id);
+      if (data?.user?.email) emails.add(data.user.email);
+    }
+    if (!emails.size) return;
+
+    const what = kind === "report" ? `reported ${reported.first_name}` : `blocked ${reported.first_name}`;
+    const email: Email = {
+      type: "alerts",
+      subject: `Safety: @${reporter.username} ${what}`,
+      preheader: kind === "report" ? REASON[reason ?? ""] ?? "A new report" : "A new block",
+      blocks: [
+        { kind: "badge", text: kind === "report" ? "New report" : "New block" },
+        who(reported),
+        { kind: "headline", text: `@${reported.username} was ${kind === "report" ? "reported" : "blocked"}` },
+        { kind: "text", text: `By @${reporter.username} (${reporter.first_name}).${kind === "report" ? ` Reason: ${REASON[reason ?? ""] ?? reason ?? "not given"}.` : ""}` },
+        ...(details ? [{ kind: "bubble" as const, text: details }] : []),
+        { kind: "fine", text: "Every block and report is emailed to the Mixstro team. Rows are in the blocks and reports tables in Supabase." },
+      ],
+      cta: { label: `Open @${reported.username}'s profile`, path: `/m/${reported.username}` },
+    };
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: FROM, to: [...emails], subject: email.subject, html: render(email), text: plain(email) }),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) console.error("notifySafety: Resend", res.status, await res.text().catch(() => ""));
+  } catch (e) {
+    console.error("notifySafety:", e);
+  }
 }
