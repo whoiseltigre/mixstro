@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { nounFor } from "./instruments";
 import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
 import { sendPush } from "./push";
@@ -515,8 +516,7 @@ export async function notifyRoleAlert(recipientId: string, joinerId: string, rol
   const from = (await people([joinerId])).get(joinerId);
   if (!from) return;
   const where = miles < 1 ? "nearby" : `${Math.round(miles)} mi away`;
-  const r = role.toLowerCase();
-  const what = r === "drums" ? "drummer" : r === "bass" ? "bassist" : r === "keys" ? "keys player" : r === "vocals" ? "singer" : r === "strings" ? "string player" : r === "horns" ? "horn player" : r;
+  const what = nounFor(role);
   const head = `${/^[aeiou]/.test(what) ? "An" : "A"} ${what} ${why} just joined ${where}`;
   await notify(recipientId, {
     type: "alerts",

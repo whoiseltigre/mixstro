@@ -27,7 +27,7 @@ export function VerifyForm() {
     setError(undefined);
     const supabase = createClient();
     if (!supabase) {
-      router.push("/onboarding/basics");
+      router.push("/onboarding/who");
       return;
     }
     const { data: auth, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
@@ -37,7 +37,7 @@ export function VerifyForm() {
       return;
     }
     const { data } = await supabase.from("profiles").select("onboarded_at").eq("id", auth.user.id).maybeSingle();
-    router.replace(data?.onboarded_at ? "/discover" : "/onboarding/basics");
+    router.replace(data?.onboarded_at ? "/discover" : "/onboarding/who");
   }
 
   async function resend() {

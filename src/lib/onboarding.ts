@@ -5,6 +5,7 @@ import { parseClip } from "@/lib/clips";
 import { saveMyLocation } from "@/app/onboarding/actions";
 import { createClient } from "@/lib/supabase/client";
 import { pruneOldPhotos, uploadPhoto } from "@/lib/photo";
+import { ROLE_IDS } from "@/lib/instruments";
 
 export type Level = "learning" | "solid" | "pro";
 export type MusicSource = "apple_music" | "spotify" | "manual";
@@ -18,10 +19,16 @@ export type Draft = {
   avatarUrl?: string;
   instruments: string[];
   mainInstrument?: string;
+  /** Instruments you typed in yourself ("Erhu"), and the family tile you added them under. */
+  customFamily?: Record<string, string>;
   level?: Level;
   genres: string[];
   musicSource?: MusicSource;
   influences: Artist[];
+  /** Signing up just for yourself, or for you and your band (picked on the first screen). */
+  signupAs?: "solo" | "band";
+  /** Your band, from the band step or "This is my band" in search. Saved as a current project, which is its band page. */
+  band?: { name: string; since: number; role?: string; link?: string; tracks?: { title: string; url: string; thumb?: string }[]; photo?: string };
   goals: string[];
   commitment: number; // index into COMMITMENT
   neighborhood: string;
@@ -47,26 +54,30 @@ export const EMPTY_DRAFT: Draft = {
 };
 
 /**
- * The numbered signup steps, kept to three so signing up takes about two minutes: you and where
- * you are, what you play, your influences. Sign-in comes before, "done" after. What you're here
- * for, tracks and projects are added afterwards from "Finish your profile".
+ * The numbered signup steps, kept short so signing up takes about two minutes: who's joining (just
+ * you, or you and your band), you and where you are, what you play, your band (band signups only),
+ * your influences. Sign-in comes before, "done" after. What you're here for, tracks and more
+ * projects are added afterwards from "Finish your profile".
  */
-export const STEPS = ["basics", "play", "influences"] as const;
+export const STEPS = ["who", "basics", "play", "band", "influences"] as const;
 export type Step = (typeof STEPS)[number];
 /** Screens you reach from your profile, outside the numbered steps. */
 export type ProfileScreen = "why" | "sound";
 
 /** Each screen's stage-spill color, so every screen feels like its own moment. */
 export const STEP_GLOW: Record<Step | ProfileScreen | "where", string> = {
+  who: "#FFB245",
+  band: "#FFACBA",
   basics: "#FFB245",
-  play: "#B5C5FF",
-  why: "#67E2DA",
+  play: "#FF8A6B",
+  why: "#F7BF77",
   where: "#FFACBA",
   influences: "#C9B6FF",
-  sound: "#F7BF77",
+  sound: "#FFACBA",
 };
 
-export const INSTRUMENTS = ["Guitar", "Bass", "Drums", "Keys", "Vocals", "Producer", "Songwriter", "DJ", "Strings", "Horns"];
+/** Instrument families, which are also the roles you can look for. The exact instruments live in lib/instruments. */
+export const INSTRUMENTS = ROLE_IDS;
 export const GENRES = ["Indie", "Rock", "Neo-soul", "Funk", "Jazz", "Hip-hop", "R&B", "Folk", "Electronic", "Punk", "Metal", "Country", "Pop", "Latin"];
 export const GOALS = [
   { id: "showcase", title: "Show off my music", sub: "Old recordings, new releases, the whole journey" },
@@ -82,7 +93,7 @@ export const REASONS = [
     id: "bandmates",
     title: "Find bandmates",
     sub: "Start a band, replace a member, or join one",
-    color: "#B5C5FF",
+    color: "#FF8A6B",
     goals: [
       { id: "start_project", label: "Start or rebuild a band" },
       { id: "join_band", label: "Join a band" },
@@ -92,7 +103,7 @@ export const REASONS = [
     id: "network",
     title: "Gigs and networking",
     sub: "Shows, studio days, other musicians",
-    color: "#67E2DA",
+    color: "#C9B6FF",
     goals: [
       { id: "paid_work", label: "Gigs and paid work" },
       { id: "jam", label: "Meet and jam" },
@@ -261,6 +272,32 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     if (infErr) return { error: infErr.message };
   }
 
+  // Your band becomes a current project on your profile, which is also its band page (/b/<id>).
+  if (draft.band?.name.trim()) {
+    const name = draft.band.name.trim().slice(0, 80);
+    const { data: existing } = await supabase.from("projects").select("id").eq("profile_id", user.id).ilike("name", name).limit(1);
+    let projectId = existing?.[0]?.id as number | undefined;
+    if (!projectId) {
+      const { data: row } = await supabase
+        .from("projects")
+        .insert({ profile_id: user.id, name, start_year: draft.band.since, role: draft.band.role?.trim() || draft.mainInstrument || null })
+        .select("id")
+        .single<{ id: number }>();
+      projectId = row?.id;
+      // Songs confirmed with "Is this you?", then any pasted link.
+      const tracks = [...(draft.band.tracks ?? []), ...(draft.band.link ? [{ url: draft.band.link, title: undefined, thumb: undefined }] : [])]
+        .map((t) => ({ t, clip: parseClip(t.url) }))
+        .filter((x) => x.clip && x.clip.provider !== "upload")
+        .slice(0, 6);
+      if (projectId && tracks.length) {
+        await supabase.from("project_tracks").insert(
+          tracks.map(({ t, clip }, rank) => ({ project_id: projectId, profile_id: user.id, provider: clip!.provider, url: clip!.url, title: t.title ?? null, thumb_url: t.thumb ?? null, rank })),
+        );
+      }
+    }
+    if (projectId) rememberBand(projectId);
+  }
+
   if (draft.clips.length) {
     await supabase.from("clips").delete().eq("profile_id", user.id);
     await supabase.from("clips").insert(
@@ -270,12 +307,29 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
   return {};
 }
 
-export function stepNav(step: Step) {
-  const i = STEPS.indexOf(step);
+/** The steps for this signup: the band step only when you're signing up with your band. */
+export function stepsFor(draft: Pick<Draft, "signupAs">) {
+  return STEPS.filter((s) => s !== "band" || draft.signupAs === "band");
+}
+
+export function stepNav(step: Step, draft: Pick<Draft, "signupAs"> = {}) {
+  const steps = stepsFor(draft);
+  const i = Math.max(0, steps.indexOf(step));
   return {
     number: i + 1,
-    total: STEPS.length,
-    back: i === 0 ? "/" : `/onboarding/${STEPS[i - 1]}`,
-    next: i === STEPS.length - 1 ? "/onboarding/done" : `/onboarding/${STEPS[i + 1]}`,
+    total: steps.length,
+    back: i === 0 ? "/" : `/onboarding/${steps[i - 1]}`,
+    next: i === steps.length - 1 ? "/onboarding/done" : `/onboarding/${steps[i + 1]}`,
   };
+}
+
+/** The band page made at signup, so "done" can link to it. */
+function rememberBand(id: number) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ ...read(), bandPageId: id }));
+  } catch {}
+}
+
+export function savedBandPageId(): number | undefined {
+  return (read() as Draft & { bandPageId?: number }).bandPageId;
 }

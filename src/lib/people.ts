@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { expandRoles, fillsRole } from "./instruments";
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
 import { distancesFromMe, ensureLocation } from "./geo";
@@ -377,7 +378,7 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
       .select(PROFILE_COLUMNS)
       .neq("id", viewer.id)
       .gte("onboarded_at", since)
-      .overlaps("instruments", roles)
+      .overlaps("instruments", expandRoles(roles))
       .order("onboarded_at", { ascending: false })
       .limit(30),
     myConnections(viewer),
@@ -392,7 +393,7 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
     if (!m || m.distanceMi === undefined || m.distanceMi > radius) continue;
     const genre = row.genres.find((g) => myGenres.has(g));
     if (!m.shared.length && !genre) continue;
-    const role = row.instruments.find((i) => roles.includes(i)) ?? m.instrument;
+    const role = row.instruments.find((i) => fillsRole(i, roles)) ?? m.instrument;
     const why = m.shared.length ? `into ${m.shared[0].name}` : `into ${genre!.toLowerCase()}`;
     return { person: m, role, why };
   }
