@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Chip } from "@/components/ui";
-import { INSTRUMENTS } from "@/lib/onboarding";
+import { FAMILIES } from "@/lib/instruments";
 import { createClient, sessionUser } from "@/lib/supabase/client";
 
 const SUGGESTED = ["Drums", "Bass"];
@@ -52,9 +52,9 @@ export function AlertRoles() {
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        {INSTRUMENTS.map((i) => (
-          <Chip key={i} selected={roles.includes(i)} disabled={!ready} onClick={() => toggle(i)}>
-            {i}
+        {FAMILIES.map((f) => (
+          <Chip key={f.id} selected={roles.includes(f.id)} disabled={!ready} onClick={() => toggle(f.id)}>
+            {f.label}
           </Chip>
         ))}
       </div>

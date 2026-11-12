@@ -31,7 +31,8 @@ export function searchArtists(q: string): Artist[] {
   return CATALOG.filter((a) => a.name.toLowerCase().includes(s)).slice(0, 8);
 }
 
-const HUES = [28, 350, 230, 175, 45, 300];
+// Warm stage-gel hues only (no navy or teal).
+const HUES = [28, 350, 300, 45, 15, 330];
 
 export function artistTint(id: string) {
   let h = 0;

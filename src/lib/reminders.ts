@@ -1,4 +1,5 @@
 import { adminClient, notifyJamSoon, notifyRoleAlert, notifyYourTurn } from "./notify";
+import { familyOf, fillsRole } from "./instruments";
 
 /**
  * The scheduled job (every 15 minutes, from Supabase pg_cron → /api/cron/reminders).
@@ -88,7 +89,8 @@ async function roleAlerts() {
     .limit(200);
   const joiners = (j ?? []) as Joiner[];
   if (!joiners.length) return 0;
-  const roles = [...new Set(joiners.flatMap((x) => x.instruments))];
+  // Alerts are saved as families ("Strings"), profiles hold exact instruments ("Cello").
+  const roles = [...new Set(joiners.flatMap((x) => x.instruments.map((i) => familyOf(i)?.id ?? i)))];
 
   // Everyone who wants to hear about one of those roles (picked, or the starting-a-band default).
   const [{ data: picked }, { data: defaults }] = await Promise.all([
@@ -123,7 +125,7 @@ async function roleAlerts() {
     const myGenres = new Set(l.genres);
     for (const x of joiners) {
       if (x.id === l.id) continue;
-      const role = x.instruments.find((i) => wanted.includes(i));
+      const role = x.instruments.find((i) => fillsRole(i, wanted));
       const there = at.get(x.id);
       if (!role || !there) continue;
       const miles = distanceMi(here, there);
