@@ -1,5 +1,8 @@
 "use client";
 
+import { HighlightList } from "@/components/profile-extras";
+import { useMyExtras } from "@/lib/extras-store";
+import { OPEN_TO } from "@/lib/open-to";
 import Link from "next/link";
 import { ArtistAvatar } from "@/components/artist-avatar";
 import { ClipCard } from "@/components/clip-card";
@@ -18,6 +21,7 @@ export default function Me() {
   const { draft, update, ready } = useDraft();
   const { verified } = useVerification();
   const projects = useMyProjects();
+  const extras = useMyExtras();
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
   if (!ready) return null;
@@ -72,6 +76,7 @@ export default function Me() {
       </div>
       <div className="flex flex-col gap-6 md:gap-8 min-w-0">
         <BandInvites />
+        {extras.ready && <OpenToPicker selected={extras.openTo} onToggle={extras.toggleOpenTo} />}
         <FinishProfile
           hasInfluences={draft.influences.length > 0}
           hasTrack={draft.clips.some((c) => c.kind === "clip")}
@@ -90,6 +95,27 @@ export default function Me() {
             }
           />
         )}
+        {extras.ready &&
+          (extras.highlights.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <HighlightList items={extras.highlights} />
+              <Link href="/me/highlights" className="self-start text-[14px] font-semibold underline underline-offset-2">
+                Edit highlights
+              </Link>
+            </div>
+          ) : (
+            <Link href="/me/highlights" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
+              <span className="text-[15px] font-semibold">Add your highlights</span>
+              <span className="text-[13px] text-smoke">A release, a show you&apos;re proud of, press, an award. What you&apos;d want someone to know first.</span>
+            </Link>
+          ))}
+        <Link href="/me/network" className="flex items-center gap-3 p-4 rounded-[18px] bg-stage border border-paper/8 transition hover:border-paper/40">
+          <span className="flex-1 flex flex-col gap-0.5">
+            <span className="text-[15px] font-semibold">Your network</span>
+            <span className="text-[13px] text-smoke">Your connections, and people you may know through your bands.</span>
+          </span>
+          <ChevronRight />
+        </Link>
         {draft.influences.length > 0 && (
           <section className="flex flex-col gap-2.5">
             <h2 className="text-[17px] font-semibold">Influences</h2>
@@ -135,6 +161,42 @@ export default function Me() {
         </div>
       </div>
     </main>
+  );
+}
+
+/** "Open to": tap to say what you're up for right now. Saves on tap and shows on your profile. */
+function OpenToPicker({ selected, onToggle }: { selected: string[]; onToggle: (id: string) => Promise<{ error?: string }> }) {
+  const [error, setError] = useState("");
+  return (
+    <section className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-0.5">
+        <h2 className="text-[17px] font-semibold">Open to</h2>
+        <p className="text-[13px] text-smoke">Shows on your profile, so the right people reach out.</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {OPEN_TO.map((o) => {
+          const on = selected.includes(o.id);
+          return (
+            <button
+              key={o.id}
+              type="button"
+              aria-pressed={on}
+              onClick={async () => setError((await onToggle(o.id)).error ?? "")}
+              className="h-9 px-3.5 rounded-full text-[14px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]"
+              style={on ? { borderColor: o.color, background: `color-mix(in srgb, ${o.color} 18%, transparent)`, color: o.color, fontWeight: 600 } : { borderColor: "rgb(245 241 236 / 0.16)" }}
+            >
+              {on && <span className="size-1.5 rounded-full" style={{ background: o.color }} aria-hidden="true" />}
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {error && (
+        <p role="alert" className="text-[13px] text-[#FF453A]">
+          {error}
+        </p>
+      )}
+    </section>
   );
 }
 

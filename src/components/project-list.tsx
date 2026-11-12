@@ -95,7 +95,13 @@ function ProjectRow({
       <Artwork project={p} size={compact ? 72 : 92} />
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
-          <span className="text-[16px] font-semibold truncate">{p.name}</span>
+          {p.bandId && !compact ? (
+            <Link href={`/b/${p.bandId}`} className="text-[16px] font-semibold truncate hover:underline underline-offset-2">
+              {p.name}
+            </Link>
+          ) : (
+            <span className="text-[16px] font-semibold truncate">{p.name}</span>
+          )}
           {isCurrent(p) && !compact && (
             <span className="shrink-0 text-[11px] font-bold tracking-[0.04em] px-[7px] py-0.5 rounded-full bg-[#67E2DA]/16 text-[#67E2DA]">NOW</span>
           )}
