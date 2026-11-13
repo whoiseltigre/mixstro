@@ -22,8 +22,12 @@ export function TodayDeck({
   const [done, setDone] = useState<string[]>([]);
   const [currentId, setCurrentId] = useState<string>();
   const [sentTo, setSentTo] = useState<string>();
+  // Sample musicians someone already moved past on this device stay gone, so they never block Today.
+  const [skipped, setSkipped] = useState<string[]>([]);
+  const [sampleNote, setSampleNote] = useState<string>();
   const [pending, start] = useTransition();
-  const remaining = people.filter((p) => !done.includes(p.id));
+  useEffect(() => setSkipped(seenSamples()), []);
+  const remaining = people.filter((p) => !done.includes(p.id) && !(p.sample && skipped.includes(p.id)));
   const m = remaining.find((p) => p.id === currentId) ?? remaining[0];
 
   if (!m) return <AllCaughtUp total={people.length} />;
@@ -32,11 +36,15 @@ export function TodayDeck({
   const asked = incoming.includes(m.id);
   const index = done.length;
   const next = () => {
+    if (m.sample) rememberSample(m.id);
     setSentTo(undefined);
+    setSampleNote(undefined);
     setCurrentId(undefined);
     setDone((d) => [...d, m.id]);
   };
-  const doConnect = () =>
+  const doConnect = () => {
+    // Samples are there to show how Today works. Connecting explains that instead of a pretend chat.
+    if (m.sample) return setSampleNote(m.id);
     start(async () => {
       const res = await connect(m.id, m.username);
       if (res?.sent) {
@@ -44,11 +52,14 @@ export function TodayDeck({
         announceConnect(first);
       }
     });
-  const doPass = () =>
+  };
+  const doPass = () => {
+    if (m.sample) return next();
     start(async () => {
       await pass(m.id);
       next();
     });
+  };
   const why = whyYouTwo({
     shared: m.shared.map((a) => a.name),
     commitment: m.commitment,
@@ -66,6 +77,7 @@ export function TodayDeck({
         why={why}
         asked={asked}
         sent={sentTo === m.id}
+        sampleNote={sampleNote === m.id}
         pending={pending}
         onPick={(id) => {
           setSentTo(undefined);
@@ -156,7 +168,9 @@ export function TodayDeck({
               <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={next} />
             </div>
           )}
-          {sentTo === m.id ? (
+          {sampleNote === m.id ? (
+            <SampleNote first={first} onNext={next} />
+          ) : sentTo === m.id ? (
             <div className="px-5 flex items-center gap-3">
               <p className="flex-1 text-[15px] leading-[1.4]">
                 Sent. We&apos;ll tell you when {first} says yes.
@@ -229,6 +243,7 @@ function Gallery({
   why,
   asked,
   sent,
+  sampleNote,
   pending,
   onPick,
   onConnect,
@@ -241,6 +256,7 @@ function Gallery({
   why: string;
   asked: boolean;
   sent: boolean;
+  sampleNote: boolean;
   pending: boolean;
   onPick: (id: string) => void;
   onConnect: () => void;
@@ -342,7 +358,9 @@ function Gallery({
                 ))}
             </div>
             {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={onNext} />}
-            {sent ? (
+            {sampleNote ? (
+              <SampleNote first={first} onNext={onNext} wide />
+            ) : sent ? (
               <div className="flex items-center gap-3 pt-1">
                 <p className="flex-1 text-[15px]">
                   Sent. We&apos;ll tell you when {first} says yes.
@@ -457,5 +475,39 @@ function AllCaughtUp({ total }: { total: number }) {
         </div>
       </div>
     </main>
+  );
+}
+
+const SEEN_KEY = "mx_seen_samples";
+
+function seenSamples(): string[] {
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_KEY) ?? "[]");
+    return Array.isArray(v) ? v.filter((x) => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+function rememberSample(id: string) {
+  try {
+    const seen = seenSamples();
+    if (!seen.includes(id)) localStorage.setItem(SEEN_KEY, JSON.stringify([...seen, id]));
+  } catch {
+    // Private mode: they just come back next visit.
+  }
+}
+
+/** What Connect does on a sample musician: say what it is, then move on. */
+function SampleNote({ first, onNext, wide }: { first: string; onNext: () => void; wide?: boolean }) {
+  return (
+    <div className={wide ? "flex items-center gap-3 pt-1" : "px-5 flex items-center gap-3"}>
+      <p className="flex-1 text-[14.5px] leading-[1.4] text-paper/85 text-pretty">
+        {first} is a sample, here to show how Today works. Real musicians near you come first as they join.
+      </p>
+      <button onClick={onNext} className="h-[51px] px-6 rounded-full bg-paper text-ink text-[17px] font-semibold shrink-0">
+        Next
+      </button>
+    </div>
   );
 }
