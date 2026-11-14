@@ -5,8 +5,11 @@ date: 2024-05-28
 updated: 2026-11-01
 description: "The best songwriting duos of all time, from Lennon-McCartney to Elton John and Bernie Taupin, and what their partnerships teach you about finding a co-writer."
 excerpt: "Lennon and McCartney, John and Taupin, Goffin and King: what the greatest songwriting partnerships teach anyone looking for a co-writer."
-cover:
-cover_alt:
+cover: "/site/v1/blog/best-songwriting-duos/cover-7f408950"
+cover_alt: "Two songwriters with guitars working on a song together"
+og: "/site/v1/blog/best-songwriting-duos/og-de4a0dc6.jpg"
+cover_credit_url: "https://unsplash.com/@edwardeyer"
+cover_credit: "Edward Eyer"
 tags: [Songwriting]
 author: Taylor Greigh
 old_urls: [/best-songwriting-duos-of-all-time/]
@@ -26,11 +29,15 @@ They started writing together as teenagers and kept at it for about a dozen year
 
 In 1967, Elton John, then 20, and Bernie Taupin, 17, answered the same newspaper ad looking for songwriters. That chance meeting started a partnership that has lasted more than five decades. Taupin writes the lyrics first and John sets them to music, often without the two of them in the same room.
 
+![A songwriter writing lyrics in a notebook with a guitar nearby](/site/v1/blog/best-songwriting-duos/photo-1-6b39190c "Photo: Adhy Setya|https://unsplash.com/@masadhysetya")
+
 Together they've made about 30 albums, with songs like "Your Song," "Rocket Man," "Tiny Dancer," "Bennie and the Jets," "Goodbye Yellow Brick Road" and "I'm Still Standing." They were inducted into the Songwriters Hall of Fame in 1992, won the [Oscar for Best Original Song](https://variety.com/2020/music/news/elton-john-wins-oscar-rocketman-song-im-gonna-love-me-again-bernie-taupin-1203498618/) in 2020 for "(I'm Gonna) Love Me Again" from *Rocketman*, and received the Library of Congress [Gershwin Prize](https://www.loc.gov/programs/gershwin-prize/) in 2024.
 
 ## Burt Bacharach and Hal David
 
 Bacharach and David worked together from the late 1950s to 1973, best known for a run of hits with Dionne Warwick: "Walk On By," "Do You Know the Way to San Jose," "I Say a Little Prayer" and "I'll Never Fall in Love Again." They also wrote "What the World Needs Now Is Love," "This Guy's in Love with You" and "(There's) Always Something There to Remind Me," and won the Oscar for "Raindrops Keep Falling on My Head." Their musical *Promises, Promises* earned a Tony nomination for Best Musical, and in 2012 they received the [Gershwin Prize](https://www.loc.gov/events/gershwin-prize/honorees/2012-burt-bacharach-hal-david/).
+
+![Hands playing a Yamaha upright piano](/site/v1/blog/best-songwriting-duos/photo-2-316cb02c "Photo: Jordan Whitfield|https://unsplash.com/@whitfieldjordan")
 
 ## Gerry Goffin and Carole King
 

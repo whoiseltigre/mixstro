@@ -4,8 +4,11 @@ slug: musician-resume
 date: 2026-11-06
 description: "How to write a musician resume for auditions, session work, teaching and music school, with a free template, an example and tips on what to include."
 excerpt: "A one-page musician resume template, a filled-in example, and what to include for auditions, sessions and teaching jobs."
-cover:
-cover_alt:
+cover: "/site/v1/blog/musician-resume/cover-eeb44038"
+cover_alt: "A session guitarist playing in a warm, wood-panelled studio"
+og: "/site/v1/blog/musician-resume/og-690fca30.jpg"
+cover_credit_url: "https://unsplash.com/@rgonzalezvisuals"
+cover_credit: "Rogelio Gonzalez"
 tags: [Profile, Gigs]
 author: Taylor Greigh
 old_urls: []
@@ -20,6 +23,8 @@ Below you'll find what to include, a template you can copy, a filled-in example 
 ## When do you need a musician resume?
 
 More often than you'd think. Common situations include:
+
+![Two musicians working at a keyboard and computer in a recording studio](/site/v1/blog/musician-resume/photo-1-66eacc5f "Photo: Soundsitive Studio|https://unsplash.com/@soundsitive")
 
 - Auditions for established bands, touring acts and theater pit orchestras
 - Session and hired-gun work, where a producer or artist wants to know your credits
@@ -62,6 +67,8 @@ One or two people who've hired you or played with you, or "references available 
 ## Musician resume template
 
 Copy this and fill it in:
+
+![A lead sheet with lyrics and chord symbols](/site/v1/blog/musician-resume/photo-2-d3a53a0f "Photo: Josh|https://unsplash.com/@jack_of_some_trades")
 
 ```
 YOUR NAME

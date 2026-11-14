@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { accentOf } from "@/components/blog/cover";
+import { photoProps } from "@/lib/blog-img";
 import { AUTHORS, SITE_URL, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -28,12 +29,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: post.date,
       modifiedTime: post.updated ?? post.date,
       tags: post.tags,
-      images: ["/site/v1/og-card.jpg"],
+      images: [{ url: post.og ?? "/site/v1/og-card.jpg", width: 1200, height: 630, alt: post.title }],
     },
+    twitter: { card: "summary_large_image", title: post.title, description: post.description, images: [post.og ?? "/site/v1/og-card.jpg"] },
   };
 }
 
-// Placeholder layout: the website design work owns the final look.
 export default async function BlogPost({ params }: Props) {
   const post = getPost((await params).slug);
   if (!post) notFound();
@@ -52,6 +53,7 @@ export default async function BlogPost({ params }: Props) {
         : { "@type": "Organization", name: post.author },
       publisher: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
       mainEntityOfPage: url,
+      ...(post.cover ? { image: [`${SITE_URL}${post.cover}-1600.webp`, ...(post.og ? [`${SITE_URL}${post.og}`] : [])] } : {}),
       keywords: post.tags.join(", "),
     },
     {
@@ -98,6 +100,20 @@ export default async function BlogPost({ params }: Props) {
           </p>
         </header>
 
+        {post.cover && (
+          <figure className="mxb-post-cover">
+            {/* Plain <img>: the photo is pre-sized into WebP at 3 widths, so no image server is needed. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img {...photoProps(post.cover, "(min-width: 1100px) 1040px, calc(100vw - 40px)")} alt={post.cover_alt ?? ""} fetchPriority="high" decoding="async" />
+            {post.cover_credit && (
+              <figcaption>
+                Photo: {post.cover_credit_url ? <a href={post.cover_credit_url} rel="nofollow noopener" target="_blank">{post.cover_credit}</a> : post.cover_credit}
+                {post.cover_credit_url?.includes("unsplash.com") ? " on Unsplash" : ""}
+              </figcaption>
+            )}
+          </figure>
+        )}
+
         <article className="mxb-article" dangerouslySetInnerHTML={{ __html: post.html }} />
 
         {author && (
@@ -124,7 +140,11 @@ export default async function BlogPost({ params }: Props) {
                 const c = category(p);
                 const { accent, glow } = accentOf(c);
                 return (
-                  <Link key={p.slug} href={`/blog/${p.slug}`} className="mxb-card" style={{ "--accent": accent, "--glow": glow, minHeight: 220 } as React.CSSProperties}>
+                  <Link key={p.slug} href={`/blog/${p.slug}`} className={`mxb-card${p.cover ? " has-photo" : ""}`} style={{ "--accent": accent, "--glow": glow, minHeight: 220 } as React.CSSProperties}>
+                    {p.cover && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className="mxb-card-img" {...photoProps(p.cover, "(min-width: 900px) 380px, (min-width: 600px) 50vw, 100vw")} alt="" loading="lazy" decoding="async" />
+                    )}
                     <span className="meta">{c} · {p.readingMinutes} min read</span>
                     <h3>{p.title}</h3>
                   </Link>

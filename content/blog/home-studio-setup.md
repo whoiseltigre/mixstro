@@ -5,8 +5,11 @@ date: 2024-05-24
 updated: 2026-11-01
 description: "A beginner home studio setup: the 10 pieces of home studio equipment you need, from DAW and interface to mic and monitors, and what to buy first."
 excerpt: "Ten pieces of gear that take you from voice memos to real recordings, in the order you should buy them."
-cover:
-cover_alt:
+cover: "/site/v1/blog/home-studio-setup/cover-8ca1ab75"
+cover_alt: "A home studio desk with studio monitors, a MIDI keyboard and a computer"
+og: "/site/v1/blog/home-studio-setup/og-c1f3104e.jpg"
+cover_credit_url: "https://unsplash.com/@techivation"
+cover_credit: "Techivation"
 tags: [Gear, Recording]
 author: Taylor Greigh
 old_urls: [/beginner-home-studio-gear/]
@@ -21,6 +24,8 @@ Here's the home studio equipment that matters, starting with what you probably a
 ### 1. A computer
 
 Mac or PC, either works. What matters is enough RAM to run your sessions and enough storage to hold them. A recent laptop handles most home recording without trouble. One tip from experience: you always need more storage than you think, so plan on an external drive for projects and sample libraries.
+
+![A red Focusrite audio interface, the heart of a home studio](/site/v1/blog/home-studio-setup/photo-1-96fc989f "Photo: Sven Brandsma|https://unsplash.com/@seffen99")
 
 ### 2. A DAW
 
@@ -49,6 +54,8 @@ You need closed-back headphones for tracking, so the click doesn't bleed into yo
 ### 7. A MIDI controller
 
 A small keyboard controller lets you play virtual instruments and program drums. The [Akai MPK Mini](https://www.akaipro.com/) is cheap, tiny and does a lot for its size.
+
+![A condenser microphone in a shock mount, ready to record vocals](/site/v1/blog/home-studio-setup/photo-2-ebc7cdfc "Photo: Jonathan Velasquez|https://unsplash.com/@jonathanvez")
 
 ### 8. Acoustic treatment
 

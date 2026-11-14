@@ -5,8 +5,11 @@ date: 2024-11-05
 updated: 2026-11-01
 description: "What is metalcore? A guide to the genre and its subgenres (classic, melodic, deathcore and progressive), with the key bands and a track to start each one."
 excerpt: "Where metalcore came from, how it splits into classic, melodic, deathcore and progressive, and five bands to start each one."
-cover:
-cover_alt:
+cover: "/site/v1/blog/metalcore/cover-aa578d5b"
+cover_alt: "A heavy band playing a small club under amber stage lights"
+og: "/site/v1/blog/metalcore/og-766d0db4.jpg"
+cover_credit_url: "https://unsplash.com/@true_zuzu"
+cover_credit: "Vitalii Onyshchuk"
 tags: [Metal]
 author: Taylor Greigh
 old_urls: [/metalcore-subgenres/]
@@ -50,6 +53,8 @@ Melodic metalcore is the most accessible branch, blending aggressive riffs with 
 
 Deathcore blends death metal’s brutality with metalcore’s breakdowns. With guttural vocals and earth-shattering riffs, it’s the heaviest branch of the family.
 
+![A metalcore crowd in the middle of a mosh pit](/site/v1/blog/metalcore/photo-1-318001c5 "Photo: Evgeniy Smersh|https://unsplash.com/@igrindphoto")
+
 **Bands to start with:**
 
 - **Suicide Silence** – [Unanswered](https://www.youtube.com/watch?v=KJbzgU3EsE0): Low tunings, punishing breakdowns, and one of the bands that took deathcore mainstream in the late 2000s.
@@ -63,6 +68,8 @@ Deathcore blends death metal’s brutality with metalcore’s breakdowns. With g
 ## Progressive metalcore
 
 Progressive metalcore pushes musical boundaries, using technical complexity, unusual time signatures, and genre-blending elements. It’s perfect if you like your heavy music technical and a little strange.
+
+![A long-haired metal guitarist playing under blue light](/site/v1/blog/metalcore/photo-2-02675e6e "Photo: Hector Bermudez|https://unsplash.com/@hectorbermudez")
 
 **Bands to start with:**
 

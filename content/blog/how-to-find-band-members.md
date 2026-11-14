@@ -4,8 +4,11 @@ slug: how-to-find-band-members
 date: 2026-11-02
 description: "How to find band members who show up, fit your sound and stick around: local shows, open mics, friends and family, music shops and apps like Mixstro."
 excerpt: "Local shows, open mics, your own group chat, and the right app: where to find band members, and how to tell if they're the right fit."
-cover:
-cover_alt:
+cover: "/site/v1/blog/how-to-find-band-members/cover-6b0a52bc"
+cover_alt: "Two musicians playing guitar and harmonica at a pub open mic"
+og: "/site/v1/blog/how-to-find-band-members/og-65e60c98.jpg"
+cover_credit_url: "https://unsplash.com/@jonathanborba"
+cover_credit: "Jonathan Borba"
 tags: [Bands, Networking]
 author: Taylor Greigh
 old_urls: []
@@ -36,6 +39,8 @@ Don't pitch anyone on the spot. Tell them you liked the set, ask what else they 
 
 Open mics and jam nights are basically auditions where nobody has to call it an audition. You get to hear people play, see how they handle a song they don't know, and find out who listens to the rest of the band. If you hit it off on stage with someone, that's a better sign than any message thread.
 
+![Three musicians playing an acoustic set in a cafe](/site/v1/blog/how-to-find-band-members/photo-1-3a6915f7 "Photo: Grace Anne Bobadilla|https://unsplash.com/@graceannefully")
+
 Go regularly. The same faces tend to come back, and being a familiar face makes the conversation easy.
 
 ## 3. Ask friends, family and your own network
@@ -47,6 +52,8 @@ People you're introduced to through someone you trust come with a built-in refer
 ## 4. Music stores, rehearsal studios and teachers
 
 Local music shops, rehearsal spaces and lesson studios sit at the center of every scene. Many still have a notice board, and the staff usually know who's looking for a band. Rehearsal studios are especially good, since everyone walking through the door is already playing in a band.
+
+![Electric guitars hanging on the wall of a music store](/site/v1/blog/how-to-find-band-members/photo-2-e8a3e324 "Photo: Franki Chamaki|https://unsplash.com/@franki")
 
 ## 5. Schools, colleges and community groups
 
