@@ -37,6 +37,8 @@ export type Draft = {
   radiusMi: number;
   playDays: string[];
   clips: { kind: "clip" | "band"; value: string }[]; // clip = YouTube/TikTok URL
+  /** The account this draft belongs to, so a second account on the same device never sees the first one's. */
+  ownerId?: string;
 };
 
 export const EMPTY_DRAFT: Draft = {
@@ -130,8 +132,26 @@ export function useDraft() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setDraft(read());
-    setReady(true);
+    const local = read();
+    setDraft(local);
+    let live = true;
+    // The saved profile is the truth for a signed-in account: a new phone, a cleared browser or a
+    // second account on this device all load it from the database instead of a stale local draft.
+    syncDraft(local)
+      .then((synced) => {
+        if (!live) return;
+        if (synced) {
+          try {
+            localStorage.setItem(KEY, JSON.stringify(synced));
+          } catch {}
+          setDraft(synced);
+        }
+        setReady(true);
+      })
+      .catch(() => live && setReady(true));
+    return () => {
+      live = false;
+    };
   }, []);
 
   /** A patch, or a function of the latest draft for updates that land after an await. */
@@ -148,6 +168,77 @@ export function useDraft() {
   }, []);
 
   return { draft, update, ready };
+}
+
+type ProfileRow = {
+  first_name: string;
+  username: string;
+  avatar_url: string | null;
+  adult_confirmed_at: string | null;
+  instruments: string[];
+  main_instrument: string | null;
+  level: Level | null;
+  genres: string[];
+  music_source: MusicSource | null;
+  goals: string[];
+  commitment: number;
+  neighborhood: string | null;
+  radius_mi: number;
+  play_days: string[];
+  onboarded_at: string | null;
+};
+
+/**
+ * The draft for whoever is signed in. Returns null when the local draft already belongs to them
+ * (it may hold edits in progress). Otherwise their saved profile, or a fresh draft if they have none.
+ */
+async function syncDraft(local: Draft): Promise<Draft | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data: session } = await supabase.auth.getSession();
+  const uid = session.session?.user.id;
+  if (!uid || local.ownerId === uid) return null;
+
+  const [{ data: profile }, { data: influences }, { data: clips }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("first_name, username, avatar_url, adult_confirmed_at, instruments, main_instrument, level, genres, music_source, goals, commitment, neighborhood, radius_mi, play_days, onboarded_at")
+      .eq("id", uid)
+      .maybeSingle<ProfileRow>(),
+    supabase.from("influences").select("artist_id, artist_name, image_url, rank").eq("profile_id", uid).order("rank"),
+    supabase.from("clips").select("kind, url").eq("profile_id", uid).order("id"),
+  ]);
+
+  if (!profile?.onboarded_at) {
+    // No profile yet. A draft started before signing in (no owner) is this person's signup in progress;
+    // one owned by another account is not, so start fresh and keep only the 18+ tick from this sign-in.
+    if (!local.ownerId) return { ...local, ownerId: uid };
+    return { ...EMPTY_DRAFT, adultConfirmedAt: local.adultConfirmedAt, ownerId: uid };
+  }
+  return {
+    ...EMPTY_DRAFT,
+    ownerId: uid,
+    firstName: profile.first_name,
+    username: profile.username,
+    adultConfirmedAt: profile.adult_confirmed_at ?? undefined,
+    avatarUrl: profile.avatar_url ?? undefined,
+    instruments: profile.instruments ?? [],
+    mainInstrument: profile.main_instrument ?? undefined,
+    level: profile.level ?? undefined,
+    genres: profile.genres ?? [],
+    musicSource: profile.music_source ?? undefined,
+    goals: profile.goals ?? [],
+    commitment: profile.commitment ?? 1,
+    neighborhood: profile.neighborhood ?? "",
+    radiusMi: profile.radius_mi ?? 25,
+    playDays: profile.play_days ?? [],
+    influences: ((influences ?? []) as { artist_id: string; artist_name: string; image_url: string | null }[]).map((r) => ({
+      id: r.artist_id,
+      name: r.artist_name,
+      image: r.image_url ?? undefined,
+    })),
+    clips: ((clips ?? []) as { kind: "clip" | "band"; url: string }[]).map((c) => ({ kind: c.kind, value: c.url })),
+  };
 }
 
 /** Remembers the sign-in screen's 18+ checkbox so it carries through the Google or email round trip. */

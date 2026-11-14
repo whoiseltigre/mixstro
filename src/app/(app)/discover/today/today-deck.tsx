@@ -9,7 +9,7 @@ import { PersonPhoto } from "@/components/person-photo";
 import { LogoMark } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
 import { whyYouTwo } from "@/lib/why";
-import { connect, pass } from "../actions";
+import { connect, pass } from "../../actions";
 
 /** Today's musicians: one at a time on phones, a gallery from 768px. Connect or pass moves to the next. */
 export function TodayDeck({
