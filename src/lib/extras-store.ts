@@ -115,13 +115,15 @@ export function useMyExtras() {
 
   const removeHighlight = useCallback(
     async (id: string) => {
-      const next = highlights.filter((h) => h.id !== id);
-      setHighlights(next);
+      setHighlights((list) => list.filter((h) => h.id !== id));
       const supabase = createClient();
-      if (!supabase || !userId) return writeLocal({ ...readLocal(), highlights: next });
+      if (!supabase || !userId) {
+        const local = readLocal();
+        return writeLocal({ ...local, highlights: local.highlights.filter((h) => h.id !== id) });
+      }
       await supabase.from("highlights").delete().eq("id", Number(id));
     },
-    [highlights, userId],
+    [userId],
   );
 
   return { ready, openTo, highlights, toggleOpenTo, saveHighlight, removeHighlight };

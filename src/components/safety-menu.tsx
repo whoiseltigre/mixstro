@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { REPORT_REASONS, type ReportReason, blockUser, reportUser } from "@/lib/safety";
+import { Sheet, SheetCloser } from "./sheet";
 import { Button } from "./ui";
 
 type View = "closed" | "menu" | "block" | "report" | "reported";
@@ -36,21 +37,20 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
 
   return (
     <>
-      <button type="button" aria-label={`More options for ${first}`} onClick={() => setView("menu")} className="glass size-10 rounded-full flex items-center justify-center shrink-0">
+      <button type="button" aria-label={`More options for ${first}`} onClick={() => setView("menu")} className="hit-slop relative glass size-10 rounded-full flex items-center justify-center shrink-0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" />
         </svg>
       </button>
 
       {view !== "closed" && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Safety options">
-          <button type="button" aria-label="Close" onClick={() => setView("closed")} className="absolute inset-0 bg-ink/60" />
-          <div className="relative w-full max-w-[440px] glass rounded-t-[28px] px-5 pt-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-3">
+        <Sheet onClose={() => setView("closed")} label="Safety options" center={false} scrimClassName="bg-ink/60" className="max-w-[440px] glass rounded-t-[28px] px-5 pt-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-3">
+          <SheetCloser>{(close) => (<>
             {view === "menu" && (
               <>
                 <SheetButton onClick={() => setView("report")}>Report {first}</SheetButton>
                 <SheetButton danger onClick={() => setView("block")}>Block {first}</SheetButton>
-                <SheetButton onClick={() => setView("closed")}>Cancel</SheetButton>
+                <SheetButton onClick={close}>Cancel</SheetButton>
               </>
             )}
 
@@ -100,12 +100,12 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
                 <h2 className="text-[20px] font-semibold">Thanks for telling us</h2>
                 <p className="text-[15px] text-smoke text-pretty">We review every report. {first} won&apos;t know it was you. Want to block them too?</p>
                 <Button onClick={block} disabled={busy} variant="danger">Block {first}</Button>
-                <Button variant="glass" onClick={() => setView("closed")}>Done</Button>
+                <Button variant="glass" onClick={close}>Done</Button>
               </>
             )}
             {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
-          </div>
-        </div>
+          </>)}</SheetCloser>
+        </Sheet>
       )}
     </>
   );

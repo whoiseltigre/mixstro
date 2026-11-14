@@ -140,3 +140,54 @@ body {
 .confetti {
   animation: confetti 1.4s cubic-bezier(0.15, 0.7, 0.4, 1) forwards;
 }
+
+/*
+ * Sheets (components/sheet.tsx). Transitions rather than keyframes, so a sheet can be
+ * grabbed mid-rise or sent back where it came from at any moment.
+ */
+.sheet-panel {
+  transition: transform 0.42s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.25s ease-out;
+  will-change: transform;
+}
+.sheet-panel[data-open="false"] {
+  transform: translateY(100%);
+}
+.sheet-backdrop {
+  transition: opacity 0.3s ease-out;
+}
+.sheet-backdrop[data-open="false"] {
+  opacity: 0;
+}
+@media (min-width: 768px) {
+  .sheet-panel.sheet-center {
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.2s ease-out;
+  }
+  .sheet-panel.sheet-center[data-open="false"] {
+    transform: translateY(10px) scale(0.96);
+    opacity: 0;
+  }
+}
+
+/* Small round buttons keep their look but get a finger-sized (44px+) tap area. Needs a positioned element. */
+@utility hit-slop {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: min(-2px, calc((100% - 48px) / 2));
+    border-radius: 9999px;
+  }
+}
+
+/* Screens arriving (components/screen-enter.tsx). No fill after, so nothing stays transformed. */
+@keyframes screen-push {
+  from { opacity: 0; transform: translateX(28px); }
+}
+@keyframes screen-fade {
+  from { opacity: 0.35; }
+}
+.screen-push {
+  animation: screen-push 0.32s cubic-bezier(0.2, 0.9, 0.25, 1) backwards;
+}
+.screen-fade {
+  animation: screen-fade 0.18s ease-out backwards;
+}

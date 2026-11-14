@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useDraft } from "@/lib/onboarding";
 import { SharePage } from "./share-page";
+import { Sheet } from "./sheet";
 
 type Action = { id: string; href?: string; title: string; sub: string; hue: string; icon: React.ReactNode };
 
@@ -82,21 +83,18 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
 
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
   const username = draft.username.replace(/^@/, "");
 
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="create-title">
-          <button type="button" aria-label="Close" onClick={onClose} className="sheet-scrim absolute inset-0 bg-ink/70 backdrop-blur-sm" />
-          <div className="sheet-up relative w-full md:max-w-[460px] rounded-t-[32px] md:rounded-[32px] bg-stage border border-paper/10 px-4 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-1.5">
+        <Sheet
+          onClose={onClose}
+          labelledBy="create-title"
+          handle={false}
+          scrimClassName="bg-ink/70 backdrop-blur-sm"
+          className="md:max-w-[460px] rounded-t-[32px] md:rounded-[32px] bg-stage border border-paper/10 px-4 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-1.5"
+        >
             <span aria-hidden="true" className="md:hidden self-center w-10 h-[5px] rounded-full bg-paper/25 mb-2" />
             <h2 id="create-title" className="px-1 pb-2 font-display text-[24px] font-bold tracking-[-0.02em]">
               What are you up to?
@@ -141,8 +139,7 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
                 </Link>
               );
             })}
-          </div>
-        </div>
+        </Sheet>
       )}
       {sharing && username && origin && (
         <SharePage username={username} firstName={draft.firstName} mine url={`${origin}/@${username}`} openNow onClose={() => setSharing(false)} />

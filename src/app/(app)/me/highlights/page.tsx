@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { KindIcon } from "@/components/profile-extras";
+import { undoable } from "@/components/toast";
 import { BackButton, Button, Field, cx } from "@/components/ui";
 import { useMyExtras, type HighlightInput } from "@/lib/extras-store";
 import { HIGHLIGHTS_MAX, HIGHLIGHT_KINDS, type Highlight, type HighlightKind } from "@/lib/highlights";
@@ -15,6 +16,20 @@ export default function HighlightsEditor() {
   const [form, setForm] = useState<(HighlightInput & { id?: string }) | null>(null);
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  const [hidden, setHidden] = useState<string[]>([]);
+  const shown = highlights.filter((h) => !hidden.includes(h.id));
+
+  function remove(h: Highlight) {
+    setHidden((x) => [...x, h.id]);
+    undoable({
+      message: "Highlight removed",
+      undo: () => setHidden((x) => x.filter((id) => id !== h.id)),
+      commit: async () => {
+        await removeHighlight(h.id);
+        setHidden((x) => x.filter((id) => id !== h.id));
+      },
+    });
+  }
 
   const kind = HIGHLIGHT_KINDS.find((k) => k.id === form?.kind) ?? HIGHLIGHT_KINDS[0];
 
@@ -94,10 +109,10 @@ export default function HighlightsEditor() {
         )
       )}
 
-      {ready && highlights.length > 0 && (
+      {ready && shown.length > 0 && (
         <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8">
-          {highlights.map((h) => (
-            <Row key={h.id} h={h} onEdit={() => setForm({ ...h })} onRemove={() => removeHighlight(h.id)} />
+          {shown.map((h) => (
+            <Row key={h.id} h={h} onEdit={() => setForm({ ...h })} onRemove={() => remove(h)} />
           ))}
         </ul>
       )}
@@ -119,7 +134,7 @@ function Row({ h, onEdit, onRemove }: { h: Highlight; onEdit: () => void; onRemo
       <button type="button" onClick={onEdit} className="text-[14px] font-semibold underline underline-offset-2">
         Edit
       </button>
-      <button type="button" onClick={onRemove} aria-label={`Remove ${h.title}`} className="size-9 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
+      <button type="button" onClick={onRemove} aria-label={`Remove ${h.title}`} className="hit-slop relative size-9 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <path d="M6 6l12 12M18 6 6 18" />
         </svg>

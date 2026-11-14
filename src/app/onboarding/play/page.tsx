@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Sheet, SheetCloser } from "@/components/sheet";
 import { InstrumentIcon } from "@/components/instrument-icon";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
@@ -191,11 +192,6 @@ function FamilySheet({
   const options = [...f.options, ...extras];
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  useEffect(() => {
     if (typing) inputRef.current?.focus();
   }, [typing]);
 
@@ -207,12 +203,14 @@ function FamilySheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-      <button type="button" aria-label="Close" onClick={onClose} className="sheet-scrim absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
-      <div
-        style={{ "--hue": f.hue } as React.CSSProperties}
-        className="sheet-up relative w-full md:max-w-[480px] glass !bg-[rgb(26_24_22/0.82)] rounded-t-[30px] md:rounded-[30px] px-5 pt-3 pb-safe md:pb-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.8)] overflow-hidden"
-      >
+    <Sheet
+      onClose={onClose}
+      labelledBy="sheet-title"
+      handle={false}
+      scrimClassName="bg-black/55 backdrop-blur-[2px]"
+      style={{ "--hue": f.hue } as React.CSSProperties}
+      className="md:max-w-[480px] glass !bg-[rgb(26_24_22/0.82)] rounded-t-[30px] md:rounded-[30px] px-5 pt-3 pb-safe md:pb-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.8)] overflow-hidden"
+    >
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-48 opacity-35"
@@ -286,10 +284,9 @@ function FamilySheet({
         </div>
 
         <div className="relative mt-6">
-          <Button onClick={onClose}>{picks.length ? "Done" : "Close"}</Button>
+          <SheetCloser>{(close) => <Button onClick={close}>{picks.length ? "Done" : "Close"}</Button>}</SheetCloser>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }
 
