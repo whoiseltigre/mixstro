@@ -1,6 +1,7 @@
 "use client";
 
 import { announceConnect } from "@/components/push-prompt";
+import { toast } from "@/components/toast";
 import { QuickReplies } from "@/components/quick-replies";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
@@ -9,7 +10,7 @@ import { PersonPhoto } from "@/components/person-photo";
 import { LogoMark } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
 import { whyYouTwo } from "@/lib/why";
-import { connect, pass } from "../actions";
+import { connect, pass } from "../../actions";
 
 /** Today's musicians: one at a time on phones, a gallery from 768px. Connect or pass moves to the next. */
 export function TodayDeck({
@@ -45,20 +46,25 @@ export function TodayDeck({
   const doConnect = () => {
     // Samples are there to show how Today works. Connecting explains that instead of a pretend chat.
     if (m.sample) return setSampleNote(m.id);
+    // Shows as sent straight away; only a failure takes it back.
+    const id = m.id;
+    setSentTo(id);
     start(async () => {
-      const res = await connect(m.id, m.username);
-      if (res?.sent) {
-        setSentTo(m.id);
-        announceConnect(first);
+      try {
+        const res = await connect(id, m.username);
+        if (res?.sent) announceConnect(first);
+      } catch {
+        setSentTo((s) => (s === id ? undefined : s));
+        toast("That didn't send. Check your connection and try again.");
       }
     });
   };
   const doPass = () => {
     if (m.sample) return next();
-    start(async () => {
-      await pass(m.id);
-      next();
-    });
+    // On to the next musician at once; the pass saves in the background.
+    const id = m.id;
+    next();
+    pass(id).catch(() => toast("Couldn't save that pass. They may show up again."));
   };
   const why = whyYouTwo({
     shared: m.shared.map((a) => a.name),

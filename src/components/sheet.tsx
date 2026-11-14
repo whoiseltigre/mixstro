@@ -105,8 +105,14 @@ export function Sheet({ onClose, children, className, scrimClassName = "bg-ink/6
     return () => {
       clearTimeout(t);
       window.removeEventListener("popstate", onPop);
-      // Closed from outside (the parent stopped rendering us): drop our entry too.
-      if (pushed.current && window.history.state?.__sheet === key) window.history.back();
+      // Closed from outside (the parent stopped rendering us, often because a link is
+      // navigating away): unmark our entry rather than going back, which could race
+      // the navigation and undo it.
+      if (pushed.current && window.history.state?.__sheet === key) {
+        const { __sheet: _drop, ...rest } = window.history.state;
+        void _drop;
+        window.history.replaceState(rest, "");
+      }
       pushed.current = false;
     };
   }, [key, finish]);

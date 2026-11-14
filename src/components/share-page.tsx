@@ -14,6 +14,9 @@ type Props = {
   className?: string;
   label?: string;
   variant?: "solid" | "glass";
+  /** Opened from somewhere else (the + sheet): no button of its own, shown open, onClose when dismissed. */
+  openNow?: boolean;
+  onClose?: () => void;
 };
 
 /**
@@ -21,8 +24,17 @@ type Props = {
  * (that's how it reaches Instagram and TikTok stories); every platform with a share
  * link gets a direct button; and anyone can copy the link or save the card.
  */
-export function SharePage({ username, firstName, mine, url, className = "", label, variant = "glass" }: Props) {
-  const [open, setOpen] = useState(false);
+export function SharePage({ username, firstName, mine, url, className = "", label, variant = "glass", openNow, onClose }: Props) {
+  const [isOpen, setIsOpen] = useState(Boolean(openNow));
+  const open = isOpen;
+  const setOpen = (on: boolean) => {
+    setIsOpen(on);
+    if (on && mine) markShared();
+    else onClose?.();
+  };
+  useEffect(() => {
+    if (openNow && mine) markShared();
+  }, [openNow, mine]);
   const [copied, setCopied] = useState(false);
   const [canShareFiles, setCanShareFiles] = useState(false);
 
@@ -79,6 +91,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
 
   return (
     <>
+      {!openNow && (
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -89,6 +102,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
         <ShareIcon />
         {label ?? (mine ? "Share your page" : "Share")}
       </button>
+      )}
 
       {open && (
         <Sheet
@@ -155,6 +169,23 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
       )}
     </>
   );
+}
+
+const SHARED_KEY = "mx_shared_page";
+
+/** Opening the share sheet for your own page ticks "Share your page" on Your stage. */
+function markShared() {
+  try {
+    localStorage.setItem(SHARED_KEY, "1");
+  } catch {}
+}
+
+export function hasSharedPage() {
+  try {
+    return localStorage.getItem(SHARED_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 function Mark({ id, size }: { id: keyof typeof BRAND_PATHS; size: number }) {
