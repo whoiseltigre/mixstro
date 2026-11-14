@@ -5,6 +5,7 @@ import { COMMITMENT, type Artist } from "./onboarding";
 import { distancesFromMe, ensureLocation } from "./geo";
 import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
+import { isSupabaseConfigured } from "./supabase/config";
 
 /**
  * Server-side reads for Today, profiles, search and Messages. With Supabase configured
@@ -398,4 +399,40 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
     return { person: m, role, why };
   }
   return null;
+}
+
+export type Stage = {
+  firstName: string;
+  username: string;
+  photo: string | null;
+  headline: string;
+  hasPhoto: boolean;
+  hasSong: boolean;
+  hasProject: boolean;
+};
+
+/** What's on your page so far, for Your stage on Home. Null in demo mode or without a profile. */
+export async function getStage(): Promise<Stage | null> {
+  const viewer = await getViewer();
+  const p = viewer?.profile;
+  // Demo mode (no database): a sample page, so Home shows Your stage as a new musician sees it.
+  if (!viewer && !isSupabaseConfigured) {
+    return { firstName: "Sundy", username: "sundy", photo: "/photos/you-ibanez.jpg", headline: "Guitar · Indie · Silver Lake", hasPhoto: true, hasSong: false, hasProject: false };
+  }
+  if (!viewer || !p) return null;
+  const [{ count: clips }, { count: tracks }, { count: projects }] = await Promise.all([
+    viewer.supabase.from("clips").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id).eq("kind", "clip"),
+    viewer.supabase.from("project_tracks").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id),
+    viewer.supabase.from("projects").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id),
+  ]);
+  const instrument = p.main_instrument ?? p.instruments[0];
+  return {
+    firstName: p.first_name,
+    username: p.username,
+    photo: p.avatar_url,
+    headline: [instrument, p.genres[0], p.neighborhood?.split(",")[0]].filter(Boolean).join(" · "),
+    hasPhoto: Boolean(p.avatar_url),
+    hasSong: Boolean(clips || tracks),
+    hasProject: Boolean(projects),
+  };
 }
