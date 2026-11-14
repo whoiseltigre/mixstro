@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { artistTint, initials } from "@/lib/artists";
+import { FadeImage } from "@/components/fade-image";
 import { cx } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
 
@@ -18,7 +18,13 @@ export function PersonPhoto({
   initialsSize?: number;
 }) {
   if (person.photo) {
-    return <Image src={person.photo} alt={person.photoAlt} fill priority={priority} sizes={sizes} className={cx("object-cover", className)} />;
+    // Their own color sits underneath while the photo loads, then the photo fades in over it.
+    return (
+      <>
+        <span aria-hidden="true" className="absolute inset-0" style={{ background: artistTint(person.id) }} />
+        <FadeImage src={person.photo} alt={person.photoAlt} fill priority={priority} sizes={sizes} className={cx("object-cover", className)} />
+      </>
+    );
   }
   return (
     <span

@@ -59,11 +59,30 @@ export async function pass(otherId: string) {
   revalidatePath("/discover");
 }
 
-export async function sendMessage(connectionId: number, body: string) {
+/**
+ * `retry`: the same text again after a send that looked like it failed. On a weak signal
+ * the first one can land even though the answer never came back, so skip it if it did.
+ */
+export async function sendMessage(connectionId: number, body: string, retry = false) {
   const text = body.trim().slice(0, 4000);
   if (!text) return { error: "Write something first." };
   const viewer = await getViewer();
   if (!viewer) return { error: "You're signed out." };
+  if (retry) {
+    const since = new Date(Date.now() - 10 * 60_000).toISOString();
+    const { data: landed } = await viewer.supabase
+      .from("messages")
+      .select("id")
+      .eq("connection_id", connectionId)
+      .eq("sender_id", viewer.id)
+      .eq("body", text)
+      .gte("created_at", since)
+      .limit(1);
+    if (landed?.length) {
+      revalidatePath("/messages");
+      return {};
+    }
+  }
   const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, body: text });
   if (error) return { error: "That didn't send. Try again." };
   after(() => notifyMessage(connectionId, viewer.id, text));

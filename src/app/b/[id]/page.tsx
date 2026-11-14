@@ -9,6 +9,7 @@ import { APP_ORIGIN } from "@/lib/public-profile";
 import { JsonLd } from "@/components/json-ld";
 import { BAND_GLOW } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/server";
+import { FadeImg } from "@/components/fade-image";
 
 /**
  * A band's page: everyone who confirmed they played in it (each confirmation is a
@@ -159,8 +160,8 @@ function MemberGrid({ members }: { members: BandMember[] }) {
           <Link href={`/@${m.username}`} className="group flex flex-col gap-2.5">
             <span className="relative block aspect-[4/5] rounded-[22px] overflow-hidden bg-riser" style={m.photo ? undefined : { background: artistTint(m.username) }}>
               {m.photo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover transition group-hover:scale-[1.03]" />
+                 
+                <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover transition group-hover:scale-[1.03]" />
               ) : (
                 <span className="absolute inset-0 flex items-center justify-center headline text-[44px] text-paper/80">{m.name.slice(0, 1)}</span>
               )}

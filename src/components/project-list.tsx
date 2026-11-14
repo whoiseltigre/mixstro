@@ -5,6 +5,7 @@ import { useState } from "react";
 import { PROVIDER_LABEL } from "@/lib/clips";
 import { artistTint } from "@/lib/artists";
 import { artworkOf, firstYear, isCurrent, nameWash, trackPlayer, yearsLabel, type Bandmate, type Project, type Track } from "@/lib/projects";
+import { FadeImg } from "@/components/fade-image";
 
 type Playing = { track: Track; project: Project };
 
@@ -33,7 +34,7 @@ export function ProjectList({
       <div className="flex justify-between items-center pb-1.5">
         <h2 className="text-[20px] font-bold tracking-[-0.02em]">Projects</h2>
         {editHref ? (
-          <Link href={editHref} aria-label={projects.length ? "Edit projects" : "Add a project"} className="glass size-10 rounded-full flex items-center justify-center">
+          <Link href={editHref} aria-label={projects.length ? "Edit projects" : "Add a project"} className="hit-slop relative glass size-10 rounded-full flex items-center justify-center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
             </svg>
@@ -68,8 +69,8 @@ function Artwork({ project, size }: { project: Project; size: number }) {
   return (
     <span className="relative shrink-0 rounded-2xl overflow-hidden" style={{ width: size, height: size, background: nameWash(project.name) }}>
       {src && !failed && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />
+         
+        <FadeImg src={src} alt="" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />
       )}
     </span>
   );
@@ -125,7 +126,7 @@ function ProjectRow({
           type="button"
           onClick={onEdit}
           aria-label={`Edit ${p.name}`}
-          className="self-start size-9 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8 transition"
+          className="hit-slop relative self-start size-9 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8 transition"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 20h4L19 9l-4-4L4 16z" />
@@ -143,10 +144,10 @@ function PlayedWith({ mates, linked }: { mates: Bandmate[]; linked: boolean }) {
     <div className="flex items-center gap-2 mt-1.5 min-w-0">
       <span className="flex -space-x-1.5 shrink-0">
         {shown.map((m) => (
-          <span key={m.username} className="relative size-[22px] rounded-full overflow-hidden border-2 border-ink bg-riser flex items-center justify-center text-[10px] font-bold" style={m.photo ? undefined : { background: artistTint(m.username) }}>
+          <span key={m.username} className="relative size-[22px] rounded-full overflow-hidden border-2 border-ink bg-riser flex items-center justify-center text-[10px] font-bold" style={{ background: artistTint(m.username) }}>
             {m.photo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+               
+              <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
             ) : (
               m.name.slice(0, 1)
             )}
@@ -229,7 +230,7 @@ function MiniPlayer({ track, project, onClose }: Playing & { onClose: () => void
             {project.name} · {PROVIDER_LABEL[track.provider]}
           </span>
         </span>
-        <button type="button" onClick={onClose} aria-label="Close player" className="size-9 rounded-full bg-paper/12 flex items-center justify-center shrink-0">
+        <button type="button" onClick={onClose} aria-label="Close player" className="hit-slop relative size-9 rounded-full bg-paper/12 flex items-center justify-center shrink-0">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </button>
       </div>

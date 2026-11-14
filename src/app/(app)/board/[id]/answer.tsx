@@ -75,11 +75,18 @@ export function AnswerForm({
             variant="gel"
             disabled={pending}
             onClick={() =>
-              start(async () => {
-                const res = await answerPost(postId, authorId, note);
-                if (res.error) setError(res.error);
-                else setDone(true);
-              })
+              {
+                // Shown as answered straight away; a failure brings the form back.
+                setError(undefined);
+                setDone(true);
+                start(async () => {
+                  const res = await answerPost(postId, authorId, note).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
+                  if (res.error && res.error !== "You already answered this one.") {
+                    setDone(false);
+                    setError(res.error);
+                  }
+                });
+              }
             }
           >
             {pending ? "Sending…" : "Answer with my profile"}

@@ -5,6 +5,7 @@ import { ButtonLink, Wordmark } from "@/components/ui";
 import { getViewer } from "@/lib/people";
 import { createClient } from "@/lib/supabase/server";
 import { ConfirmSpot } from "./confirm";
+import { FadeImg } from "@/components/fade-image";
 
 /**
  * "Confirm your spot": where a bandmate tag lands. Members confirm in one tap; anyone
@@ -60,8 +61,8 @@ export default async function Join({ params }: Params) {
           <div className="rounded-[26.5px] bg-stage p-6 flex flex-col items-center text-center gap-4">
             <span className="relative size-20 rounded-full overflow-hidden bg-riser">
               {invite.from.avatar_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={invite.from.avatar_url} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                 
+                <FadeImg src={invite.from.avatar_url} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
               )}
             </span>
             <h1 className="headline text-[30px] leading-[1.05] text-balance">

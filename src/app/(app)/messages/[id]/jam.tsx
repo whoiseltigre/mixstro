@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Sheet, useSheetClose } from "@/components/sheet";
 import { Button, Field } from "@/components/ui";
 import { CHECKIN_AFTER_MS, type Jam } from "@/lib/jams";
 import { answerJam, checkInJam, proposeJam } from "../../actions";
@@ -166,20 +167,31 @@ function defaultWhen() {
   return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: "19:00" };
 }
 
-/** The sheet for proposing a jam, or suggesting another time for one they sent. */
-export function PlanJamSheet({
-  connectionId,
-  first,
-  replacing,
-  onClose,
-  onSent,
-}: {
+type PlanProps = {
   connectionId: number;
   first: string;
   replacing: Jam | null;
   onClose: () => void;
   onSent: () => void;
-}) {
+};
+
+/** The sheet for proposing a jam, or suggesting another time for one they sent. */
+export function PlanJamSheet(props: PlanProps) {
+  return (
+    <Sheet
+      onClose={props.onClose}
+      z="z-40"
+      labelledBy="plan-jam-title"
+      scrimClassName="bg-ink/70"
+      className="md:max-w-[440px] rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10"
+    >
+      <PlanJamForm {...props} />
+    </Sheet>
+  );
+}
+
+function PlanJamForm({ connectionId, first, replacing, onSent }: PlanProps) {
+  const close = useSheetClose();
   const [{ date, time }, setWhen] = useState(defaultWhen);
   const [place, setPlace] = useState(replacing?.place ?? "");
   const [note, setNote] = useState("");
@@ -193,18 +205,15 @@ export function PlanJamSheet({
     start(async () => {
       const res = await proposeJam(connectionId, startsAt.toISOString(), place, note, replacing?.id);
       if (res.error) setError(res.error);
-      else onSent();
+      else {
+        onSent();
+        close();
+      }
     });
   }
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end md:items-center justify-center bg-ink/70" onClick={onClose}>
-      <form
-        onSubmit={submit}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full md:max-w-[440px] rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10 p-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-4"
-        aria-labelledby="plan-jam-title"
-      >
+      <form onSubmit={submit} className="p-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-4" aria-labelledby="plan-jam-title">
         <div className="flex items-center gap-2">
           {CAL}
           <h2 id="plan-jam-title" className="text-[20px] font-semibold tracking-[-0.01em]">
@@ -219,7 +228,7 @@ export function PlanJamSheet({
         <Field id="jam-note" label="Anything to bring? (optional)" placeholder="Bring your bass, we have a drum kit" value={note} maxLength={280} onChange={(e) => setNote(e.target.value)} />
         {error && <p className="text-[13px] text-[#FF453A]">{error}</p>}
         <div className="flex gap-2">
-          <Button type="button" variant="glass" onClick={onClose} className="h-12 text-[16px]">
+          <Button type="button" variant="glass" onClick={close} className="h-12 text-[16px]">
             Not now
           </Button>
           <Button type="submit" disabled={pending || place.trim().length < 2} className="h-12 text-[16px]">
@@ -227,6 +236,5 @@ export function PlanJamSheet({
           </Button>
         </div>
       </form>
-    </div>
   );
 }

@@ -8,15 +8,21 @@ export function QuickReplies({ otherId, username, first, onClosed }: { otherId: 
   const [pending, start] = useTransition();
   const [closed, setClosed] = useState(false);
   const [error, setError] = useState<string>();
-  const tap = (kind: "jam" | "clip" | "no") =>
+  const tap = (kind: "jam" | "clip" | "no") => {
+    // A polite no shows as done straight away; a failure brings the chips back.
+    if (kind === "no") setClosed(true);
+    setError(undefined);
     start(async () => {
-      const res = await quickReply(otherId, username, kind);
-      if (res?.error) setError(res.error);
-      else if (res?.closed) {
+      const res = await quickReply(otherId, username, kind).catch(() => ({ error: "That didn't send. Try again.", closed: false }));
+      if (res?.error) {
+        setClosed(false);
+        setError(res.error);
+      } else if (res?.closed) {
         setClosed(true);
         onClosed?.();
       }
     });
+  };
 
   if (closed) return <p className="text-[14px] text-smoke">Done. We&apos;ll let {first} know it&apos;s not the right fit, kindly.</p>;
   const chip = "h-9 px-3.5 rounded-full text-[14px] font-medium border transition disabled:opacity-50 whitespace-nowrap";
