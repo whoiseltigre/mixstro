@@ -4,8 +4,11 @@ slug: electronic-press-kit
 date: 2026-11-06
 description: "How to make an electronic press kit (EPK) that gets you booked: what to include, how to build it for free, and how to send it to venues, promoters and press."
 excerpt: "What goes in an electronic press kit, how to build one in an afternoon, and the email that gets it opened."
-cover:
-cover_alt:
+cover: "/site/v1/blog/electronic-press-kit/cover-30289b32"
+cover_alt: "A band posing for press photos in a photo studio"
+og: "/site/v1/blog/electronic-press-kit/og-87b8c889.jpg"
+cover_credit_url: "https://unsplash.com/@isaacmacdonald"
+cover_credit: "isaac macdonald"
 tags: [Gigs, Profile]
 author: Taylor Greigh
 old_urls: []
@@ -24,6 +27,8 @@ The people reading it are busy. A talent buyer at a mid-size venue might get doz
 ## What should be in an EPK?
 
 Keep it tight. Everything here should fit on one page that someone can scan in 60 seconds.
+
+![A band press photo shot against an industrial fence](/site/v1/blog/electronic-press-kit/photo-1-77943f41 "Photo: Johanna Buguet|https://unsplash.com/@johannabuguet")
 
 ### A short bio
 
@@ -56,6 +61,8 @@ One clear contact (name, email and phone) and links to your website and socials.
 ## How do you make an EPK for free?
 
 You don't need to pay for an EPK builder. Any of these works:
+
+![A laptop, camera and guitar pedals on a desk, ready to put an EPK together](/site/v1/blog/electronic-press-kit/photo-2-345a5792 "Photo: Duncan Kidd|https://unsplash.com/@we_the_royal")
 
 1. A page on your website. Make it yourbandname.com/epk. It's easy to update and easy to share.
 2. A shared folder. A Google Drive or Dropbox folder with your bio, photos, stage plot and a links document. Simple, but less polished.

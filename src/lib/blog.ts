@@ -1,11 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import { marked } from "marked";
+import { Marked } from "marked";
+import { isBlogImage, srcSet, imgSrc } from "./blog-img";
 
 /**
  * Blog posts live as Markdown files in content/blog/<slug>.md.
  * Frontmatter fields (shared with the website design work):
- *   title, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, tags[], author, old_urls[]
+ *   title, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, cover_credit?, cover_credit_url?,
+ *   og?, tags[], author, old_urls[]
+ * cover and og are written by scripts/blog_images.py.
  * Files starting with "_" are ignored.
  */
 export type PostMeta = {
@@ -17,6 +20,9 @@ export type PostMeta = {
   excerpt: string;
   cover?: string;
   cover_alt?: string;
+  cover_credit?: string;
+  cover_credit_url?: string;
+  og?: string;
   tags: string[];
   author: string;
   old_urls: string[];
@@ -62,6 +68,30 @@ function decorate(html: string) {
       return `<h2 id="${id}">${inner}</h2>`;
     });
 }
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+/**
+ * In-post photos: ![alt](/site/v1/blog/<slug>/<name>-<hash> "Photo: Name|https://credit-url")
+ * become a lazy-loaded, responsive <figure> with a photo credit. Other images render as plain <img>.
+ */
+const md = new Marked({
+  renderer: {
+    image({ href, title, text }) {
+      if (!isBlogImage(href)) return `<img src="${esc(href)}" alt="${esc(text)}" loading="lazy" decoding="async">`;
+      const [credit, url] = (title ?? "").split("|");
+      const caption = credit
+        ? `<figcaption>${url ? `<a href="${esc(url)}" rel="nofollow noopener" target="_blank">${esc(credit)}</a>` : esc(credit)}${url?.includes("unsplash.com") ? " on Unsplash" : ""}</figcaption>`
+        : "";
+      return `<figure class="mxb-photo"><img src="${imgSrc(href)}" srcset="${srcSet(href)}" sizes="(min-width: 800px) 760px, calc(100vw - 40px)" width="1600" height="1067" alt="${esc(text)}" loading="lazy" decoding="async">${caption}</figure>`;
+    },
+    paragraph({ tokens }) {
+      // A paragraph holding only a photo should not wrap the <figure> in a <p>.
+      const inner = this.parser.parseInline(tokens);
+      return inner.startsWith("<figure") ? `${inner}\n` : `<p>${inner}</p>\n`;
+    },
+  },
+});
 
 const DIR = path.join(process.cwd(), "content", "blog");
 
@@ -121,11 +151,14 @@ function load(file: string): Post {
     excerpt: str(data.excerpt) ?? "",
     cover: str(data.cover) || undefined,
     cover_alt: str(data.cover_alt) || undefined,
+    cover_credit: str(data.cover_credit) || undefined,
+    cover_credit_url: str(data.cover_credit_url) || undefined,
+    og: str(data.og) || undefined,
     tags: list(data.tags),
     author: str(data.author) ?? "Mixstro",
     old_urls: list(data.old_urls),
     readingMinutes: Math.max(1, Math.round(words / 230)),
-    html: decorate(marked.parse(body, { async: false })),
+    html: decorate(md.parse(body, { async: false }) as string),
     faqs: extractFaqs(body),
   };
 }

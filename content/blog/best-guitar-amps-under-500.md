@@ -5,8 +5,11 @@ date: 2024-06-04
 updated: 2026-11-01
 description: "The best guitar amps under $500 for practice, recording and gigs, from the Boss Katana to the Supro Delta King 8, plus what really shapes your tone."
 excerpt: "Four amps that sound far bigger than their price, and what actually shapes your tone."
-cover:
-cover_alt:
+cover: "/site/v1/blog/best-guitar-amps-under-500/cover-236bb782"
+cover_alt: "Close-up of the gain, treble, middle and bass knobs on a guitar amp"
+og: "/site/v1/blog/best-guitar-amps-under-500/og-b903fea8.jpg"
+cover_credit_url: "https://unsplash.com/@pixelesse"
+cover_credit: "Ksenia Pixelesse"
 tags: [Gear, Guitar]
 author: Taylor Greigh
 old_urls: [/top-guitar-amps-under-500/]
@@ -24,6 +27,8 @@ The [Boss Katana](https://www.boss.info/) is the amp a lot of players recommend 
 
 Don't let the 1-watt rating fool you. The [Supro Delta King 8](https://suprousa.com/) is a little tube amp that gets surprisingly loud when you crank it, with the kind of gritty breakup that the great [blues guitarists](/blog/blues-guitarists) built their sound on. It's small and looks the part, which makes it a favorite for home practice and recording.
 
+![Vacuum tubes like the ones inside a tube guitar amp](/site/v1/blog/best-guitar-amps-under-500/photo-1-f4f88463 "Photo: Ries Bosch|https://unsplash.com/@ries_bosch")
+
 ## Best for gigs: Orange Super Crush 100 Head
 
 Need an amp that can keep up with a loud drummer? The [Orange Super Crush 100](https://orangeamps.com/) has the power and headroom for bigger rooms and a pedalboard. It goes from clean to high gain easily, and that thick Orange voice suits rock and heavier styles, from stoner riffs to the [metalcore subgenres](/blog/metalcore). Just remember it's a head, so budget for a cab.
@@ -37,6 +42,8 @@ The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp
 - **Practice at home:** modeling amps like the Spark or Katana sound good quiet, which tube amps usually don't.
 - **Recording:** a small tube amp like the Delta King, or an amp with a good direct output, fits easily into a [home studio setup](/blog/home-studio-setup).
 - **Gigging:** you need power and headroom. A 100-watt head or the Katana 100 will hold up in a full band.
+
+![A small Fender practice amp next to an electric guitar](/site/v1/blog/best-guitar-amps-under-500/photo-2-cdc79fc9 "Photo: Matt Wojtaś|https://unsplash.com/@matt_wojtas")
 
 ## What really shapes your tone
 

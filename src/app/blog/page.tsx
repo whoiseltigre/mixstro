@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Cover, accentOf } from "@/components/blog/cover";
 import { PostGrid } from "@/components/blog/post-grid";
+import { photoProps } from "@/lib/blog-img";
 import { SITE_URL, category, getAllPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
   title: "Blog · Mixstro",
   description: "Guides for musicians on starting a band, finding bandmates, gear, recording and getting gigs, from the team behind Mixstro.",
-  openGraph: { type: "website", url: "/blog", title: "The Mixstro blog", images: ["/site/v1/og-card.jpg"] },
+  openGraph: { type: "website", url: "/blog", title: "The Mixstro blog", images: [{ url: "/site/v1/og-card.jpg", width: 1200, height: 630 }] },
 };
 
 /** The pillar guide leads the page; the next newest posts sit beside it. */
@@ -23,7 +24,7 @@ export default function BlogIndex() {
   const topics = TOPICS.filter((t) => posts.some((p) => p.tags.includes(t)));
   const grid = posts.map((p) => {
     const cat = category(p);
-    return { slug: p.slug, title: p.title, excerpt: p.excerpt, tags: p.tags, cat, minutes: p.readingMinutes, ...accentOf(cat) };
+    return { slug: p.slug, title: p.title, excerpt: p.excerpt, tags: p.tags, cat, minutes: p.readingMinutes, cover: p.cover, ...accentOf(cat) };
   });
 
   return (
@@ -41,8 +42,13 @@ export default function BlogIndex() {
 
         {feat && (
           <div className="mxb-bgrid">
-            <Link className="mxb-feat" href={`/blog/${feat.slug}`}>
-              <Cover slug={feat.slug} cat={category(feat)} label={false} rings={60} />
+            <Link className={`mxb-feat${feat.cover ? " has-photo" : ""}`} href={`/blog/${feat.slug}`}>
+              {feat.cover ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="mxb-feat-img" {...photoProps(feat.cover, "(min-width: 900px) 650px, calc(100vw - 40px)")} alt={feat.cover_alt ?? ""} fetchPriority="high" decoding="async" />
+              ) : (
+                <Cover slug={feat.slug} cat={category(feat)} label={false} rings={60} />
+              )}
               <span className="meta">
                 {category(feat)} · {feat.readingMinutes} min read
               </span>
@@ -58,7 +64,12 @@ export default function BlogIndex() {
             <div className="mxb-side">
               {side.map((p) => (
                 <Link key={p.slug} className="mxb-mini" href={`/blog/${p.slug}`}>
-                  <Cover slug={p.slug} cat={category(p)} rings={30} />
+                  {p.cover ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="mxb-mini-img" {...photoProps(p.cover, "124px")} alt="" decoding="async" />
+                  ) : (
+                    <Cover slug={p.slug} cat={category(p)} rings={30} />
+                  )}
                   <div>
                     <span className="meta">{p.readingMinutes} min read</span>
                     <h3>{p.title}</h3>

@@ -5,8 +5,11 @@ date: 2024-10-27
 updated: 2026-11-01
 description: "The greatest live performances of all time, from Queen at Live Aid to Prince in the rain, and the stagecraft lessons every band can take from them."
 excerpt: "Queen at Live Aid, Hendrix at Monterey, Prince in the rain: the shows people still talk about, and what made them work."
-cover:
-cover_alt:
+cover: "/site/v1/blog/greatest-live-performances/cover-bc6e5e9c"
+cover_alt: "A packed crowd facing a stage lit with warm spotlights"
+og: "/site/v1/blog/greatest-live-performances/og-7f47e3f1.jpg"
+cover_credit_url: "https://unsplash.com/@yvettedewit"
+cover_credit: "Yvette de Wit"
 tags: [Live]
 author: Taylor Greigh
 old_urls: [/top-live-music-performances/, /best-live-performances/, /best-stage-performances/, /epic-concert-moments/, /greatest-live-performances-of-all-time/]
@@ -42,6 +45,8 @@ The Beatles' last public performance was unannounced: a lunchtime set on the roo
 
 About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up. (New to thrash? Our guide to [metal genres](/blog/types-of-metal) starts there.)
 
+![Fireworks shooting up from a stadium concert stage](/site/v1/blog/greatest-live-performances/photo-1-eec2e541 "Photo: Jessey Bijl|https://unsplash.com/@jesseybijl")
+
 **The lesson:** context matters. The same set can mean much more depending on when and where you play it.
 
 ## Radiohead at Glastonbury (1997)
@@ -59,6 +64,8 @@ Daft Punk played Coachella from inside a giant LED pyramid, mixing their catalog
 ## Prince at the Super Bowl (2007)
 
 Rain poured down on Miami during the halftime show, and Prince played straight through it, ending with "Purple Rain" in an actual downpour. It's widely considered the best halftime show ever.
+
+![An arena crowd glowing with lights during a show](/site/v1/blog/greatest-live-performances/photo-2-f910e250 "Photo: BoliviaInteligente|https://unsplash.com/@boliviainteligente")
 
 **The lesson:** when something unexpected happens, lean in. The rain didn't ruin the show, it made it.
 

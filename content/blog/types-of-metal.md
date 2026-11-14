@@ -5,8 +5,11 @@ date: 2024-10-30
 updated: 2026-11-01
 description: "The main types of metal explained, from heavy metal and thrash to death, black, doom, power, nu and progressive metal, with two tracks to start each genre."
 excerpt: "Eight metal genres, two tracks each, and the mood that goes with them. Earplugs recommended."
-cover:
-cover_alt:
+cover: "/site/v1/blog/types-of-metal/cover-0c1a2463"
+cover_alt: "Silhouettes of a metal band playing under golden stage lights"
+og: "/site/v1/blog/types-of-metal/og-94afb3b9.jpg"
+cover_credit_url: "https://unsplash.com/@igrindphoto"
+cover_credit: "Evgeniy Smersh"
 tags: [Metal]
 author: Taylor Greigh
 old_urls: [/different-metal-genres/]
@@ -41,6 +44,8 @@ If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just 
 ## Death Metal: Where Screaming Becomes an Art Form
 
 Death metal took thrash’s aggression, threw in guttural growls, and went all-in on lyrics about mortality, chaos, and … well, death.
+
+![A metal guitarist playing on a blue-lit stage](/site/v1/blog/types-of-metal/photo-1-f217f96e "Photo: Max Brinton|https://unsplash.com/@maxbrinton")
 
 - **Start with:**
   - [Cannibal Corpse – Hammer Smashed Face](https://www.youtube.com/watch?v=i0mQQs4RZqg)
@@ -89,6 +94,8 @@ Power metal is all about soaring vocals, symphonic elements, and a *lot* of epic
 ## Nu Metal: For Those Who Miss the Early 2000s
 
 Born in the late ’90s with bands like Korn and Limp Bizkit, nu metal blends elements of metal, hip-hop, and sometimes *deep angst.*
+
+![A metal crowd throwing horns at the front of the barrier](/site/v1/blog/types-of-metal/photo-2-05085ec3 "Photo: Evgeniy Smersh|https://unsplash.com/@igrindphoto")
 
 - **Start with:**
   - [Korn – Freak on a Leash](https://www.youtube.com/watch?v=jRGrNDV2mKc)
