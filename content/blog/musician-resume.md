@@ -24,7 +24,7 @@ Below you'll find what to include, a template you can copy, a filled-in example 
 
 More often than you'd think. Common situations include:
 
-![Two musicians working at a keyboard and computer in a recording studio](/site/v1/blog/musician-resume/photo-1-66eacc5f "Photo: Soundsitive Studio|https://unsplash.com/@soundsitive")
+![Two guitarists playing together in a warm, dim studio](/site/v1/blog/musician-resume/photo-1-a391374b "Photo: Daniel Twal|https://www.pexels.com/photo/men-playing-guitars-in-a-band-5939645/")
 
 - Auditions for established bands, touring acts and theater pit orchestras
 - Session and hired-gun work, where a producer or artist wants to know your credits
@@ -100,6 +100,8 @@ Name, relationship, contact (or "available on request")
 ## Musician resume example
 
 Here's a short, made-up example for a guitarist auditioning for a touring indie band:
+
+![A guitarist playing alone on a stage lit amber](/site/v1/blog/musician-resume/photo-3-ad05f81b)
 
 ```
 ALEX RIVERA

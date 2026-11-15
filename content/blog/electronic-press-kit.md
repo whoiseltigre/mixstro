@@ -28,7 +28,7 @@ The people reading it are busy. A talent buyer at a mid-size venue might get doz
 
 Keep it tight. Everything here should fit on one page that someone can scan in 60 seconds.
 
-![A band press photo shot against an industrial fence](/site/v1/blog/electronic-press-kit/photo-1-77943f41 "Photo: Johanna Buguet|https://unsplash.com/@johannabuguet")
+![A band posing for a press photo on a city rooftop at sunset](/site/v1/blog/electronic-press-kit/photo-1-a8b5cf73 "Photo: RDNE Stock project|https://www.pexels.com/@rdne")
 
 ### A short bio
 
@@ -62,7 +62,7 @@ One clear contact (name, email and phone) and links to your website and socials.
 
 You don't need to pay for an EPK builder. Any of these works:
 
-![A laptop, camera and guitar pedals on a desk, ready to put an EPK together](/site/v1/blog/electronic-press-kit/photo-2-345a5792 "Photo: Duncan Kidd|https://unsplash.com/@we_the_royal")
+![A guitarist filming herself playing at home for her EPK](/site/v1/blog/electronic-press-kit/photo-2-fd6db065 "Photo: Alena Darmel|https://www.pexels.com/@a-darmel")
 
 1. A page on your website. Make it yourbandname.com/epk. It's easy to update and easy to share.
 2. A shared folder. A Google Drive or Dropbox folder with your bio, photos, stage plot and a links document. Simple, but less polished.

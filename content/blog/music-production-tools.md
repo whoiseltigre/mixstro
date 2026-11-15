@@ -39,7 +39,7 @@ It's useful in more ways than remixing. You can solo the bass line of a song you
 
 [Maschine+](https://www.native-instruments.com/) is a standalone groovebox: pads, sounds and a sequencer, no computer needed. It's built for sketching beats on the couch and playing live, and it's easier to stay creative when you're not staring at a screen.
 
-![A stack of synthesizers and keyboards](/site/v1/blog/music-production-tools/photo-2-e91a8f2d "Photo: TStudio_lv|https://unsplash.com/@tstudio_lv")
+![Roland synthesizers in a production studio](/site/v1/blog/music-production-tools/photo-2-3134c155 "Photo: TStudio|https://www.pexels.com/photo/roland-boutique-jd-08-synthesizer-module-10827847/")
 
 ### ROLI Seaboard RISE 2
 

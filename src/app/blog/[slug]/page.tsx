@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { accentOf } from "@/components/blog/cover";
 import { photoProps } from "@/lib/blog-img";
-import { AUTHORS, SITE_URL, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
+import { AUTHORS, SITE_URL, sourceOf, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -108,7 +108,7 @@ export default async function BlogPost({ params }: Props) {
             {post.cover_credit && (
               <figcaption>
                 Photo: {post.cover_credit_url ? <a href={post.cover_credit_url} rel="nofollow noopener" target="_blank">{post.cover_credit}</a> : post.cover_credit}
-                {post.cover_credit_url?.includes("unsplash.com") ? " on Unsplash" : ""}
+                {sourceOf(post.cover_credit_url)}
               </figcaption>
             )}
           </figure>

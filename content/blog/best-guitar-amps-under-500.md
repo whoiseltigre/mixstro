@@ -23,6 +23,8 @@ So start with that question. Is this for your bedroom, your home studio, or a st
 
 The [Boss Katana](https://www.boss.info/) is the amp a lot of players recommend first, and for good reason. You get a range of amp voicings and a full set of Boss effects in one combo that works at home, in the studio and on stage. The current generation is the newest, but a used MkII is still one of the best deals in guitar.
 
+![A purple electric guitar leaning on a Boss combo amp on stage](/site/v1/blog/best-guitar-amps-under-500/photo-2-a8465c7f "Photo: Caique Araujo|https://www.pexels.com/photo/purple-electric-guitar-with-amplifier-on-stage-31143497/")
+
 ## Best tube amp under $500: Supro Delta King 8
 
 Don't let the 1-watt rating fool you. The [Supro Delta King 8](https://suprousa.com/) is a little tube amp that gets surprisingly loud when you crank it, with the kind of gritty breakup that the great [blues guitarists](/blog/blues-guitarists) built their sound on. It's small and looks the part, which makes it a favorite for home practice and recording.
@@ -42,8 +44,6 @@ The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp
 - **Practice at home:** modeling amps like the Spark or Katana sound good quiet, which tube amps usually don't.
 - **Recording:** a small tube amp like the Delta King, or an amp with a good direct output, fits easily into a [home studio setup](/blog/home-studio-setup).
 - **Gigging:** you need power and headroom. A 100-watt head or the Katana 100 will hold up in a full band.
-
-![A small Fender practice amp next to an electric guitar](/site/v1/blog/best-guitar-amps-under-500/photo-2-cdc79fc9 "Photo: Matt Wojtaś|https://unsplash.com/@matt_wojtas")
 
 ## What really shapes your tone
 

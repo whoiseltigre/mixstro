@@ -69,6 +69,9 @@ function decorate(html: string) {
     });
 }
 
+/** " on Unsplash" / " on Pexels" after a photographer's credit. */
+export const sourceOf = (url?: string) => (url?.includes("unsplash.com") ? " on Unsplash" : url?.includes("pexels.com") ? " on Pexels" : "");
+
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 
 /**
@@ -81,7 +84,7 @@ const md = new Marked({
       if (!isBlogImage(href)) return `<img src="${esc(href)}" alt="${esc(text)}" loading="lazy" decoding="async">`;
       const [credit, url] = (title ?? "").split("|");
       const caption = credit
-        ? `<figcaption>${url ? `<a href="${esc(url)}" rel="nofollow noopener" target="_blank">${esc(credit)}</a>` : esc(credit)}${url?.includes("unsplash.com") ? " on Unsplash" : ""}</figcaption>`
+        ? `<figcaption>${url ? `<a href="${esc(url)}" rel="nofollow noopener" target="_blank">${esc(credit)}</a>` : esc(credit)}${sourceOf(url)}</figcaption>`
         : "";
       return `<figure class="mxb-photo"><img src="${imgSrc(href)}" srcset="${srcSet(href)}" sizes="(min-width: 800px) 760px, calc(100vw - 40px)" width="1600" height="1067" alt="${esc(text)}" loading="lazy" decoding="async">${caption}</figure>`;
     },

@@ -65,7 +65,7 @@ Daft Punk played Coachella from inside a giant LED pyramid, mixing their catalog
 
 Rain poured down on Miami during the halftime show, and Prince played straight through it, ending with "Purple Rain" in an actual downpour. It's widely considered the best halftime show ever.
 
-![An arena crowd glowing with lights during a show](/site/v1/blog/greatest-live-performances/photo-2-f910e250 "Photo: BoliviaInteligente|https://unsplash.com/@boliviainteligente")
+![A packed arena lit gold by stage lights during a concert](/site/v1/blog/greatest-live-performances/photo-2-9f8597f7 "Photo: Teddy Yang|https://www.pexels.com/@Teddy")
 
 **The lesson:** when something unexpected happens, lean in. The rain didn't ruin the show, it made it.
 

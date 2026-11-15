@@ -53,7 +53,7 @@ People you're introduced to through someone you trust come with a built-in refer
 
 Local music shops, rehearsal spaces and lesson studios sit at the center of every scene. Many still have a notice board, and the staff usually know who's looking for a band. Rehearsal studios are especially good, since everyone walking through the door is already playing in a band.
 
-![Electric guitars hanging on the wall of a music store](/site/v1/blog/how-to-find-band-members/photo-2-e8a3e324 "Photo: Franki Chamaki|https://unsplash.com/@franki")
+![A wall of electric guitars in a music store](/site/v1/blog/how-to-find-band-members/photo-2-61d41a8d "Photo: Mika du Bosquet Small grove|https://www.pexels.com/photo/a-wall-of-guitars-in-a-store-27218829/")
 
 ## 5. Schools, colleges and community groups
 

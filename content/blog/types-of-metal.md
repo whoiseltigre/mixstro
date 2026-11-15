@@ -21,6 +21,8 @@ Metal splinters into new genres faster than a Les Paul breaks a string under a r
 
 Where it all began. Heavy metal was born back in the ’70s with bands like Black Sabbath, Judas Priest, and Iron Maiden. Heavy metal is like the cool grandpa who tells stories that are both terrifying and awesome.
 
+![A shirtless guitarist raising his fist to a wall of stage lights](/site/v1/blog/types-of-metal/photo-1-67ec9f70)
+
 - **Start with:**
   - [Black Sabbath – Paranoid](https://www.youtube.com/watch?v=0qanF-91aJo)
   - [Iron Maiden – Run to the Hills](https://www.youtube.com/watch?v=geHLdg_VNww)
@@ -44,8 +46,6 @@ If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just 
 ## Death Metal: Where Screaming Becomes an Art Form
 
 Death metal took thrash’s aggression, threw in guttural growls, and went all-in on lyrics about mortality, chaos, and … well, death.
-
-![A metal guitarist playing on a blue-lit stage](/site/v1/blog/types-of-metal/photo-1-f217f96e "Photo: Max Brinton|https://unsplash.com/@maxbrinton")
 
 - **Start with:**
   - [Cannibal Corpse – Hammer Smashed Face](https://www.youtube.com/watch?v=i0mQQs4RZqg)
@@ -95,7 +95,7 @@ Power metal is all about soaring vocals, symphonic elements, and a *lot* of epic
 
 Born in the late ’90s with bands like Korn and Limp Bizkit, nu metal blends elements of metal, hip-hop, and sometimes *deep angst.*
 
-![A metal crowd throwing horns at the front of the barrier](/site/v1/blog/types-of-metal/photo-2-05085ec3 "Photo: Evgeniy Smersh|https://unsplash.com/@igrindphoto")
+![Silhouettes of a metal band and crowd against white stage lights](/site/v1/blog/types-of-metal/photo-2-889ac727 "Photo: Dustin Tray|https://www.pexels.com/@trayproductions")
 
 - **Start with:**
   - [Korn – Freak on a Leash](https://www.youtube.com/watch?v=jRGrNDV2mKc)

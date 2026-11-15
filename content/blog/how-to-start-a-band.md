@@ -32,6 +32,8 @@ How serious it is. A fun weekly jam, a gigging local band or a project that want
 
 Fewer than you think. A classic rock lineup is four people: vocals, guitar, bass and drums. But you can start with two or three and fill gaps later.
 
+![A bassist playing under blue stage light](/site/v1/blog/how-to-start-a-band/photo-3-fb5821dc)
+
 - Duo: guitar and vocals, or a singer plus a producer with backing tracks. Easy to schedule and cheap to run.
 - Three-piece: guitar, bass and drums, with one or two people singing. Tight, loud and simple to book.
 - Four or five-piece: room for a second guitar, keys or a dedicated frontperson. More sound, more scheduling headaches.
@@ -113,7 +115,7 @@ As soon as you have three songs you're proud of. A demo doesn't need to be polis
 
 Start small and local. Open mics, house shows, friends' parties and the opening slot on a local bill are all good first gigs. Here's how to land one:
 
-![A rock band playing a small club gig under red stage lights](/site/v1/blog/how-to-start-a-band/photo-2-0301ddaf "Photo: Noah Carter|https://unsplash.com/@granoahbars")
+![A guitarist playing a small, candlelit bar gig](/site/v1/blog/how-to-start-a-band/photo-2-2bc1cfc2 "Photo: RDNE Stock project|https://www.pexels.com/@rdne")
 
 1. Go to shows at the venue first. Learn who books it and what kind of bands play there.
 2. Send a short, specific email with your demo or [electronic press kit](/blog/electronic-press-kit), two or three similar bands, your draw (how many people you'll realistically bring) and your available dates.

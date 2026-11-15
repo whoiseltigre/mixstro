@@ -55,7 +55,7 @@ You need closed-back headphones for tracking, so the click doesn't bleed into yo
 
 A small keyboard controller lets you play virtual instruments and program drums. The [Akai MPK Mini](https://www.akaipro.com/) is cheap, tiny and does a lot for its size.
 
-![A condenser microphone in a shock mount, ready to record vocals](/site/v1/blog/home-studio-setup/photo-2-ebc7cdfc "Photo: Jonathan Velasquez|https://unsplash.com/@jonathanvez")
+![A condenser microphone with a pop filter in a treated vocal booth](/site/v1/blog/home-studio-setup/photo-2-96550bff "Photo: Jessica Lewis 🦋 thepaintedsquare|https://www.pexels.com/@thepaintedsquare")
 
 ### 8. Acoustic treatment
 
