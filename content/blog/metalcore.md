@@ -53,7 +53,7 @@ Melodic metalcore is the most accessible branch, blending aggressive riffs with 
 
 Deathcore blends death metal’s brutality with metalcore’s breakdowns. With guttural vocals and earth-shattering riffs, it’s the heaviest branch of the family.
 
-![A metalcore crowd in the middle of a mosh pit](/site/v1/blog/metalcore/photo-1-318001c5 "Photo: Evgeniy Smersh|https://unsplash.com/@igrindphoto")
+![A crowd surfer carried over a metal crowd in green stage smoke](/site/v1/blog/metalcore/photo-1-6e9ac390 "Photo: Johannes Havn|https://www.pexels.com/photo/people-lift-a-person-2417730/")
 
 **Bands to start with:**
 
@@ -69,7 +69,7 @@ Deathcore blends death metal’s brutality with metalcore’s breakdowns. With g
 
 Progressive metalcore pushes musical boundaries, using technical complexity, unusual time signatures, and genre-blending elements. It’s perfect if you like your heavy music technical and a little strange.
 
-![A long-haired metal guitarist playing under blue light](/site/v1/blog/metalcore/photo-2-02675e6e "Photo: Hector Bermudez|https://unsplash.com/@hectorbermudez")
+![A metal guitarist playing a white Ibanez on an outdoor stage](/site/v1/blog/metalcore/photo-2-3fd750bd)
 
 **Bands to start with:**
 

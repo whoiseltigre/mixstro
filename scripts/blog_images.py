@@ -11,9 +11,12 @@ For every entry it:
   * draws a 1200x630 share card per post (og-<hash>.jpg) with the title and the Mixstro lockup,
   * writes cover, cover_alt, cover_credit, cover_credit_url and og into the post's frontmatter.
 
-Filenames carry a content hash, so /site/v1 can stay cached forever. In-post photos are placed by
-hand in the Markdown: ![alt](/site/v1/blog/<slug>/<name>-<hash> "Photo: Name|https://unsplash.com/@name").
-The script prints that line for each one.
+Sources: free Unsplash and Pexels photos (credited: `credit` + `credit_url`, the page adds
+"on Unsplash" / "on Pexels"), and Mixstro's own photos (leave `credit` out: no caption).
+`file` paths are relative to the folder passed on the command line.
+
+Filenames carry a content hash, so /site/v1 can stay cached forever. In-post photos go under the H2
+named in `section`, as ![alt](/site/v1/blog/<slug>/<name>-<hash> "Photo: Name|https://credit-url").
 """
 import hashlib
 import json
@@ -81,7 +84,9 @@ def write_webps(img: Image.Image, slug: str, name: str) -> str:
     for old in d.glob(f"{name}-*.webp"):
         old.unlink()
     for w in WIDTHS:
-        r = img.resize((w, round(w * img.height / img.width)), Image.LANCZOS)
+        # never upscale a small source (our own photos are ~1000px): keep the file name, cap the size
+        tw = min(w, img.width)
+        r = img.resize((tw, round(tw * img.height / img.width)), Image.LANCZOS)
         r.save(d / f"{name}-{h}-{w}.webp", "WEBP", quality=74 if w > 1000 else 78, method=6)
     return f"/site/v1/blog/{slug}/{name}-{h}"
 
@@ -187,8 +192,8 @@ def main():
         set_fields(slug, {
             "cover": base,
             "cover_alt": cover["alt"].replace('"', "'"),
-            "cover_credit": cover["credit"],
-            "cover_credit_url": cover["credit_url"],
+            "cover_credit": cover.get("credit", ""),
+            "cover_credit_url": cover.get("credit_url", ""),
             "og": og,
         })
         print(f"{slug}: cover {base}")
@@ -196,7 +201,8 @@ def main():
         for i, inl in enumerate(entry.get("inline", []), 1):
             ph = grade(Image.open(src / inl["file"]))
             b = write_webps(crop(ph, 3 / 2, inl.get("focus", (0.5, 0.5))), slug, f"photo-{i}")
-            lines.append((inl["section"], f'![{inl["alt"]}]({b} "Photo: {inl["credit"]}|{inl["credit_url"]}")'))
+            title = f' "Photo: {inl["credit"]}|{inl.get("credit_url", "")}"' if inl.get("credit") else ""
+            lines.append((inl["section"], f'![{inl["alt"]}]({b}{title})'))
         place_inline(slug, lines)
 
 

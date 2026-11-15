@@ -25,7 +25,7 @@ The earliest rural blues was mostly vocal music. It wasn't built to tell a story
 
 Born in the 1880s or 1890s (the records are sketchy), Charley Patton is often called the Father of the Delta Blues. He sang with a gravelly voice that carried a long way and played an aggressive, percussive guitar style. He was a real showman, recorded around 70 songs including "Pony Blues" and "High Water Everywhere," and influenced Son House, Howlin' Wolf and Bukka White. He died in 1934. Patton was among the first inductees into the [Blues Hall of Fame](https://blues.org/blues_hof_inductee/charley-patton/) in 1980, and the [Rock & Roll Hall of Fame](https://rockhall.com/inductees/charley-patton/) recognized him in 2021.
 
-![Hands strumming an acoustic guitar, the sound of Delta blues](/site/v1/blog/blues-guitarists/photo-1-ba60a80e "Photo: 42 North|https://unsplash.com/@42north")
+![Hands playing a lap steel guitar with a slide](/site/v1/blog/blues-guitarists/photo-1-ebdc83f5 "Photo: Will Carter|https://www.pexels.com/photo/a-person-holding-a-lap-steel-5934046/")
 
 ### Robert Johnson
 
@@ -45,7 +45,7 @@ Self-taught and from the Mississippi Delta, B.B. King brought new sophistication
 
 Stevie Ray Vaughan's major-label career lasted only seven years, but in that time he released four studio albums, won six Grammys, and led the blues revival of the 1980s. He taught himself by listening to blues, rock and jazz greats, quit school to play, and jammed with Buddy Guy, Albert King and Lightnin' Hopkins. After his band Double Trouble played Montreux in 1982, David Bowie asked him to play on *Let's Dance*. *Texas Flood* followed in 1983, with "Pride and Joy" and "Love Struck Baby." He died in a helicopter crash in 1990, at 35. He's in both the Blues and [Rock & Roll](https://rockhall.com/inductees/stevie-ray-vaughan-double-trouble/) Halls of Fame, and his sound still defines modern blues guitar. He also makes our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time), in any genre.
 
-![A black Les Paul style electric guitar up close](/site/v1/blog/blues-guitarists/photo-2-7fd955d1 "Photo: Tyler Clemmensen|https://unsplash.com/@tyler_clemmensen")
+![A guitarist's hands on a red Gretsch electric guitar](/site/v1/blog/blues-guitarists/photo-2-8ead9fa0)
 
 ### Joe Bonamassa
 

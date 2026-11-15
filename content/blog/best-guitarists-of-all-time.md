@@ -69,7 +69,7 @@ Nile Rodgers shaped pop music as both a guitarist and a producer. His tight, cho
 
 In 2018, Nita Strauss became the first woman with a signature Ibanez guitar. She's best known for her high-energy playing as Alice Cooper's guitarist, as well as her solo albums.
 
-![Guitarist playing a sunburst electric guitar on stage in front of a crowd](/site/v1/blog/best-guitarists-of-all-time/photo-1-7e2592de "Photo: Marcus Neto|https://unsplash.com/@marcusneto")
+![A guitarist playing on stage under bright beams of light](/site/v1/blog/best-guitarists-of-all-time/photo-1-aae21deb)
 
 ### Mateus Asato
 
@@ -79,7 +79,7 @@ Brazilian guitarist Mateus Asato built a huge following online with fluid, melod
 
 Look past the gear and the technique and the same thing shows up again and again: every one of these players sounds like themselves within a few notes. They got there by playing constantly, usually with other musicians pushing them. If you're working on your own sound, start with your hands, then your amp. Our guide to the [best guitar amps under $500](/blog/best-guitar-amps-under-500) is a good place to begin.
 
-![A lead guitarist taking a solo under a spotlight](/site/v1/blog/best-guitarists-of-all-time/photo-2-3d2ff91c "Photo: Greyson Joralemon|https://unsplash.com/@greysonjoralemon")
+![A guitarist bent over his guitar mid-solo in front of a Marshall stack](/site/v1/blog/best-guitarists-of-all-time/photo-2-8fd55284 "Photo: Matheus Andrade|https://www.pexels.com/@andrademattheus")
 
 ## FAQ
 

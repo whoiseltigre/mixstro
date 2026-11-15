@@ -29,7 +29,7 @@ They started writing together as teenagers and kept at it for about a dozen year
 
 In 1967, Elton John, then 20, and Bernie Taupin, 17, answered the same newspaper ad looking for songwriters. That chance meeting started a partnership that has lasted more than five decades. Taupin writes the lyrics first and John sets them to music, often without the two of them in the same room.
 
-![A songwriter writing lyrics in a notebook with a guitar nearby](/site/v1/blog/best-songwriting-duos/photo-1-6b39190c "Photo: Adhy Setya|https://unsplash.com/@masadhysetya")
+![A songwriter writing lyrics in a notebook with a guitar in his lap](/site/v1/blog/best-songwriting-duos/photo-1-e6c88bc0 "Photo: MART PRODUCTION|https://www.pexels.com/@MART-PRODUCTION")
 
 Together they've made about 30 albums, with songs like "Your Song," "Rocket Man," "Tiny Dancer," "Bennie and the Jets," "Goodbye Yellow Brick Road" and "I'm Still Standing." They were inducted into the Songwriters Hall of Fame in 1992, won the [Oscar for Best Original Song](https://variety.com/2020/music/news/elton-john-wins-oscar-rocketman-song-im-gonna-love-me-again-bernie-taupin-1203498618/) in 2020 for "(I'm Gonna) Love Me Again" from *Rocketman*, and received the Library of Congress [Gershwin Prize](https://www.loc.gov/programs/gershwin-prize/) in 2024.
 
