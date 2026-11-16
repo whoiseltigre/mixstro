@@ -11,6 +11,7 @@ import { BAND_GLOW, nameWash } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/server";
 import { FadeImg } from "@/components/fade-image";
 import { BandActions } from "@/components/band-actions";
+import { Toaster } from "@/components/toast";
 
 /**
  * A band's page: its photo, bio, genres and status, everyone who confirmed they played in
@@ -270,6 +271,7 @@ export default async function BandPageView({ params }: Params) {
           )}
         </main>
       </div>
+      <Toaster />
     </div>
   );
 }
