@@ -53,6 +53,24 @@ begin
   where id = p_band;
 end $$;
 
+-- Turn one of your current projects into a band (its page and Your band), without waiting
+-- for a bandmate to join. Returns the band id; the same one if it already is a band.
+create or replace function public.start_band(p_project bigint)
+returns bigint language plpgsql security definer set search_path = public as $$
+declare
+  me uuid := auth.uid();
+  proj public.projects;
+  band bigint;
+begin
+  select * into proj from public.projects where id = p_project and profile_id = me;
+  if proj.id is null then raise exception 'not your project'; end if;
+  select band_id into band from public.band_members where project_id = p_project;
+  if band is not null then return band; end if;
+  insert into public.bands (name, created_by) values (proj.name, me) returning id into band;
+  insert into public.band_members (band_id, profile_id, project_id) values (band, me, p_project);
+  return band;
+end $$;
+
 -- 2. Shows ----------------------------------------------------------------------------------
 
 create table if not exists public.band_shows (
@@ -420,6 +438,7 @@ returns table (
 $$;
 
 revoke all on function public.is_band_member(bigint, uuid) from public;
+revoke all on function public.start_band(bigint) from public;
 revoke all on function public.update_band(bigint, text, text, text[], text, text) from public;
 revoke all on function public.confirm_shared_bill(bigint, bigint) from public;
 revoke all on function public.mark_band_read(bigint) from public;
@@ -434,6 +453,7 @@ revoke all on function public.band_chat_on_reply() from public;
 revoke all on function public.band_chat_on_show() from public;
 revoke all on function public.band_chat_on_join() from public;
 grant execute on function public.is_band_member(bigint, uuid) to authenticated;
+grant execute on function public.start_band(bigint) to authenticated;
 grant execute on function public.update_band(bigint, text, text, text[], text, text) to authenticated;
 grant execute on function public.confirm_shared_bill(bigint, bigint) to authenticated;
 grant execute on function public.mark_band_read(bigint) to authenticated;

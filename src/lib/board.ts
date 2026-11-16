@@ -201,11 +201,14 @@ export async function getPost(id: string): Promise<PostView | null> {
   }
   const viewer = await getViewer();
   if (!viewer || !/^\d+$/.test(id)) return null;
-  const { data } = await viewer.supabase.from("board_posts").select(POST_COLUMNS).eq("id", Number(id)).maybeSingle<PostRow>();
+  // "*" so band_id comes along once bands v2 is in, without breaking before.
+  const { data } = await viewer.supabase.from("board_posts").select("*").eq("id", Number(id)).maybeSingle<PostRow & { band_id?: number | null }>();
   if (!data) return null;
   const [post] = await decorate(viewer, [data]);
+  // A band's open spot: everyone in the band sees who answered, like the member who posted it.
+  const bandMember = !post.mine && data.band_id ? Boolean((await viewer.supabase.rpc("is_band_member", { p_band: data.band_id })).data) : false;
 
-  if (post.mine) {
+  if (post.mine || bandMember) {
     const { data: rows } = await viewer.supabase
       .from("board_replies")
       .select("id, from_id, note, created_at")
@@ -215,7 +218,7 @@ export async function getPost(id: string): Promise<PostView | null> {
     const people = await getMusicians(viewer, list.map((r) => r.from_id));
     return {
       kind: "mine",
-      post,
+      post: bandMember ? { ...post, mine: true, replies: list.length, foot: `${list.length} musician${list.length === 1 ? "" : "s"} answered` } : post,
       replies: list.flatMap((r) => {
         const person = people.find((p) => p.id === r.from_id);
         return person ? [{ id: r.id, person, note: r.note, createdAt: r.created_at }] : [];

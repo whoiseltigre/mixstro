@@ -82,7 +82,7 @@ export async function answerPost(postId: number, authorId: string, note: string)
 export async function closePost(postId: number) {
   const viewer = await getViewer();
   if (!viewer) return;
-  await viewer.supabase.from("board_posts").update({ closed_at: new Date().toISOString() }).eq("id", postId).eq("author_id", viewer.id);
+  await viewer.supabase.from("board_posts").update({ closed_at: new Date().toISOString() }).eq("id", postId); // RLS: your own post, or your band's open spot.
   revalidatePath("/board", "layout");
   redirect("/board");
 }

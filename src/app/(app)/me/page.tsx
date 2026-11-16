@@ -13,6 +13,7 @@ import { useMyProjects } from "@/lib/projects-store";
 import { useEffect, useRef, useState } from "react";
 import { SharePage } from "@/components/share-page";
 import { BandInvites } from "@/components/band-invites";
+import { MyBands } from "@/components/my-bands";
 import { COMMITMENT, savePhoto, useDraft } from "@/lib/onboarding";
 import { shrinkPhoto } from "@/lib/photo";
 import { useVerification } from "@/lib/verification";
@@ -76,6 +77,7 @@ export default function Me() {
       </div>
       <div className="flex flex-col gap-6 md:gap-8 min-w-0">
         <BandInvites />
+        {projects.ready && <MyBands projects={projects.projects} />}
         {extras.ready && <OpenToPicker selected={extras.openTo} onToggle={extras.toggleOpenTo} />}
         <FinishProfile
           hasInfluences={draft.influences.length > 0}

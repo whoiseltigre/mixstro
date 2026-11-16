@@ -205,3 +205,15 @@ export async function sendBandNote(id: string, note: string): Promise<Result> {
   after(() => notifyBandNote(n, viewer.id, text));
   return {};
 }
+
+/** Give one of your current projects its band page and Your band. Returns the band id. */
+export async function startBand(projectId: string): Promise<{ id?: string; error?: string }> {
+  const p = bandId(projectId);
+  if (p === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  const { data, error } = await viewer.supabase.rpc("start_band", { p_project: p });
+  if (error || data == null) return { error: "That didn't work. Try again." };
+  revalidatePath("/me");
+  return { id: String(data) };
+}
