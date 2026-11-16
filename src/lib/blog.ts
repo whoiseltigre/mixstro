@@ -6,13 +6,15 @@ import { isBlogImage, srcSet, imgSrc } from "./blog-img";
 /**
  * Blog posts live as Markdown files in content/blog/<slug>.md.
  * Frontmatter fields (shared with the website design work):
- *   title, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, cover_credit?, cover_credit_url?,
+ *   title, seo_title?, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, cover_credit?, cover_credit_url?,
  *   og?, tags[], author, old_urls[]
  * cover and og are written by scripts/blog_images.py.
  * Files starting with "_" are ignored.
  */
 export type PostMeta = {
   title: string;
+  /** Shorter title for the browser tab and Google, when the headline runs long. */
+  seo_title?: string;
   slug: string;
   date: string;
   updated?: string;
@@ -33,8 +35,10 @@ export type Faq = { question: string; answer: string };
 export type Post = PostMeta & { html: string; faqs: Faq[] };
 
 /** Author bylines. Keep bios factual: they feed the Person schema on every post. */
-export const AUTHORS: Record<string, { bio: string; jobTitle: string }> = {
+export type Author = { slug: string; bio: string; jobTitle: string; image?: string; sameAs?: string[] };
+export const AUTHORS: Record<string, Author> = {
   "Taylor Greigh": {
+    slug: "taylor-greigh",
     jobTitle: "Guitarist",
     bio: "Taylor Greigh is a guitarist who has been playing for more than 20 years, across a wide range of gear, bands and gigs. Taylor builds Mixstro.",
   },
@@ -147,6 +151,7 @@ function load(file: string): Post {
   const words = body.split(/\s+/).filter(Boolean).length;
   return {
     title: str(data.title) ?? file,
+    seo_title: str(data.seo_title) || undefined,
     slug: str(data.slug) ?? file.replace(/\.md$/, ""),
     date: str(data.date) ?? "",
     updated: str(data.updated),
@@ -202,4 +207,29 @@ export function relatedPosts(slug: string, n = 3): PostMeta[] {
   if (!me) return others.slice(0, n);
   const score = (p: PostMeta) => p.tags.filter((t) => me.tags.includes(t)).length;
   return [...others].sort((a, b) => score(b) - score(a)).slice(0, n);
+}
+
+/** The author's page on the blog, e.g. /blog/author/taylor-greigh. */
+export function authorPath(a: Pick<Author, "slug">) {
+  return `/blog/author/${a.slug}`;
+}
+
+/** Person schema for an author. The url ties every post's byline to one author page. */
+export function authorSchema(name: string, a: Author) {
+  return {
+    "@type": "Person",
+    name,
+    url: `${SITE_URL}${authorPath(a)}`,
+    jobTitle: a.jobTitle,
+    description: a.bio,
+    worksFor: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
+    ...(a.image ? { image: `${SITE_URL}${a.image}` } : {}),
+    ...(a.sameAs?.length ? { sameAs: a.sameAs } : {}),
+  };
+}
+
+/** Google cuts titles off around 60 characters, so long post titles drop the brand suffix. */
+export function pageTitle(title: string) {
+  const full = `${title} · Mixstro`;
+  return full.length <= 60 ? full : title;
 }

@@ -21,13 +21,15 @@ export function PostGrid({ posts, topics }: { posts: GridPost[]; topics: string[
   const [topic, setTopic] = useState("All");
   return (
     <>
-      <div className="mxb-tabs" role="group" aria-label="Filter by topic">
-        {["All", ...topics].map((t) => (
-          <button key={t} type="button" aria-pressed={topic === t} onClick={() => setTopic(t)}>
-            {t}
-          </button>
-        ))}
-      </div>
+      {topics.length > 0 && (
+        <div className="mxb-tabs" role="group" aria-label="Filter by topic">
+          {["All", ...topics].map((t) => (
+            <button key={t} type="button" aria-pressed={topic === t} onClick={() => setTopic(t)}>
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="mxb-cards">
         {posts.map((p) => (
           <Link

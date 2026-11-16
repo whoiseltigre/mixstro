@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { accentOf } from "@/components/blog/cover";
 import { photoProps } from "@/lib/blog-img";
-import { AUTHORS, SITE_URL, sourceOf, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
+import { AUTHORS, SITE_URL, authorPath, authorSchema, pageTitle, sourceOf, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {};
   return {
     metadataBase: new URL(SITE_URL),
-    title: `${post.title} · Mixstro`,
+    title: pageTitle(post.seo_title ?? post.title),
     description: post.description,
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
@@ -48,9 +48,7 @@ export default async function BlogPost({ params }: Props) {
       description: post.description,
       datePublished: post.date,
       dateModified: post.updated ?? post.date,
-      author: author
-        ? { "@type": "Person", name: post.author, jobTitle: author.jobTitle, description: author.bio }
-        : { "@type": "Organization", name: post.author },
+      author: author ? authorSchema(post.author, author) : { "@type": "Organization", name: post.author },
       publisher: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
       mainEntityOfPage: url,
       ...(post.cover ? { image: [`${SITE_URL}${post.cover}-1600.webp`, ...(post.og ? [`${SITE_URL}${post.og}`] : [])] } : {}),
@@ -96,7 +94,7 @@ export default async function BlogPost({ params }: Props) {
           <h1>{post.title}</h1>
           {post.excerpt && <p className="dek">{post.excerpt}</p>}
           <p className="mxb-byline">
-            By <b>{post.author}</b> · {post.updated ? `Updated ${formatDate(post.updated)}` : formatDate(post.date)}
+            By {author ? <Link href={authorPath(author)}><b>{post.author}</b></Link> : <b>{post.author}</b>} · {post.updated ? `Updated ${formatDate(post.updated)}` : formatDate(post.date)}
           </p>
         </header>
 
@@ -121,7 +119,7 @@ export default async function BlogPost({ params }: Props) {
             <span className="av" aria-hidden="true">{initials}</span>
             <span>
               <b>About {post.author}</b>
-              {author.bio}
+              {author.bio} <Link href={authorPath(author)}>All posts by {post.author.split(" ")[0]}</Link>
             </span>
           </aside>
         )}

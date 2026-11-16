@@ -141,7 +141,7 @@ Available on request
 
 A resume lists your experience. A musician portfolio shows it: recordings, videos, charts and photos collected in one place. Most working players have both, with the resume linking to the portfolio.
 
-That's the idea behind a Mixstro profile. It keeps your whole history in one place, including the bands and projects you've played in, your role and years in each, and the music you made with them. So when someone's [looking for band members](/blog/how-to-find-band-members), they can see what you've actually done.
+That's the idea behind a Mixstro profile. It keeps your whole history in one place, including the bands and projects you've played in, your role and years in each, and the music you made with them. So when someone's [looking for band members](/blog/how-to-find-band-members), they can see what you've actually done. Starting something new instead? Our guide on [how to start a band](/blog/how-to-start-a-band) covers it step by step.
 
 ## FAQ
 

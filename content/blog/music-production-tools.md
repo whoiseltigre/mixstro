@@ -59,4 +59,4 @@ The [Seaboard RISE 2](https://roli.com/) swaps piano keys for a soft, continuous
 
 If you're just getting set up, sort out the basics first. Our [home studio setup for beginners](/blog/home-studio-setup) covers the interface, mic and monitors you need before any of this. After that, stem separation and chord detection are the cheapest wins, since you may already have them in your DAW.
 
-And remember that tools don't replace collaborators. Some of the best records ever made came from two people in a room, as the [greatest songwriting duos](/blog/best-songwriting-duos) show.
+And remember that tools don't replace collaborators. Some of the best records ever made came from two people in a room, as the [greatest songwriting duos](/blog/best-songwriting-duos) show. When the songs are ready, put them in an [electronic press kit](/blog/electronic-press-kit) and start pitching for gigs.
