@@ -24,8 +24,8 @@ Where it all began. Heavy metal was born back in the ’70s with bands like Blac
 ![A shirtless guitarist raising his fist to a wall of stage lights](/site/v1/blog/types-of-metal/photo-1-67ec9f70)
 
 - **Start with:**
-  - [Black Sabbath – Paranoid](https://www.youtube.com/watch?v=0qanF-91aJo)
-  - [Iron Maiden – Run to the Hills](https://www.youtube.com/watch?v=geHLdg_VNww)
+  - [Black Sabbath: Paranoid](https://www.youtube.com/watch?v=0qanF-91aJo)
+  - [Iron Maiden: Run to the Hills](https://www.youtube.com/watch?v=geHLdg_VNww)
 - **Official sites:**
   - [Black Sabbath Official](https://www.blacksabbath.com)
   - [Iron Maiden Official](https://www.ironmaiden.com)
@@ -36,8 +36,8 @@ Where it all began. Heavy metal was born back in the ’70s with bands like Blac
 If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just discovered caffeine and is taking it *way too far.* Metallica took thrash to stadiums, and their 1991 show in Moscow is one of the [greatest live performances](/blog/greatest-live-performances) in rock history.
 
 - **Start with:**
-  - [Metallica – Master of Puppets](https://www.youtube.com/watch?v=xnKhsTXoKCI)
-  - [Slayer – Raining Blood](https://www.youtube.com/watch?v=e8eb9DCmOR0)
+  - [Metallica: Master of Puppets](https://www.youtube.com/watch?v=xnKhsTXoKCI)
+  - [Slayer: Raining Blood](https://www.youtube.com/watch?v=e8eb9DCmOR0)
 - **Official sites:**
   - [Metallica Official](https://www.metallica.com)
   - [Slayer Official](https://www.slayer.net)
@@ -48,8 +48,8 @@ If heavy metal is grandpa, thrash metal is the teenage punk nephew who’s just 
 Death metal took thrash’s aggression, threw in guttural growls, and went all-in on lyrics about mortality, chaos, and … well, death.
 
 - **Start with:**
-  - [Cannibal Corpse – Hammer Smashed Face](https://www.youtube.com/watch?v=i0mQQs4RZqg)
-  - [Morbid Angel – Immortal Rites](https://www.youtube.com/watch?v=8p35xFxYS5Y)
+  - [Cannibal Corpse: Hammer Smashed Face](https://www.youtube.com/watch?v=i0mQQs4RZqg)
+  - [Morbid Angel: Immortal Rites](https://www.youtube.com/watch?v=8p35xFxYS5Y)
 - **Official sites:**
   - [Cannibal Corpse Official](https://www.cannibalcorpse.net)
   - [Morbid Angel Official](https://morbidangel.com)
@@ -60,8 +60,8 @@ Death metal took thrash’s aggression, threw in guttural growls, and went all-i
 Known for its haunting, atmospheric sounds and corpse-paint aesthetics, black metal was largely birthed in Norway and features bands like Mayhem and Darkthrone.
 
 - **Start with:**
-  - [Mayhem – Freezing Moon](https://www.youtube.com/watch?v=w5AzlwOqYZ0)
-  - [Darkthrone – Transilvanian Hunger](https://www.youtube.com/watch?v=SBwu83RR6ZU)
+  - [Mayhem: Freezing Moon](https://www.youtube.com/watch?v=w5AzlwOqYZ0)
+  - [Darkthrone: Transilvanian Hunger](https://www.youtube.com/watch?v=SBwu83RR6ZU)
 - **Official sites:**
   - [Mayhem Official](https://thetruemayhem.com)
   - [Darkthrone Official](https://www.darkthrone.no)
@@ -72,8 +72,8 @@ Known for its haunting, atmospheric sounds and corpse-paint aesthetics, black me
 Doom metal can be cathartic, especially when you need a soundtrack for contemplating your fate.
 
 - **Start with:**
-  - [Electric Wizard – Dopethrone](https://www.youtube.com/watch?v=V8IX-0UEe2g)
-  - [Candlemass – Solitude](https://www.youtube.com/watch?v=0eMVzL8w2jM)
+  - [Electric Wizard: Dopethrone](https://www.youtube.com/watch?v=V8IX-0UEe2g)
+  - [Candlemass: Solitude](https://www.youtube.com/watch?v=0eMVzL8w2jM)
 - **Official sites:**
   - [Electric Wizard Official](https://www.facebook.com/electricwizarddorsetdoom)
   - [Candlemass Official](https://candlemass.se)
@@ -84,8 +84,8 @@ Doom metal can be cathartic, especially when you need a soundtrack for contempla
 Power metal is all about soaring vocals, symphonic elements, and a *lot* of epic energy.
 
 - **Start with:**
-  - [DragonForce – Through the Fire and Flames](https://www.youtube.com/watch?v=0jgrCKhxE1s)
-  - [Blind Guardian – Mirror Mirror](https://www.youtube.com/watch?v=uh4YfouV26Y)
+  - [DragonForce: Through the Fire and Flames](https://www.youtube.com/watch?v=0jgrCKhxE1s)
+  - [Blind Guardian: Mirror Mirror](https://www.youtube.com/watch?v=uh4YfouV26Y)
 - **Official sites:**
   - [DragonForce Official](https://dragonforce.com)
   - [Blind Guardian Official](https://www.blind-guardian.com)
@@ -98,8 +98,8 @@ Born in the late ’90s with bands like Korn and Limp Bizkit, nu metal blends el
 ![Silhouettes of a metal band and crowd against white stage lights](/site/v1/blog/types-of-metal/photo-2-889ac727 "Photo: Dustin Tray|https://www.pexels.com/@trayproductions")
 
 - **Start with:**
-  - [Korn – Freak on a Leash](https://www.youtube.com/watch?v=jRGrNDV2mKc)
-  - [Limp Bizkit – Break Stuff](https://www.youtube.com/watch?v=ZpUYjpKg9KY)
+  - [Korn: Freak on a Leash](https://www.youtube.com/watch?v=jRGrNDV2mKc)
+  - [Limp Bizkit: Break Stuff](https://www.youtube.com/watch?v=ZpUYjpKg9KY)
 - **Official sites:**
   - [Korn Official](https://www.korn.com)
   - [Limp Bizkit Official](https://limpbizkit.com)
@@ -110,8 +110,8 @@ Born in the late ’90s with bands like Korn and Limp Bizkit, nu metal blends el
 Progressive metal is heavy but experimental, often with changing time signatures and long instrumental sections.
 
 - **Start with:**
-  - [Dream Theater – Pull Me Under](https://www.youtube.com/watch?v=2obIsC0bOLs)
-  - [Tool – Schism](https://www.youtube.com/watch?v=UhjG47gtMCo)
+  - [Dream Theater: Pull Me Under](https://www.youtube.com/watch?v=2obIsC0bOLs)
+  - [Tool: Schism](https://www.youtube.com/watch?v=UhjG47gtMCo)
 - **Official sites:**
   - [Dream Theater Official](https://dreamtheater.net)
   - [Tool Official](https://www.toolband.com)
@@ -119,7 +119,7 @@ Progressive metal is heavy but experimental, often with changing time signatures
 
 ## Which type of metal should you start with?
 
-Of all the types of metal, heavy metal and thrash are the easiest way in, so start there then follow whatever grabs you. Guitar players should also check out the shredders in our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time). Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore) breaks down one of heavy music's biggest modern branches.
+Of all the types of metal, heavy metal and thrash are the easiest way in, so start there then follow whatever grabs you. Guitar players should also check out the shredders in our list of the [best guitarists of all time](/blog/best-guitarists-of-all-time). Once you've found your genre, go deeper: our [metalcore listening guide](/blog/metalcore) breaks down one of heavy music's biggest modern branches. And if you want to play it, not just listen, our guide to [starting a band](/blog/how-to-start-a-band) walks you through it.
 
 ## FAQ
 

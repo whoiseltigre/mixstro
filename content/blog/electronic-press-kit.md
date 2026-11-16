@@ -112,6 +112,8 @@ Your Mixstro profile works a lot like a living version of all three. It shows wh
 - Hiding the contact info. Put it at the top.
 - Letting it go stale. Update it every few months with new shows, songs and photos.
 
+An EPK sells a band, so it helps to have the right one. If you're still building the lineup, here's [how to find band members](/blog/how-to-find-band-members) who'll stick around.
+
 ## FAQ
 
 ### Do I need an EPK as a new band?

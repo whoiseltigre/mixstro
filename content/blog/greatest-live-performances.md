@@ -1,5 +1,6 @@
 ---
 title: "The Greatest Live Performances of All Time (and What Bands Can Learn)"
+seo_title: "The Greatest Live Performances of All Time"
 slug: greatest-live-performances
 date: 2024-10-27
 updated: 2026-11-01
@@ -84,7 +85,7 @@ Look across these shows and a few habits keep coming up:
 - **They leave room for the unexpected.** An extended jam, a rain shower, a broken monitor: the best performers treat surprises as part of the show.
 - **They play as a band.** Every one of these performers had people around them who were locked in. Great shows come from players who know each other's playing inside out.
 
-Great live moments start with the right people on stage together. Find them, rehearse hard, and go make a show people will talk about.
+Great live moments start with the right people on stage together. If you're still putting that lineup together, here's [how to find band members](/blog/how-to-find-band-members) who fit, and our guide to [starting a band](/blog/how-to-start-a-band) covers the rest, from first rehearsal to first gig.
 
 ## FAQ
 

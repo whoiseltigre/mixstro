@@ -1,5 +1,6 @@
 ---
 title: "Home Studio Setup: The Gear You Actually Need (Beginner's Guide)"
+seo_title: "Home Studio Setup: The Gear You Actually Need"
 slug: home-studio-setup
 date: 2024-05-24
 updated: 2026-11-01
@@ -73,7 +74,7 @@ Decent XLR cables and a mic stand that doesn't droop mid-take. [Mogami](https://
 
 Start with the computer you have, a free or cheap DAW, a two-input interface, one good mic and closed-back headphones. That's a complete home studio setup for recording real songs. Add monitors, a controller and room treatment as you go.
 
-If you play guitar, an amp that records well is the next upgrade. Our list of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) covers a few that sound great at bedroom volume. Once the basics are in place, these [music production tools](/blog/music-production-tools) can speed up the rest of your workflow.
+If you play guitar, an amp that records well is the next upgrade. Our list of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) covers a few that sound great at bedroom volume. Once the basics are in place, these [music production tools](/blog/music-production-tools) can speed up the rest of your workflow. Your first good recordings are also the heart of an [electronic press kit](/blog/electronic-press-kit), the thing that gets you booked.
 
 ## FAQ
 

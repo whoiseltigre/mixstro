@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Cover, accentOf } from "@/components/blog/cover";
 import { PostGrid } from "@/components/blog/post-grid";
 import { photoProps } from "@/lib/blog-img";
-import { SITE_URL, category, getAllPosts } from "@/lib/blog";
+import { AUTHORS, SITE_URL, authorSchema, category, getAllPosts } from "@/lib/blog";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -27,8 +27,26 @@ export default function BlogIndex() {
     return { slug: p.slug, title: p.title, excerpt: p.excerpt, tags: p.tags, cat, minutes: p.readingMinutes, cover: p.cover, ...accentOf(cat) };
   });
 
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "The Mixstro blog",
+    url: `${SITE_URL}/blog`,
+    description: "Guides for musicians on starting a band, finding bandmates, gear, recording and getting gigs.",
+    publisher: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
+    blogPost: posts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      url: `${SITE_URL}/blog/${p.slug}`,
+      datePublished: p.date,
+      dateModified: p.updated ?? p.date,
+      ...(AUTHORS[p.author] ? { author: authorSchema(p.author, AUTHORS[p.author]) } : {}),
+    })),
+  };
+
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />
       <div className="mxb-glow" aria-hidden="true" />
       <div className="mxb-wrap">
         <section className="mxb-hero">

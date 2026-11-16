@@ -37,7 +37,7 @@ Need an amp that can keep up with a loud drummer? The [Orange Super Crush 100](h
 
 ## Best for practice: Positive Grid Spark
 
-The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp packed with amp models and effects. Its app can show the chords for songs you're learning and generate backing tracks that follow your playing. It's a good practice partner for the nights your bandmates can't make it.
+The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp packed with amp models and effects. Its app can show the chords for songs you're learning and generate backing tracks that follow your playing. It's a good practice partner for the nights your bandmates can't make it. No bandmates yet? Here's [how to find band members](/blog/how-to-find-band-members).
 
 ## How to choose between guitar amps under $500
 

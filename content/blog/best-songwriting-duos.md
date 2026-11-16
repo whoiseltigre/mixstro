@@ -35,13 +35,17 @@ Together they've made about 30 albums, with songs like "Your Song," "Rocket Man,
 
 ## Burt Bacharach and Hal David
 
-Bacharach and David worked together from the late 1950s to 1973, best known for a run of hits with Dionne Warwick: "Walk On By," "Do You Know the Way to San Jose," "I Say a Little Prayer" and "I'll Never Fall in Love Again." They also wrote "What the World Needs Now Is Love," "This Guy's in Love with You" and "(There's) Always Something There to Remind Me," and won the Oscar for "Raindrops Keep Falling on My Head." Their musical *Promises, Promises* earned a Tony nomination for Best Musical, and in 2012 they received the [Gershwin Prize](https://www.loc.gov/events/gershwin-prize/honorees/2012-burt-bacharach-hal-david/).
+Bacharach and David worked together from the late 1950s to 1973, best known for a run of hits with Dionne Warwick: "Walk On By," "Do You Know the Way to San Jose," "I Say a Little Prayer" and "I'll Never Fall in Love Again."
+
+They also wrote "What the World Needs Now Is Love," "This Guy's in Love with You" and "(There's) Always Something There to Remind Me," and won the Oscar for "Raindrops Keep Falling on My Head." Their musical *Promises, Promises* earned a Tony nomination for Best Musical, and in 2012 they received the [Gershwin Prize](https://www.loc.gov/events/gershwin-prize/honorees/2012-burt-bacharach-hal-david/).
 
 ![Hands playing a Yamaha upright piano](/site/v1/blog/best-songwriting-duos/photo-2-316cb02c "Photo: Jordan Whitfield|https://unsplash.com/@whitfieldjordan")
 
 ## Gerry Goffin and Carole King
 
-Goffin and King were writing hits before the Beatles were the Beatles. John Lennon reportedly said he and Paul wanted to be "the Goffin and King of England." They were 22 and 19 when they wrote "Will You Still Love Me Tomorrow," a 1961 number one for The Shirelles. Over the next decade they wrote "Up on the Roof" (The Drifters), "The Loco-Motion" (a hit in three different decades for Little Eva, Grand Funk Railroad and Kylie Minogue), "I'm into Something Good" and "(You Make Me Feel Like) A Natural Woman" for Aretha Franklin. The Beatles even recorded their song "Chains."
+Goffin and King were writing hits before the Beatles were the Beatles. John Lennon reportedly said he and Paul wanted to be "the Goffin and King of England." They were 22 and 19 when they wrote "Will You Still Love Me Tomorrow," a 1961 number one for The Shirelles.
+
+Over the next decade they wrote "Up on the Roof" (The Drifters), "The Loco-Motion" (a hit in three different decades for Little Eva, Grand Funk Railroad and Kylie Minogue), "I'm into Something Good" and "(You Make Me Feel Like) A Natural Woman" for Aretha Franklin. The Beatles even recorded their song "Chains."
 
 ## Nickolas Ashford and Valerie Simpson
 
@@ -73,4 +77,4 @@ Look across these pairs and a few patterns show up:
 - **Their strengths were different.** The best partners cover each other's blind spots rather than duplicating them.
 - **Many met by chance.** A newspaper ad, a church, a shared publisher's office. Most great partnerships start because two people simply ended up in the same place.
 
-If you're looking for your own co-writer, put yourself where other writers are, try writing with a few different people, and pay attention when it clicks. You don't need a label's studio to start, either: a simple [home studio setup](/blog/home-studio-setup) is enough to get your first songs recorded, and a few modern [music production tools](/blog/music-production-tools) make it easy to send ideas back and forth.
+If you're looking for your own co-writer, put yourself where other writers are (our guide on [how to find band members](/blog/how-to-find-band-members) works for co-writers too), try writing with a few different people, and pay attention when it clicks. You don't need a label's studio to start, either: a simple [home studio setup](/blog/home-studio-setup) is enough to get your first songs recorded, and a few modern [music production tools](/blog/music-production-tools) make it easy to send ideas back and forth.
