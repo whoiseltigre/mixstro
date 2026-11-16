@@ -152,7 +152,6 @@ export async function getBandChat(id: string): Promise<BandChat | null> {
       messages: [
         { id: 1, kind: "show", mine: false, body: "The Echo", voiceUrl: null, createdAt: ago(60 * 26) },
         { id: 2, kind: "text", mine: true, body: "New ending for Low Ceilings, tell me if it's too long", voiceUrl: null, createdAt: ago(60 * 3) },
-        { id: 3, kind: "voice", mine: true, body: null, voiceUrl: null, voiceSeconds: 41, createdAt: ago(60 * 3 - 1) },
         { id: 4, kind: "text", mine: false, sender: maya, body: "Love it. Soundcheck at 7?", voiceUrl: null, createdAt: ago(40) },
         { id: 5, kind: "text", mine: true, body: "7 works. Still need a drummer for December though", voiceUrl: null, createdAt: ago(30) },
         { id: 6, kind: "spot_reply", mine: false, sender: rafa, body: "Drums", voiceUrl: null, refId: null, createdAt: ago(12) },

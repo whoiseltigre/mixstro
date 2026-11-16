@@ -6,15 +6,19 @@ import { PersonPhoto } from "@/components/person-photo";
 import { TimeAgo } from "@/components/time-ago";
 import { cx } from "@/components/ui";
 import type { getThreads } from "@/lib/people";
+import type { MyBand } from "@/lib/band-hub";
+import { FadeImg } from "@/components/fade-image";
+import { nameWash } from "@/lib/projects";
 
 type Thread = Awaited<ReturnType<typeof getThreads>>["threads"][number];
 
 /** Your conversations. The whole screen on phones; the left pane beside the open chat from 768px. */
-export function ThreadList({ threads }: { threads: Thread[] }) {
+export function ThreadList({ threads, bands = [] }: { threads: Thread[]; bands?: MyBand[] }) {
   const path = usePathname();
   return (
     <div className="pt-safe md:pt-5 px-5 md:px-3 pb-32 md:pb-4 flex flex-col gap-5 md:gap-3 md:h-full md:overflow-y-auto">
       <h1 className="mt-3 md:mt-0 md:px-2 headline text-[34px] md:text-[28px]">Messages</h1>
+      {bands.length > 0 && <BandThreads bands={bands} path={path} />}
       {threads.length === 0 ? (
         <div className="pt-16 md:pt-8 flex flex-col items-center gap-2 text-center">
           <h2 className="text-[20px] font-semibold">No conversations yet</h2>
@@ -62,6 +66,49 @@ export function ThreadList({ threads }: { threads: Thread[] }) {
         </>
       )}
     </div>
+  );
+}
+
+/** Your band chats, above your one-to-one chats. */
+function BandThreads({ bands, path }: { bands: MyBand[]; path: string }) {
+  return (
+    <section aria-label="Band chats" className="flex flex-col gap-1">
+      <h2 className="md:px-2 text-[13px] font-semibold text-smoke">{bands.length === 1 ? "Your band" : "Your bands"}</h2>
+      <ul className="flex flex-col md:gap-1">
+        {bands.map((b) => {
+          const href = `/messages/b/${b.id}`;
+          const open = path === href;
+          return (
+            <li key={b.id}>
+              <Link
+                href={href}
+                aria-current={open ? "page" : undefined}
+                className={cx(
+                  "flex items-center gap-3.5 py-3 border-b border-paper/8 md:border-0 md:px-2.5 md:rounded-2xl transition",
+                  open ? "md:bg-paper/10" : "md:hover:bg-paper/5",
+                )}
+              >
+                <span className="relative size-14 md:size-12 rounded-[18px] md:rounded-[15px] overflow-hidden shrink-0" style={{ background: nameWash(b.name) }}>
+                  {b.photo && <FadeImg src={b.photo} alt="" className="absolute inset-0 size-full object-cover" />}
+                </span>
+                <span className="flex-1 min-w-0 flex flex-col gap-0.5">
+                  <span className="flex justify-between gap-2">
+                    <span className="text-[16px] font-semibold truncate">{b.name}</span>
+                    {b.at && <TimeAgo iso={b.at} className="text-[13px] text-smoke shrink-0" />}
+                  </span>
+                  <span className={`text-[14px] truncate ${b.unread ? "text-paper" : "text-smoke"}`}>{b.preview}</span>
+                </span>
+                {b.unread > 0 && (
+                  <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-[12px] font-bold flex items-center justify-center shrink-0" aria-label={`${b.unread} unread`}>
+                    {b.unread}
+                  </span>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 
