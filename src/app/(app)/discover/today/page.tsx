@@ -7,12 +7,12 @@ export const metadata = { title: "Today's musicians · Mixstro" };
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
-  const [{ people, incoming, yourTurn }, alert] = await Promise.all([getToday(), getRoleAlert().catch(() => null)]);
+  const [{ people, incoming, notes, yourTurn }, alert] = await Promise.all([getToday(), getRoleAlert().catch(() => null)]);
   if (yourTurn >= YOUR_TURN_LIMIT) return <YourTurnPause count={yourTurn} />;
   return (
     <>
       {alert && <RoleAlertCard alert={alert} />}
-      <TodayDeck people={people} incoming={incoming} />
+      <TodayDeck people={people} incoming={incoming} notes={notes} />
     </>
   );
 }
