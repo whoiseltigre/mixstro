@@ -81,3 +81,29 @@ export async function deleteAccount(): Promise<{ error?: string }> {
   }
   return {};
 }
+
+/**
+ * Signs out on this device: stops push here (so the next person on this phone or computer
+ * doesn't get your notifications), ends the session and clears what's kept in the browser.
+ */
+export async function signOut(): Promise<{ error?: string }> {
+  try {
+    const { disablePush } = await import("@/lib/push-client");
+    await disablePush();
+  } catch {
+    // Push was never on here.
+  }
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) return { error: error.message };
+  }
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("mixstro:"))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // Nothing stored.
+  }
+  return {};
+}

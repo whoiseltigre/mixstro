@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BackButton, Button, ChevronRight, GoogleIcon, VerifiedMark } from "@/components/ui";
-import { deleteAccount } from "@/lib/safety";
+import { deleteAccount, signOut } from "@/lib/safety";
 import { useVerification } from "@/lib/verification";
 import { PublicPageToggle } from "./public-page";
 
@@ -16,6 +16,18 @@ export default function Settings() {
   const [error, setError] = useState<string>();
   const verification = useVerification();
   const [linkError, setLinkError] = useState<string>();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function leave() {
+    setSigningOut(true);
+    const { error } = await signOut();
+    if (error) {
+      setSigningOut(false);
+      return setError(error);
+    }
+    // A full load, so nothing from this account stays in memory.
+    window.location.replace("/");
+  }
 
   async function remove() {
     setBusy(true);
@@ -66,6 +78,10 @@ export default function Settings() {
 
       <section className="flex flex-col gap-3 pt-2">
         <h2 className="text-[13px] font-semibold text-smoke">Account</h2>
+        <button type="button" onClick={leave} disabled={signingOut} className="h-14 rounded-[20px] bg-stage text-[16px] font-semibold disabled:opacity-60">
+          {signingOut ? "Signing out…" : "Sign out"}
+        </button>
+        {error && !confirming && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
         {!confirming ? (
           <button type="button" onClick={() => setConfirming(true)} className="h-14 rounded-[20px] bg-stage text-[16px] font-semibold text-[#FF453A]">
             Delete my account
