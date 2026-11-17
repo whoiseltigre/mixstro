@@ -39,7 +39,7 @@ export default async function NetworkPage() {
                   {p.sample ? (
                     <ButtonLink href={`/m/${p.username}`} variant="glass" className="h-10 text-[14px]">View profile</ButtonLink>
                   ) : (
-                    <ConnectButton id={p.id} username={p.username} firstName={p.name} label="Connect" className="h-10 text-[14px]" />
+                    <ConnectButton person={p} label="Connect" className="h-10 text-[14px]" />
                   )}
                 </div>
               </article>

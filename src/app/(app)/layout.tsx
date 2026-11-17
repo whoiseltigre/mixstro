@@ -1,4 +1,5 @@
 import { ActivityPing } from "@/components/activity";
+import { PmfSurvey } from "@/components/pmf-survey";
 import { PushPrompt } from "@/components/push-prompt";
 import { TabBar } from "@/components/tab-bar";
 import { Toaster } from "@/components/toast";
@@ -19,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <TabBar />
       <ActivityPing />
       <PushPrompt />
+      <PmfSurvey />
       <Toaster />
     </div>
   );

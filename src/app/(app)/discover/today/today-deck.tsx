@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectSheet } from "@/components/connect-sheet";
 import { announceConnect } from "@/components/push-prompt";
 import { toast } from "@/components/toast";
 import { QuickReplies } from "@/components/quick-replies";
@@ -16,10 +17,14 @@ import { connect, pass } from "../../actions";
 export function TodayDeck({
   people,
   incoming,
+  notes = {},
 }: {
   people: Musician[];
   incoming: string[];
+  /** The note each person who asked you sent, by their id. */
+  notes?: Record<string, string>;
 }) {
+  const [sheetFor, setSheetFor] = useState<Musician>();
   const [done, setDone] = useState<string[]>([]);
   const [currentId, setCurrentId] = useState<string>();
   const [sentTo, setSentTo] = useState<string>();
@@ -46,13 +51,15 @@ export function TodayDeck({
   const doConnect = () => {
     // Samples are there to show how Today works. Connecting explains that instead of a pretend chat.
     if (m.sample) return setSampleNote(m.id);
+    // A new Connect opens the note sheet; answering someone who asked you connects straight away.
+    if (!asked) return setSheetFor(m);
     // Shows as sent straight away; only a failure takes it back.
     const id = m.id;
     setSentTo(id);
     start(async () => {
       try {
         const res = await connect(id, m.username);
-        if (res?.sent) announceConnect(first);
+        if (res && "sent" in res && res.sent) announceConnect(first);
       } catch {
         setSentTo((s) => (s === id ? undefined : s));
         toast("That didn't send. Check your connection and try again.");
@@ -76,7 +83,19 @@ export function TodayDeck({
 
   return (
     <>
+      {sheetFor && (
+        <ConnectSheet
+          person={sheetFor}
+          onClose={() => setSheetFor(undefined)}
+          onSent={() => {
+            setSentTo(sheetFor.id);
+            announceConnect(sheetFor.name.split(" ")[0]);
+            setSheetFor(undefined);
+          }}
+        />
+      )}
       <Gallery
+        note={asked ? notes[m.id] : undefined}
         people={remaining}
         current={m}
         total={people.length}
@@ -171,7 +190,7 @@ export function TodayDeck({
 
           {asked && sentTo !== m.id && (
             <div className="px-5">
-              <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={next} />
+              <QuickReplies otherId={m.id} username={m.username} first={first} note={notes[m.id]} onClosed={next} />
             </div>
           )}
           {sampleNote === m.id ? (
@@ -248,6 +267,7 @@ function Gallery({
   total,
   why,
   asked,
+  note,
   sent,
   sampleNote,
   pending,
@@ -261,6 +281,7 @@ function Gallery({
   total: number;
   why: string;
   asked: boolean;
+  note?: string;
   sent: boolean;
   sampleNote: boolean;
   pending: boolean;
@@ -363,7 +384,7 @@ function Gallery({
                   </span>
                 ))}
             </div>
-            {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} onClosed={onNext} />}
+            {asked && !sent && <QuickReplies otherId={m.id} username={m.username} first={first} note={note} onClosed={onNext} />}
             {sampleNote ? (
               <SampleNote first={first} onNext={onNext} wide />
             ) : sent ? (
