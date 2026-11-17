@@ -5,8 +5,11 @@ date: 2024-06-12
 updated: 2026-11-01
 description: "The music production tools worth knowing in 2026, from AI stem separation and chord detection to standalone grooveboxes, online mastering and samples."
 excerpt: "From AI stem splitting to standalone grooveboxes, these are the tools changing how people make records at home."
-cover:
-cover_alt:
+cover: "/site/v1/blog/music-production-tools/cover-0076ac5c"
+cover_alt: "A music production studio with guitars on the wall and a mixing console"
+og: "/site/v1/blog/music-production-tools/og-09c75ff1.jpg"
+cover_credit_url: "https://unsplash.com/@caught_in_joy"
+cover_credit: "Caught In Joy"
 tags: [Production, Gear]
 author: Taylor Greigh
 old_urls: [/exploring-the-latest-music-production-tools-of-2024/]
@@ -22,6 +25,8 @@ Here's what's worth knowing about, whether you produce your own tracks or record
 
 Stem separation splits a finished recording into vocals, drums, bass and everything else. [AudioShake](https://www.audioshake.ai/) is one of the best-known dedicated tools, and stem splitting is now built into major DAWs like Logic Pro and FL Studio. Check what you already own before you pay for anything.
 
+![Hands playing a pad controller for music production](/site/v1/blog/music-production-tools/photo-1-509c0d0e "Photo: Tamas Pap|https://unsplash.com/@tamasp")
+
 It's useful in more ways than remixing. You can solo the bass line of a song you're learning, or rescue an old live recording of your band whose multitracks are long gone.
 
 ### Chord detection
@@ -33,6 +38,8 @@ It's useful in more ways than remixing. You can solo the bass line of a song you
 ### Native Instruments Maschine+
 
 [Maschine+](https://www.native-instruments.com/) is a standalone groovebox: pads, sounds and a sequencer, no computer needed. It's built for sketching beats on the couch and playing live, and it's easier to stay creative when you're not staring at a screen.
+
+![Roland synthesizers in a production studio](/site/v1/blog/music-production-tools/photo-2-3134c155 "Photo: TStudio|https://www.pexels.com/photo/roland-boutique-jd-08-synthesizer-module-10827847/")
 
 ### ROLI Seaboard RISE 2
 
@@ -52,4 +59,4 @@ The [Seaboard RISE 2](https://roli.com/) swaps piano keys for a soft, continuous
 
 If you're just getting set up, sort out the basics first. Our [home studio setup for beginners](/blog/home-studio-setup) covers the interface, mic and monitors you need before any of this. After that, stem separation and chord detection are the cheapest wins, since you may already have them in your DAW.
 
-And remember that tools don't replace collaborators. Some of the best records ever made came from two people in a room, as the [greatest songwriting duos](/blog/best-songwriting-duos) show.
+And remember that tools don't replace collaborators. Some of the best records ever made came from two people in a room, as the [greatest songwriting duos](/blog/best-songwriting-duos) show. When the songs are ready, put them in an [electronic press kit](/blog/electronic-press-kit) and start pitching for gigs.

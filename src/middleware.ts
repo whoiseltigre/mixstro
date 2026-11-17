@@ -14,7 +14,7 @@ const REF_COOKIE = "mx_ref";
 const SITE_HOST = "mixstro.com";
 const APP_ORIGIN = "https://app.mixstro.com";
 // Paths on mixstro.com that belong to the app, sent over to app.mixstro.com.
-const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/join"];
+const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/b/", "/join"];
 
 function siteRouting(request: NextRequest): NextResponse | null {
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")

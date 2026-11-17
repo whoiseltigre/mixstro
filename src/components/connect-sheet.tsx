@@ -7,12 +7,15 @@ import type { Musician } from "@/lib/mock";
 
 const MAX = 280;
 
+/** What the sheet needs to know about the person you're connecting with. */
+export type ConnectPerson = Pick<Musician, "id" | "username" | "name" | "instrument"> & Partial<Pick<Musician, "shared">>;
+
 /** Three openers written for this person: one tap sends one. */
-export function openers(m: Pick<Musician, "name" | "instrument" | "shared">): string[] {
+export function openers(m: ConnectPerson): string[] {
   const first = m.name.split(" ")[0];
   const plays = m.instrument && m.instrument !== "Musician" ? m.instrument.toLowerCase() : "";
   return [
-    m.shared.length
+    m.shared?.length
       ? `Fellow ${m.shared[0].name} fan here. Want to get together and play sometime?`
       : `Hey ${first}, I like your sound. Want to get together and play sometime?`,
     plays
@@ -27,7 +30,7 @@ export function openers(m: Pick<Musician, "name" | "instrument" | "shared">): st
  * or write your own. If you have no song on your profile yet, it asks you to add one first,
  * because musicians answer people they can hear.
  */
-export function ConnectSheet({ person, onClose, onSent }: { person: Musician; onClose: () => void; onSent: () => void }) {
+export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerson; onClose: () => void; onSent: () => void }) {
   const first = person.name.split(" ")[0];
   const [ready, setReady] = useState<boolean | null>(null);
   const [own, setOwn] = useState("");

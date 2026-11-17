@@ -1,12 +1,16 @@
 ---
 title: "The Greatest Live Performances of All Time (and What Bands Can Learn)"
+seo_title: "The Greatest Live Performances of All Time"
 slug: greatest-live-performances
 date: 2024-10-27
 updated: 2026-11-01
 description: "The greatest live performances of all time, from Queen at Live Aid to Prince in the rain, and the stagecraft lessons every band can take from them."
 excerpt: "Queen at Live Aid, Hendrix at Monterey, Prince in the rain: the shows people still talk about, and what made them work."
-cover:
-cover_alt:
+cover: "/site/v1/blog/greatest-live-performances/cover-bc6e5e9c"
+cover_alt: "A packed crowd facing a stage lit with warm spotlights"
+og: "/site/v1/blog/greatest-live-performances/og-7f47e3f1.jpg"
+cover_credit_url: "https://unsplash.com/@yvettedewit"
+cover_credit: "Yvette de Wit"
 tags: [Live]
 author: Taylor Greigh
 old_urls: [/top-live-music-performances/, /best-live-performances/, /best-stage-performances/, /epic-concert-moments/, /greatest-live-performances-of-all-time/]
@@ -42,6 +46,8 @@ The Beatles' last public performance was unannounced: a lunchtime set on the roo
 
 About a month after the failed coup in the Soviet Union, Metallica headlined the Monsters of Rock festival at Tushino Airfield outside Moscow. Estimates of the crowd run from several hundred thousand to over a million people. For many of them it was their first big Western rock concert, and it became a symbol of a country opening up. (New to thrash? Our guide to [metal genres](/blog/types-of-metal) starts there.)
 
+![Fireworks shooting up from a stadium concert stage](/site/v1/blog/greatest-live-performances/photo-1-eec2e541 "Photo: Jessey Bijl|https://unsplash.com/@jesseybijl")
+
 **The lesson:** context matters. The same set can mean much more depending on when and where you play it.
 
 ## Radiohead at Glastonbury (1997)
@@ -60,6 +66,8 @@ Daft Punk played Coachella from inside a giant LED pyramid, mixing their catalog
 
 Rain poured down on Miami during the halftime show, and Prince played straight through it, ending with "Purple Rain" in an actual downpour. It's widely considered the best halftime show ever.
 
+![A packed arena lit gold by stage lights during a concert](/site/v1/blog/greatest-live-performances/photo-2-9f8597f7 "Photo: Teddy Yang|https://www.pexels.com/@Teddy")
+
 **The lesson:** when something unexpected happens, lean in. The rain didn't ruin the show, it made it.
 
 ## Kendrick Lamar at the Grammys (2016)
@@ -77,7 +85,7 @@ Look across these shows and a few habits keep coming up:
 - **They leave room for the unexpected.** An extended jam, a rain shower, a broken monitor: the best performers treat surprises as part of the show.
 - **They play as a band.** Every one of these performers had people around them who were locked in. Great shows come from players who know each other's playing inside out.
 
-Great live moments start with the right people on stage together. Find them, rehearse hard, and go make a show people will talk about.
+Great live moments start with the right people on stage together. If you're still putting that lineup together, here's [how to find band members](/blog/how-to-find-band-members) who fit, and our guide to [starting a band](/blog/how-to-start-a-band) covers the rest, from first rehearsal to first gig.
 
 ## FAQ
 

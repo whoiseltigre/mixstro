@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { logEvent } from "@/app/(app)/pmf-actions";
 import { BRAND_PATHS } from "./brand-icons";
+import { Sheet, SheetCloser } from "./sheet";
 
 type Props = {
   username: string;
@@ -14,6 +15,9 @@ type Props = {
   className?: string;
   label?: string;
   variant?: "solid" | "glass";
+  /** Opened from somewhere else (the + sheet): no button of its own, shown open, onClose when dismissed. */
+  openNow?: boolean;
+  onClose?: () => void;
 };
 
 /**
@@ -21,8 +25,17 @@ type Props = {
  * (that's how it reaches Instagram and TikTok stories); every platform with a share
  * link gets a direct button; and anyone can copy the link or save the card.
  */
-export function SharePage({ username, firstName, mine, url, className = "", label, variant = "glass" }: Props) {
-  const [open, setOpen] = useState(false);
+export function SharePage({ username, firstName, mine, url, className = "", label, variant = "glass", openNow, onClose }: Props) {
+  const [isOpen, setIsOpen] = useState(Boolean(openNow));
+  const open = isOpen;
+  const setOpen = (on: boolean) => {
+    setIsOpen(on);
+    if (on && mine) markShared();
+    else onClose?.();
+  };
+  useEffect(() => {
+    if (openNow && mine) markShared();
+  }, [openNow, mine]);
   const [copied, setCopied] = useState(false);
   const [canShareFiles, setCanShareFiles] = useState(false);
 
@@ -37,9 +50,6 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
     } catch {
       setCanShareFiles(false);
     }
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
   /** Counts shares of your own page for Pulse (the share loop). */
@@ -89,6 +99,7 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
 
   return (
     <>
+      {!openNow && (
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -99,16 +110,21 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
         <ShareIcon />
         {label ?? (mine ? "Share your page" : "Share")}
       </button>
+      )}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="share-title">
-          <button type="button" aria-label="Close" onClick={() => setOpen(false)} className="absolute inset-0 bg-ink/70 backdrop-blur-sm" />
-          <div className="relative w-full md:max-w-[520px] max-h-[92dvh] overflow-y-auto rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10 px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-5">
+        <Sheet
+          onClose={() => setOpen(false)}
+          labelledBy="share-title"
+          scrimClassName="bg-ink/70 backdrop-blur-sm"
+          className="md:max-w-[520px] max-h-[92dvh] overflow-y-auto rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10 px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-5"
+        >
+          <SheetCloser>{(close) => (<>
             <div className="flex items-center justify-between">
               <h2 id="share-title" className="text-[20px] font-semibold">
                 {mine ? "Share your music page" : `Share ${firstName}'s page`}
               </h2>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="size-9 rounded-full bg-paper/8 flex items-center justify-center hover:bg-paper/14">
+              <button type="button" onClick={close} aria-label="Close" className="hit-slop relative size-9 rounded-full bg-paper/8 flex items-center justify-center hover:bg-paper/14">
                 <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" /></svg>
               </button>
             </div>
@@ -156,11 +172,28 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
             </ul>
 
             <p className="text-[13px] text-smoke truncate">{url.replace(/^https:\/\//, "")}</p>
-          </div>
-        </div>
+          </>)}</SheetCloser>
+        </Sheet>
       )}
     </>
   );
+}
+
+const SHARED_KEY = "mx_shared_page";
+
+/** Opening the share sheet for your own page ticks "Share your page" on Your stage. */
+function markShared() {
+  try {
+    localStorage.setItem(SHARED_KEY, "1");
+  } catch {}
+}
+
+export function hasSharedPage() {
+  try {
+    return localStorage.getItem(SHARED_KEY) === "1";
+  } catch {
+    return false;
+  }
 }
 
 function Mark({ id, size }: { id: keyof typeof BRAND_PATHS; size: number }) {

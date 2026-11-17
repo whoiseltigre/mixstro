@@ -34,7 +34,7 @@ export function SignInButtons() {
     if (!gate()) return;
     const supabase = createClient();
     if (!supabase) {
-      router.push("/onboarding/basics");
+      router.push("/onboarding/who");
       return;
     }
     const { error } = await supabase.auth.signInWithOAuth({

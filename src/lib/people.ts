@@ -1,9 +1,11 @@
 import { cache } from "react";
+import { expandRoles, fillsRole } from "./instruments";
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
 import { distancesFromMe, ensureLocation } from "./geo";
 import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
+import { isSupabaseConfigured } from "./supabase/config";
 
 /**
  * Server-side reads for Today, profiles, search and Messages. With Supabase configured
@@ -172,13 +174,12 @@ export const profileTier = (m: Musician, music: Set<string>) => (m.photo ? 0 : 1
 const withinRadius = (viewer: Viewer) => (m: Musician) => m.distanceMi === undefined || m.distanceMi <= (viewer.profile?.radius_mi ?? 25);
 
 /** Every connection row you're part of, in either direction. */
-async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
-  const mine = `from_id.eq.${viewer.id},to_id.eq.${viewer.id}`;
-  const { data, error } = await viewer.supabase.from("connections").select("id, from_id, to_id, status, created_at, note").or(mine);
-  if (!error) return (data ?? []) as ConnectionRow[];
-  // Before the connect-notes SQL runs there's no note column.
-  const { data: rows } = await viewer.supabase.from("connections").select("id, from_id, to_id, status, created_at").or(mine);
-  return (rows ?? []) as ConnectionRow[];
+export async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
+  const { data } = await viewer.supabase
+    .from("connections")
+    .select("id, from_id, to_id, status, created_at, note")
+    .or(`from_id.eq.${viewer.id},to_id.eq.${viewer.id}`);
+  return (data ?? []) as ConnectionRow[];
 }
 
 /** Past this many chats waiting on you, Today pauses until you answer some (#4). */
@@ -418,7 +419,7 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
       .select(PROFILE_COLUMNS)
       .neq("id", viewer.id)
       .gte("onboarded_at", since)
-      .overlaps("instruments", roles)
+      .overlaps("instruments", expandRoles(roles))
       .order("onboarded_at", { ascending: false })
       .limit(30),
     myConnections(viewer),
@@ -433,9 +434,45 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
     if (!m || m.distanceMi === undefined || m.distanceMi > radius) continue;
     const genre = row.genres.find((g) => myGenres.has(g));
     if (!m.shared.length && !genre) continue;
-    const role = row.instruments.find((i) => roles.includes(i)) ?? m.instrument;
+    const role = row.instruments.find((i) => fillsRole(i, roles)) ?? m.instrument;
     const why = m.shared.length ? `into ${m.shared[0].name}` : `into ${genre!.toLowerCase()}`;
     return { person: m, role, why };
   }
   return null;
+}
+
+export type Stage = {
+  firstName: string;
+  username: string;
+  photo: string | null;
+  headline: string;
+  hasPhoto: boolean;
+  hasSong: boolean;
+  hasProject: boolean;
+};
+
+/** What's on your page so far, for Your stage on Home. Null in demo mode or without a profile. */
+export async function getStage(): Promise<Stage | null> {
+  const viewer = await getViewer();
+  const p = viewer?.profile;
+  // Demo mode (no database): a sample page, so Home shows Your stage as a new musician sees it.
+  if (!viewer && !isSupabaseConfigured) {
+    return { firstName: "Sundy", username: "sundy", photo: "/photos/you-ibanez.jpg", headline: "Guitar · Indie · Silver Lake", hasPhoto: true, hasSong: false, hasProject: false };
+  }
+  if (!viewer || !p) return null;
+  const [{ count: clips }, { count: tracks }, { count: projects }] = await Promise.all([
+    viewer.supabase.from("clips").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id).eq("kind", "clip"),
+    viewer.supabase.from("project_tracks").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id),
+    viewer.supabase.from("projects").select("id", { count: "exact", head: true }).eq("profile_id", viewer.id),
+  ]);
+  const instrument = p.main_instrument ?? p.instruments[0];
+  return {
+    firstName: p.first_name,
+    username: p.username,
+    photo: p.avatar_url,
+    headline: [instrument, p.genres[0], p.neighborhood?.split(",")[0]].filter(Boolean).join(" · "),
+    hasPhoto: Boolean(p.avatar_url),
+    hasSong: Boolean(clips || tracks),
+    hasProject: Boolean(projects),
+  };
 }

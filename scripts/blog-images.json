@@ -1,0 +1,316 @@
+{
+  "how-to-start-a-band": {
+    "cover": {
+      "file": "unsplash/how-to-start-a-band/garage-band-QSdmn5-UI1c.jpg",
+      "alt": "A new band rehearsing together in a sunny home studio",
+      "credit": "Kyle Loftus",
+      "credit_url": "https://unsplash.com/@kyleloftusstudios"
+    },
+    "inline": [
+      {
+        "file": "unsplash/how-to-start-a-band/rehearsal-room-9Yz2f38wZ2I.jpg",
+        "alt": "Guitarist playing in a rehearsal room next to a drum kit",
+        "credit": "Katarina Bubenikova",
+        "credit_url": "https://unsplash.com/@ktrn_b",
+        "section": "How often should a new band rehearse?"
+      },
+      {
+        "file": "pexels/how-to-start-a-band/small-concert-bar-6173809.jpeg",
+        "alt": "A guitarist playing a small, candlelit bar gig",
+        "credit": "RDNE Stock project",
+        "credit_url": "https://www.pexels.com/@rdne",
+        "section": "How do you get your first gig?"
+      },
+      {
+        "file": "own/bass-blue.jpg",
+        "alt": "A bassist playing under blue stage light",
+        "section": "How many members do you need"
+      }
+    ]
+  },
+  "how-to-find-band-members": {
+    "cover": {
+      "file": "unsplash/how-to-find-band-members/open-mic-NlE1B05GdS0.jpg",
+      "alt": "Two musicians playing guitar and harmonica at a pub open mic",
+      "credit": "Jonathan Borba",
+      "credit_url": "https://unsplash.com/@jonathanborba"
+    },
+    "inline": [
+      {
+        "file": "unsplash/how-to-find-band-members/open-mic-R1QM91LbjIM.jpg",
+        "alt": "Three musicians playing an acoustic set in a cafe",
+        "credit": "Grace Anne Bobadilla",
+        "credit_url": "https://unsplash.com/@graceannefully",
+        "section": "2. Open mic"
+      },
+      {
+        "file": "pexels/how-to-find-band-members/guitar-store-27218829.jpeg",
+        "alt": "A wall of electric guitars in a music store",
+        "credit": "Mika du Bosquet Small grove",
+        "credit_url": "https://www.pexels.com/photo/a-wall-of-guitars-in-a-store-27218829/",
+        "section": "4. Music stores"
+      }
+    ]
+  },
+  "best-guitar-amps-under-500": {
+    "cover": {
+      "file": "unsplash/best-guitar-amps-under-500/amp-knobs-ItqhAPGc7qM.jpg",
+      "alt": "Close-up of the gain, treble, middle and bass knobs on a guitar amp",
+      "credit": "Ksenia Pixelesse",
+      "credit_url": "https://unsplash.com/@pixelesse"
+    },
+    "inline": [
+      {
+        "file": "unsplash/best-guitar-amps-under-500/tube-amp-3O2zJ9MjC4Y.jpg",
+        "alt": "Vacuum tubes like the ones inside a tube guitar amp",
+        "credit": "Ries Bosch",
+        "credit_url": "https://unsplash.com/@ries_bosch",
+        "section": "Best tube amp"
+      },
+      {
+        "file": "pexels/best-guitar-amps-under-500/guitar-amplifier-31143497.jpeg",
+        "alt": "A purple electric guitar leaning on a Boss combo amp on stage",
+        "credit": "Caique Araujo",
+        "credit_url": "https://www.pexels.com/photo/purple-electric-guitar-with-amplifier-on-stage-31143497/",
+        "section": "Best all-rounder: Boss Katana"
+      }
+    ]
+  },
+  "home-studio-setup": {
+    "cover": {
+      "file": "unsplash/home-studio-setup/monitors-RINfyuHMZLg.jpg",
+      "alt": "A home studio desk with studio monitors, a MIDI keyboard and a computer",
+      "credit": "Techivation",
+      "credit_url": "https://unsplash.com/@techivation"
+    },
+    "inline": [
+      {
+        "file": "unsplash/home-studio-setup/audio-interface-4hXTMl7m5oU.jpg",
+        "alt": "A red Focusrite audio interface, the heart of a home studio",
+        "credit": "Sven Brandsma",
+        "credit_url": "https://unsplash.com/@seffen99",
+        "section": "Essential home studio equipment"
+      },
+      {
+        "file": "pexels/home-studio-setup/studio-microphone-10854607.jpeg",
+        "alt": "A condenser microphone with a pop filter in a treated vocal booth",
+        "credit": "Jessica Lewis 🦋 thepaintedsquare",
+        "credit_url": "https://www.pexels.com/@thepaintedsquare",
+        "section": "Nice to have"
+      }
+    ]
+  },
+  "music-production-tools": {
+    "cover": {
+      "file": "unsplash/music-production-tools/music-production-ptVBlniJi50.jpg",
+      "alt": "A music production studio with guitars on the wall and a mixing console",
+      "credit": "Caught In Joy",
+      "credit_url": "https://unsplash.com/@caught_in_joy"
+    },
+    "inline": [
+      {
+        "file": "unsplash/music-production-tools/midi-sLubgyNR31Y.jpg",
+        "alt": "Hands playing a pad controller for music production",
+        "credit": "Tamas Pap",
+        "credit_url": "https://unsplash.com/@tamasp",
+        "section": "Music production software"
+      },
+      {
+        "file": "pexels/music-production-tools/synthesizer-10827847.jpeg",
+        "alt": "Roland synthesizers in a production studio",
+        "credit": "TStudio",
+        "credit_url": "https://www.pexels.com/photo/roland-boutique-jd-08-synthesizer-module-10827847/",
+        "section": "Production hardware"
+      }
+    ]
+  },
+  "best-guitarists-of-all-time": {
+    "cover": {
+      "file": "unsplash/best-guitarists-of-all-time/guitarist-stage-QO0hJHVUVso.jpg",
+      "alt": "A guitarist bent over an electric guitar in a beam of stage light",
+      "credit": "Flavio",
+      "credit_url": "https://unsplash.com/@flaviewxvx"
+    },
+    "inline": [
+      {
+        "file": "own/eli-stage.jpg",
+        "alt": "A guitarist playing on stage under bright beams of light",
+        "section": "Modern guitarists"
+      },
+      {
+        "file": "pexels/best-guitarists-of-all-time/guitar-solo-33865968.jpeg",
+        "alt": "A guitarist bent over his guitar mid-solo in front of a Marshall stack",
+        "credit": "Matheus Andrade",
+        "credit_url": "https://www.pexels.com/@andrademattheus",
+        "section": "What the best guitarists have in common"
+      }
+    ]
+  },
+  "blues-guitarists": {
+    "cover": {
+      "file": "unsplash/blues-guitarists/resonator-ZOegh8WzCFo.jpg",
+      "alt": "A blues player's hands on a resonator guitar, in black and white",
+      "credit": "Jessie McCall",
+      "credit_url": "https://unsplash.com/@littlegreeneyes"
+    },
+    "inline": [
+      {
+        "file": "pexels/blues-guitarists/slide-guitar-5934046.jpeg",
+        "alt": "Hands playing a lap steel guitar with a slide",
+        "credit": "Will Carter",
+        "credit_url": "https://www.pexels.com/photo/a-person-holding-a-lap-steel-5934046/",
+        "section": "Delta blues"
+      },
+      {
+        "file": "own/gretsch.jpg",
+        "alt": "A guitarist's hands on a red Gretsch electric guitar",
+        "section": "Texas"
+      }
+    ]
+  },
+  "best-songwriting-duos": {
+    "cover": {
+      "file": "unsplash/best-songwriting-duos/two-musicians-hnYvjzrgbUY.jpg",
+      "alt": "Two songwriters with guitars working on a song together",
+      "credit": "Edward Eyer",
+      "credit_url": "https://unsplash.com/@edwardeyer"
+    },
+    "inline": [
+      {
+        "file": "pexels/best-songwriting-duos/songwriting-8472858.jpeg",
+        "alt": "A songwriter writing lyrics in a notebook with a guitar in his lap",
+        "credit": "MART PRODUCTION",
+        "credit_url": "https://www.pexels.com/@MART-PRODUCTION",
+        "section": "Elton John"
+      },
+      {
+        "file": "unsplash/best-songwriting-duos/piano-BhfE1IgcsA8.jpg",
+        "alt": "Hands playing a Yamaha upright piano",
+        "credit": "Jordan Whitfield",
+        "credit_url": "https://unsplash.com/@whitfieldjordan",
+        "section": "Burt Bacharach"
+      }
+    ]
+  },
+  "greatest-live-performances": {
+    "cover": {
+      "file": "unsplash/greatest-live-performances/crowd-lights-NYrVisodQ2M.jpg",
+      "alt": "A packed crowd facing a stage lit with warm spotlights",
+      "credit": "Yvette de Wit",
+      "credit_url": "https://unsplash.com/@yvettedewit"
+    },
+    "inline": [
+      {
+        "file": "unsplash/greatest-live-performances/festival-5Rt5KhbUp5g.jpg",
+        "alt": "Fireworks shooting up from a stadium concert stage",
+        "credit": "Jessey Bijl",
+        "credit_url": "https://unsplash.com/@jesseybijl",
+        "section": "Metallica"
+      },
+      {
+        "file": "pexels/greatest-live-performances/stadium-concert-2263410.jpeg",
+        "alt": "A packed arena lit gold by stage lights during a concert",
+        "credit": "Teddy Yang",
+        "credit_url": "https://www.pexels.com/@Teddy",
+        "section": "Prince"
+      }
+    ]
+  },
+  "metalcore": {
+    "cover": {
+      "file": "unsplash/metalcore/metal-concert-EiO7_aLaMX4.jpg",
+      "alt": "A heavy band playing a small club under amber stage lights",
+      "credit": "Vitalii Onyshchuk",
+      "credit_url": "https://unsplash.com/@true_zuzu"
+    },
+    "inline": [
+      {
+        "file": "pexels/metalcore/mosh-pit-2417730.jpeg",
+        "alt": "A crowd surfer carried over a metal crowd in green stage smoke",
+        "credit": "Johannes Havn",
+        "credit_url": "https://www.pexels.com/photo/people-lift-a-person-2417730/",
+        "section": "Deathcore"
+      },
+      {
+        "file": "own/you-ibanez.jpg",
+        "alt": "A metal guitarist playing a white Ibanez on an outdoor stage",
+        "section": "Progressive"
+      }
+    ]
+  },
+  "types-of-metal": {
+    "cover": {
+      "file": "unsplash/types-of-metal/metal-band-uW8dnSPxYbA.jpg",
+      "alt": "Silhouettes of a metal band playing under golden stage lights",
+      "credit": "Evgeniy Smersh",
+      "credit_url": "https://unsplash.com/@igrindphoto"
+    },
+    "inline": [
+      {
+        "file": "own/rock-red.jpg",
+        "alt": "A shirtless guitarist raising his fist to a wall of stage lights",
+        "section": "Heavy Metal"
+      },
+      {
+        "file": "pexels/types-of-metal/rock-concert-stage-11963130.jpeg",
+        "alt": "Silhouettes of a metal band and crowd against white stage lights",
+        "credit": "Dustin Tray",
+        "credit_url": "https://www.pexels.com/@trayproductions",
+        "section": "Nu Metal"
+      }
+    ]
+  },
+  "electronic-press-kit": {
+    "cover": {
+      "file": "unsplash/electronic-press-kit/band-photoshoot-80sYJlDB9mM.jpg",
+      "alt": "A band posing for press photos in a photo studio",
+      "credit": "isaac macdonald",
+      "credit_url": "https://unsplash.com/@isaacmacdonald"
+    },
+    "inline": [
+      {
+        "file": "pexels/electronic-press-kit/band-photoshoot-7502554.jpeg",
+        "alt": "A band posing for a press photo on a city rooftop at sunset",
+        "credit": "RDNE Stock project",
+        "credit_url": "https://www.pexels.com/@rdne",
+        "section": "What should be in an EPK"
+      },
+      {
+        "file": "pexels/electronic-press-kit/musician-laptop-9040562.jpeg",
+        "alt": "A guitarist filming herself playing at home for her EPK",
+        "credit": "Alena Darmel",
+        "credit_url": "https://www.pexels.com/@a-darmel",
+        "section": "How do you make an EPK for free"
+      }
+    ]
+  },
+  "musician-resume": {
+    "cover": {
+      "file": "unsplash/musician-resume/musician-portrait-dY0QJlfe054.jpg",
+      "alt": "A session guitarist playing in a warm, wood-panelled studio",
+      "credit": "Rogelio Gonzalez",
+      "credit_url": "https://unsplash.com/@rgonzalezvisuals"
+    },
+    "inline": [
+      {
+        "file": "pexels/musician-resume/session-musician-5939645.jpeg",
+        "alt": "Two guitarists playing together in a warm, dim studio",
+        "credit": "Daniel Twal",
+        "credit_url": "https://www.pexels.com/photo/men-playing-guitars-in-a-band-5939645/",
+        "section": "When do you need"
+      },
+      {
+        "file": "unsplash/musician-resume/sheet-music-JesImZwP-9k.jpg",
+        "alt": "A lead sheet with lyrics and chord symbols",
+        "credit": "Josh",
+        "credit_url": "https://unsplash.com/@jack_of_some_trades",
+        "section": "Musician resume template"
+      },
+      {
+        "file": "own/acoustic-amber.jpg",
+        "alt": "A guitarist playing alone on a stage lit amber",
+        "section": "Musician resume example"
+      }
+    ]
+  }
+}

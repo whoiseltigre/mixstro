@@ -6,22 +6,28 @@ import type { Bandmate, Project } from "./projects";
  * were in. Membership only changes through the invite functions in the database.
  */
 
-type Row = { project_id: number; username: string; first_name: string; avatar_url: string | null };
+type Row = { project_id: number; band_id: number; username: string; first_name: string; avatar_url: string | null };
+type Band = { bandId: string; mates: Bandmate[] };
 
-/** Bandmates per project id, for one person's profile. Works signed out too. */
-export async function playedWith(supabase: SupabaseClient, profileId: string): Promise<Map<string, Bandmate[]>> {
-  const map = new Map<string, Bandmate[]>();
+/** The band and its other members, per project id, for one person's profile. Works signed out too. */
+export async function playedWith(supabase: SupabaseClient, profileId: string): Promise<Map<string, Band>> {
+  const map = new Map<string, Band>();
   const { data, error } = await supabase.rpc("played_with", { p_profile: profileId });
   if (error || !data) return map;
   for (const r of data as Row[]) {
     const key = String(r.project_id);
-    map.set(key, [...(map.get(key) ?? []), { username: r.username, name: r.first_name, photo: r.avatar_url }]);
+    const band = map.get(key) ?? { bandId: String(r.band_id), mates: [] };
+    band.mates.push({ username: r.username, name: r.first_name, photo: r.avatar_url });
+    map.set(key, band);
   }
   return map;
 }
 
-export const withBandmates = (projects: Project[], map: Map<string, Bandmate[]>) =>
-  map.size ? projects.map((p) => (map.has(p.id) ? { ...p, bandmates: map.get(p.id) } : p)) : projects;
+export const withBandmates = (projects: Project[], map: Map<string, Band>) =>
+  map.size ? projects.map((p) => (map.has(p.id) ? { ...p, bandmates: map.get(p.id)!.mates, bandId: map.get(p.id)!.bandId } : p)) : projects;
+
+/** A band's page: /b/<id>. */
+export const bandPath = (id: string | number) => `/b/${id}`;
 
 /** "Maya", "Maya and Jo", "Maya, Jo and 2 more". */
 export function names(list: { name: string }[]) {

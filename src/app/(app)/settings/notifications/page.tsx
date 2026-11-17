@@ -2,7 +2,9 @@
 
 import { BackButton } from "@/components/ui";
 import { type Channel, NOTIFICATION_TYPES, useNotificationPrefs, wants } from "@/lib/notifications";
+import { useState } from "react";
 import { usePush } from "@/lib/push-client";
+import { sendTestPush } from "./actions";
 import { AlertRoles } from "./roles";
 
 export default function NotificationSettings() {
@@ -59,14 +61,40 @@ function ThisDevice() {
   };
   const c = copy[state];
   return (
-    <section className="flex items-center gap-3 p-4 rounded-[20px] bg-stage border border-paper/8">
+    <section className="flex flex-col gap-3 p-4 rounded-[20px] bg-stage border border-paper/8">
+      <div className="flex items-center gap-3">
       <span className={`size-2.5 rounded-full shrink-0 ${state === "on" ? "bg-[#30D158]" : "bg-tungsten"}`} aria-hidden="true" />
       <span className="flex-1 flex flex-col gap-0.5 min-w-0">
         <span className="text-[15px] font-semibold">{c.title}</span>
         <span className="text-[13px] text-smoke text-pretty">{c.sub}</span>
       </span>
       {(state === "on" || state === "off") && <Toggle label="Push on this device" on={state === "on"} onChange={(on) => (on ? enable() : disable())} />}
+      </div>
+      {state === "on" && <TestPush />}
     </section>
+  );
+}
+
+function TestPush() {
+  const [note, setNote] = useState<string>();
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex items-center gap-3 pl-[22px]">
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          const r = await sendTestPush().catch(() => ({ ok: false, error: "That didn't go through. Try again." }));
+          setBusy(false);
+          setNote(r.ok ? "Sent. It should pop up in a few seconds." : r.error);
+        }}
+        className="h-9 px-3.5 rounded-full border border-paper/20 text-[14px] font-semibold disabled:opacity-50"
+      >
+        {busy ? "Sending…" : "Send me a test"}
+      </button>
+      {note && <span className="text-[13px] text-smoke">{note}</span>}
+    </div>
   );
 }
 

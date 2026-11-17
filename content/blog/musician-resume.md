@@ -4,8 +4,11 @@ slug: musician-resume
 date: 2026-11-06
 description: "How to write a musician resume for auditions, session work, teaching and music school, with a free template, an example and tips on what to include."
 excerpt: "A one-page musician resume template, a filled-in example, and what to include for auditions, sessions and teaching jobs."
-cover:
-cover_alt:
+cover: "/site/v1/blog/musician-resume/cover-eeb44038"
+cover_alt: "A session guitarist playing in a warm, wood-panelled studio"
+og: "/site/v1/blog/musician-resume/og-690fca30.jpg"
+cover_credit_url: "https://unsplash.com/@rgonzalezvisuals"
+cover_credit: "Rogelio Gonzalez"
 tags: [Profile, Gigs]
 author: Taylor Greigh
 old_urls: []
@@ -20,6 +23,8 @@ Below you'll find what to include, a template you can copy, a filled-in example 
 ## When do you need a musician resume?
 
 More often than you'd think. Common situations include:
+
+![Two guitarists playing together in a warm, dim studio](/site/v1/blog/musician-resume/photo-1-a391374b "Photo: Daniel Twal|https://www.pexels.com/photo/men-playing-guitars-in-a-band-5939645/")
 
 - Auditions for established bands, touring acts and theater pit orchestras
 - Session and hired-gun work, where a producer or artist wants to know your credits
@@ -63,6 +68,8 @@ One or two people who've hired you or played with you, or "references available 
 
 Copy this and fill it in:
 
+![A lead sheet with lyrics and chord symbols](/site/v1/blog/musician-resume/photo-2-d3a53a0f "Photo: Josh|https://unsplash.com/@jack_of_some_trades")
+
 ```
 YOUR NAME
 Instrument(s) · City · phone · email
@@ -93,6 +100,8 @@ Name, relationship, contact (or "available on request")
 ## Musician resume example
 
 Here's a short, made-up example for a guitarist auditioning for a touring indie band:
+
+![A guitarist playing alone on a stage lit amber](/site/v1/blog/musician-resume/photo-3-ad05f81b)
 
 ```
 ALEX RIVERA
@@ -132,7 +141,7 @@ Available on request
 
 A resume lists your experience. A musician portfolio shows it: recordings, videos, charts and photos collected in one place. Most working players have both, with the resume linking to the portfolio.
 
-That's the idea behind a Mixstro profile. It keeps your whole history in one place, including the bands and projects you've played in, your role and years in each, and the music you made with them. So when someone's [looking for band members](/blog/how-to-find-band-members), they can see what you've actually done.
+That's the idea behind a Mixstro profile. It keeps your whole history in one place, including the bands and projects you've played in, your role and years in each, and the music you made with them. So when someone's [looking for band members](/blog/how-to-find-band-members), they can see what you've actually done. Starting something new instead? Our guide on [how to start a band](/blog/how-to-start-a-band) covers it step by step.
 
 ## FAQ
 

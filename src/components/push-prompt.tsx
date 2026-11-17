@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { type PushState, currentPushState, enablePush } from "@/lib/push-client";
+import { Sheet, SheetCloser } from "./sheet";
 import { Button } from "./ui";
 
 const ASKED = "mixstro:push-asked";
@@ -59,8 +60,8 @@ export function PushPrompt() {
   if (!ask) return null;
   const who = ask.name ?? "they";
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="push-title" className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-ink/60 backdrop-blur-sm" onClick={() => setAsk(null)}>
-      <div className="glass w-full md:max-w-[420px] rounded-t-[28px] md:rounded-[28px] p-6 pb-safe md:pb-6 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+    <Sheet onClose={() => setAsk(null)} labelledBy="push-title" scrimClassName="bg-ink/60 backdrop-blur-sm" className="glass md:max-w-[420px] rounded-t-[28px] md:rounded-[28px] p-6 pb-safe md:pb-6 flex flex-col gap-4">
+      <SheetCloser>{(close) => (<>
         <span className="size-12 rounded-2xl bg-tungsten/20 text-tungsten flex items-center justify-center" aria-hidden="true">
           <BellIcon />
         </span>
@@ -79,7 +80,7 @@ export function PushPrompt() {
           )}
         </div>
         {ask.state === "install" ? (
-          <Button onClick={() => setAsk(null)}>Got it</Button>
+          <Button onClick={close}>Got it</Button>
         ) : (
           <>
             <Button
@@ -89,18 +90,18 @@ export function PushPrompt() {
                 setBusy(true);
                 await enablePush().catch(() => {});
                 setBusy(false);
-                setAsk(null);
+                close();
               }}
             >
               {busy ? "Turning on…" : "Turn on notifications"}
             </Button>
-            <button type="button" onClick={() => setAsk(null)} className="h-11 text-[15px] font-semibold text-smoke">
+            <button type="button" onClick={close} className="h-11 text-[15px] font-semibold text-smoke">
               {who === "they" ? "Not now" : "Not now, I'll check back"}
             </button>
           </>
         )}
-      </div>
-    </div>
+      </>)}</SheetCloser>
+    </Sheet>
   );
 }
 

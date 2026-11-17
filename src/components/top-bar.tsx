@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { useDraft } from "@/lib/onboarding";
+import { CreateSheet } from "./create-sheet";
 import { TABS, UNREAD } from "./tab-bar";
 import { Wordmark, cx } from "./ui";
 
@@ -13,6 +15,7 @@ const GLOW: Record<string, string> = { "/discover": "#FFB245", "/board": "#B5C5F
 export function TopBar() {
   const path = usePathname();
   const { draft } = useDraft();
+  const [creating, setCreating] = useState(false);
   const tab = TABS.find((t) => path === t.href || path.startsWith(t.href + "/"));
   const glow = GLOW[tab?.href ?? ""] ?? "#FFB245";
 
@@ -25,7 +28,7 @@ export function TopBar() {
       />
       <header className="hidden md:flex fixed inset-x-0 top-0 z-30 pt-safe">
         <div className="w-full max-w-[1440px] mx-auto h-[88px] px-10 flex items-center justify-between gap-6">
-          <Link href="/discover" aria-label="Mixstro, Today" className="shrink-0 lg:w-[160px]">
+          <Link href="/discover" aria-label="Mixstro, Home" className="shrink-0 lg:w-[220px]">
             <Wordmark size={24} />
           </Link>
           <nav aria-label="Main" className="glass rounded-full p-[5px] flex gap-1">
@@ -51,7 +54,16 @@ export function TopBar() {
               );
             })}
           </nav>
-          <div className="shrink-0 lg:w-[160px] flex items-center justify-end gap-2.5">
+          <div className="shrink-0 lg:w-[220px] flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              onClick={() => setCreating(true)}
+              aria-haspopup="dialog"
+              className="h-11 px-4 rounded-full bg-tungsten text-ink text-[15px] font-semibold flex items-center gap-1.5 hover:brightness-105 transition"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              Create
+            </button>
             <Link href="/search" aria-label="Search" className="glass size-11 rounded-full flex items-center justify-center hover:bg-paper/10 transition">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="6.5" />
@@ -69,6 +81,9 @@ export function TopBar() {
           </div>
         </div>
       </header>
+      <div className="hidden md:block">
+        <CreateSheet open={creating} onClose={() => setCreating(false)} />
+      </div>
     </>
   );
 }

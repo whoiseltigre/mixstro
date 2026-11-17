@@ -109,12 +109,11 @@ export function useMyProjects() {
         const { error } = await supabase.from("projects").delete().eq("id", Number(id));
         if (error) return { error: error.message };
       }
-      const next = projects.filter((p) => p.id !== id);
-      setProjects(next);
-      if (!userId) writeLocal(next);
+      setProjects((list) => list.filter((p) => p.id !== id));
+      if (!userId) writeLocal(readLocal().filter((p) => p.id !== id));
       return {};
     },
-    [projects, userId],
+    [userId],
   );
 
   return { projects, ready, save, remove };

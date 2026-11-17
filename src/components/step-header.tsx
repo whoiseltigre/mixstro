@@ -24,18 +24,20 @@ export function StepHeader({ step, total, back, glow }: { step?: number; total?:
             aria-valuemin={1}
             aria-valuemax={total}
             aria-valuenow={step}
-            className="flex-1 flex gap-1"
+            className="flex-1 h-2 rounded-full bg-paper/12 overflow-hidden"
           >
-            {Array.from({ length: total }, (_, i) => (
-              <span
-                key={i}
-                className={`h-1 flex-1 rounded-full transition-colors ${i < step ? (glow ? "" : "bg-paper") : "bg-paper/15"}`}
-                style={i < step && glow ? { background: glow } : undefined}
-              />
-            ))}
+            {/* One bar that fills up, lit in the step's color, like a fader being pushed. */}
+            <span
+              className="block h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.2,0.9,0.25,1)]"
+              style={{
+                width: `${(step / total) * 100}%`,
+                background: glow ? `linear-gradient(90deg, color-mix(in srgb, ${glow} 55%, #fff0), ${glow})` : "var(--color-paper)",
+                boxShadow: glow ? `0 0 12px ${glow}99` : undefined,
+              }}
+            />
           </div>
           <span className="text-[12px] text-smoke tabular-nums">
-            {step}/{total}
+            {step} of {total}
           </span>
         </>
       )}
@@ -43,10 +45,15 @@ export function StepHeader({ step, total, back, glow }: { step?: number; total?:
   );
 }
 
-export function StepTitle({ title, sub }: { title: string; sub?: string }) {
+export function StepTitle({ title, sub, eyebrow, color }: { title: string; sub?: string; eyebrow?: string; color?: string }) {
   return (
     <div className="flex flex-col gap-2 px-6 pt-6">
-      <h1 className="headline text-[32px]">{title}</h1>
+      {eyebrow && (
+        <span className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: color ?? "var(--color-tungsten)" }}>
+          {eyebrow}
+        </span>
+      )}
+      <h1 className="font-display text-[31px] font-semibold tracking-[-0.03em] leading-[1.05] text-balance">{title}</h1>
       {sub && <p className="text-[15px] leading-[1.45] text-smoke text-pretty">{sub}</p>}
     </div>
   );
@@ -55,7 +62,7 @@ export function StepTitle({ title, sub }: { title: string; sub?: string }) {
 /** Sticky bottom action area that sits above the home indicator. */
 export function StepFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="sticky bottom-0 mt-auto px-5 pt-4 pb-safe bg-gradient-to-t from-ink via-ink to-ink/0 flex flex-col gap-2">
+    <div className="sticky bottom-0 mt-auto px-5 pt-8 pb-safe bg-gradient-to-t from-ink from-0% via-ink via-75% to-ink/0 flex flex-col gap-2">
       {children}
     </div>
   );

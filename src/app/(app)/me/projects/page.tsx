@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { ProjectList } from "@/components/project-list";
+import { Sheet, SheetCloser } from "@/components/sheet";
+import { toast, undoable } from "@/components/toast";
 import { BackButton, Button, Field } from "@/components/ui";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Bandmate, type Project, type Track } from "@/lib/projects";
 import { findBandmates, inviteBandmate, type Candidate } from "./band-actions";
 import { useMyProjects } from "@/lib/projects-store";
 import { lookupTrack, type TrackInfo } from "./actions";
+import { FadeImg } from "@/components/fade-image";
 
 type Form = { id?: string; name: string; role: string; startYear: number; endYear: number; current: boolean; tracks: Track[]; bandmates: Bandmate[] };
 
@@ -28,6 +31,8 @@ const selectCls = "h-[50px] w-full rounded-2xl bg-ink border border-paper/12 px-
 export default function ProjectsEditor() {
   const { projects, ready, save, remove } = useMyProjects();
   const [form, setForm] = useState<Form | null>(null);
+  const [hidden, setHidden] = useState<string[]>([]);
+  const shown = projects.filter((p) => !hidden.includes(p.id));
 
   return (
     <main className="pt-safe md:pt-6 px-5 md:px-0 pb-32 md:pb-16 flex flex-col gap-6 md:max-w-[680px] md:mx-auto">
@@ -42,27 +47,36 @@ export default function ProjectsEditor() {
         </Button>
       </div>
 
-      {ready && projects.length > 0 && <ProjectList projects={projects} onEdit={(p) => setForm(fromProject(p))} />}
+      {ready && shown.length > 0 && <ProjectList projects={shown} onEdit={(p) => setForm(fromProject(p))} />}
 
       {form && (
         <ProjectSheet
           form={form}
           update={(fn) => setForm((f) => f && fn(f))}
           onClose={() => setForm(null)}
-          onSave={async () => {
-            const res = await save(
+          onSave={() =>
+            save(
               { name: form.name, role: form.role, startYear: form.startYear, endYear: form.current ? undefined : form.endYear, tracks: form.tracks },
               form.id,
-            );
-            if (!res.error) setForm(null);
-            return res;
-          }}
+            )
+          }
           onRemove={
             form.id
               ? async () => {
-                  const res = await remove(form.id!);
-                  if (!res.error) setForm(null);
-                  return res;
+                  // Gone straight away; really removed once the Undo window closes.
+                  const id = form.id!;
+                  const name = form.name.trim() || "Project";
+                  setHidden((h) => [...h, id]);
+                  undoable({
+                    message: `${name} removed`,
+                    undo: () => setHidden((h) => h.filter((x) => x !== id)),
+                    commit: async () => {
+                      const res = await remove(id);
+                      setHidden((h) => h.filter((x) => x !== id));
+                      if (res.error) toast("Couldn't remove that. Try again.");
+                    },
+                  });
+                  return {};
                 }
               : undefined
           }
@@ -103,27 +117,37 @@ function ProjectSheet({
     update((f) => ({ ...f, tracks: f.tracks.map((t) => (t.id === id ? { ...t, url: info.url ?? t.url, title: t.title || info.title, thumb: info.thumb ?? t.thumb } : t)) }));
   }
 
-  async function run(action: () => Promise<{ error?: string }>) {
-    setBusy(true);
-    const res = await action();
-    setBusy(false);
-    if (res.error) setError(res.error);
-  }
-
   return (
-    <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink/60" onClick={onClose}>
+    <Sheet
+      onClose={onClose}
+      z="z-40"
+      center={false}
+      handle={false}
+      scrimClassName="bg-ink/60"
+      label={form.id ? "Edit project" : "Add a project"}
+      className="max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-t-[32px] bg-stage border-t border-paper/12 shadow-[0_-20px_60px_rgb(0_0_0/0.5)]"
+    >
+      <SheetCloser>
+        {(close) => {
+          const run = async (action: () => Promise<{ error?: string }>) => {
+            setBusy(true);
+            const res = await action();
+            setBusy(false);
+            if (res.error) setError(res.error);
+            else close();
+          };
+          return (
       <form
-        onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault();
           run(onSave);
         }}
         aria-label={form.id ? "Edit project" : "Add a project"}
-        className="w-full max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-t-[32px] bg-stage border-t border-paper/12 shadow-[0_-20px_60px_rgb(0_0_0/0.5)] px-5 pt-2.5 pb-safe flex flex-col gap-4"
+        className="px-5 pt-2.5 pb-safe flex flex-col gap-4"
       >
         <span aria-hidden="true" className="self-center w-[38px] h-[5px] rounded-full bg-paper/25" />
         <div className="flex justify-between items-center">
-          <button type="button" onClick={onClose} className="text-[16px] text-smoke">
+          <button type="button" onClick={close} className="text-[16px] text-smoke">
             Cancel
           </button>
           <h2 className="text-[17px] font-bold">{form.id ? "Edit project" : "Add a project"}</h2>
@@ -176,8 +200,8 @@ function ProjectSheet({
             <div key={t.id} className="flex items-center gap-3 p-2 rounded-2xl bg-ink border border-paper/8">
               <span className="relative size-10 shrink-0 rounded-[10px] overflow-hidden bg-riser">
                 {t.thumb && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={t.thumb} alt="" className="absolute inset-0 size-full object-cover" />
+                   
+                  <FadeImg src={t.thumb} alt="" className="absolute inset-0 size-full object-cover" />
                 )}
               </span>
               <span className="flex-1 min-w-0 flex flex-col">
@@ -195,7 +219,7 @@ function ProjectSheet({
                 type="button"
                 onClick={() => update((f) => ({ ...f, tracks: f.tracks.filter((x) => x.id !== t.id) }))}
                 aria-label={`Remove ${t.title || "track"}`}
-                className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper"
+                className="hit-slop relative size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
               </button>
@@ -251,7 +275,10 @@ function ProjectSheet({
           </button>
         )}
       </form>
-    </div>
+          );
+        }}
+      </SheetCloser>
+    </Sheet>
   );
 }
 
@@ -321,8 +348,8 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
             <li key={m.username} className="h-8 pl-1 pr-3 rounded-full bg-ink border border-paper/10 flex items-center gap-2 text-[13px] font-semibold">
               <span className="relative size-6 rounded-full overflow-hidden bg-riser">
                 {m.photo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                   
+                  <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
                 )}
               </span>
               {m.name}
@@ -349,8 +376,8 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
               <li key={c.id} className="flex items-center gap-3 px-3 py-2">
                 <span className="relative size-9 rounded-full overflow-hidden bg-riser shrink-0">
                   {c.photo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={c.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                     
+                    <FadeImg src={c.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
                   )}
                 </span>
                 <span className="flex-1 min-w-0 flex flex-col">

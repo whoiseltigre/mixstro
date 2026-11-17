@@ -31,6 +31,8 @@ export type Project = {
   tracks: Track[];
   /** "Played with": the band's other confirmed members. */
   bandmates?: Bandmate[];
+  /** Set once someone else confirmed they played in it too: links to its band page. */
+  bandId?: string;
 };
 
 export type ProjectRow = {
@@ -101,16 +103,23 @@ export function trackPlayer(track: Track): (ParsedClip & { height?: number }) | 
 }
 
 /** A warm wash for projects without artwork, so the list still has some color. */
+// Warm House Lights hues only (tungsten, peach, pink, ember), never greens or blues.
+const WARM = ["#FFB245", "#F7BF77", "#FFACBA", "#E8794A"];
+
 export function nameWash(name: string) {
   let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360;
-  return `linear-gradient(150deg, hsl(${h} 50% 40%), hsl(${(h + 40) % 360} 40% 16%))`;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 997;
+  const tint = WARM[h % WARM.length];
+  return `linear-gradient(150deg, color-mix(in srgb, ${tint} 62%, #0F0D0B), color-mix(in srgb, ${tint} 14%, #0F0D0B))`;
 }
+
+/** The stage spill at the top of a band page: a warm tungsten glow over Ink. */
+export const BAND_GLOW = "radial-gradient(120% 90% at 50% 0%, rgb(255 178 69 / 0.38), rgb(255 178 69 / 0.08) 55%, transparent 80%)";
 
 /** Sample musicians' projects. Their tracks have no links, so they show but don't play. */
 export const SAMPLE_PROJECTS: Record<string, Project[]> = {
   eli: [
-    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }], bandmates: [{ username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg" }] },
+    { id: "eli-1", name: "Night Shift", role: "Guitar, vocals", startYear: 2022, artwork: "/photos/rock-red.jpg", tracks: [{ id: "e1", provider: "spotify", title: "Low Ceilings" }, { id: "e2", provider: "youtube", title: "Live at the Echo" }], bandmates: [{ username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg" }], bandId: "night-shift" },
     { id: "eli-2", name: "Basement demos", role: "Everything", startYear: 2018, endYear: 2019, tracks: [{ id: "e3", provider: "soundcloud", title: "Vol. 2" }] },
     { id: "eli-3", name: "Second Period", role: "Rhythm guitar", startYear: 2012, endYear: 2014, tracks: [{ id: "e4", provider: "youtube", title: "Battle of the bands" }], bandmates: [{ username: "jonah", name: "Jonah", photo: "/photos/acoustic-amber.jpg" }] },
   ],

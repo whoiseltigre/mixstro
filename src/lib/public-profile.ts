@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { findMusician, type Musician } from "./mock";
 import { LOOKING_FOR } from "./people";
 import { playedWith, withBandmates } from "./bands";
+import { SAMPLE_HIGHLIGHTS, SAMPLE_OPEN_TO, fromHighlightRow, sortHighlights, type Highlight, type HighlightRow } from "./highlights";
 import { SAMPLE_PROJECTS, fromRow, sortProjects, type Project, type ProjectRow } from "./projects";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "./supabase/config";
 
@@ -17,7 +18,7 @@ export const APP_ORIGIN = (process.env.APP_URL || "https://app.mixstro.com").rep
 /** The link people share: app.mixstro.com/@name. */
 export const pageUrl = (username: string) => `${APP_ORIGIN}/@${username}`;
 
-export type PublicPage = { person: Musician; projects: Project[]; instruments: string[] };
+export type PublicPage = { person: Musician; projects: Project[]; instruments: string[]; openTo: string[]; highlights: Highlight[] };
 
 type Row = {
   id: string;
@@ -32,6 +33,8 @@ type Row = {
   verified: boolean;
   influences: { id: string; name: string; image: string | null }[];
   projects: ProjectRow[];
+  open_to?: string[];
+  highlights?: HighlightRow[];
 };
 
 const anon = () => createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -42,7 +45,9 @@ export const getPublicPage = cache(async (username: string): Promise<PublicPage 
 
   if (!isSupabaseConfigured) {
     const person = findMusician(name);
-    return person ? { person, projects: SAMPLE_PROJECTS[name] ?? [], instruments: [person.instrument] } : null;
+    return person
+      ? { person, projects: SAMPLE_PROJECTS[name] ?? [], instruments: [person.instrument], openTo: SAMPLE_OPEN_TO[name] ?? [], highlights: SAMPLE_HIGHLIGHTS[name] ?? [] }
+      : null;
   }
 
   const db = anon();
@@ -71,7 +76,13 @@ export const getPublicPage = cache(async (username: string): Promise<PublicPage 
     goals: r.goals,
     bands: [],
   };
-  return { person, projects: withBandmates(sortProjects(r.projects.map(fromRow)), mates), instruments: r.instruments.length ? r.instruments : [instrument] };
+  return {
+    person,
+    projects: withBandmates(sortProjects(r.projects.map(fromRow)), mates),
+    instruments: r.instruments.length ? r.instruments : [instrument],
+    openTo: r.open_to ?? [],
+    highlights: sortHighlights((r.highlights ?? []).map(fromHighlightRow)),
+  };
 });
 
 /** "Guitar and vocals", "Guitar, bass and keys". */

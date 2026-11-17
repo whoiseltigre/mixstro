@@ -1,12 +1,16 @@
 ---
 title: "Home Studio Setup: The Gear You Actually Need (Beginner's Guide)"
+seo_title: "Home Studio Setup: The Gear You Actually Need"
 slug: home-studio-setup
 date: 2024-05-24
 updated: 2026-11-01
 description: "A beginner home studio setup: the 10 pieces of home studio equipment you need, from DAW and interface to mic and monitors, and what to buy first."
 excerpt: "Ten pieces of gear that take you from voice memos to real recordings, in the order you should buy them."
-cover:
-cover_alt:
+cover: "/site/v1/blog/home-studio-setup/cover-8ca1ab75"
+cover_alt: "A home studio desk with studio monitors, a MIDI keyboard and a computer"
+og: "/site/v1/blog/home-studio-setup/og-c1f3104e.jpg"
+cover_credit_url: "https://unsplash.com/@techivation"
+cover_credit: "Techivation"
 tags: [Gear, Recording]
 author: Taylor Greigh
 old_urls: [/beginner-home-studio-gear/]
@@ -21,6 +25,8 @@ Here's the home studio equipment that matters, starting with what you probably a
 ### 1. A computer
 
 Mac or PC, either works. What matters is enough RAM to run your sessions and enough storage to hold them. A recent laptop handles most home recording without trouble. One tip from experience: you always need more storage than you think, so plan on an external drive for projects and sample libraries.
+
+![A red Focusrite audio interface, the heart of a home studio](/site/v1/blog/home-studio-setup/photo-1-96fc989f "Photo: Sven Brandsma|https://unsplash.com/@seffen99")
 
 ### 2. A DAW
 
@@ -50,6 +56,8 @@ You need closed-back headphones for tracking, so the click doesn't bleed into yo
 
 A small keyboard controller lets you play virtual instruments and program drums. The [Akai MPK Mini](https://www.akaipro.com/) is cheap, tiny and does a lot for its size.
 
+![A condenser microphone with a pop filter in a treated vocal booth](/site/v1/blog/home-studio-setup/photo-2-96550bff "Photo: Jessica Lewis 🦋 thepaintedsquare|https://www.pexels.com/@thepaintedsquare")
+
 ### 8. Acoustic treatment
 
 Panels and bass traps tame reflections and boomy low end, so your room stops lying to you. [Auralex](https://www.auralex.com/) and [Primacoustic](https://www.primacoustic.com/) are good places to look. Treat the room after you know where the problems are, not before.
@@ -66,7 +74,7 @@ Decent XLR cables and a mic stand that doesn't droop mid-take. [Mogami](https://
 
 Start with the computer you have, a free or cheap DAW, a two-input interface, one good mic and closed-back headphones. That's a complete home studio setup for recording real songs. Add monitors, a controller and room treatment as you go.
 
-If you play guitar, an amp that records well is the next upgrade. Our list of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) covers a few that sound great at bedroom volume. Once the basics are in place, these [music production tools](/blog/music-production-tools) can speed up the rest of your workflow.
+If you play guitar, an amp that records well is the next upgrade. Our list of the [best guitar amps under $500](/blog/best-guitar-amps-under-500) covers a few that sound great at bedroom volume. Once the basics are in place, these [music production tools](/blog/music-production-tools) can speed up the rest of your workflow. Your first good recordings are also the heart of an [electronic press kit](/blog/electronic-press-kit), the thing that gets you booked.
 
 ## FAQ
 

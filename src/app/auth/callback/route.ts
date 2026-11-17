@@ -20,6 +20,6 @@ export async function GET(request: NextRequest) {
     .select("onboarded_at")
     .eq("id", auth.user.id)
     .maybeSingle();
-  if (!data?.onboarded_at) return redirectTo("/onboarding/basics");
+  if (!data?.onboarded_at) return redirectTo("/onboarding/who");
   return redirectTo(safeNext ?? "/discover");
 }

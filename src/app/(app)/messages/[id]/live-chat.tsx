@@ -19,6 +19,8 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string>();
   const [optimistic, setOptimistic] = useState<ChatMessage[]>([]);
+  /** The text of a send that seemed to fail, so sending it again can't double it. */
+  const failed = useRef<string | null>(null);
   const [pending, start] = useTransition();
   const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
@@ -77,14 +79,17 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
       createdAt: new Date(Date.now() - 1000).toISOString(),
     };
     setOptimistic((o) => [...o, temp]);
+    const retry = failed.current === body;
     start(async () => {
-      const res = await sendMessage(connectionId, body);
+      const res = await sendMessage(connectionId, body, retry).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
       if (res.error) {
+        failed.current = body;
         setError(res.error);
         setDraft(body);
         setOptimistic((o) => o.filter((m) => m.id !== temp.id));
         return;
       }
+      failed.current = null;
       router.refresh();
     });
   }
@@ -104,7 +109,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
     setOptimistic((o) => [...o, temp]);
     start(async () => {
       const up = await uploadVoice(connectionId, blob);
-      const res = up.path ? await sendVoice(connectionId, up.path, seconds) : { error: up.error };
+      const res = up.path ? await sendVoice(connectionId, up.path, seconds).catch(() => ({ error: "That didn't send. Try again." })) : { error: up.error };
       if (res.error) {
         setError(res.error);
         setOptimistic((o) => o.filter((m) => m.id !== temp.id));
@@ -208,7 +213,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
               type="button"
               onClick={voice.stop}
               aria-label="Send voice note"
-              className="size-10 rounded-full bg-tungsten text-ink flex items-center justify-center shrink-0"
+              className="hit-slop relative size-10 rounded-full bg-tungsten text-ink flex items-center justify-center shrink-0"
             >
               <svg
                 width="18"
@@ -240,7 +245,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
               className="flex-1 h-10 bg-transparent text-[16px] outline-none placeholder:text-smoke"
             />
             {draft.trim() ? (
-              <button type="submit" aria-label="Send" className="size-10 rounded-full bg-paper text-ink flex items-center justify-center">
+              <button type="submit" aria-label="Send" className="hit-slop relative size-10 rounded-full bg-paper text-ink flex items-center justify-center">
                 <svg
                   width="18"
                   height="18"
@@ -263,7 +268,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
                   voice.start();
                 }}
                 aria-label="Record a voice note"
-                className="size-10 rounded-full bg-paper text-ink flex items-center justify-center"
+                className="hit-slop relative size-10 rounded-full bg-paper text-ink flex items-center justify-center"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <rect x="9" y="3" width="6" height="11" rx="3" />
@@ -281,7 +286,6 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
           replacing={planning.replacing}
           onClose={() => setPlanning(null)}
           onSent={() => {
-            setPlanning(null);
             router.refresh();
           }}
         />

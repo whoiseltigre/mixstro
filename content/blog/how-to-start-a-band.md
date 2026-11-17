@@ -4,8 +4,11 @@ slug: how-to-start-a-band
 date: 2026-11-03
 description: "How to start a band, step by step: pick your sound, find members, sort out gear and rehearsal space, name the band, agree on the money and book your first gig."
 excerpt: "Everything between \"we should start a band\" and your first gig: lineup, gear, rehearsals, a name, a band agreement and a demo."
-cover:
-cover_alt:
+cover: "/site/v1/blog/how-to-start-a-band/cover-30303220"
+cover_alt: "A new band rehearsing together in a sunny home studio"
+og: "/site/v1/blog/how-to-start-a-band/og-2dce5110.jpg"
+cover_credit_url: "https://unsplash.com/@kyleloftusstudios"
+cover_credit: "Kyle Loftus"
 tags: [Bands]
 author: Taylor Greigh
 old_urls: []
@@ -28,6 +31,8 @@ How serious it is. A fun weekly jam, a gigging local band or a project that want
 ## How many members do you need to start a band?
 
 Fewer than you think. A classic rock lineup is four people: vocals, guitar, bass and drums. But you can start with two or three and fill gaps later.
+
+![A bassist playing under blue stage light](/site/v1/blog/how-to-start-a-band/photo-3-fb5821dc)
 
 - Duo: guitar and vocals, or a singer plus a producer with backing tracks. Easy to schedule and cheap to run.
 - Three-piece: guitar, bass and drums, with one or two people singing. Tight, loud and simple to book.
@@ -72,6 +77,8 @@ Then start writing. Some bands have one main songwriter. Others write everything
 
 Once a week is the sweet spot for most new bands. It's often enough to build momentum and rare enough that people with jobs can commit. A few habits make each rehearsal count:
 
+![Guitarist playing in a rehearsal room next to a drum kit](/site/v1/blog/how-to-start-a-band/photo-1-ba99e1fb "Photo: Katarina Bubenikova|https://unsplash.com/@ktrn_b")
+
 1. Send songs ahead of time. Everyone learns their parts at home. Rehearsal is for playing together, not learning chords.
 2. Make a set list for the session. Decide what you're working on before you plug in.
 3. Record and listen back. Pick one thing to fix next week.
@@ -107,6 +114,8 @@ As soon as you have three songs you're proud of. A demo doesn't need to be polis
 ## How do you get your first gig?
 
 Start small and local. Open mics, house shows, friends' parties and the opening slot on a local bill are all good first gigs. Here's how to land one:
+
+![A guitarist playing a small, candlelit bar gig](/site/v1/blog/how-to-start-a-band/photo-2-2bc1cfc2 "Photo: RDNE Stock project|https://www.pexels.com/@rdne")
 
 1. Go to shows at the venue first. Learn who books it and what kind of bands play there.
 2. Send a short, specific email with your demo or [electronic press kit](/blog/electronic-press-kit), two or three similar bands, your draw (how many people you'll realistically bring) and your available dates.

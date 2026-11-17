@@ -5,8 +5,11 @@ date: 2024-06-04
 updated: 2026-11-01
 description: "The best guitar amps under $500 for practice, recording and gigs, from the Boss Katana to the Supro Delta King 8, plus what really shapes your tone."
 excerpt: "Four amps that sound far bigger than their price, and what actually shapes your tone."
-cover:
-cover_alt:
+cover: "/site/v1/blog/best-guitar-amps-under-500/cover-236bb782"
+cover_alt: "Close-up of the gain, treble, middle and bass knobs on a guitar amp"
+og: "/site/v1/blog/best-guitar-amps-under-500/og-b903fea8.jpg"
+cover_credit_url: "https://unsplash.com/@pixelesse"
+cover_credit: "Ksenia Pixelesse"
 tags: [Gear, Guitar]
 author: Taylor Greigh
 old_urls: [/top-guitar-amps-under-500/]
@@ -20,9 +23,13 @@ So start with that question. Is this for your bedroom, your home studio, or a st
 
 The [Boss Katana](https://www.boss.info/) is the amp a lot of players recommend first, and for good reason. You get a range of amp voicings and a full set of Boss effects in one combo that works at home, in the studio and on stage. The current generation is the newest, but a used MkII is still one of the best deals in guitar.
 
+![A purple electric guitar leaning on a Boss combo amp on stage](/site/v1/blog/best-guitar-amps-under-500/photo-2-a8465c7f "Photo: Caique Araujo|https://www.pexels.com/photo/purple-electric-guitar-with-amplifier-on-stage-31143497/")
+
 ## Best tube amp under $500: Supro Delta King 8
 
 Don't let the 1-watt rating fool you. The [Supro Delta King 8](https://suprousa.com/) is a little tube amp that gets surprisingly loud when you crank it, with the kind of gritty breakup that the great [blues guitarists](/blog/blues-guitarists) built their sound on. It's small and looks the part, which makes it a favorite for home practice and recording.
+
+![Vacuum tubes like the ones inside a tube guitar amp](/site/v1/blog/best-guitar-amps-under-500/photo-1-f4f88463 "Photo: Ries Bosch|https://unsplash.com/@ries_bosch")
 
 ## Best for gigs: Orange Super Crush 100 Head
 
@@ -30,7 +37,7 @@ Need an amp that can keep up with a loud drummer? The [Orange Super Crush 100](h
 
 ## Best for practice: Positive Grid Spark
 
-The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp packed with amp models and effects. Its app can show the chords for songs you're learning and generate backing tracks that follow your playing. It's a good practice partner for the nights your bandmates can't make it.
+The [Positive Grid Spark](https://www.positivegrid.com/) is a smart practice amp packed with amp models and effects. Its app can show the chords for songs you're learning and generate backing tracks that follow your playing. It's a good practice partner for the nights your bandmates can't make it. No bandmates yet? Here's [how to find band members](/blog/how-to-find-band-members).
 
 ## How to choose between guitar amps under $500
 

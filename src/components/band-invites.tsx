@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { myBandInvites, type BandInvite } from "@/lib/bands";
 import { createClient, sessionUser } from "@/lib/supabase/client";
+import { FadeImg } from "@/components/fade-image";
 
 /** Bandmate tags waiting on you, at the top of your profile. */
 export function BandInvites() {
@@ -25,8 +26,8 @@ export function BandInvites() {
           <span className="rounded-[18.5px] bg-stage flex items-center gap-3 p-3.5">
             <span className="relative size-11 rounded-full overflow-hidden bg-riser shrink-0">
               {i.from.avatar_url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={i.from.avatar_url} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
+                 
+                <FadeImg src={i.from.avatar_url} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
               )}
             </span>
             <span className="flex-1 min-w-0 flex flex-col">

@@ -133,7 +133,7 @@ export function SectionLabel({ children }: { children: ReactNode }) {
 
 export function BackButton({ href, onClick }: { href?: string; onClick?: () => void }) {
   const icon = <ChevronLeft />;
-  const cls = "glass size-10 rounded-full flex items-center justify-center shrink-0";
+  const cls = "hit-slop relative glass size-10 rounded-full flex items-center justify-center shrink-0";
   return href ? (
     <Link href={href} aria-label="Back" className={cls}>
       {icon}

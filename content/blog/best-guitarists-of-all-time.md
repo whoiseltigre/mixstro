@@ -5,8 +5,11 @@ date: 2024-05-16
 updated: 2026-11-01
 description: "The best guitarists of all time, from Jimi Hendrix, Eddie Van Halen and Jimmy Page to Nile Rodgers, plus modern players like Nita Strauss and Mateus Asato."
 excerpt: "Legends, virtuosos, pioneers and modern players: the guitarists who changed what the instrument can do."
-cover:
-cover_alt:
+cover: "/site/v1/blog/best-guitarists-of-all-time/cover-d68c8e4b"
+cover_alt: "A guitarist bent over an electric guitar in a beam of stage light"
+og: "/site/v1/blog/best-guitarists-of-all-time/og-3920f40c.jpg"
+cover_credit_url: "https://unsplash.com/@flaviewxvx"
+cover_credit: "Flavio"
 tags: [Guitar]
 author: Taylor Greigh
 old_urls: [/best-guitarists-of-all-time/, /the-best-modern-guitar-players/]
@@ -66,13 +69,17 @@ Nile Rodgers shaped pop music as both a guitarist and a producer. His tight, cho
 
 In 2018, Nita Strauss became the first woman with a signature Ibanez guitar. She's best known for her high-energy playing as Alice Cooper's guitarist, as well as her solo albums.
 
+![A guitarist playing on stage under bright beams of light](/site/v1/blog/best-guitarists-of-all-time/photo-1-aae21deb)
+
 ### Mateus Asato
 
 Brazilian guitarist Mateus Asato built a huge following online with fluid, melodic playing. He treats the electric guitar as a solo instrument, mixing chord melodies with lines that almost sing, and he's influenced a whole generation of younger players.
 
 ## What the best guitarists have in common
 
-Look past the gear and the technique and the same thing shows up again and again: every one of these players sounds like themselves within a few notes. They got there by playing constantly, usually with other musicians pushing them. If you're working on your own sound, start with your hands, then your amp. Our guide to the [best guitar amps under $500](/blog/best-guitar-amps-under-500) is a good place to begin.
+Look past the gear and the technique and the same thing shows up again and again: every one of these players sounds like themselves within a few notes. They got there by playing constantly, usually with other musicians pushing them. If you don't have those people yet, here's [how to find band members](/blog/how-to-find-band-members) worth playing with. If you're working on your own sound, start with your hands, then your amp. Our guide to the [best guitar amps under $500](/blog/best-guitar-amps-under-500) is a good place to begin.
+
+![A guitarist bent over his guitar mid-solo in front of a Marshall stack](/site/v1/blog/best-guitarists-of-all-time/photo-2-8fd55284 "Photo: Matheus Andrade|https://www.pexels.com/@andrademattheus")
 
 ## FAQ
 

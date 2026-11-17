@@ -1,8 +1,16 @@
 import Image from "next/image";
 import { Wordmark } from "@/components/ui";
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/people";
 import { SignInButtons } from "./sign-in-buttons";
 
-export default function Welcome() {
+export default async function Welcome({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
+  // If Supabase sends a sign-in back to the plain address, finish it like the normal callback does.
+  const { code } = await searchParams;
+  if (code && /^[\w-]{8,200}$/.test(code)) redirect(`/auth/callback?code=${code}`);
+  // Already signed in: straight to the app, or to signup if there's no profile yet.
+  const viewer = await getViewer();
+  if (viewer) redirect(viewer.profile?.onboarded_at ? "/discover" : "/onboarding/who");
   return (
     <main className="relative min-h-dvh flex flex-col md:grid md:grid-cols-[1.1fr_1fr]">
       {/* Phones: the photo fills the top and fades into the sign-in. Wider screens: photo left, sign-in right. */}

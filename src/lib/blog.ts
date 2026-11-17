@@ -1,15 +1,20 @@
 import fs from "node:fs";
 import path from "node:path";
-import { marked } from "marked";
+import { Marked } from "marked";
+import { isBlogImage, srcSet, imgSrc } from "./blog-img";
 
 /**
  * Blog posts live as Markdown files in content/blog/<slug>.md.
  * Frontmatter fields (shared with the website design work):
- *   title, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, tags[], author, old_urls[]
+ *   title, seo_title?, slug, date (ISO), updated?, description, excerpt, cover?, cover_alt?, cover_credit?, cover_credit_url?,
+ *   og?, tags[], author, old_urls[]
+ * cover and og are written by scripts/blog_images.py.
  * Files starting with "_" are ignored.
  */
 export type PostMeta = {
   title: string;
+  /** Shorter title for the browser tab and Google, when the headline runs long. */
+  seo_title?: string;
   slug: string;
   date: string;
   updated?: string;
@@ -17,6 +22,9 @@ export type PostMeta = {
   excerpt: string;
   cover?: string;
   cover_alt?: string;
+  cover_credit?: string;
+  cover_credit_url?: string;
+  og?: string;
   tags: string[];
   author: string;
   old_urls: string[];
@@ -27,8 +35,10 @@ export type Faq = { question: string; answer: string };
 export type Post = PostMeta & { html: string; faqs: Faq[] };
 
 /** Author bylines. Keep bios factual: they feed the Person schema on every post. */
-export const AUTHORS: Record<string, { bio: string; jobTitle: string }> = {
+export type Author = { slug: string; bio: string; jobTitle: string; image?: string; sameAs?: string[] };
+export const AUTHORS: Record<string, Author> = {
   "Taylor Greigh": {
+    slug: "taylor-greigh",
     jobTitle: "Guitarist",
     bio: "Taylor Greigh is a guitarist who has been playing for more than 20 years, across a wide range of gear, bands and gigs. Taylor builds Mixstro.",
   },
@@ -62,6 +72,33 @@ function decorate(html: string) {
       return `<h2 id="${id}">${inner}</h2>`;
     });
 }
+
+/** " on Unsplash" / " on Pexels" after a photographer's credit. */
+export const sourceOf = (url?: string) => (url?.includes("unsplash.com") ? " on Unsplash" : url?.includes("pexels.com") ? " on Pexels" : "");
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+
+/**
+ * In-post photos: ![alt](/site/v1/blog/<slug>/<name>-<hash> "Photo: Name|https://credit-url")
+ * become a lazy-loaded, responsive <figure> with a photo credit. Other images render as plain <img>.
+ */
+const md = new Marked({
+  renderer: {
+    image({ href, title, text }) {
+      if (!isBlogImage(href)) return `<img src="${esc(href)}" alt="${esc(text)}" loading="lazy" decoding="async">`;
+      const [credit, url] = (title ?? "").split("|");
+      const caption = credit
+        ? `<figcaption>${url ? `<a href="${esc(url)}" rel="nofollow noopener" target="_blank">${esc(credit)}</a>` : esc(credit)}${sourceOf(url)}</figcaption>`
+        : "";
+      return `<figure class="mxb-photo"><img src="${imgSrc(href)}" srcset="${srcSet(href)}" sizes="(min-width: 800px) 760px, calc(100vw - 40px)" width="1600" height="1067" alt="${esc(text)}" loading="lazy" decoding="async">${caption}</figure>`;
+    },
+    paragraph({ tokens }) {
+      // A paragraph holding only a photo should not wrap the <figure> in a <p>.
+      const inner = this.parser.parseInline(tokens);
+      return inner.startsWith("<figure") ? `${inner}\n` : `<p>${inner}</p>\n`;
+    },
+  },
+});
 
 const DIR = path.join(process.cwd(), "content", "blog");
 
@@ -114,6 +151,7 @@ function load(file: string): Post {
   const words = body.split(/\s+/).filter(Boolean).length;
   return {
     title: str(data.title) ?? file,
+    seo_title: str(data.seo_title) || undefined,
     slug: str(data.slug) ?? file.replace(/\.md$/, ""),
     date: str(data.date) ?? "",
     updated: str(data.updated),
@@ -121,11 +159,14 @@ function load(file: string): Post {
     excerpt: str(data.excerpt) ?? "",
     cover: str(data.cover) || undefined,
     cover_alt: str(data.cover_alt) || undefined,
+    cover_credit: str(data.cover_credit) || undefined,
+    cover_credit_url: str(data.cover_credit_url) || undefined,
+    og: str(data.og) || undefined,
     tags: list(data.tags),
     author: str(data.author) ?? "Mixstro",
     old_urls: list(data.old_urls),
     readingMinutes: Math.max(1, Math.round(words / 230)),
-    html: decorate(marked.parse(body, { async: false })),
+    html: decorate(md.parse(body, { async: false }) as string),
     faqs: extractFaqs(body),
   };
 }
@@ -166,4 +207,29 @@ export function relatedPosts(slug: string, n = 3): PostMeta[] {
   if (!me) return others.slice(0, n);
   const score = (p: PostMeta) => p.tags.filter((t) => me.tags.includes(t)).length;
   return [...others].sort((a, b) => score(b) - score(a)).slice(0, n);
+}
+
+/** The author's page on the blog, e.g. /blog/author/taylor-greigh. */
+export function authorPath(a: Pick<Author, "slug">) {
+  return `/blog/author/${a.slug}`;
+}
+
+/** Person schema for an author. The url ties every post's byline to one author page. */
+export function authorSchema(name: string, a: Author) {
+  return {
+    "@type": "Person",
+    name,
+    url: `${SITE_URL}${authorPath(a)}`,
+    jobTitle: a.jobTitle,
+    description: a.bio,
+    worksFor: { "@type": "Organization", name: "Mixstro", url: SITE_URL },
+    ...(a.image ? { image: `${SITE_URL}${a.image}` } : {}),
+    ...(a.sameAs?.length ? { sameAs: a.sameAs } : {}),
+  };
+}
+
+/** Google cuts titles off around 60 characters, so long post titles drop the brand suffix. */
+export function pageTitle(title: string) {
+  const full = `${title} · Mixstro`;
+  return full.length <= 60 ? full : title;
 }
