@@ -1,38 +1,21 @@
 import { cache } from "react";
-import { SAMPLE_PROJECTS, type Track } from "./projects";
+import { sampleBands, span, type BandMember, type BandPage, type BandStatus } from "./band-shared";
+import type { Track } from "./projects";
 import { createClient } from "./supabase/server";
 
-/**
- * A band's page (/b/<id>): everyone who confirmed they played in it, with their role and
- * years, and every track they linked to it. Readable signed out through public.public_band().
- * Demo mode builds one from the sample musicians.
- */
+export * from "./band-shared";
 
-export type BandMember = {
-  username: string;
-  name: string;
-  photo: string | null;
-  instrument: string;
-  neighborhood: string;
-  verified: boolean;
-  role?: string;
-  startYear: number;
-  endYear?: number;
-};
-
-export type BandPage = {
-  id: string;
-  name: string;
-  members: BandMember[];
-  tracks: (Track & { by: string })[];
-  startYear: number;
-  /** Undefined while anyone still plays in it. */
-  endYear?: number;
-};
+/** A band's page from public.public_band(), or a sample band in demo mode. Server only. */
 
 type Row = {
   id: number;
   name: string;
+  bio?: string | null;
+  city?: string | null;
+  genres?: string[];
+  status?: BandStatus;
+  photo_url?: string | null;
+  is_member?: boolean;
   members: {
     username: string;
     first_name: string;
@@ -46,6 +29,9 @@ type Row = {
     end_year: number | null;
   }[];
   tracks: { id: number; provider: Track["provider"]; url: string; title: string | null; thumb_url: string | null; by: string }[];
+  shows?: { id: number; date: string; time: string | null; venue: string; city: string | null; ticket_url: string | null; with_text: string | null; with_bands: { id: number; name: string }[] }[];
+  spots?: { id: number; title: string; role: string | null; details: string | null; paid: boolean; pay: string | null; asked: number; answered: boolean }[];
+  shared_stage?: { id: number; name: string; photo_url: string | null; shows: number }[];
 };
 
 export const getBandPage = cache(async (raw: string): Promise<BandPage | null> => {
@@ -74,29 +60,42 @@ export const getBandPage = cache(async (raw: string): Promise<BandPage | null> =
     seen.add(t.url);
     return [{ id: String(t.id), provider: t.provider, url: t.url, title: t.title ?? undefined, thumb: t.thumb_url ?? undefined, by: t.by }];
   });
-  return { id: String(r.id), name: r.name, members, tracks, ...span(members) };
+  return {
+    id: String(r.id),
+    name: r.name,
+    bio: r.bio ?? undefined,
+    city: r.city ?? undefined,
+    genres: r.genres ?? [],
+    status: r.status ?? "active",
+    photo: r.photo_url ?? undefined,
+    isMember: Boolean(r.is_member),
+    members,
+    tracks,
+    shows: (r.shows ?? []).map((s) => ({
+      id: String(s.id),
+      date: s.date,
+      time: s.time ?? undefined,
+      venue: s.venue,
+      city: s.city ?? undefined,
+      ticketUrl: s.ticket_url ?? undefined,
+      withText: s.with_text ?? undefined,
+      withBands: (s.with_bands ?? []).map((b) => ({ id: String(b.id), name: b.name })),
+    })),
+    spots: (r.spots ?? []).map((s) => ({
+      id: String(s.id),
+      title: s.title,
+      role: s.role ?? undefined,
+      details: s.details ?? undefined,
+      paid: s.paid,
+      pay: s.pay ?? undefined,
+      asked: Number(s.asked) || 0,
+      answered: Boolean(s.answered),
+    })),
+    sharedStage: (r.shared_stage ?? []).map((b) => ({ id: String(b.id), name: b.name, photo: b.photo_url ?? undefined, shows: b.shows })),
+    ...span(members),
+  };
 });
 
-function span(members: BandMember[]) {
-  const startYear = Math.min(...members.map((m) => m.startYear));
-  const endYear = members.some((m) => m.endYear === undefined) ? undefined : Math.max(...members.map((m) => m.endYear!));
-  return { startYear, endYear };
-}
-
-/** "2019 to now", "2012 to 2014" or "2016". */
-export function bandYears(b: Pick<BandPage, "startYear" | "endYear">) {
-  if (b.endYear === undefined) return `${b.startYear} to now`;
-  return b.endYear === b.startYear ? `${b.startYear}` : `${b.startYear} to ${b.endYear}`;
-}
-
-/** Sample band for demo mode: Eli and Maya's Night Shift (/b/night-shift). */
 function demoBand(raw: string): BandPage | null {
-  if (raw !== "night-shift") return null;
-  const p = SAMPLE_PROJECTS.eli[0];
-  const members: BandMember[] = [
-    { username: "eli", name: "Eli", photo: "/photos/eli-stage.jpg", instrument: "Guitar", neighborhood: "Echo Park", verified: true, role: "Guitar, vocals", startYear: 2022 },
-    { username: "maya", name: "Maya", photo: "/photos/bass-blue.jpg", instrument: "Bass", neighborhood: "Silver Lake", verified: true, role: "Bass, backing vocals", startYear: 2022 },
-    { username: "jonah", name: "Jonah", photo: "/photos/acoustic-amber.jpg", instrument: "Guitar", neighborhood: "Highland Park", verified: false, role: "Drums", startYear: 2022, endYear: 2023 },
-  ];
-  return { id: raw, name: p.name, members, tracks: p.tracks.map((t) => ({ ...t, by: "Eli" })), ...span(members) };
+  return sampleBands().find((b) => b.id === raw) ?? null;
 }

@@ -84,8 +84,11 @@ export function useVoiceRecorder(onDone: (r: Recording) => void) {
   return { recording: seconds !== null, seconds: seconds ?? 0, error, clearError: () => setError(undefined), start, stop, cancel };
 }
 
-/** Uploads to voice/<connection>/<you>/<time>.<ext>; storage rules only let the two of you in. */
-export async function uploadVoice(connectionId: number, blob: Blob): Promise<{ path?: string; error?: string }> {
+/**
+ * Uploads to voice/<connection>/<you>/<time>.<ext> (or voice/band-<id>/… for a band chat);
+ * storage rules only let the people in that chat in.
+ */
+export async function uploadVoice(connectionId: number | string, blob: Blob): Promise<{ path?: string; error?: string }> {
   const supabase = createClient();
   if (!supabase) return { error: "Voice notes need an account." };
   const {

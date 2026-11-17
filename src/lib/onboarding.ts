@@ -386,6 +386,8 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
         );
       }
     }
+    // Make it a band right away, so its page and Your band work before anyone else joins. Best effort.
+    if (projectId) await supabase.rpc("start_band", { p_project: projectId }).then(() => {}, () => {});
     if (projectId) rememberBand(projectId);
   }
 

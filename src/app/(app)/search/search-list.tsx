@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { BackButton } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
+import type { BandCard } from "@/lib/band-hub";
+import { FadeImg } from "@/components/fade-image";
+import { familyOf, nounFor } from "@/lib/instruments";
+import { nameWash } from "@/lib/projects";
 
 const WITHIN = [5, 10, 25, 50];
 const LOOKING = [
@@ -22,7 +26,8 @@ const NONE: Filters = { plays: [], genres: [], within: null, looking: null };
 const STORE = "mixstro:search-filters";
 
 /** Search by name, instrument, genre, neighborhood or influence, narrowed by filters. */
-export function SearchList({ people }: { people: Musician[] }) {
+export function SearchList({ people, bands = [], plays = [], initialTab = "people" }: { people: Musician[]; bands?: BandCard[]; plays?: string[]; initialTab?: "people" | "bands" }) {
+  const [tab, setTab] = useState<"people" | "bands">(initialTab);
   const [q, setQ] = useState("");
   const [f, setF] = useState<Filters>(NONE);
   const [open, setOpen] = useState(false);
@@ -72,10 +77,10 @@ export function SearchList({ people }: { people: Musician[] }) {
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Name, instrument or influence"
+          placeholder={tab === "bands" ? "Band, genre or city" : "Name, instrument or influence"}
           className="flex-1 min-w-0 h-11 rounded-full bg-stage border border-paper/12 px-4 text-[16px] placeholder:text-smoke outline-none focus:border-paper/40"
         />
-        <button
+        {tab === "people" && <button
           type="button"
           onClick={() => setOpen(!open)}
           aria-expanded={open}
@@ -84,10 +89,30 @@ export function SearchList({ people }: { people: Musician[] }) {
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
           Filters{active ? ` · ${active}` : ""}
-        </button>
+        </button>}
       </div>
 
-      {open && (
+      <div role="tablist" aria-label="Search for" className="flex p-[3px] rounded-[12px] bg-stage">
+        {(["people", "bands"] as const).map((t) => (
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            aria-selected={tab === t}
+            onClick={() => {
+              setTab(t);
+              history.replaceState(null, "", t === "bands" ? "?tab=bands" : location.pathname);
+            }}
+            className={`flex-1 h-9 rounded-[10px] text-[14px] font-semibold transition ${tab === t ? "bg-riser text-paper shadow-[0_1px_4px_rgb(0_0_0/0.3)]" : "text-smoke"}`}
+          >
+            {t === "people" ? "Musicians" : "Bands"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "bands" && <BandResults bands={bands} plays={plays} q={s} />}
+
+      {tab === "people" && open && (
         <div id="filters" className="flex flex-col gap-4 p-4 rounded-[22px] bg-stage border border-paper/10">
           <Group label="Plays">
             {options.plays.map((v) => <Chip key={v} on={f.plays.includes(v)} onClick={() => toggle("plays", v)}>{v}</Chip>)}
@@ -110,7 +135,7 @@ export function SearchList({ people }: { people: Musician[] }) {
         </div>
       )}
 
-      <ul className="flex flex-col">
+      {tab === "people" && <ul className="flex flex-col">
         {results.map((m) => (
           <li key={m.username}>
             <Link href={`/m/${m.username}`} className="flex items-center gap-3.5 py-3 border-b border-paper/8">
@@ -138,8 +163,85 @@ export function SearchList({ people }: { people: Musician[] }) {
             )}
           </li>
         )}
-      </ul>
+      </ul>}
     </main>
+  );
+}
+
+/** Does this open role fit something you play? "Drums" fits "Drum kit"; "Lead guitar" fits "Electric guitar". */
+function fits(role: string, plays: string[]) {
+  const r = role.toLowerCase();
+  return plays.some((p) => {
+    const fam = familyOf(p)?.id;
+    return role === p || (fam && (role === fam || familyOf(role)?.id === fam || r.includes(fam.toLowerCase()))) || r.includes(p.toLowerCase());
+  });
+}
+
+/** Bands: open spots that fit what you play first, then everyone nearby. */
+function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; q: string }) {
+  const match = (b: BandCard) => !q || [b.name, b.city ?? "", ...b.genres, ...b.openRoles].some((v) => v.toLowerCase().includes(q));
+  const list = bands.filter(match);
+  const forYou = list.filter((b) => b.openRoles.length && (plays.length ? b.openRoles.some((r) => fits(r, plays)) : true));
+  const near = [...list].sort((a, b) => (a.miles ?? 1e9) - (b.miles ?? 1e9) || a.name.localeCompare(b.name));
+  const main = plays[0];
+  const fam = main ? familyOf(main)?.id ?? main : null;
+  const noun = fam ? nounFor(fam) : null;
+
+  return (
+    <div className="flex flex-col gap-6 pt-1">
+      {forYou.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <div className="flex flex-col">
+            <h2 className="text-[20px] font-bold tracking-[-0.02em]">{noun ? `Bands looking for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}` : "Bands with an open spot"}</h2>
+            {noun && <span className="text-[13px] text-smoke">Because you play {main!.toLowerCase()}</span>}
+          </div>
+          <ul className="hscroll flex gap-3 -mx-5 px-5 md:mx-0 md:px-0">
+            {forYou.map((b) => (
+              <li key={b.id} className="shrink-0 w-[168px]">
+                <Link href={`/b/${b.id}`} className="flex flex-col gap-2 group">
+                  <span className="relative block h-[124px] rounded-[20px] overflow-hidden" style={{ background: nameWash(b.name) }}>
+                    {b.photo && <FadeImg src={b.photo} alt="" className="absolute inset-0 size-full object-cover transition group-hover:scale-[1.03]" />}
+                    <span className="absolute left-2 bottom-2 h-6 px-2.5 rounded-full bg-tungsten text-ink text-[12px] font-semibold flex items-center max-w-[150px] truncate">
+                      {(plays.length ? b.openRoles.find((r) => fits(r, plays)) : b.openRoles[0]) ?? b.openRoles[0]}
+                    </span>
+                  </span>
+                  <span className="flex flex-col px-0.5">
+                    <span className="text-[15px] font-semibold truncate">{b.name}</span>
+                    <span className="text-[12px] text-smoke truncate">{[b.genres[0], b.miles !== undefined ? `${b.miles} mi` : b.city?.split(",")[0]].filter(Boolean).join(" · ")}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-[20px] font-bold tracking-[-0.02em]">{near.some((b) => b.miles !== undefined) ? "Bands near you" : "Bands on Mixstro"}</h2>
+        {near.length ? (
+          <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8">
+            {near.map((b) => (
+              <li key={b.id}>
+                <Link href={`/b/${b.id}`} className="flex items-center gap-3.5 px-3.5 py-3 transition hover:bg-paper/4">
+                  <span className="relative size-14 rounded-[16px] overflow-hidden shrink-0" style={{ background: nameWash(b.name) }}>
+                    {b.photo && <FadeImg src={b.photo} alt="" className="absolute inset-0 size-full object-cover" />}
+                  </span>
+                  <span className="flex-1 min-w-0 flex flex-col gap-0.5">
+                    <span className="text-[16px] font-semibold truncate">{b.name}</span>
+                    <span className="text-[13px] text-smoke truncate">
+                      {[b.genres[0], b.city?.split(",")[0], b.miles !== undefined ? `${b.miles} mi` : null, `${b.members} ${b.members === 1 ? "member" : "members"}`].filter(Boolean).join(" · ")}
+                    </span>
+                  </span>
+                  {b.openRoles.length > 0 && <span className="h-6 px-2.5 rounded-full bg-tungsten/16 text-tungsten text-[12px] font-semibold flex items-center shrink-0">Open spot</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="py-8 text-center text-smoke">{q ? "No bands match that yet." : "No bands here yet. Add yours from your profile."}</p>
+        )}
+      </section>
+    </div>
   );
 }
 

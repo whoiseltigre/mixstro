@@ -545,3 +545,67 @@ export async function notifyJamSoon(jamId: number, recipientId: string, otherId:
     push: { title: `Jam with ${other.first_name} at ${clock(startsAt)}`, body: place },
   });
 }
+
+/* ---------- Bands ---------- */
+
+/** The band's name and its current members other than `exceptId`. */
+async function bandAudience(bandId: number, exceptId: string) {
+  const db = adminClient();
+  if (!db) return null;
+  const [{ data: band }, { data: rows }] = await Promise.all([
+    db.from("bands").select("name").eq("id", bandId).maybeSingle<{ name: string }>(),
+    db.from("band_members").select("profile_id, projects(end_year)").eq("band_id", bandId),
+  ]);
+  if (!band) return null;
+  const ids = ((rows ?? []) as unknown as { profile_id: string; projects: { end_year: number | null } | null }[])
+    .filter((r) => r.projects && r.projects.end_year === null && r.profile_id !== exceptId)
+    .map((r) => r.profile_id);
+  return { name: band.name, ids };
+}
+
+/** A message or voice note in the band chat. At most one email per band chat every 30 minutes. */
+export async function notifyBandMessage(bandId: number, senderId: string, preview: string | null, voiceSeconds: number | null = null) {
+  if (!emailEnabled()) return;
+  const [aud, map] = await Promise.all([bandAudience(bandId, senderId), people([senderId])]);
+  const from = map.get(senderId);
+  if (!aud || !from || !aud.ids.length) return;
+  const text = preview ? (preview.length > 280 ? `${preview.slice(0, 277)}…` : preview) : null;
+  const short = text && text.length > 48 ? `${text.slice(0, 46).trimEnd()}…` : text;
+  await Promise.all(
+    aud.ids.map((id) =>
+      notify(id, {
+        type: "message",
+        ref: `band:${bandId}`,
+        throttleMinutes: 30,
+        subject: short ? `${aud.name} · ${from.first_name}: “${short}”` : `${from.first_name} sent ${aud.name} a voice note`,
+        preheader: `In your ${aud.name} band chat.`,
+        blocks: [{ kind: "band", name: aud.name, line: "Band chat" }, who(from), text ? { kind: "bubble", text } : { kind: "voice", seconds: voiceSeconds }],
+        cta: { label: "Open the band chat", path: `/messages/b/${bandId}` },
+        push: { title: `${aud.name} · ${from.first_name}`, body: text ?? (voiceSeconds ? `Voice note · ${mmss(voiceSeconds)}` : "Voice note") },
+      }),
+    ),
+  );
+}
+
+/** Someone outside the band wrote to it ("Message the band"). */
+export async function notifyBandNote(bandId: number, senderId: string, note: string) {
+  if (!emailEnabled()) return;
+  const [aud, map] = await Promise.all([bandAudience(bandId, senderId), people([senderId])]);
+  const from = map.get(senderId);
+  if (!aud || !from || !aud.ids.length) return;
+  await Promise.all(
+    aud.ids.map((id) =>
+      notify(id, {
+        type: "message",
+        ref: `band-note:${bandId}:${senderId}`,
+        throttleMinutes: 60 * 24,
+        subject: `${from.first_name} wrote to ${aud.name}`,
+        preheader: line(from),
+        blocks: [{ kind: "band", name: aud.name, line: "A note for the band" }, who(from), { kind: "bubble", text: note }],
+        cta: { label: "Open the band chat", path: `/messages/b/${bandId}` },
+        alt: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
+        push: { title: `${from.first_name} wrote to ${aud.name}`, body: note.slice(0, 120) },
+      }),
+    ),
+  );
+}
