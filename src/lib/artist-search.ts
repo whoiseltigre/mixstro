@@ -62,7 +62,8 @@ export function rankArtists<T extends Ranked>(term: string, all: T[]): T[] {
   };
   const scored = list.map((a, i) => ({ a, t: tier(a.name), i }));
   scored.sort((x, y) => x.t - y.t || (y.a.fans ?? 0) - (x.a.fans ?? 0) || x.i - y.i);
-  const strong = scored.filter((x) => x.t < 4).length;
+  // Count real hits before spinoffs were dropped: "metallica" had plenty, so no sound-alikes.
+  const strong = all.filter((a) => tier(a.name) < 4).length;
   return scored.filter((x) => x.t < 4 || strong < 3).map((x) => x.a);
 }
 
