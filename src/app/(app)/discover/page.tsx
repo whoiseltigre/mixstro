@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { PersonPhoto } from "@/components/person-photo";
 import { PostCard } from "@/components/post-card";
+import { EarlyArea } from "@/components/early-area";
 import { RoleAlertCard } from "@/components/role-alert";
 import { getBoard } from "@/lib/board";
-import { getRoleAlert, getStage, getToday } from "@/lib/people";
+import { EARLY_AREA, getRoleAlert, getStage, getToday } from "@/lib/people";
 import { HomeHeader, YourStage } from "./your-stage";
 
 export const metadata = { title: "Home · Mixstro" };
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
  * and what's on the Board. Never a dead end: every section has somewhere to go.
  */
 export default async function Home() {
-  const [{ people, incoming, yourTurn }, board, alert, stage] = await Promise.all([
+  const [{ people, incoming, yourTurn, area }, board, alert, stage] = await Promise.all([
     getToday(),
     getBoard(),
     getRoleAlert().catch(() => null),
@@ -22,6 +23,8 @@ export default async function Home() {
   ]);
   const asked = people.filter((p) => incoming.includes(p.id));
   const posts = board.posts.filter((p) => !p.mine).slice(0, 6);
+  const early = area && area.nearby < EARLY_AREA ? area : null;
+  const onlySamples = people.length > 0 && people.every((p) => p.sample);
 
   return (
     <main className="relative overflow-x-clip pt-safe md:pt-6 pb-36 md:pb-16 flex flex-col gap-7 md:gap-9">
@@ -41,6 +44,8 @@ export default async function Home() {
         <Chip href="/board/new">Post on the Board</Chip>
       </nav>
 
+      {early && <EarlyArea area={early} username={stage?.username} firstName={stage?.firstName} />}
+
       {yourTurn > 0 && (
         <Link href="/messages" className="relative mx-5 md:mx-0 p-4 rounded-[22px] bg-stage border border-[#67E2DA]/40 flex items-center gap-3 transition hover:border-[#67E2DA]">
           <span className="size-2.5 rounded-full bg-[#67E2DA] shrink-0" aria-hidden="true" />
@@ -58,7 +63,7 @@ export default async function Home() {
       <section aria-labelledby="near-you" className="relative flex flex-col gap-3 min-w-0">
         <div className="px-5 md:px-0 flex items-baseline justify-between gap-3">
           <h2 id="near-you" className="text-[19px] md:text-[22px] font-semibold tracking-[-0.01em]">
-            {asked.length ? "Want to play with you" : "Musicians near you"}
+            {asked.length ? "Want to play with you" : onlySamples ? "Sample musicians" : "Musicians near you"}
           </h2>
           <Link href="/discover/today" className="text-[14px] font-semibold text-tungsten">
             See all

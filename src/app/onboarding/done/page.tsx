@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArtistAvatar } from "@/components/artist-avatar";
+import { SharePage } from "@/components/share-page";
 import { Button, ButtonLink } from "@/components/ui";
 import { headlineFor } from "@/lib/instruments";
 import { saveProfile, savedBandPageId, useDraft } from "@/lib/onboarding";
@@ -16,6 +17,10 @@ export default function Done() {
   const [bandPage, setBandPage] = useState<number>();
   // Came in through a bandmate's "Confirm your spot" link: take them back to it.
   const [joinToken, setJoinToken] = useState<string>();
+  const [sharing, setSharing] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
   useEffect(() => {
     const t = document.cookie.split("; ").find((c) => c.startsWith("mx_join="))?.slice(8);
     if (t && /^[0-9a-f]{32}$/.test(t)) setJoinToken(t);
@@ -40,6 +45,9 @@ export default function Done() {
     await enablePush().catch(() => {});
     router.push("/discover");
   }
+
+  const username = draft.username.replace(/^@/, "").trim().toLowerCase();
+  const pageLink = `${origin || "https://app.mixstro.com"}/@${username}`;
 
   const meta = [headlineFor(draft.instruments, draft.mainInstrument), draft.band?.name, draft.neighborhood.split(",")[0]].filter(Boolean).join(" · ");
 
@@ -71,10 +79,17 @@ export default function Done() {
         </div>
         </div>
         <div className="flex flex-col gap-2.5">
-          <h1 className="font-display text-[34px] font-semibold tracking-[-0.03em]">You&apos;re in.</h1>
+          <h1 className="font-display text-[34px] font-semibold tracking-[-0.03em]">{state === "saved" ? "Your page is live." : "You're in."}</h1>
           <p className="text-[15px] leading-[1.45] text-smoke text-pretty">
-            Your profile is live. Turn on notifications so you know when a musician reaches out.
+            {state === "saved"
+              ? "Share it with the musicians you know. They see your music first, and every one who joins makes Mixstro better near you."
+              : "Saving your profile."}
           </p>
+          {state === "saved" && username && (
+            <a href={pageLink} target="_blank" rel="noreferrer" className="self-center text-[14px] font-semibold text-tungsten">
+              {pageLink.replace(/^https?:\/\//, "")}
+            </a>
+          )}
           {state === "error" && (
             <p role="alert" className="text-[13px] text-[#FF453A]">
               {error}
@@ -93,13 +108,31 @@ export default function Done() {
             Now confirm your spot in the band
           </ButtonLink>
         )}
-        <Button variant="gel" onClick={enableNotifications} disabled={state === "saving"}>
+        {state === "saved" && username && (
+          <Button variant={shared ? "glass" : "gel"} onClick={() => setSharing(true)}>
+            {shared ? "Share it again" : "Share your page"}
+          </Button>
+        )}
+        <Button variant={state === "saved" && username && !shared ? "glass" : "gel"} onClick={enableNotifications} disabled={state === "saving"}>
           {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
         </Button>
-        <ButtonLink variant="glass" href="/board">
-          Browse the Board first
+        <ButtonLink variant="glass" href="/discover">
+          Go to Home
         </ButtonLink>
       </div>
+      {sharing && username && (
+        <SharePage
+          username={username}
+          firstName={draft.firstName}
+          mine
+          url={pageLink}
+          openNow
+          onClose={() => {
+            setSharing(false);
+            setShared(true);
+          }}
+        />
+      )}
     </main>
   );
 }
