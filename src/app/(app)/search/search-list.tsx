@@ -158,7 +158,7 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
           <li className="py-10 text-center text-smoke flex flex-col items-center gap-3">
             {s || active ? (
               <>
-                <span>{s ? <>No musicians match &ldquo;{q}&rdquo;{active ? " with these filters" : ""} yet.</> : "No one matches these filters yet."}</span>
+                <span>{s ? <>No musicians found for &ldquo;{q}&rdquo;{active ? " with these filters" : ""} yet.</> : "No one fits these filters yet."}</span>
                 {active > 0 && <button type="button" onClick={() => set(NONE)} className="text-paper font-semibold underline underline-offset-4">Clear filters</button>}
               </>
             ) : (
@@ -241,7 +241,7 @@ function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; 
             ))}
           </ul>
         ) : (
-          <p className="py-8 text-center text-smoke">{q ? "No bands match that yet." : "No bands here yet. Add yours from your profile."}</p>
+          <p className="py-8 text-center text-smoke">{q ? "No bands found for that yet." : "No bands here yet. Add yours from your profile."}</p>
         )}
       </section>
     </div>

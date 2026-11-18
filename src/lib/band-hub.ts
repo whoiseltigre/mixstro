@@ -244,6 +244,8 @@ export async function getBands(): Promise<BandCard[]> {
     : [];
   const viewer = await getViewer();
   if (!viewer) return samples;
+  // Sample bands are in Los Angeles; for a real musician don't pretend they're a few miles away.
+  for (const b of samples) b.miles = undefined;
   const { data, error } = await viewer.supabase.rpc("browse_bands");
   if (error || !data) return samples;
   type R = { band_id: number; name: string; photo_url: string | null; city: string | null; genres: string[]; status: string; members: number; open_roles: string[]; open_spot_id: number | null; miles: number | null };

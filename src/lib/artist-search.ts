@@ -48,9 +48,10 @@ function norm(s: string) {
  * containing it, and only then sound-alikes. Within a group the artist with more fans comes first.
  * Sound-alikes are dropped when there are already a few real hits.
  */
-export function rankArtists<T extends Ranked>(term: string, list: T[]): T[] {
+export function rankArtists<T extends Ranked>(term: string, all: T[]): T[] {
   const q = norm(term);
-  if (!q) return list;
+  if (!q) return all;
+  const list = dropSpinoffs(q, all);
   const tier = (name: string) => {
     const n = norm(name);
     if (n === q) return 0;
@@ -63,6 +64,25 @@ export function rankArtists<T extends Ranked>(term: string, list: T[]): T[] {
   scored.sort((x, y) => x.t - y.t || (y.a.fans ?? 0) - (x.a.fans ?? 0) || x.i - y.i);
   const strong = scored.filter((x) => x.t < 4).length;
   return scored.filter((x) => x.t < 4 || strong < 3).map((x) => x.a);
+}
+
+/**
+ * Providers list every collab, tribute act and cover channel as its own artist, so "metallica" came
+ * back as Metallica, Metallica Tribute Band, Metallica's Robert Trujillo, SaD - Symphony and Metallica...
+ * When you're clearly typing one artist's name, drop names that only wrap that artist ("Bad Bunny &
+ * Arcangel", "DJ Radiohead", "Beyoncé & Shakira") when they are smaller than that artist. Typing the
+ * other name too ("bad bunny arcangel") brings them back, and bigger acts like "Paul Simon" always stay.
+ */
+export function dropSpinoffs<T extends Ranked>(q: string, list: T[]): T[] {
+  const names = list.map((a) => norm(a.name));
+  const has = (outer: string, inner: string) => ` ${outer} `.includes(` ${inner} `);
+  // Bigger artists first: more fans, or earlier in the provider's own order when there are no counts.
+  const bigger = (j: number, i: number) => (list[j].fans ?? 0) > (list[i].fans ?? 0) || ((list[j].fans ?? 0) === (list[i].fans ?? 0) && j < i);
+  return list.filter((_, i) => {
+    const n = names[i];
+    // Dropped when a bigger artist whose name holds what you typed sits whole inside this name.
+    return !names.some((core, j) => j !== i && core !== n && core.includes(q) && has(n, core) && bigger(j, i));
+  });
 }
 
 function dedupe<T extends Artist>(list: T[]) {
