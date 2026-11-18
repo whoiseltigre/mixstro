@@ -95,8 +95,8 @@ const maybe = <T>(p: Promise<T>) => p.catch((e) => (console.warn("similar-artist
  * Score candidates. Exported so it can be tested without the network.
  *
  * Deezer's list is the pool, because it stays inside the genre. ListenBrainz votes on it: an artist
- * both agree on gets a big bonus. Deezer-only acts under 5k fans drop down. Artists only ListenBrainz
- * names are allowed in only as late filler, at half weight, because on their own they drift to
+ * both agree on gets up to 1.8x its Deezer score. Deezer-only acts under 5k fans drop down. Artists only ListenBrainz
+ * names are allowed in only as late filler, at 0.3 weight, because on their own they drift to
  * whoever is most streamed (Zach Bryan → Harry Styles, Chris Stapleton → Ariana Grande).
  */
 export function blend(seed: string, dz: DeezerArtist[], lb: { name: string }[]): (Candidate & { score: number })[] {
@@ -114,13 +114,14 @@ export function blend(seed: string, dz: DeezerArtist[], lb: { name: string }[]):
     if (n === me || by.has(n)) return;
     const l = lbRank.get(n);
     let score = 1 - i / DZ;
-    if (l !== undefined) score += 0.6 + (1 - l / LB);
+    // Agreement multiplies rather than adds, so a Deezer tail pick can't jump to the top on one vote.
+    if (l !== undefined) score *= 1 + 0.8 * (1 - l / LB);
     else if ((a.nb_fan ?? 0) < SMALL_FANS) score *= 0.45;
     by.set(n, { name: a.name, deezer: a, dz: i, lb: l, score });
   });
   for (const [n, l] of lbRank) {
     const name = lb.find((a) => norm(a.name) === n)!.name;
-    if (!by.has(n)) by.set(n, { name, lb: l, score: 0.5 * (1 - l / LB) });
+    if (!by.has(n)) by.set(n, { name, lb: l, score: 0.3 * (1 - l / LB) });
   }
   return [...by.values()].sort((x, y) => y.score - x.score);
 }
@@ -141,8 +142,10 @@ export async function similarArtists(name: string): Promise<Similar[]> {
   const seenDeezer = new Set<number>(seed ? [seed.id] : []);
   const out: Similar[] = [];
   for (const c of top) {
-    // A ListenBrainz-only name Deezer can't find has no photo and is often a mismatch: skip it.
-    if (!c.deezer) continue;
+    // A ListenBrainz-only name Deezer can't find, or finds without a photo, is often a mismatch: skip it.
+    if (!c.deezer || (c.dz === undefined && !photo(c.deezer))) continue;
+    // ListenBrainz-only filler that's far bigger than the seed is popularity drift (Hozier → Ed Sheeran).
+    if (c.dz === undefined && seed?.nb_fan && (c.deezer.nb_fan ?? 0) > seed.nb_fan * 10) continue;
     const display = c.deezer?.name ?? c.name;
     const id = artistId(display);
     if (!id || seen.has(id) || (c.deezer && seenDeezer.has(c.deezer.id))) continue;
