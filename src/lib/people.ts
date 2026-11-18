@@ -242,7 +242,29 @@ export type Today = {
   /** The note each of them sent, by their id. */
   notes?: Record<string, string>;
   demo: boolean;
+  /** How busy your area is, for the "you're one of the first here" card. Signed-in only. */
+  area?: Area;
 };
+
+/**
+ * While few real musicians are near you, Home says so plainly instead of leaning on samples:
+ * you're early, invite people, we'll ping you when a player you need joins, and here are the
+ * nearest real musicians even if they're past your radius.
+ */
+export type Area = {
+  /** "Kyle", from your neighborhood. */
+  place: string | null;
+  radius: number;
+  /** Real musicians with a known distance inside your radius. */
+  nearby: number;
+  /** The closest real musicians outside your radius, nearest first. */
+  further: Musician[];
+  /** Roles you get alerts for ("Drums", "Bass"); empty when alerts are off. */
+  alertRoles: string[];
+};
+
+/** Below this many real musicians nearby, Home shows the early-area card. */
+export const EARLY_AREA = 3;
 
 /**
  * Today: up to five musicians you haven't connected with or passed on. People who
@@ -259,6 +281,7 @@ export async function getToday(): Promise<Today> {
 
   // Only needs the connections, so it runs alongside the rest instead of after it.
   const yourTurn = yourTurnCount(viewer, connections);
+  const alertRoles = getAlertRoles(viewer).catch(() => ({ roles: [] as string[], picked: false }));
   // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
   const { data } = await viewer.supabase
     .from("discoverable_profiles")
@@ -284,7 +307,18 @@ export async function getToday(): Promise<Today> {
       near(a) - near(b),
   );
   const notes = Object.fromEntries(connections.filter((c) => incoming.includes(c.from_id) && c.note).map((c) => [c.from_id, c.note as string]));
-  return { people: withSamples(people, TODAY_SIZE, viewer), incoming, notes, demo: false, yourTurn: await yourTurn };
+  const radius = viewer.profile?.radius_mi ?? 25;
+  const area: Area = {
+    place: viewer.profile?.neighborhood?.split(",")[0]?.trim() || null,
+    radius,
+    nearby: nearby.filter((m) => m.distanceMi !== undefined && m.distanceMi <= radius).length,
+    further: nearby
+      .filter((m) => m.distanceMi !== undefined && m.distanceMi > radius)
+      .sort((a, b) => a.distanceMi! - b.distanceMi!)
+      .slice(0, 8),
+    alertRoles: (await alertRoles).roles,
+  };
+  return { people: withSamples(people, TODAY_SIZE, viewer), incoming, notes, demo: false, yourTurn: await yourTurn, area };
 }
 
 /** Everyone you can search: photo and music first, then most recently active. */

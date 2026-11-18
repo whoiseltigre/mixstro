@@ -7,9 +7,11 @@ import { QuickReplies } from "@/components/quick-replies";
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { ArtistAvatar } from "@/components/artist-avatar";
+import { EarlyArea } from "@/components/early-area";
 import { PersonPhoto } from "@/components/person-photo";
 import { LogoMark } from "@/components/ui";
 import type { Musician } from "@/lib/mock";
+import type { Area } from "@/lib/people";
 import { whyYouTwo } from "@/lib/why";
 import { connect, pass } from "../../actions";
 
@@ -18,11 +20,14 @@ export function TodayDeck({
   people,
   incoming,
   notes = {},
+  early,
 }: {
   people: Musician[];
   incoming: string[];
   /** The note each person who asked you sent, by their id. */
   notes?: Record<string, string>;
+  /** Few real musicians near you yet: the end of Today says so and offers invites. */
+  early?: Early;
 }) {
   const [sheetFor, setSheetFor] = useState<Musician>();
   const [done, setDone] = useState<string[]>([]);
@@ -36,7 +41,7 @@ export function TodayDeck({
   const remaining = people.filter((p) => !done.includes(p.id) && !(p.sample && skipped.includes(p.id)));
   const m = remaining.find((p) => p.id === currentId) ?? remaining[0];
 
-  if (!m) return <AllCaughtUp total={people.length} />;
+  if (!m) return <AllCaughtUp total={people.length} early={early} />;
 
   const first = m.name.split(" ")[0];
   const asked = incoming.includes(m.id);
@@ -465,7 +470,20 @@ function Gallery({
   );
 }
 
-function AllCaughtUp({ total }: { total: number }) {
+type Early = { area: Area; username?: string; firstName?: string };
+
+function AllCaughtUp({ total, early }: { total: number; early?: Early }) {
+  if (early) {
+    return (
+      <main className="relative min-h-dvh md:min-h-[calc(100dvh-88px)] pt-safe pb-32 flex flex-col justify-center gap-4 md:max-w-[640px]">
+        <header className="relative mt-2 px-5 flex items-center md:hidden">
+          <LogoMark size={24} />
+        </header>
+        <p className="px-5 md:px-0 text-[15px] text-smoke">That&apos;s all for today.</p>
+        <EarlyArea area={early.area} username={early.username} firstName={early.firstName} />
+      </main>
+    );
+  }
   return (
     <main className="relative min-h-dvh md:min-h-[calc(100dvh-88px)] px-5 md:px-0 pt-safe pb-32 flex flex-col overflow-hidden md:overflow-visible">
       <div

@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { RoleAlertCard } from "@/components/role-alert";
-import { YOUR_TURN_LIMIT, getRoleAlert, getToday } from "@/lib/people";
+import { EARLY_AREA, YOUR_TURN_LIMIT, getRoleAlert, getStage, getToday } from "@/lib/people";
 import { TodayDeck } from "./today-deck";
 
 export const metadata = { title: "Today's musicians · Mixstro" };
 export const dynamic = "force-dynamic";
 
 export default async function Discover() {
-  const [{ people, incoming, notes, yourTurn }, alert] = await Promise.all([getToday(), getRoleAlert().catch(() => null)]);
+  const [{ people, incoming, notes, yourTurn, area }, alert, stage] = await Promise.all([getToday(), getRoleAlert().catch(() => null), getStage().catch(() => null)]);
   if (yourTurn >= YOUR_TURN_LIMIT) return <YourTurnPause count={yourTurn} />;
   return (
     <>
       {alert && <RoleAlertCard alert={alert} />}
-      <TodayDeck people={people} incoming={incoming} notes={notes} />
+      <TodayDeck
+        people={people}
+        incoming={incoming}
+        notes={notes}
+        early={area && area.nearby < EARLY_AREA ? { area, username: stage?.username, firstName: stage?.firstName } : undefined}
+      />
     </>
   );
 }
