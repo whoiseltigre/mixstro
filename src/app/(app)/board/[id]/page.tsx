@@ -53,7 +53,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
       )}
 
       {view.kind === "sample" && (
-        <p className="rounded-[20px] bg-stage p-4 text-[14px] text-smoke">This is a sample post. Real posts near you show up alongside it.</p>
+        <p className="rounded-[20px] bg-stage p-4 text-[14px] text-smoke">This is a sample post. Real posts show up alongside it.</p>
       )}
     </main>
   );

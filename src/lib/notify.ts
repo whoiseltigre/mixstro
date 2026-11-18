@@ -512,20 +512,20 @@ export async function notifyYourTurn(connectionId: number, messageId: number, se
   });
 }
 
-/** #12 A musician you're looking for just joined nearby. At most one a day (the job checks). */
-export async function notifyRoleAlert(recipientId: string, joinerId: string, role: string, why: string, miles: number) {
+/** #12 A musician you're looking for just joined. At most one a day (the job checks). */
+export async function notifyRoleAlert(recipientId: string, joinerId: string, role: string, why: string, miles?: number) {
   const from = (await people([joinerId])).get(joinerId);
   if (!from) return;
-  const where = miles < 1 ? "nearby" : `${Math.round(miles)} mi away`;
+  const where = miles === undefined ? "" : miles < 1 ? " nearby" : ` ${Math.round(miles)} mi away`;
   const what = nounFor(role);
-  const head = `${/^[aeiou]/.test(what) ? "An" : "A"} ${what} ${why} just joined ${where}`;
+  const head = `${/^[aeiou]/.test(what) ? "An" : "A"} ${what} ${why} just joined${where}`;
   await notify(recipientId, {
     type: "alerts",
     ref: `who:${joinerId}`,
     throttleMinutes: 60 * 24 * 30,
     subject: head,
     preheader: `${from.first_name} · ${line(from)}`,
-    blocks: [{ kind: "badge", text: "New nearby" }, who(from), { kind: "headline", text: head }],
+    blocks: [{ kind: "badge", text: "Just joined" }, who(from), { kind: "headline", text: head }],
     cta: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
     alt: { label: "Change these alerts", path: "/settings/notifications" },
   });

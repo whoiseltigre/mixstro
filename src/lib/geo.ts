@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
  * Turns a neighborhood like "Echo Park, Los Angeles" into a rough point so we can say
- * "3 mi" and keep Today within your radius. Server-side only.
+ * "3 mi" and break ties by distance. Server-side only.
  *
  * Points are rounded to two decimals (about 1 km) before they're stored, live in
  * profile_locations (readable only by their owner), and other people only ever get

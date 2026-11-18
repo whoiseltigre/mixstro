@@ -7,7 +7,7 @@ import { createClient, sessionUser } from "@/lib/supabase/client";
 
 const SUGGESTED = ["Drums", "Bass"];
 
-/** #12 Which roles to hear about when one joins nearby. Suggests drums and bass if you're building a band. */
+/** #12 Which roles to hear about when one joins. Suggests drums and bass if you're building a band. */
 export function AlertRoles() {
   const [roles, setRoles] = useState<string[]>([]);
   const [suggested, setSuggested] = useState(false);
@@ -47,7 +47,7 @@ export function AlertRoles() {
       <div className="flex flex-col gap-1">
         <h2 className="text-[17px] font-semibold">Who you&apos;re looking for</h2>
         <p className="text-[14px] text-smoke text-pretty">
-          When one of these joins within your radius and likes some of the same music, it shows at the top of Today.
+          When one of these joins and likes some of the same music, it shows at the top of Today.
           {suggested ? " We picked drums and bass because you're building a band." : ""}
         </p>
       </div>

@@ -12,7 +12,7 @@ const and = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).
 /**
  * Few real musicians near you yet. Instead of pretending with samples, say so: you're early,
  * invite the musicians you know, we'll tell you when a player you need joins, and here are
- * the closest real musicians even past your radius.
+ * the closest real musicians wherever they are.
  */
 export function EarlyArea({ area, username, firstName }: { area: Area; username?: string; firstName?: string }) {
   const [inviting, setInviting] = useState(false);
@@ -70,7 +70,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
           </span>
           <span className="flex-1 min-w-0 flex flex-col">
             <span className="text-[14px] font-semibold leading-tight text-pretty">
-              {players ? `We'll tell you when a ${players} joins within ${area.radius} mi` : "Get told when the player you need joins"}
+              {players ? `We'll tell you when a ${players} joins` : "Get told when the player you need joins"}
             </span>
             <span className="text-[12.5px] text-smoke">{players ? "Change who you're looking for" : "Pick the instruments you're looking for"}</span>
           </span>

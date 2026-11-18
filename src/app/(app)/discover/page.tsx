@@ -63,7 +63,7 @@ export default async function Home() {
       <section aria-labelledby="near-you" className="relative flex flex-col gap-3 min-w-0">
         <div className="px-5 md:px-0 flex items-baseline justify-between gap-3">
           <h2 id="near-you" className="text-[19px] md:text-[22px] font-semibold tracking-[-0.01em]">
-            {asked.length ? "Want to play with you" : onlySamples ? "Sample musicians" : "Musicians near you"}
+            {asked.length ? "Want to play with you" : onlySamples ? "Sample musicians" : "Musicians for you"}
           </h2>
           <Link href="/discover/today" className="text-[14px] font-semibold text-tungsten">
             See all
@@ -93,7 +93,7 @@ export default async function Home() {
             ))}
           </ul>
         ) : (
-          <EmptyCard title="You're early here" body="Musicians near you show up as they join. Share your page so the ones you know come first." />
+          <EmptyCard title="You're early here" body="Musicians show up here as they join. Share your page so the ones you know come first." />
         )}
       </section>
       </div>
@@ -114,7 +114,7 @@ export default async function Home() {
             ))}
           </ul>
         ) : (
-          <EmptyCard title="Nothing posted near you yet" body="Need a drummer, a sub for Saturday, or someone to write with? Post it first." href="/board/new" cta="Post on the Board" />
+          <EmptyCard title="Nothing posted yet" body="Need a drummer, a sub for Saturday, or someone to write with? Post it first." href="/board/new" cta="Post on the Board" />
         )}
       </section>
     </main>
