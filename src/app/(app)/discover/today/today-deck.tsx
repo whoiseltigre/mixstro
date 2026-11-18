@@ -73,7 +73,9 @@ export function TodayDeck({
     next();
     pass(id).catch(() => toast("Couldn't save that pass. They may show up again."));
   };
-  const why = whyYouTwo({
+  const why = m.sample && !m.shared.length && m.distanceMi == null
+    ? "A sample musician, here so you can see how Today works."
+    : whyYouTwo({
     shared: m.shared.map((a) => a.name),
     commitment: m.commitment,
     sameCommitment: m.sameCommitment,

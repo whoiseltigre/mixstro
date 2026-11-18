@@ -2,6 +2,7 @@ import { cache } from "react";
 import { expandRoles, fillsRole } from "./instruments";
 import { MUSICIANS, THREADS, findMusician, type Musician } from "./mock";
 import { COMMITMENT, type Artist } from "./onboarding";
+import { catalogPhoto } from "./artists";
 import { distancesFromMe, ensureLocation } from "./geo";
 import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
@@ -29,18 +30,49 @@ const TODAY_SIZE = 5;
  * Set NEXT_PUBLIC_SAMPLE_PEOPLE=off (and redeploy) to show signed-in people only real musicians.
  */
 export const SHOW_SAMPLES = process.env.NEXT_PUBLIC_SAMPLE_PEOPLE !== "off";
-const SAMPLES = (): Musician[] => (SHOW_SAMPLES ? MUSICIANS : []);
+const SAMPLES = (viewer?: Viewer): Musician[] => (SHOW_SAMPLES ? MUSICIANS.map((m) => asSampleFor(m, viewer)) : []);
+
+/**
+ * Sample people are written for Los Angeles and for one taste. Shown to a real musician they
+ * must not pretend otherwise: no distance (they're not 3 mi from someone in Austin), the city
+ * named, and "you both love" only for influences you actually picked.
+ */
+export function asSampleFor(m: Musician, viewer?: Viewer | null): Musician {
+  if (!viewer) return m;
+  const mine = new Map(viewer.influences.map((a) => [a.id, a]));
+  return {
+    ...m,
+    distanceMi: undefined,
+    neighborhood: `${m.neighborhood}, LA`,
+    shared: m.influences.filter((a) => mine.has(a.id)).map((a) => ({ ...a, image: a.image ?? mine.get(a.id)?.image })),
+    sameCommitment: false,
+    sharedDays: [],
+  };
+}
 
 /** Once this many real musicians show up for you, sample people step aside in search and Messages. */
 export const ENOUGH_REAL = 20;
 const ENOUGH_REAL_CHATS = 3;
 
-function withSamples(people: Musician[], size: number) {
-  return [...people, ...SAMPLES()].slice(0, size);
+function withSamples(people: Musician[], size: number, viewer: Viewer) {
+  return [...people, ...SAMPLES(viewer)].slice(0, size);
 }
 
-const SAMPLE_THREADS = (): Thread[] =>
-  SHOW_SAMPLES ? THREADS.map((t) => ({ username: t.with, person: findMusician(t.with)!, preview: t.preview, at: t.time, mine: !t.unread, yourTurn: t.unread })) : [];
+/**
+ * Sample chats. Signed out (the demo) they show the full flow; for a real musician they never
+ * claim a reply is waiting on you or that you sent something you didn't.
+ */
+const SAMPLE_THREADS = (viewer?: Viewer): Thread[] =>
+  SHOW_SAMPLES
+    ? THREADS.map((t) => ({
+        username: t.with,
+        person: asSampleFor(findMusician(t.with)!, viewer),
+        preview: t.preview,
+        at: t.time,
+        mine: viewer ? false : !t.unread,
+        yourTurn: viewer ? false : t.unread,
+      }))
+    : [];
 
 type ProfileRow = {
   id: string;
@@ -101,7 +133,8 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   return { supabase, id: user.id, profile, influences: ((influences ?? []) as InfluenceRow[]).map(toArtist) };
 });
 
-const toArtist = (r: InfluenceRow): Artist => ({ id: r.artist_id, name: r.artist_name, image: r.image_url ?? undefined });
+// Influences picked while artist search was down were saved without a photo; fill in the ones we know.
+const toArtist = (r: InfluenceRow): Artist => ({ id: r.artist_id, name: r.artist_name, image: r.image_url ?? catalogPhoto(r.artist_id) });
 
 function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer): Musician {
   const mine = new Set(viewer.influences.map((a) => a.id));
@@ -251,7 +284,7 @@ export async function getToday(): Promise<Today> {
       near(a) - near(b),
   );
   const notes = Object.fromEntries(connections.filter((c) => incoming.includes(c.from_id) && c.note).map((c) => [c.from_id, c.note as string]));
-  return { people: withSamples(people, TODAY_SIZE), incoming, notes, demo: false, yourTurn: await yourTurn };
+  return { people: withSamples(people, TODAY_SIZE, viewer), incoming, notes, demo: false, yourTurn: await yourTurn };
 }
 
 /** Everyone you can search: photo and music first, then most recently active. */
@@ -267,7 +300,7 @@ export async function getSearchable(): Promise<Musician[]> {
   const [real, music] = await Promise.all([hydrate(viewer, rows), withMusic(viewer.supabase, rows.map((r) => r.id))]);
   // Stable sort keeps "most recently active" within each tier.
   real.sort((a, b) => profileTier(a, music) - profileTier(b, music));
-  return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES()];
+  return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES(viewer)];
 }
 
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
@@ -286,7 +319,7 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
     .maybeSingle<ProfileRow>();
   if (!data) {
     const sample = SHOW_SAMPLES ? findMusician(username) : undefined;
-    return sample ? { person: sample, connection: null, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null } : null;
+    return sample ? { person: asSampleFor(sample, viewer), connection: null, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null } : null;
   }
   const [[person], connections] = await Promise.all([hydrate(viewer, [data]), myConnections(viewer)]);
   const connection = connections.find((c) => c.from_id === data.id || c.to_id === data.id) ?? null;
@@ -304,7 +337,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
     return { demo: true, threads: SAMPLE_THREADS() };
   }
   const accepted = (await myConnections(viewer)).filter((c) => c.status === "accepted");
-  if (!accepted.length) return { threads: SAMPLE_THREADS(), demo: false };
+  if (!accepted.length) return { threads: SAMPLE_THREADS(viewer), demo: false };
 
   const otherIds = accepted.map((c) => (c.from_id === viewer.id ? c.to_id : c.from_id));
   const [{ data: rows }, { data: messages }] = await Promise.all([
@@ -342,7 +375,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
     ];
   });
   threads.sort((a, b) => b.at.localeCompare(a.at));
-  return { threads: threads.length >= ENOUGH_REAL_CHATS ? threads : [...threads, ...SAMPLE_THREADS()], demo: false };
+  return { threads: threads.length >= ENOUGH_REAL_CHATS ? threads : [...threads, ...SAMPLE_THREADS(viewer)], demo: false };
 }
 
 /** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */

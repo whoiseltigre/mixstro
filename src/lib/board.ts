@@ -60,7 +60,7 @@ type PostRow = {
 const POST_COLUMNS = "id, author_id, kind, title, role, details, neighborhood, paid, pay, closes_on, closed_at, created_at";
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
-function samples(): BoardPost[] {
+function samples(viewer?: Viewer | null): BoardPost[] {
   if (!SHOW_SAMPLES) return [];
   return BOARD.map((p) => {
     const m = findMusician(p.author)!;
@@ -70,14 +70,15 @@ function samples(): BoardPost[] {
       kind: p.kind,
       title: p.title,
       paid: /paid|\$/i.test(p.meta),
-      isNew: p.isNew,
+      isNew: viewer ? false : p.isNew,
       author: { id: m.id, username: m.username, name: m.name, photo: m.photo, photoAlt: m.photoAlt, instrument: m.instrument },
       photo: p.photo,
       alt: p.alt,
-      distanceMi: m.distanceMi,
+      // Samples are set in Los Angeles. A real musician sees them as samples: no distance, no made-up interest.
+      distanceMi: viewer ? undefined : m.distanceMi,
       mine: false,
       meta: p.meta,
-      foot: p.foot,
+      foot: viewer ? "Sample post" : p.foot,
     };
   });
 }
@@ -183,7 +184,7 @@ export async function getBoard(): Promise<BoardView> {
   const radius = viewer.profile?.radius_mi ?? 25;
   const posts = (await decorate(viewer, (data ?? []) as PostRow[])).filter((p) => p.mine || p.distanceMi === undefined || p.distanceMi <= radius);
   const hood = viewer.profile?.neighborhood?.split(",")[0]?.trim();
-  return { posts: [...posts, ...samples()], area: hood ? `${hood} · within ${radius} mi` : `Within ${radius} mi`, demo: false };
+  return { posts: [...posts, ...samples(viewer)], area: hood ? `${hood} · within ${radius} mi` : `Within ${radius} mi`, demo: false };
 }
 
 export type Reply = { id: number; person: Musician; note: string | null; createdAt: string };
