@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Inter_Tight, Outfit, Roboto } from "next/font/google";
+import { NativeShell } from "@/components/native-shell";
 import "./globals.css";
 
 // Apple devices use SF first (see globals.css), so Geist, Inter Tight and Roboto are only fetched
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
         {children}
+        <NativeShell />
       </body>
     </html>
   );

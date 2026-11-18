@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { isNativeApp, nativePlatform, nativePush, registerNativePush } from "@/lib/native";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -9,7 +10,59 @@ import { createClient } from "@/lib/supabase/client";
  *
  * iPhone and iPad only allow web push once Mixstro is added to the Home Screen (iOS 16.4+),
  * so there the state is "install" until it's opened from the Home Screen.
+ *
+ * Inside the Mixstro iPhone app, push goes through Apple's own service (APNs) instead: the
+ * device token is saved to native_push_tokens and src/lib/apns.ts sends to it.
  */
+
+const NATIVE_TOKEN_KEY = "mixstro:native-push-token";
+
+function storedNativeToken() {
+  try {
+    return localStorage.getItem(NATIVE_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+async function nativeState(): Promise<PushState> {
+  const push = nativePush();
+  if (!push) return "unavailable";
+  const { receive } = await push.checkPermissions();
+  if (receive === "denied") return "blocked";
+  if (receive !== "granted") return "off";
+  return storedNativeToken() ? "on" : "off";
+}
+
+async function enableNative(): Promise<PushState> {
+  const { token, state } = await registerNativePush();
+  if (!token) return state === "denied" ? "blocked" : "off";
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase.rpc("save_native_push_token", { p_token: token, p_platform: nativePlatform() === "android" ? "android" : "ios" });
+    if (error) {
+      console.error("push: save token", error.message);
+      return "off";
+    }
+  }
+  try {
+    localStorage.setItem(NATIVE_TOKEN_KEY, token);
+  } catch {
+    // Private storage: still on for this session.
+  }
+  return "on";
+}
+
+async function disableNative(): Promise<PushState> {
+  const token = storedNativeToken();
+  if (token) await createClient()?.from("native_push_tokens").delete().eq("token", token);
+  try {
+    localStorage.removeItem(NATIVE_TOKEN_KEY);
+  } catch {
+    // Nothing stored.
+  }
+  return "off";
+}
 
 /** The server's public push key (env at build time, else /api/push/key). */
 let vapid: Promise<string> | null = null;
@@ -56,6 +109,7 @@ async function registration() {
 
 export async function currentPushState(): Promise<PushState> {
   if (typeof window === "undefined") return "loading";
+  if (isNativeApp()) return nativeState();
   const supported = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
   if (!supported) return isIOS() && !standalone() ? "install" : "unavailable";
   if (!(await publicKey())) return "unavailable";
@@ -68,6 +122,7 @@ export async function currentPushState(): Promise<PushState> {
 
 /** Asks permission (must run from a tap) and saves this device. */
 export async function enablePush(): Promise<PushState> {
+  if (isNativeApp()) return enableNative();
   const state = await currentPushState();
   if (state === "unavailable" || state === "install" || state === "blocked") return state;
   const permission = await Notification.requestPermission();
@@ -94,6 +149,7 @@ export async function enablePush(): Promise<PushState> {
 
 /** Turns push off for this device only. */
 export async function disablePush(): Promise<PushState> {
+  if (isNativeApp()) return disableNative();
   const reg = await navigator.serviceWorker.getRegistration("/");
   const sub = await reg?.pushManager.getSubscription();
   if (sub) {
