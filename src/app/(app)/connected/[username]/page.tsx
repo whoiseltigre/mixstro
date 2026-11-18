@@ -7,6 +7,8 @@ import { getProfile } from "@/lib/people";
 export const dynamic = "force-dynamic";
 
 /** Shown when both musicians said yes: the overlap of your sound and theirs. */
+export const metadata = { title: "Connected · Mixstro" };
+
 export default async function Connected({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const view = await getProfile(username);

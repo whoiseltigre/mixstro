@@ -20,6 +20,11 @@ import { requestOrigin } from "@/lib/origin";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ username: string }> }) {
+  const view = await getProfile((await params).username);
+  return { title: view ? `${view.person.name} · Mixstro` : "Mixstro" };
+}
+
 export default async function Profile({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
   const view = await getProfile(username);

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ClipCard } from "@/components/clip-card";
 import { ClipRecorder } from "@/components/clip-recorder";
+import { FindMyMusic } from "@/components/find-my-music";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { parseClip } from "@/lib/clips";
@@ -41,6 +42,16 @@ export default function Sound() {
     }
   }
 
+  /** Songs found by artist name: add the ones not already on your profile, up to the max. */
+  function addFound(urls: string[]) {
+    const have = new Set(clips.map((c) => parseClip(c.value)?.id));
+    const fresh = urls.flatMap((u) => {
+      const parsed = parseClip(u);
+      return parsed && !have.has(parsed.id) ? [{ kind: "clip" as const, value: parsed.url }] : [];
+    });
+    update({ clips: [...draft.clips, ...fresh.slice(0, Math.max(0, MAX_CLIPS - clips.length))] });
+  }
+
   async function finish() {
     setSaving(true);
     const r = await saveProfile(draft);
@@ -70,6 +81,14 @@ export default function Sound() {
             </div>
           </div>
         )}
+
+        <FindMyMusic onAdd={addFound} disabled={full} />
+
+        <div className="flex items-center gap-3 text-[12px] text-smoke/70" aria-hidden="true">
+          <span className="flex-1 h-px bg-paper/10" />
+          or
+          <span className="flex-1 h-px bg-paper/10" />
+        </div>
 
         <form
           onSubmit={(e) => {

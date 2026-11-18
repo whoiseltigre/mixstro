@@ -118,21 +118,25 @@ export default function Influences() {
                     <span className="flex-1 text-[15px]">{a.name}</span>
                     <span className="text-[13px] text-smoke pr-1">Add</span>
                   </button>
-                  {/* Musicians often search for their own band first: let them claim it instead. */}
-                  {draft.signupAs !== "band" && (
+                </li>
+              ))}
+              {/* Musicians often search for their own band first: one line to claim it instead. */}
+              {draft.signupAs !== "band" && q.trim().length > 1 && (
+                <li className="border-t border-paper/8 mt-1 pt-1">
                   <button
                     type="button"
                     onClick={() => {
-                      update({ band: { ...draft.band, name: a.name, since: draft.band?.since ?? new Date().getFullYear() } });
+                      const typed = q.trim();
+                      const name = results.find((a) => a.name.toLowerCase() === typed.toLowerCase())?.name ?? typed;
+                      update({ band: { ...draft.band, name, since: draft.band?.since ?? new Date().getFullYear() } });
                       setQ("");
                     }}
-                    className="ml-[52px] mb-1 -mt-1 text-[12.5px] text-smoke hover:text-paper underline-offset-2 hover:underline"
+                    className="w-full p-2.5 rounded-xl hover:bg-paper/5 text-left text-[14px] text-smoke"
                   >
-                    This is my band
+                    &ldquo;<span className="text-paper">{q.trim()}</span>&rdquo; is my band
                   </button>
-                  )}
                 </li>
-              ))}
+              )}
             </ul>
           )}
         </div>
@@ -185,7 +189,7 @@ export default function Influences() {
             </div>
             <p className="text-[15px] text-pretty">Start with one artist who shaped your sound.</p>
             <p className="text-[13px] text-smoke text-pretty -mt-2">
-              Anyone works, from The Beatles to your friend&apos;s band. Got your own music? Search your band name and tap &ldquo;This is my band&rdquo;.
+              Anyone works, from The Beatles to your friend&apos;s band. Got your own music? Search your band name and tap &ldquo;is my band&rdquo; at the bottom.
             </p>
           </div>
         )}

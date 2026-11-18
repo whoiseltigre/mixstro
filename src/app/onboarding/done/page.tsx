@@ -7,7 +7,8 @@ import { SharePage } from "@/components/share-page";
 import { Button, ButtonLink } from "@/components/ui";
 import { headlineFor } from "@/lib/instruments";
 import { saveProfile, savedBandPageId, useDraft } from "@/lib/onboarding";
-import { enablePush } from "@/lib/push-client";
+import { ShareIcon } from "@/components/push-prompt";
+import { currentPushState, enablePush, type PushState } from "@/lib/push-client";
 
 export default function Done() {
   const router = useRouter();
@@ -21,6 +22,12 @@ export default function Done() {
   const [shared, setShared] = useState(false);
   const [origin, setOrigin] = useState("");
   useEffect(() => setOrigin(window.location.origin), []);
+  // iPhone Safari can't do push until Mixstro is on the Home Screen: show how instead of a button that does nothing.
+  const [push, setPush] = useState<PushState>("loading");
+  useEffect(() => {
+    currentPushState().then(setPush).catch(() => setPush("unavailable"));
+  }, []);
+  const askPush = push === "off" || push === "loading";
   useEffect(() => {
     const t = document.cookie.split("; ").find((c) => c.startsWith("mx_join="))?.slice(8);
     if (t && /^[0-9a-f]{32}$/.test(t)) setJoinToken(t);
@@ -113,9 +120,19 @@ export default function Done() {
             {shared ? "Share it again" : "Share your page"}
           </Button>
         )}
-        <Button variant={state === "saved" && username && !shared ? "glass" : "gel"} onClick={enableNotifications} disabled={state === "saving"}>
-          {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
-        </Button>
+        {push === "install" && state === "saved" && (
+          <div className="rounded-[20px] p-4 bg-stage border border-paper/10 flex flex-col gap-1.5 text-left">
+            <span className="text-[15px] font-semibold">Get notified on your iPhone</span>
+            <span className="text-[14px] leading-[1.45] text-smoke text-pretty">
+              Tap <ShareIcon /> Share in Safari, then <b className="text-paper font-semibold">Add to Home Screen</b>. Open Mixstro from your Home Screen and turn on notifications there.
+            </span>
+          </div>
+        )}
+        {(askPush || state !== "saved") && (
+          <Button variant={state === "saved" && username && !shared ? "glass" : "gel"} onClick={enableNotifications} disabled={state === "saving"}>
+            {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
+          </Button>
+        )}
         <ButtonLink variant="glass" href="/discover">
           Go to Home
         </ButtonLink>
