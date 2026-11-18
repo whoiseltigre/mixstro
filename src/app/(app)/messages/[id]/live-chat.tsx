@@ -7,6 +7,8 @@ import type { Musician } from "@/lib/mock";
 import type { Jam } from "@/lib/jams";
 import type { ChatMessage } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
+import { playSound } from "@/lib/sounds";
+import { tapHaptic } from "@/lib/native";
 import { sendMessage, sendVoice } from "../../actions";
 import { ChatHeader } from "./chat-header";
 import { JamCard, PlanJamSheet } from "./jam";
@@ -79,6 +81,8 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
       createdAt: new Date(Date.now() - 1000).toISOString(),
     };
     setOptimistic((o) => [...o, temp]);
+    playSound("sent");
+    tapHaptic();
     const retry = failed.current === body;
     start(async () => {
       const res = await sendMessage(connectionId, body, retry).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
@@ -107,6 +111,8 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
       createdAt: new Date().toISOString(),
     };
     setOptimistic((o) => [...o, temp]);
+    playSound("sent");
+    tapHaptic();
     start(async () => {
       const up = await uploadVoice(connectionId, blob);
       const res = up.path ? await sendVoice(connectionId, up.path, seconds).catch(() => ({ error: "That didn't send. Try again." })) : { error: up.error };

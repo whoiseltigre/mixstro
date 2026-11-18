@@ -11,6 +11,11 @@ parts a website can't do on its own:
 | Links and notification taps open the right page | `@capacitor/app` | `src/components/native-shell.tsx` |
 | Haptics, share sheet, splash, status bar | `@capacitor/haptics`, `share`, `splash-screen`, `status-bar` | `src/lib/native.ts` |
 
+Sounds (picked 2026-11-18): notifications play `App/mixstro-notify.caf` ("Mallet call", named in
+the APNs payload in `src/lib/apns.ts`). In-app, `src/lib/sounds.ts` plays `public/sounds/sent.m4a`
+("Rim click") when a chat message goes out and `connected.m4a` ("Mallet chord") when a Connect is
+accepted. App only, muted by the silent switch.
+
 Because the app loads the live site, every web release reaches the app at once. Only changes to
 this folder (new plugins, icons, permissions) need a new App Store build.
 

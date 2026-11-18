@@ -42,7 +42,7 @@ export type ApnsMessage = { title: string; body: string; url: string; tag?: stri
 export function sendApns(token: string, msg: ApnsMessage, env: "sandbox" | "production" = "production"): Promise<"ok" | "gone" | "error"> {
   const host = env === "sandbox" ? "https://api.sandbox.push.apple.com" : "https://api.push.apple.com";
   const payload = JSON.stringify({
-    aps: { alert: { title: msg.title, body: msg.body }, sound: "default", "thread-id": msg.tag },
+    aps: { alert: { title: msg.title, body: msg.body }, sound: "mixstro-notify.caf", "thread-id": msg.tag },
     url: msg.url,
   });
   return new Promise((resolve) => {
