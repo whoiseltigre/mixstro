@@ -38,6 +38,8 @@ export default function Influences() {
   // Spotify-style: every artist you pick brings in a row of artists like them, newest first.
   const [groups, setGroups] = useState<{ from: Artist; artists: Artist[] }[]>([]);
   const asked = useRef(new Set<string>());
+  const pickedRef = useRef<string[]>([]);
+  pickedRef.current = picked.map((p) => p.id);
 
   const loadSimilar = useCallback(async (a: Artist) => {
     if (asked.current.has(a.id)) return;
@@ -45,8 +47,14 @@ export default function Influences() {
     try {
       const res = await fetch(`/api/artists/related?name=${encodeURIComponent(a.name)}`);
       const body = (await res.json()) as { artists?: Artist[] };
-      const artists = (body.artists ?? []).slice(0, 9);
-      if (artists.length) setGroups((g) => [{ from: a, artists }, ...g.filter((x) => x.from.id !== a.id)].slice(0, 4));
+      const all = body.artists ?? [];
+      setGroups((g) => {
+        const rest = g.filter((x) => x.from.id !== a.id);
+        // Each artist shows up once: skip ones already in another row or already picked.
+        const shown = new Set([...rest.flatMap((x) => x.artists.map((y) => y.id)), ...pickedRef.current]);
+        const artists = all.filter((x) => !shown.has(x.id)).slice(0, 9);
+        return artists.length ? [{ from: a, artists }, ...rest].slice(0, 4) : g;
+      });
     } catch {
       // No suggestions this time: search still works.
     }

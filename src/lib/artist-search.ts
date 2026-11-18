@@ -65,23 +65,6 @@ export function rankArtists<T extends Ranked>(term: string, list: T[]): T[] {
   return scored.filter((x) => x.t < 4 || strong < 3).map((x) => x.a);
 }
 
-/**
- * Artists similar to the one you picked, for the "sounds like" step: Deezer's related artists
- * (free, no key) for whichever provider runs search. Finds the artist by name first.
- */
-export async function relatedArtists(name: string): Promise<Artist[]> {
-  const term = name.trim();
-  if (!term) return [];
-  const found = rankArtists(term, await deezerSearch(term));
-  const me = found[0];
-  if (!me?.deezerId || norm(me.name) !== norm(term)) return [];
-  const res = await fetch(`https://api.deezer.com/artist/${me.deezerId}/related?limit=12`, { next: { revalidate: 604800 } });
-  if (!res.ok) throw new Error(`Deezer related failed: ${res.status}`);
-  const body = (await res.json()) as { data?: DeezerArtist[]; error?: { message: string } };
-  if (body.error) throw new Error(`Deezer related failed: ${body.error.message}`);
-  return dedupe((body.data ?? []).map(fromDeezer)).filter((a) => a.id !== me.id).map(({ id, name, image }) => ({ id, name, image }));
-}
-
 function dedupe<T extends Artist>(list: T[]) {
   const seen = new Set<string>();
   return list.filter((a) => a.id && (seen.has(a.id) ? false : (seen.add(a.id), true)));
@@ -90,7 +73,7 @@ function dedupe<T extends Artist>(list: T[]) {
 // Deezer: https://developers.deezer.com/api/search
 
 type DeezerArtist = { id?: number; name: string; picture_medium?: string; picture_big?: string; nb_fan?: number };
-type DeezerHit = Ranked & { deezerId?: number };
+type DeezerHit = Ranked;
 
 function fromDeezer(a: DeezerArtist): DeezerHit {
   return {
@@ -99,7 +82,6 @@ function fromDeezer(a: DeezerArtist): DeezerHit {
     // Artists without a photo get a placeholder whose path has an empty hash ("/artist//").
     image: a.picture_big && !a.picture_big.includes("/artist//") ? a.picture_big : undefined,
     fans: a.nb_fan,
-    deezerId: a.id,
   };
 }
 
