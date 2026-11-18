@@ -340,7 +340,8 @@ export async function getSearchable(): Promise<Musician[]> {
 export type ProfileView = { person: Musician; connection: ConnectionRow | null; viewerId: string | null; viewerPhoto: string | null };
 
 /** One musician by username, plus where you stand with them. */
-export async function getProfile(username: string): Promise<ProfileView | null> {
+/** Cached per request, so the page and its title share one lookup. */
+export const getProfile = cache(async (username: string): Promise<ProfileView | null> => {
   const viewer = await getViewer();
   if (!viewer) {
     const person = findMusician(username);
@@ -358,7 +359,7 @@ export async function getProfile(username: string): Promise<ProfileView | null> 
   const [[person], connections] = await Promise.all([hydrate(viewer, [data]), myConnections(viewer)]);
   const connection = connections.find((c) => c.from_id === data.id || c.to_id === data.id) ?? null;
   return { person, connection, viewerId: viewer.id, viewerPhoto: viewer.profile?.avatar_url ?? null };
-}
+});
 
 /** `at` is an ISO timestamp, or preformatted text for sample threads. */
 /** `yourTurn`: they wrote last (or a "Did you jam?" is waiting), so it's in your private Your turn tray (#4). */
@@ -421,7 +422,7 @@ export type ChatView =
   | { kind: "not-connected"; person: Musician; connection: ConnectionRow | null; viewerId: string };
 
 /** The conversation with one musician. Messages only exist inside an accepted connection. */
-export async function getChat(username: string): Promise<ChatView | null> {
+export const getChat = cache(async (username: string): Promise<ChatView | null> => {
   const view = await getProfile(username);
   if (!view) return null;
   if (!view.viewerId || view.person.sample) return { kind: "demo", person: view.person };
@@ -455,7 +456,7 @@ export async function getChat(username: string): Promise<ChatView | null> {
       createdAt: m.created_at,
     })),
   };
-}
+});
 
 /** Starting or rebuilding a band? Drummers and bassists are the classic hard finds. */
 export const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];

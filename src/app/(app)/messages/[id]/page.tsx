@@ -7,6 +7,11 @@ import { LiveChat } from "./live-chat";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const chat = await getChat((await params).id);
+  return { title: chat ? `${chat.person.name.split(" ")[0]} · Messages · Mixstro` : "Messages · Mixstro" };
+}
+
 export default async function Chat({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const chat = await getChat(id);

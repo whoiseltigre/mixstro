@@ -5,7 +5,7 @@ import { BackButton, ButtonLink, ChevronRight } from "@/components/ui";
 import { getNetwork } from "@/lib/network";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Your network" };
+export const metadata = { title: "Your network · Mixstro" };
 
 /** Your connections, and people you may know through your bands and your connections. */
 export default async function NetworkPage() {
