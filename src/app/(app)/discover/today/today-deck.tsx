@@ -328,7 +328,7 @@ function Gallery({
             Today&apos;s {total === 5 ? "five" : "musicians"}
           </h1>
           <p className="text-[15px] text-smoke">
-            Musicians near you who want what you want. New every morning.
+            Musicians who want what you want. New every morning.
           </p>
         </div>
         <span className="glass h-8 px-3.5 rounded-full flex items-center text-[13px] font-semibold shrink-0">
@@ -504,7 +504,7 @@ function AllCaughtUp({ total, early }: { total: number; early?: Early }) {
         <p className="text-[16px] leading-[1.5] text-smoke">
           {total
             ? "New musicians land here tomorrow. Meanwhile, see who's posting on the Board."
-            : "Musicians near you will show up here as they join. Post on the Board so they can find you first."}
+            : "Musicians will show up here as they join. Post on the Board so they can find you first."}
         </p>
         <div className="flex gap-2.5 pt-3">
           <Link
@@ -550,7 +550,7 @@ function SampleNote({ first, onNext, wide }: { first: string; onNext: () => void
   return (
     <div className={wide ? "flex items-center gap-3 pt-1" : "px-5 flex items-center gap-3"}>
       <p className="flex-1 text-[14.5px] leading-[1.4] text-paper/85 text-pretty">
-        {first} is a sample, here to show how Today works. Real musicians near you come first as they join.
+        {first} is a sample, here to show how Today works. Real musicians come first as they join.
       </p>
       <button onClick={onNext} className="h-[51px] px-6 rounded-full bg-paper text-ink text-[17px] font-semibold shrink-0">
         Next

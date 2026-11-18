@@ -75,8 +75,8 @@ type Joiner = { id: string; instruments: string[]; genres: string[]; onboarded_a
 type Listener = { id: string; alert_roles: string[] | null; goals: string[]; genres: string[]; radius_mi: number | null };
 
 /**
- * #12 role alerts: someone who joined in the last 24 hours plays a role you want, is within
- * your radius, and shares an influence or genre. At most one alert a day per person.
+ * #12 role alerts: someone who joined in the last 24 hours plays a role you want (anywhere)
+ * and shares an influence or genre. At most one alert a day per person.
  */
 async function roleAlerts() {
   const db = adminClient()!;
@@ -119,17 +119,16 @@ async function roleAlerts() {
   for (const l of listeners) {
     if (alertedToday.has(l.id)) continue;
     const here = at.get(l.id);
-    if (!here) continue;
     const wanted = l.alert_roles ?? DEFAULT_ALERT_ROLES;
     const mine = new Set((influences.get(l.id) ?? []).map((a) => a.id));
     const myGenres = new Set(l.genres);
     for (const x of joiners) {
       if (x.id === l.id) continue;
       const role = x.instruments.find((i) => fillsRole(i, wanted));
+      if (!role) continue;
       const there = at.get(x.id);
-      if (!role || !there) continue;
-      const miles = distanceMi(here, there);
-      if (miles > (l.radius_mi ?? 25)) continue;
+      // No distance limit; the alert just says how far when both places are known.
+      const miles = here && there ? distanceMi(here, there) : undefined;
       const shared = (influences.get(x.id) ?? []).find((a) => mine.has(a.id));
       const genre = x.genres.find((g) => myGenres.has(g));
       if (!shared && !genre) continue;

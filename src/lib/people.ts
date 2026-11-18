@@ -203,8 +203,11 @@ export async function withMusic(supabase: Viewer["supabase"], ids: string[]): Pr
 /** 0: photo and music. 1: one of the two. 2: neither. Lower ranks first. */
 export const profileTier = (m: Musician, music: Set<string>) => (m.photo ? 0 : 1) + (music.has(m.id) ? 0 : 1);
 
-/** People within your radius. Anyone without a known distance yet stays in. */
-const withinRadius = (viewer: Viewer) => (m: Musician) => m.distanceMi === undefined || m.distanceMi <= (viewer.profile?.radius_mi ?? 25);
+/**
+ * "Near you" for the early-area card only. Nothing else is limited by distance: everyone sees
+ * everyone, and distance just shows on cards and breaks ties.
+ */
+export const NEAR_MI = 25;
 
 /** Every connection row you're part of, in either direction. */
 export async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
@@ -249,15 +252,15 @@ export type Today = {
 /**
  * While few real musicians are near you, Home says so plainly instead of leaning on samples:
  * you're early, invite people, we'll ping you when a player you need joins, and here are the
- * nearest real musicians even if they're past your radius.
+ * nearest real musicians wherever they are.
  */
 export type Area = {
   /** "Kyle", from your neighborhood. */
   place: string | null;
   radius: number;
-  /** Real musicians with a known distance inside your radius. */
+  /** Real musicians with a known distance within NEAR_MI. */
   nearby: number;
-  /** The closest real musicians outside your radius, nearest first. */
+  /** The closest real musicians, nearest first. */
   further: Musician[];
   /** Roles you get alerts for ("Drums", "Bass"); empty when alerts are off. */
   alertRoles: string[];
@@ -289,12 +292,12 @@ export async function getToday(): Promise<Today> {
     .order("last_active_at", { ascending: false })
     .limit(200);
   const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
-  const [nearby, music] = await Promise.all([
+  const [everyone, music] = await Promise.all([
     hydrate(viewer, candidates),
     withMusic(viewer.supabase, candidates.map((r) => r.id)),
   ]);
-  // Someone who already asked to play with you shows up even if they're a bit further out.
-  const people = nearby.filter((m) => incoming.includes(m.id) || withinRadius(viewer)(m));
+  // No distance limit: everyone sees everyone. Distance only breaks ties below.
+  const people = [...everyone];
   const score = (m: Musician) => m.shared.length + (m.sameCommitment ? 1 : 0);
   // Ties go to whoever is closer.
   const near = (m: Musician) => m.distanceMi ?? Infinity;
@@ -307,13 +310,12 @@ export async function getToday(): Promise<Today> {
       near(a) - near(b),
   );
   const notes = Object.fromEntries(connections.filter((c) => incoming.includes(c.from_id) && c.note).map((c) => [c.from_id, c.note as string]));
-  const radius = viewer.profile?.radius_mi ?? 25;
   const area: Area = {
     place: viewer.profile?.neighborhood?.split(",")[0]?.trim() || null,
-    radius,
-    nearby: nearby.filter((m) => m.distanceMi !== undefined && m.distanceMi <= radius).length,
-    further: nearby
-      .filter((m) => m.distanceMi !== undefined && m.distanceMi > radius)
+    radius: NEAR_MI,
+    nearby: everyone.filter((m) => m.distanceMi !== undefined && m.distanceMi <= NEAR_MI).length,
+    further: everyone
+      .filter((m) => m.distanceMi !== undefined)
       .sort((a, b) => a.distanceMi! - b.distanceMi!)
       .slice(0, 8),
     alertRoles: (await alertRoles).roles,
@@ -472,7 +474,7 @@ export type RoleAlert = { person: Musician; role: string; why: string };
 
 /**
  * #12 "A drummer into your kind of music just joined 6 mi away." Someone who finished
- * signup in the last 3 days, plays a role you want, is within your radius, shares an
+ * signup in the last 3 days, plays a role you want (anywhere), shares an
  * influence or genre with you, and isn't already in your Connects.
  */
 export async function getRoleAlert(): Promise<RoleAlert | null> {
@@ -496,10 +498,9 @@ export async function getRoleAlert(): Promise<RoleAlert | null> {
   const myGenres = new Set(viewer.profile.genres);
   const rows = ((data ?? []) as ProfileRow[]).filter((r) => !known.has(r.id));
   const people = await hydrate(viewer, rows);
-  const radius = viewer.profile.radius_mi ?? 25;
   for (const row of rows) {
     const m = people.find((p) => p.id === row.id);
-    if (!m || m.distanceMi === undefined || m.distanceMi > radius) continue;
+    if (!m) continue;
     const genre = row.genres.find((g) => myGenres.has(g));
     if (!m.shared.length && !genre) continue;
     const role = row.instruments.find((i) => fillsRole(i, roles)) ?? m.instrument;

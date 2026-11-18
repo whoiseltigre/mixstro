@@ -71,7 +71,7 @@ export default function Me() {
           <Fact label="Commitment" value={COMMITMENT[draft.commitment]} />
           <Fact
             label="Where"
-            value={`${draft.neighborhood} · ${draft.radiusMi} mi`}
+            value={draft.neighborhood}
           />
         </dl>
       </div>

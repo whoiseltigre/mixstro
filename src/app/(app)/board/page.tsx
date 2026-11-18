@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 // Shelves, like Apple Music's Browse: one row per kind of post, each with its own gel color.
 const SHELVES: { title: string; sub: string; color: string; match: (p: BoardPost) => boolean }[] = [
   { title: "Your posts", sub: "See who answered", color: "#F5F1EC", match: (p) => p.mine },
-  { title: "New near you", sub: "Posted this week", color: "#FFB245", match: (p) => !p.mine && p.isNew },
+  { title: "New this week", sub: "Fresh posts from everywhere", color: "#FFB245", match: (p) => !p.mine && p.isNew },
   { title: "Bands looking for members", sub: "Open spots in bands and projects", color: "#B5C5FF", match: (p) => !p.mine && p.kind === "Band seeking" },
   { title: "Sessions and paid work", sub: "Studio days, subs and shows", color: "#67E2DA", match: (p) => !p.mine && (p.kind === "Session" || p.paid) },
   { title: "Collabs and co-writes", sub: "Writing, remote projects, just for fun", color: "#FFACBA", match: (p) => !p.mine && p.kind === "Collab" },
@@ -36,9 +36,9 @@ export default async function Board() {
 
       {shelves.length === 0 && (
         <section className="mx-5 md:mx-0 rounded-[24px] bg-stage p-6 md:p-8 flex flex-col gap-3 items-start" style={{ background: "radial-gradient(120% 140% at 0% 0%, rgb(255 178 69 / 0.18), transparent 60%), var(--color-stage)" }}>
-          <h2 className="text-[22px] font-semibold tracking-[-0.01em]">Nothing posted near you yet</h2>
+          <h2 className="text-[22px] font-semibold tracking-[-0.01em]">Nothing posted yet</h2>
           <p className="text-[15px] text-smoke max-w-[460px]">
-            Need a drummer, a sub for Saturday, or someone to write with? Post it and musicians nearby answer with their profile.
+            Need a drummer, a sub for Saturday, or someone to write with? Post it and musicians answer with their profile.
           </p>
           <Link href="/board/new" className="mt-1 h-11 px-5 rounded-full bg-paper text-ink text-[15px] font-semibold flex items-center">
             Post the first one

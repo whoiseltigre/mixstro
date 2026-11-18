@@ -160,15 +160,15 @@ async function decorate(viewer: Viewer, rows: PostRow[]): Promise<BoardPost[]> {
 
 export type BoardView = {
   posts: BoardPost[];
-  /** "Echo Park · within 25 mi", or a generic line in demo mode. */
+  /** The line under the Board title. */
   area: string;
   demo: boolean;
 };
 
-/** Open posts near you (your radius; posts whose distance we don't know yet stay in), newest first, then samples. */
+/** Every open post, wherever it is, newest first, then samples. Distance shows on each card. */
 export async function getBoard(): Promise<BoardView> {
   const viewer = await getViewer();
-  if (!viewer) return { posts: samples(), area: "Los Angeles · within 25 mi", demo: true };
+  if (!viewer) return { posts: samples(), area: "Posts from everywhere", demo: true };
   const today = new Date().toISOString().slice(0, 10);
   // Saving your location and fetching posts don't depend on each other; distances need both.
   const [{ data }] = await Promise.all([
@@ -181,10 +181,8 @@ export async function getBoard(): Promise<BoardView> {
       .limit(150),
     locate(viewer),
   ]);
-  const radius = viewer.profile?.radius_mi ?? 25;
-  const posts = (await decorate(viewer, (data ?? []) as PostRow[])).filter((p) => p.mine || p.distanceMi === undefined || p.distanceMi <= radius);
-  const hood = viewer.profile?.neighborhood?.split(",")[0]?.trim();
-  return { posts: [...posts, ...samples(viewer)], area: hood ? `${hood} · within ${radius} mi` : `Within ${radius} mi`, demo: false };
+  const posts = await decorate(viewer, (data ?? []) as PostRow[]);
+  return { posts: [...posts, ...samples(viewer)], area: "Posts from everywhere", demo: false };
 }
 
 export type Reply = { id: number; person: Musician; note: string | null; createdAt: string };
