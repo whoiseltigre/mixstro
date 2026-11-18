@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { NATIVE_AUTH_CALLBACK, isNativeApp, openInSafari } from "@/lib/native";
 import { createClient } from "@/lib/supabase/client";
 
 /**
@@ -24,6 +25,16 @@ export function useVerification() {
   async function linkGoogle(): Promise<{ error?: string }> {
     const supabase = createClient();
     if (!supabase) return { error: "Verification needs a real account. It's off in demo mode." };
+    if (isNativeApp()) {
+      // Google won't sign in inside the app's web view: use a Safari sheet that returns to the app.
+      const { data, error } = await supabase.auth.linkIdentity({
+        provider: "google",
+        options: { redirectTo: `${NATIVE_AUTH_CALLBACK}?next=/settings`, skipBrowserRedirect: true },
+      });
+      if (error || !data?.url) return { error: error?.message ?? "Couldn't open Google." };
+      await openInSafari(data.url);
+      return {};
+    }
     const { error } = await supabase.auth.linkIdentity({
       provider: "google",
       options: { redirectTo: `${location.origin}/auth/callback?next=/settings` },

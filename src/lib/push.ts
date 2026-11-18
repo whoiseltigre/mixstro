@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
+import { apnsConfigured, sendApns } from "./apns";
 
 /**
  * Sends web push to every device a person turned notifications on for.
@@ -59,6 +60,31 @@ export function vapidKeys(db: SupabaseClient): Promise<Keys | null> {
 
 /** Returns true if at least one device accepted it. */
 export async function sendPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
+  const [web, app] = await Promise.all([sendWebPush(db, recipientId, msg), sendAppPush(db, recipientId, msg)]);
+  return web || app;
+}
+
+/** The iPhone app's devices (APNs). Off until the APNs key is in env (see apns.ts). */
+async function sendAppPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
+  if (!apnsConfigured()) return false;
+  const { data } = await db.from("native_push_tokens").select("id, token, apns_env").eq("profile_id", recipientId).eq("platform", "ios");
+  const tokens = (data ?? []) as { id: number; token: string; apns_env: "sandbox" | "production" }[];
+  const results = await Promise.all(
+    tokens.map(async (t) => {
+      let r = await sendApns(t.token, msg, t.apns_env);
+      // Builds run straight from Xcode get sandbox tokens, which production calls bad: try there once.
+      if (r === "gone" && t.apns_env === "production") {
+        r = await sendApns(t.token, msg, "sandbox");
+        if (r === "ok") await db.from("native_push_tokens").update({ apns_env: "sandbox" }).eq("id", t.id);
+      }
+      if (r === "gone") await db.from("native_push_tokens").delete().eq("id", t.id);
+      return r === "ok";
+    }),
+  );
+  return results.some(Boolean);
+}
+
+async function sendWebPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
   const k = await vapidKeys(db);
   if (!k) return false;
   const { data } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("profile_id", recipientId);

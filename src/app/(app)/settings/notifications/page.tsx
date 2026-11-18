@@ -1,5 +1,6 @@
 "use client";
 
+import { isNativeApp } from "@/lib/native";
 import { BackButton } from "@/components/ui";
 import { type Channel, NOTIFICATION_TYPES, useNotificationPrefs, wants } from "@/lib/notifications";
 import { useState } from "react";
@@ -56,7 +57,12 @@ function ThisDevice() {
     loading: { title: "Push on this device", sub: "Checking…" },
     on: { title: "Push is on for this device", sub: "Pick which ones below." },
     off: { title: "Push is off on this device", sub: "Turn it on to hear about Connects and messages right away." },
-    blocked: { title: "Push is blocked on this device", sub: "Your browser is set to block Mixstro. Allow notifications for app.mixstro.com in its site settings." },
+    blocked: {
+      title: "Push is blocked on this device",
+      sub: isNativeApp()
+        ? "Open iPhone Settings, tap Mixstro, then Notifications, and turn on Allow Notifications."
+        : "Your browser is set to block Mixstro. Allow notifications for app.mixstro.com in its site settings.",
+    },
     install: { title: "Add Mixstro to your Home Screen", sub: "On iPhone and iPad, push works once Mixstro is on your Home Screen. Tap Share, then Add to Home Screen, and open it from there." },
   };
   const c = copy[state];
