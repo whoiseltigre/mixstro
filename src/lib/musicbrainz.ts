@@ -83,12 +83,22 @@ async function releases(mbid: string): Promise<JourneyRelease[]> {
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const span = (rs: JourneyRelease[]) => rs.map((r) => r.year).filter((y): y is number => Boolean(y));
 
-/** Your own releases plus up to six bands you were in, each with their releases (no links yet). */
-export async function mbJourney(mbid: string): Promise<{ name: string; acts: JourneyAct[] } | null> {
+/**
+ * Your own releases plus up to six bands you were in, each with their releases (no links yet).
+ * Each act is handed to `onAct` as soon as its releases are in, so the page can show them one
+ * by one. With `skipOwn`, your own act comes back with its years but no releases (the page
+ * already has them from Apple), which saves a slow request.
+ */
+export async function mbJourney(mbid: string, { onAct, skipOwn }: { onAct?: (act: JourneyAct) => void; skipOwn?: boolean } = {}): Promise<{ name: string; acts: JourneyAct[] } | null> {
   const artist = await mb<MbArtist>(`/artist/${mbid}?inc=artist-rels`);
   if (!artist) return null;
   const acts: JourneyAct[] = [];
   const life = artist["life-span"];
+  const group = artist.type === "Group";
+  const emit = (act: JourneyAct) => {
+    acts.push(act);
+    onAct?.(act);
+  };
 
   // Bands this person was a member of, most recent first.
   const bands = (artist.relations ?? [])
@@ -98,31 +108,34 @@ export async function mbJourney(mbid: string): Promise<{ name: string; acts: Jou
     .slice(0, 6);
 
   // All the release lookups at once (still started a second apart): MusicBrainz can be slow to answer.
-  const [own, ...bandReleases] = await Promise.all([releases(mbid), ...bands.map((b) => releases(b.artist.id))]);
-  const ownYears = span(own);
-  const group = artist.type === "Group";
-  if (own.length || group) {
-    acts.push({
-      name: artist.name,
-      relation: "self",
-      startYear: (group ? yearOf(life?.begin) : undefined) ?? (ownYears.length ? Math.min(...ownYears) : undefined),
-      endYear: group && life?.ended ? yearOf(life.end) : undefined,
-      releases: own,
-    });
-  }
-
-  bands.forEach((b, i) => {
-    const rs = bandReleases[i];
+  const own = (skipOwn ? Promise.resolve([] as JourneyRelease[]) : releases(mbid)).then((rs) => {
     const years = span(rs);
-    const instruments = (b.attributes ?? []).filter((a) => !["original", "founder", "additional", "minor"].includes(a));
-    acts.push({
-      name: b.artist.name,
-      relation: "band",
-      startYear: yearOf(b.begin) ?? (years.length ? Math.min(...years) : undefined),
-      endYear: b.ended ? (yearOf(b.end) ?? (years.length ? Math.max(...years) : undefined)) : undefined,
-      role: instruments.length ? cap(instruments.slice(0, 3).join(", ")) : undefined,
-      releases: rs,
-    });
+    if (rs.length || group || skipOwn) {
+      emit({
+        name: artist.name,
+        relation: "self",
+        startYear: (group ? yearOf(life?.begin) : undefined) ?? (years.length ? Math.min(...years) : undefined),
+        endYear: group && life?.ended ? yearOf(life.end) : undefined,
+        releases: rs,
+      });
+    }
   });
+
+  const theirs = bands.map((b) =>
+    releases(b.artist.id).then((rs) => {
+      const years = span(rs);
+      const instruments = (b.attributes ?? []).filter((a) => !["original", "founder", "additional", "minor"].includes(a));
+      emit({
+        name: b.artist.name,
+        relation: "band",
+        startYear: yearOf(b.begin) ?? (years.length ? Math.min(...years) : undefined),
+        endYear: b.ended ? (yearOf(b.end) ?? (years.length ? Math.max(...years) : undefined)) : undefined,
+        role: instruments.length ? cap(instruments.slice(0, 3).join(", ")) : undefined,
+        releases: rs,
+      });
+    }),
+  );
+
+  await Promise.all([own, ...theirs]);
   return { name: artist.name, acts };
 }
