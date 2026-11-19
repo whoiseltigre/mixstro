@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Inter_Tight, Outfit, Roboto } from "next/font/google";
 import "./globals.css";
+import { PlayerProvider } from "@/components/player";
 
 // Apple devices use SF first (see globals.css), so Geist, Inter Tight and Roboto are only fetched
 // when a page actually needs them instead of being preloaded on every first visit.
@@ -35,7 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
-        {children}
+        <PlayerProvider>{children}</PlayerProvider>
       </body>
     </html>
   );
