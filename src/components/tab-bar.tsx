@@ -65,7 +65,7 @@ const FULL_SCREEN = /^\/(m|connected)\/|^\/messages\/.+|^\/search/;
 export function TabBar() {
   const path = usePathname();
   const [creating, setCreating] = useState(false);
-  const native = useNativeTabBar(path, () => setCreating(true));
+  const native = useNativeTabBar(path, creating, () => setCreating(true));
   if (native) return <CreateSheet open={creating} onClose={() => setCreating(false)} />;
   if (FULL_SCREEN.test(path)) return null;
 
@@ -125,7 +125,7 @@ export function TabBar() {
  * active tab, visibility and badge in step with the page, and turns its taps into navigation.
  * Returns true when the native bar is in charge, so the web bar isn't drawn.
  */
-function useNativeTabBar(path: string, onCreate: () => void) {
+function useNativeTabBar(path: string, creating: boolean, onCreate: () => void) {
   const router = useRouter();
   const [native, setNative] = useState(false);
   useEffect(() => setNative(isNativeApp() && Boolean(mixstroNative())), []);
@@ -134,8 +134,10 @@ function useNativeTabBar(path: string, onCreate: () => void) {
     if (!native) return;
     const active = TABS.find((t) => path === t.href || path.startsWith(t.href + "/"))?.href ?? null;
     const chat = /^\/messages\/.+/.test(path);
-    mixstroNative()?.updateChrome({ visible: !FULL_SCREEN.test(path), active, badge: UNREAD, refresh: !chat }).catch(() => {});
-  }, [native, path]);
+    // The Create sheet sits where the bar is, so the bar steps aside while it's open; closing
+    // it puts the bar back with the page's own tab selected (not "Create").
+    mixstroNative()?.updateChrome({ visible: !FULL_SCREEN.test(path) && !creating, active, badge: UNREAD, refresh: !chat }).catch(() => {});
+  }, [native, path, creating]);
 
   useEffect(() => {
     const n = native ? mixstroNative() : null;

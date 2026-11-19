@@ -84,13 +84,20 @@ type BrowserPlugin = { open: (o: { url: string; presentationStyle?: "popover" | 
  * Opens a page in an in-app Safari sheet (SFSafariViewController). Used for Google sign-in,
  * which Google refuses inside app web views, and for links that leave Mixstro.
  */
+let safariOpen = false;
+
 export async function openInSafari(url: string) {
   const b = plugin<BrowserPlugin>("Browser");
-  if (b) return b.open({ url, presentationStyle: "popover" });
+  if (b) {
+    safariOpen = true;
+    return b.open({ url, presentationStyle: "popover" });
+  }
   window.location.href = url;
 }
 
 export async function closeSafari() {
+  if (!safariOpen) return;
+  safariOpen = false;
   try {
     // Throws "No active window to close" when no Safari sheet is open; that's fine.
     await plugin<BrowserPlugin>("Browser")?.close();

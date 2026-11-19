@@ -223,3 +223,8 @@ html[data-native] :is(input, textarea, [contenteditable="true"]) {
   -webkit-user-select: text;
   user-select: text;
 }
+
+/* The native pull-to-refresh needs the page's top bounce, which the website turns off. */
+html[data-native] body {
+  overscroll-behavior-y: auto;
+}

@@ -138,6 +138,18 @@ public class MixstroNativePlugin: CAPPlugin, CAPBridgedPlugin, UITabBarDelegate 
         DispatchQueue.main.async { self.applyVisibility() }
     }
 
+    /// A full page load (sign-in returning, sign out, a cold link) starts with no tab bar; the
+    /// site turns it back on for pages that have tabs. In-app navigation doesn't come through here.
+    public override func shouldOverrideLoad(_ navigationAction: WKNavigationAction) -> NSNumber? {
+        if navigationAction.targetFrame?.isMainFrame ?? false {
+            DispatchQueue.main.async {
+                self.wantsTabBar = false
+                self.applyVisibility()
+            }
+        }
+        return nil
+    }
+
     // MARK: Pull to refresh
 
     @objc private func pulled() {
