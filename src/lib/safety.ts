@@ -78,6 +78,7 @@ export async function deleteAccount(): Promise<{ error?: string }> {
   }
   const { error } = await s.supabase.rpc("delete_my_account");
   if (error) return { error: error.message };
+  clearAppCache();
   await s.supabase.auth.signOut();
   try {
     localStorage.removeItem("mixstro:onboarding");
@@ -91,7 +92,17 @@ export async function deleteAccount(): Promise<{ error?: string }> {
  * Signs out on this device: stops push here (so the next person on this phone or computer
  * doesn't get your notifications), ends the session and clears what's kept in the browser.
  */
+/** The iPhone app keeps copies of screens for fast launches (public/sw.js): drop them. */
+function clearAppCache() {
+  try {
+    navigator.serviceWorker?.controller?.postMessage({ type: "mixstro:clear-cache" });
+  } catch {
+    // No service worker here.
+  }
+}
+
 export async function signOut(): Promise<{ error?: string }> {
+  clearAppCache();
   try {
     const { disablePush } = await import("@/lib/push-client");
     await disablePush();

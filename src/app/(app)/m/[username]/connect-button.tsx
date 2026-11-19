@@ -59,6 +59,7 @@ export function ConnectButton({
           person={person}
           onClose={() => setOpen(false)}
           onSent={() => {
+            successHaptic();
             setOpen(false);
             setSent(true);
             announceConnect(first);

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { isNativeApp, mixstroNative } from "@/lib/native";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { CreateSheet } from "./create-sheet";
 import { cx } from "./ui";
@@ -58,11 +59,15 @@ export const TABS = [
 // Sample badge in demo mode. TODO: count threads waiting on you once read state is tracked.
 export const UNREAD = isSupabaseConfigured ? 0 : 2;
 
+// Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
+const FULL_SCREEN = /^\/(m|connected)\/|^\/messages\/.+|^\/search/;
+
 export function TabBar() {
   const path = usePathname();
   const [creating, setCreating] = useState(false);
-  // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
-  if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
+  const native = useNativeTabBar(path, () => setCreating(true));
+  if (native) return <CreateSheet open={creating} onClose={() => setCreating(false)} />;
+  if (FULL_SCREEN.test(path)) return null;
 
   const tab = (t: (typeof TABS)[number]) => {
     const active = path === t.href || path.startsWith(t.href + "/");
@@ -113,4 +118,45 @@ export function TabBar() {
       <CreateSheet open={creating} onClose={() => setCreating(false)} />
     </>
   );
+}
+
+/**
+ * In the iPhone app the tab bar is a real iOS one (MixstroNativePlugin.swift): this keeps its
+ * active tab, visibility and badge in step with the page, and turns its taps into navigation.
+ * Returns true when the native bar is in charge, so the web bar isn't drawn.
+ */
+function useNativeTabBar(path: string, onCreate: () => void) {
+  const router = useRouter();
+  const [native, setNative] = useState(false);
+  useEffect(() => setNative(isNativeApp() && Boolean(mixstroNative())), []);
+
+  useEffect(() => {
+    if (!native) return;
+    const active = TABS.find((t) => path === t.href || path.startsWith(t.href + "/"))?.href ?? null;
+    const chat = /^\/messages\/.+/.test(path);
+    mixstroNative()?.updateChrome({ visible: !FULL_SCREEN.test(path), active, badge: UNREAD, refresh: !chat }).catch(() => {});
+  }, [native, path]);
+
+  useEffect(() => {
+    const n = native ? mixstroNative() : null;
+    if (!n) return;
+    const subs = [
+      n.addListener("tabSelect", ({ href }) => {
+        if (!href) return;
+        // Tapping the tab you're on scrolls to the top (or back to the tab's first screen).
+        if (location.pathname === href) window.scrollTo({ top: 0, behavior: "smooth" });
+        else router.push(href);
+      }),
+      n.addListener("create", onCreate),
+    ];
+    return () => {
+      subs.forEach((s) => s.then((l) => l.remove()).catch(() => {}));
+      // Leaving the app's tabbed screens (sign out, a public page): hide the bar.
+      n.updateChrome({ visible: false }).catch(() => {});
+    };
+    // onCreate only opens the sheet; a stale copy is fine.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [native, router]);
+
+  return native;
 }

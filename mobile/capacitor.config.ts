@@ -29,12 +29,16 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "never",
     scheme: "Mixstro",
-    limitsNavigationsToAppBoundDomains: false,
+    // App-bound domains (WKAppBoundDomains in Info.plist) let the site's service worker run in
+    // the app, which keeps screens and assets cached for fast and offline launches.
+    limitsNavigationsToAppBoundDomains: true,
   },
   plugins: {
     SplashScreen: { launchShowDuration: 1500, launchAutoHide: false, backgroundColor: "#0F0D0B", showSpinner: false },
     StatusBar: { style: "DARK", overlaysWebView: true },
     PushNotifications: { presentationOptions: ["badge", "sound", "alert"] },
+    // The web view shrinks above the keyboard, so chat's message box rides up with it.
+    Keyboard: { resize: "native", resizeOnFullScreen: true },
   },
 };
 

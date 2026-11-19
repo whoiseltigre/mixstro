@@ -182,3 +182,28 @@ export async function registerNativePush(): Promise<{ token?: string; state: "gr
   });
   return { token, state: "granted" };
 }
+
+// ---- Native chrome: tab bar, pull to refresh, menus (mobile/ios/App/App/MixstroNativePlugin.swift)
+
+export type MixstroNativePlugin = {
+  updateChrome: (o: { visible: boolean; active?: string | null; badge?: number; refresh?: boolean }) => Promise<{ height: number }>;
+  endRefresh: () => Promise<void>;
+  showMenu: (o: { title?: string; actions: { title: string; destructive?: boolean }[] }) => Promise<{ index: number }>;
+  addListener: (event: "tabSelect" | "create" | "refresh", cb: (d: { href?: string }) => void) => Promise<Listener>;
+};
+
+/** Mixstro's own native plugin, or null on the web (or an app build from before it existed). */
+export function mixstroNative() {
+  return plugin<MixstroNativePlugin>("MixstroNative");
+}
+
+/** A native iOS action sheet. Resolves to the picked index, or -1 (cancelled / not in the app). */
+export async function nativeMenu(title: string | undefined, actions: { title: string; destructive?: boolean }[]) {
+  const n = mixstroNative();
+  if (!n) return -1;
+  try {
+    return (await n.showMenu({ title, actions })).index;
+  } catch {
+    return -1;
+  }
+}
