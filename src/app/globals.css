@@ -191,3 +191,17 @@ body {
 .screen-fade {
   animation: screen-fade 0.18s ease-out backwards;
 }
+
+/* iPhone app only: a frosted strip behind the clock and Dynamic Island, so content scrolling
+   up under the status bar doesn't collide with it (src/components/native-shell.tsx sets data-native). */
+html[data-native] body::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: rgba(15, 13, 11, 0.82);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  z-index: 60;
+  pointer-events: none;
+}

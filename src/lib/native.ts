@@ -91,7 +91,12 @@ export async function openInSafari(url: string) {
 }
 
 export async function closeSafari() {
-  await plugin<BrowserPlugin>("Browser")?.close().catch(() => {});
+  try {
+    // Throws "No active window to close" when no Safari sheet is open; that's fine.
+    await plugin<BrowserPlugin>("Browser")?.close();
+  } catch {
+    // Nothing to close.
+  }
 }
 
 /** The app's own URL scheme. Sign-in in Safari returns here (add it to Supabase's redirect list). */

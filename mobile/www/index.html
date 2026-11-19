@@ -20,5 +20,9 @@
   <p>Mixstro needs the internet to load. Check your connection and try again.</p>
   <button onclick="location.href='https://app.mixstro.com/discover'">Try again</button>
 </main>
+<script>
+  // The splash waits for the site to hide it; offline the site never loads, so hide it here.
+  try { window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen && window.Capacitor.Plugins.SplashScreen.hide(); } catch (e) {}
+</script>
 </body>
 </html>
