@@ -33,19 +33,20 @@ export default function ImportJourney() {
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       setLooking(true);
-      try {
-        const [mbArtists, apple] = await Promise.all([
-          mbSearch(term),
-          fetch(`/api/music/journey?name=${encodeURIComponent(term)}`, { signal: ctrl.signal })
-            .then((r) => r.json() as Promise<{ apple?: JourneyArtist; image?: string }>)
-            .catch(() => ({}) as { apple?: JourneyArtist; image?: string }),
-        ]);
-        if (ctrl.signal.aborted) return;
-        // Exact-name matches get the photo; self-released musicians only Apple knows come last.
-        const artists = mbArtists.map((a) => (norm(a.name) === norm(term) ? { ...a, image: apple.image } : a));
-        if (apple.apple && !artists.some((a) => norm(a.name) === norm(apple.apple!.name))) artists.push(apple.apple);
-        setFound({ q: term, artists });
-      } catch {}
+      // Apple answers fast, MusicBrainz can take a while: show Apple's match first, then merge.
+      const applePromise = fetch(`/api/music/journey?name=${encodeURIComponent(term)}`, { signal: ctrl.signal })
+        .then((r) => r.json() as Promise<{ apple?: JourneyArtist; image?: string }>)
+        .catch(() => ({}) as { apple?: JourneyArtist; image?: string });
+      const mbPromise = mbSearch(term);
+      const apple = await applePromise;
+      if (ctrl.signal.aborted) return;
+      if (apple.apple) setFound({ q: term, artists: [apple.apple] });
+      const mbArtists = await mbPromise;
+      if (ctrl.signal.aborted) return;
+      // Exact-name matches get the photo; self-released musicians only Apple knows come last.
+      const artists = mbArtists.map((a) => (norm(a.name) === norm(term) ? { ...a, image: apple.image } : a));
+      if (apple.apple && !artists.some((a) => norm(a.name) === norm(apple.apple!.name))) artists.push(apple.apple);
+      setFound({ q: term, artists });
       if (!ctrl.signal.aborted) setLooking(false);
     }, 600);
     return () => {
@@ -70,7 +71,8 @@ export default function ImportJourney() {
         const res = await fetch(`/api/music/journey?id=${encodeURIComponent(a.id)}`);
         body = await res.json();
       }
-      const list = (body.acts ?? []).filter((x) => x.releases.length || x.relation === "band");
+      // Keep what can play on a profile; bands with known years stay too (they're part of the story).
+      const list = (body.acts ?? []).filter((x) => x.releases.some((r) => r.url) || (x.relation === "band" && x.startYear));
       setActs(list);
       // Start with every act and the newest playable releases ticked, up to a project's limit.
       const on = new Set<string>();
@@ -92,7 +94,10 @@ export default function ImportJourney() {
       return next;
     });
 
-  const chosenCount = useMemo(() => (acts ?? []).reduce((n, a) => n + (picked.has(`act:${a.name}`) ? Math.max(1, a.releases.filter((r) => r.url && picked.has(r.id)).length) : 0), 0), [acts, picked]);
+  const chosenCount = useMemo(
+    () => (acts ?? []).reduce((n, a) => n + (picked.has(`act:${a.name}`) ? Math.max(1, Math.min(TRACKS_MAX, a.releases.filter((r) => r.url && picked.has(r.id)).length)) : 0), 0),
+    [acts, picked],
+  );
 
   async function addAll() {
     if (!acts) return;
@@ -226,9 +231,12 @@ export default function ImportJourney() {
 function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string>; toggle: (key: string) => void }) {
   const on = picked.has(`act:${act.name}`);
   const years = act.startYear ? `${act.startYear} to ${act.endYear ?? "now"}` : undefined;
+  // Only releases that can play here; live tapes and bootlegs without a link are just counted.
+  const playable = act.releases.filter((r) => r.url);
+  const others = act.releases.length - playable.length;
   const byYear = useMemo(() => {
     const groups = new Map<string, typeof act.releases>();
-    for (const r of act.releases) {
+    for (const r of act.releases.filter((x) => x.url)) {
       const k = r.year ? String(r.year) : "Undated";
       groups.set(k, [...(groups.get(k) ?? []), r]);
     }
@@ -247,12 +255,12 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
         <span className="flex-1 min-w-0 flex flex-col">
           {act.relation === "band" && <span className="text-[12px] font-semibold text-[#FFACBA]">Band found</span>}
           <span className="text-[17px] font-semibold truncate">{act.name}</span>
-          <span className="text-[13px] text-smoke truncate">{[act.role, years, `${act.releases.length} ${act.releases.length === 1 ? "release" : "releases"}`].filter(Boolean).join(" · ")}</span>
+          <span className="text-[13px] text-smoke truncate">{[act.role, years, playable.length ? `${playable.length} on Apple Music` : undefined].filter(Boolean).join(" · ")}</span>
         </span>
         <Check on={on} />
       </button>
 
-      {on && act.releases.length > 0 && (
+      {on && playable.length > 0 && (
         <div className="relative pl-5 flex flex-col">
           <span aria-hidden="true" className="absolute left-[5px] top-2 bottom-2 w-[1.5px] bg-gradient-to-b from-tungsten to-tungsten/10" />
           {byYear.map(([year, list]) => (
@@ -281,6 +289,7 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
               ))}
             </div>
           ))}
+          {others > 0 && <p className="text-[12px] text-smoke pt-2">Plus {others} more without a streaming link, like live tapes. You can paste links for those yourself.</p>}
           {act.releases.filter((r) => r.url && picked.has(r.id)).length > TRACKS_MAX && (
             <p className="text-[12px] text-smoke pt-2">A project shows up to {TRACKS_MAX} releases. We&apos;ll add the first {TRACKS_MAX} you ticked.</p>
           )}
