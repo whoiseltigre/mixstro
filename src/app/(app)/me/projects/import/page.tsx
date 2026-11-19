@@ -7,7 +7,8 @@ import { Cover } from "@/components/player";
 import { toast } from "@/components/toast";
 import { useMyProjects } from "@/lib/projects-store";
 import { TRACKS_MAX, thisYear, type Track } from "@/lib/projects";
-import type { JourneyAct, JourneyArtist } from "@/lib/journey";
+import type { JourneyAct, JourneyArtist } from "@/lib/journey-types";
+import { mbJourney, mbSearch, norm } from "@/lib/musicbrainz";
 
 /**
  * "We found your journey": type the name you release under, confirm it's you, and your
@@ -33,9 +34,17 @@ export default function ImportJourney() {
     const t = setTimeout(async () => {
       setLooking(true);
       try {
-        const res = await fetch(`/api/music/journey?name=${encodeURIComponent(term)}`, { signal: ctrl.signal });
-        const body = (await res.json()) as { artists?: JourneyArtist[] };
-        setFound({ q: term, artists: body.artists ?? [] });
+        const [mbArtists, apple] = await Promise.all([
+          mbSearch(term),
+          fetch(`/api/music/journey?name=${encodeURIComponent(term)}`, { signal: ctrl.signal })
+            .then((r) => r.json() as Promise<{ apple?: JourneyArtist; image?: string }>)
+            .catch(() => ({}) as { apple?: JourneyArtist; image?: string }),
+        ]);
+        if (ctrl.signal.aborted) return;
+        // Exact-name matches get the photo; self-released musicians only Apple knows come last.
+        const artists = mbArtists.map((a) => (norm(a.name) === norm(term) ? { ...a, image: apple.image } : a));
+        if (apple.apple && !artists.some((a) => norm(a.name) === norm(apple.apple!.name))) artists.push(apple.apple);
+        setFound({ q: term, artists });
       } catch {}
       if (!ctrl.signal.aborted) setLooking(false);
     }, 600);
@@ -49,8 +58,18 @@ export default function ImportJourney() {
     setChosen(a);
     setActs(null);
     try {
-      const res = await fetch(`/api/music/journey?id=${encodeURIComponent(a.id)}`);
-      const body = (await res.json()) as { acts?: JourneyAct[] };
+      let body: { acts?: JourneyAct[] } = {};
+      if (a.id.startsWith("mb:")) {
+        // MusicBrainz from the browser, then Apple links and artwork from our server.
+        const found = await mbJourney(a.id.slice(3));
+        if (found?.acts.length) {
+          const res = await fetch("/api/music/journey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acts: found.acts }) });
+          body = res.ok ? await res.json() : { acts: found.acts };
+        }
+      } else {
+        const res = await fetch(`/api/music/journey?id=${encodeURIComponent(a.id)}`);
+        body = await res.json();
+      }
       const list = (body.acts ?? []).filter((x) => x.releases.length || x.relation === "band");
       setActs(list);
       // Start with every act and the newest playable releases ticked, up to a project's limit.
