@@ -8,14 +8,19 @@ import type { CapacitorConfig } from "@capacitor/cli";
  *
  * www/ only holds the screen shown when the phone is offline on first launch.
  */
+// For testing a branch before it's live: MIXSTRO_APP_URL=http://localhost:3000 npx cap sync ios
+const APP_URL = (process.env.MIXSTRO_APP_URL || "https://app.mixstro.com").replace(/\/$/, "");
+const local = APP_URL.startsWith("http://");
+
 const config: CapacitorConfig = {
   appId: "com.mixstro.app",
   appName: "Mixstro",
   webDir: "www",
   server: {
-    url: "https://app.mixstro.com/discover",
+    url: `${APP_URL}/discover`,
+    cleartext: local,
     // Only Mixstro pages load inside the app; anything else opens in Safari.
-    allowNavigation: ["app.mixstro.com", "mixstro.com", "pcnyiyendctvbjcdgrpn.supabase.co"],
+    allowNavigation: ["app.mixstro.com", "mixstro.com", "pcnyiyendctvbjcdgrpn.supabase.co", ...(local ? ["localhost"] : [])],
     errorPath: "offline.html",
   },
   // Lets the server tell the app apart from mobile Safari in logs and analytics.
