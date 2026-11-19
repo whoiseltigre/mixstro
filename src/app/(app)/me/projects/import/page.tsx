@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BackButton, Button } from "@/components/ui";
 import { Cover } from "@/components/player";
@@ -15,6 +15,8 @@ import { mbJourney, mbSearch, norm } from "@/lib/musicbrainz";
  * releases land on a timeline by year with the bands you were in suggested as projects.
  * One tap adds them all to your Projects.
  */
+type Load = { acts: JourneyAct[]; done: boolean };
+
 export default function ImportJourney() {
   const router = useRouter();
   const { projects, ready, save } = useMyProjects();
@@ -23,8 +25,11 @@ export default function ImportJourney() {
   const [skipped, setSkipped] = useState<string[]>([]);
   const [looking, setLooking] = useState(false);
   const [chosen, setChosen] = useState<JourneyArtist>();
-  const [acts, setActs] = useState<JourneyAct[] | null>(null);
+  const [loads, setLoads] = useState<Record<string, Load>>({});
+  const started = useRef(new Set<string>());
+  const appleByName = useRef(new Map<string, JourneyArtist>());
   const [picked, setPicked] = useState<Set<string>>(new Set());
+  const seen = useRef(new Set<string>());
   const [busy, setBusy] = useState(false);
   const term = name.trim();
 
@@ -40,7 +45,10 @@ export default function ImportJourney() {
       const mbPromise = mbSearch(term);
       const apple = await applePromise;
       if (ctrl.signal.aborted) return;
-      if (apple.apple) setFound({ q: term, artists: [apple.apple] });
+      if (apple.apple) {
+        appleByName.current.set(norm(apple.apple.name), apple.apple);
+        setFound({ q: term, artists: [apple.apple] });
+      }
       const mbArtists = await mbPromise;
       if (ctrl.signal.aborted) return;
       // Exact-name matches get the photo; self-released musicians only Apple knows come last.
@@ -55,36 +63,85 @@ export default function ImportJourney() {
     };
   }, [term, chosen]);
 
-  async function confirm(a: JourneyArtist) {
-    setChosen(a);
-    setActs(null);
-    try {
-      let body: { acts?: JourneyAct[] } = {};
-      if (a.id.startsWith("mb:")) {
-        // MusicBrainz from the browser, then Apple links and artwork from our server.
-        const found = await mbJourney(a.id.slice(3));
-        if (found?.acts.length) {
-          const res = await fetch("/api/music/journey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acts: found.acts }) });
-          body = res.ok ? await res.json() : { acts: found.acts };
+  const upsert = useCallback((id: string, act: JourneyAct) => {
+    setLoads((all) => {
+      const cur = all[id] ?? { acts: [], done: false };
+      const same = cur.acts.find((x) => x.name === act.name || (x.relation === "self" && act.relation === "self"));
+      // Your own act can arrive twice: releases from Apple, years from MusicBrainz. Keep the best of both.
+      const merged = same
+        ? { ...same, ...act, name: same.name, startYear: act.startYear ?? same.startYear, endYear: act.endYear ?? same.endYear, releases: act.releases.length ? act.releases : same.releases }
+        : act;
+      const acts = [...cur.acts.filter((x) => x !== same), merged].sort((a, b) => (a.relation === "self" ? -1 : b.relation === "self" ? 1 : (b.startYear ?? 0) - (a.startYear ?? 0)));
+      return { ...all, [id]: { ...cur, acts } };
+    });
+  }, []);
+
+  /**
+   * Starts loading someone's journey, at most once per artist. Called as soon as the
+   * "Is this you?" card shows, so most of it is done by the time they tap Yes. Their own
+   * releases come from Apple in about a second; bands and older releases follow from MusicBrainz.
+   */
+  const prefetch = useCallback(
+    (a: JourneyArtist) => {
+      if (started.current.has(a.id)) return;
+      started.current.add(a.id);
+      const enrich = async (act: JourneyAct) => {
+        if (!act.releases.length) return act;
+        try {
+          const res = await fetch("/api/music/journey", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acts: [act] }) });
+          return ((await res.json()) as { acts?: JourneyAct[] }).acts?.[0] ?? act;
+        } catch {
+          return act;
         }
-      } else {
-        const res = await fetch(`/api/music/journey?id=${encodeURIComponent(a.id)}`);
-        body = await res.json();
+      };
+      const peer = a.id.startsWith("apple:") ? a : appleByName.current.get(norm(a.name));
+      const tasks: Promise<unknown>[] = [];
+      if (peer) {
+        tasks.push(
+          fetch(`/api/music/journey?id=${encodeURIComponent(peer.id)}`)
+            .then((r) => r.json() as Promise<{ acts?: JourneyAct[] }>)
+            .then((body) => body.acts?.[0] && upsert(a.id, { ...body.acts[0], name: a.name }))
+            .catch(() => {}),
+        );
       }
-      // Keep what can play on a profile; bands with known years stay too (they're part of the story).
-      const list = (body.acts ?? []).filter((x) => x.releases.some((r) => r.url) || (x.relation === "band" && x.startYear));
-      setActs(list);
-      // Start with every act and the newest playable releases ticked, up to a project's limit.
-      const on = new Set<string>();
-      for (const act of list) {
-        on.add(`act:${act.name}`);
-        act.releases.filter((r) => r.url).slice(0, TRACKS_MAX).forEach((r) => on.add(r.id));
+      if (a.id.startsWith("mb:")) {
+        const enriching: Promise<unknown>[] = [];
+        tasks.push(
+          mbJourney(a.id.slice(3), { skipOwn: Boolean(peer), onAct: (act) => enriching.push(enrich(act).then((e) => upsert(a.id, e))) })
+            .catch(() => null)
+            .then(() => Promise.all(enriching)),
+        );
       }
-      setPicked(on);
-    } catch {
-      setActs([]);
-    }
-  }
+      Promise.allSettled(tasks).then(() => setLoads((all) => ({ ...all, [a.id]: { acts: all[a.id]?.acts ?? [], done: true } })));
+    },
+    [upsert],
+  );
+
+  const confirm = (a: JourneyArtist) => {
+    setChosen(a);
+    prefetch(a);
+  };
+
+  const load = chosen ? loads[chosen.id] : undefined;
+  // Keep what can play on a profile; bands with known years stay too (they're part of the story).
+  const acts = useMemo(() => (load?.acts ?? []).filter((x) => x.releases.some((r) => r.url) || (x.relation === "band" && x.startYear)), [load]);
+  const loading = Boolean(chosen && !load?.done);
+
+  // Each act starts ticked, with its newest playable releases up to a project's limit.
+  useEffect(() => {
+    const fresh = acts.filter((act) => !seen.current.has(`${act.name}:${act.releases.length}`));
+    if (!fresh.length) return;
+    setPicked((s) => {
+      const next = new Set(s);
+      for (const act of fresh) {
+        if (!seen.current.has(`act:${act.name}`)) next.add(`act:${act.name}`);
+        seen.current.add(`act:${act.name}`);
+        seen.current.add(`${act.name}:${act.releases.length}`);
+        act.releases.filter((r) => r.url).slice(0, TRACKS_MAX).forEach((r) => next.add(r.id));
+      }
+      return next;
+    });
+  }, [acts]);
 
   const toggle = (key: string) =>
     setPicked((s) => {
@@ -100,7 +157,6 @@ export default function ImportJourney() {
   );
 
   async function addAll() {
-    if (!acts) return;
     setBusy(true);
     let added = 0;
     for (const act of acts) {
@@ -131,6 +187,10 @@ export default function ImportJourney() {
   }
 
   const candidate = found.q === term ? found.artists.find((a) => !skipped.includes(a.id)) : undefined;
+  // Get a head start while they look at the card.
+  useEffect(() => {
+    if (candidate && !chosen) prefetch(candidate);
+  }, [candidate, chosen, prefetch]);
   const exhausted = found.q === term && term.length > 1 && !looking && !candidate;
 
   return (
@@ -138,9 +198,9 @@ export default function ImportJourney() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me/projects" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-[34px] font-bold tracking-[-0.03em] leading-tight">{acts?.length ? "We found your journey" : "Find your releases"}</h1>
+          <h1 className="text-[34px] font-bold tracking-[-0.03em] leading-tight">{acts.length ? "We found your journey" : "Find your releases"}</h1>
           <p className="text-[15px] text-smoke leading-snug">
-            {acts?.length
+            {acts.length
               ? "Your releases by year, and the bands you were in. Untick anything that isn't yours."
               : "Type the name you release under, or a band you were in. We'll lay out your releases by year."}
           </p>
@@ -189,30 +249,37 @@ export default function ImportJourney() {
         </div>
       )}
 
-      {chosen && acts === null && (
+      {chosen && loading && !acts.length && (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
           <span aria-hidden="true" className="size-10 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin" />
           <p className="text-[15px]">Looking through {chosen.name}&apos;s releases…</p>
-          <p className="text-[13px] text-smoke">This can take up to half a minute for a long career.</p>
         </div>
       )}
 
-      {chosen && acts?.length === 0 && (
+      {chosen && !loading && !acts.length && (
         <div className="flex flex-col gap-3">
           <p className="text-[15px] text-smoke">We couldn&apos;t find releases for {chosen.name}. Add a project yourself and paste a link or two.</p>
-          <Button variant="glass" onClick={() => { setChosen(undefined); setActs(null); }} className="h-12">Try another name</Button>
+          <Button variant="glass" onClick={() => setChosen(undefined)} className="h-12">Try another name</Button>
         </div>
       )}
 
-      {acts && acts.length > 0 && (
+      {acts.length > 0 && (
         <div className="flex flex-col gap-7">
           {acts.map((act) => (
-            <ActBlock key={act.name} act={act} picked={picked} toggle={toggle} />
+            <div key={act.name} className="rise-in">
+              <ActBlock act={act} picked={picked} toggle={toggle} />
+            </div>
           ))}
+          {loading && chosen?.id.startsWith("mb:") && (
+            <div className="flex items-center gap-3 p-3.5 rounded-[18px] border border-dashed border-paper/16 text-[14px] text-smoke">
+              <span aria-hidden="true" className="size-5 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin shrink-0" />
+              Finding the bands you were in and older releases…
+            </div>
+          )}
         </div>
       )}
 
-      {acts && acts.length > 0 && (
+      {acts.length > 0 && (
         <div className="fixed z-20 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] bottom-[calc(max(env(safe-area-inset-bottom),16px)+74px)] md:bottom-6">
           <button
             type="button"
