@@ -9,7 +9,8 @@ import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Bandmate, type Project, type Track } from "@/lib/projects";
 import { findBandmates, inviteBandmate, type Candidate } from "./band-actions";
 import { useMyProjects } from "@/lib/projects-store";
-import { lookupTrack, type TrackInfo } from "./actions";
+import { lookupTrack, resolveLink, searchSongs, type SongHit, type TrackInfo } from "./actions";
+import Link from "next/link";
 import { FadeImg } from "@/components/fade-image";
 
 type Form = { id?: string; name: string; role: string; startYear: number; endYear: number; current: boolean; tracks: Track[]; bandmates: Bandmate[] };
@@ -42,9 +43,14 @@ export default function ProjectsEditor() {
           <h1 className="text-[34px] font-bold tracking-[-0.03em] leading-tight">Your projects</h1>
           <p className="text-[15px] text-smoke leading-snug">Every band and project, old or new. Add the name, your role and the years, then link a track or two.</p>
         </div>
-        <Button onClick={() => setForm(blank())} className="h-12 text-[16px]">
-          Add a project
-        </Button>
+        <div className="grid grid-cols-2 gap-2.5">
+          <Link href="/me/projects/import" className="h-12 rounded-full bg-tungsten text-ink text-[16px] font-semibold flex items-center justify-center active:scale-[0.98] transition">
+            Find my releases
+          </Link>
+          <Button variant="glass" onClick={() => setForm(blank())} className="h-12 text-[16px]">
+            Add a project
+          </Button>
+        </div>
       </div>
 
       {ready && shown.length > 0 && <ProjectList projects={shown} onEdit={(p) => setForm(fromProject(p))} />}
@@ -104,14 +110,20 @@ function ProjectSheet({
   const [busy, setBusy] = useState(false);
   const set = (patch: Partial<Form>) => update((f) => ({ ...f, ...patch }));
 
-  async function addTrack(raw: string) {
-    const clip = parseClip(raw);
-    if (!clip) return setError("That link isn't one we can play yet. Try YouTube, SoundCloud, Spotify, Apple Music or Bandcamp.");
+  async function addTrack(raw: string, known?: { title?: string; thumb?: string }) {
+    let clip = parseClip(raw);
+    if (!clip && /deezer\./.test(raw)) {
+      // Deezer has no player we can use, so find the same song on Apple Music.
+      const url = await resolveLink(raw).catch(() => undefined);
+      clip = url ? parseClip(url) : null;
+    }
+    if (!clip) return setError("That link isn't one we can play yet. Try Spotify, Apple Music, YouTube, SoundCloud, Bandcamp or Deezer, or search by song name below.");
     if (form.tracks.some((t) => t.url && parseClip(t.url)?.id === clip.id)) return setError("You already added that one.");
     setError(undefined);
     setLink("");
     const id = crypto.randomUUID();
-    update((f) => ({ ...f, tracks: [...f.tracks, { id, provider: clip.provider, url: clip.url, thumb: clip.thumb }] }));
+    const added = clip;
+    update((f) => ({ ...f, tracks: [...f.tracks, { id, provider: added.provider, url: added.url, thumb: known?.thumb ?? added.thumb, title: known?.title }] }));
     const info: TrackInfo = await lookupTrack(clip.url).catch(() => ({}));
     // Fill in what the platform knows without overwriting a title typed meanwhile.
     update((f) => ({ ...f, tracks: f.tracks.map((t) => (t.id === id ? { ...t, url: info.url ?? t.url, title: t.title || info.title, thumb: info.thumb ?? t.thumb } : t)) }));
@@ -237,7 +249,7 @@ function ProjectSheet({
                 }}
                 onPaste={(e) => {
                   const text = e.clipboardData.getData("text").trim();
-                  if (parseClip(text)) {
+                  if (parseClip(text) || /deezer\./.test(text)) {
                     e.preventDefault();
                     addTrack(text);
                   }
@@ -259,7 +271,8 @@ function ProjectSheet({
               </button>
             </div>
           )}
-          <span className="text-[12px] text-smoke text-center">YouTube · SoundCloud · Spotify · Apple Music</span>
+          <span className="text-[12px] text-smoke text-center">Spotify · Apple Music · YouTube · SoundCloud · Bandcamp · Deezer</span>
+          {form.tracks.length < TRACKS_MAX && <SongSearch onPick={(h) => addTrack(h.url, { title: h.title, thumb: h.thumb })} />}
         </div>
 
         {form.id && <Bandmates projectId={form.id} projectName={form.name} mates={form.bandmates} />}
@@ -399,6 +412,57 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
         <p className="text-[12px] text-smoke text-center">{note ?? "They'll get an invite to confirm. The band shows on both profiles once they do."}</p>
       )}
       {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
+    </div>
+  );
+}
+
+/** No link handy? Search the song or album by name and tap it. */
+function SongSearch({ onPick }: { onPick: (hit: SongHit) => void }) {
+  const [q, setQ] = useState("");
+  const [hits, setHits] = useState<SongHit[]>([]);
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length < 3) return setHits([]);
+    let live = true;
+    const t = setTimeout(async () => {
+      const res = await searchSongs(term).catch(() => []);
+      if (live) setHits(res);
+    }, 400);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [q]);
+  return (
+    <div className="flex flex-col gap-2 pt-1">
+      <div className="h-12 rounded-full bg-ink border border-paper/12 flex items-center gap-2 px-4 focus-within:border-paper/50">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="text-smoke shrink-0" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4-4" /></svg>
+        <label htmlFor="song-q" className="sr-only">Search by song or album name</label>
+        <input id="song-q" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" placeholder="Or search: artist and song name" className="flex-1 min-w-0 bg-transparent text-[15px] outline-none placeholder:text-smoke/60" />
+      </div>
+      {hits.length > 0 && (
+        <ul className="flex flex-col rounded-2xl bg-ink border border-paper/8 divide-y divide-paper/8">
+          {hits.map((h) => (
+            <li key={h.url}>
+              <button
+                type="button"
+                onClick={() => {
+                  onPick(h);
+                  setQ("");
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-paper/5"
+              >
+                <span className="relative size-10 shrink-0 rounded-[10px] overflow-hidden bg-riser">{h.thumb && <FadeImg src={h.thumb} alt="" className="absolute inset-0 size-full object-cover" />}</span>
+                <span className="flex-1 min-w-0 flex flex-col">
+                  <span className="text-[14px] font-semibold truncate">{h.title}</span>
+                  <span className="text-[12px] text-smoke truncate">{[h.artist, h.kind, h.year].filter(Boolean).join(" · ")}</span>
+                </span>
+                <span className="text-[13px] font-semibold text-tungsten shrink-0">Add</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

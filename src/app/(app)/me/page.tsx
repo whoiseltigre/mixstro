@@ -92,7 +92,7 @@ export default function Me() {
             empty={
               <Link href="/me/projects" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
                 <span className="text-[15px] font-semibold">Show what you&apos;ve played in</span>
-                <span className="text-[13px] text-smoke">Every band and project, old or new, with a track or two from each.</span>
+                <span className="text-[13px] text-smoke">Every band and project, old or new. Type your artist name and we&apos;ll find your releases.</span>
               </Link>
             }
           />

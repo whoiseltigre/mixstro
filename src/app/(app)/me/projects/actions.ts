@@ -55,3 +55,33 @@ export async function lookupTrack(raw: string): Promise<TrackInfo> {
   }
   return { thumb: clip.thumb };
 }
+
+/** A Deezer link (which we can't embed) becomes the same song on Apple Music. */
+export async function resolveLink(raw: string): Promise<string | undefined> {
+  const { playableLink } = await import("@/lib/music-track");
+  return playableLink(raw.slice(0, 500)).catch(() => undefined);
+}
+
+export type SongHit = { title: string; artist: string; url: string; thumb?: string; year?: number; kind: "Song" | "Album" };
+
+/** Find a released song or album by name, so there's no link hunting. Apple's free catalog search. */
+export async function searchSongs(q: string): Promise<SongHit[]> {
+  const term = q.trim().slice(0, 100);
+  if (term.length < 3) return [];
+  type R = { wrapperType: string; kind?: string; trackName?: string; collectionName?: string; artistName?: string; trackViewUrl?: string; collectionViewUrl?: string; artworkUrl100?: string; releaseDate?: string };
+  const get = async (entity: string) => {
+    try {
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=${entity}&limit=5`, { signal: AbortSignal.timeout(4000), next: { revalidate: 86400 } });
+      return res.ok ? ((await res.json()) as { results: R[] }).results : [];
+    } catch {
+      return [];
+    }
+  };
+  const [songs, albums] = await Promise.all([get("song"), get("album")]);
+  const art = (u?: string) => u?.replace("100x100bb", "300x300bb");
+  const year = (d?: string) => (d ? Number(d.slice(0, 4)) : undefined);
+  return [
+    ...songs.filter((r) => r.trackViewUrl && r.trackName).map((r) => ({ title: r.trackName!, artist: r.artistName ?? "", url: r.trackViewUrl!.replace(/[?&]uo=\d+/, ""), thumb: art(r.artworkUrl100), year: year(r.releaseDate), kind: "Song" as const })),
+    ...albums.filter((r) => r.collectionViewUrl && r.collectionName).slice(0, 2).map((r) => ({ title: r.collectionName!, artist: r.artistName ?? "", url: r.collectionViewUrl!.replace(/[?&]uo=\d+/, ""), thumb: art(r.artworkUrl100), year: year(r.releaseDate), kind: "Album" as const })),
+  ];
+}
