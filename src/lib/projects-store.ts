@@ -64,9 +64,11 @@ export function useMyProjects() {
 
       if (!supabase || !userId) {
         const project: Project = { ...input, id: id ?? crypto.randomUUID(), name: input.name.trim(), role: clean(input.role) ?? undefined, tracks };
-        const next = sortProjects(id ? projects.map((p) => (p.id === id ? project : p)) : [...projects, project]);
-        setProjects(next);
-        writeLocal(next);
+        setProjects((prev) => {
+          const next = sortProjects(id ? prev.map((p) => (p.id === id ? project : p)) : [...prev, project]);
+          writeLocal(next);
+          return next;
+        });
         return {};
       }
 
@@ -99,7 +101,7 @@ export function useMyProjects() {
       }
       return {};
     },
-    [projects, userId],
+    [userId],
   );
 
   const remove = useCallback(

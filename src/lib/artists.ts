@@ -80,9 +80,6 @@ const CATALOG_PHOTO = new Map(CATALOG.map((a) => [a.id, a.image]));
 /** A known photo for an artist saved without one (picked while search was down), else undefined. */
 export const catalogPhoto = (id: string) => CATALOG_PHOTO.get(id);
 
-/** What "Connect Apple Music" returns in demo mode: a plausible top-artists list. */
-export const DEMO_TOP_ARTISTS = CATALOG.slice(0, 12);
-
 export function searchArtists(q: string): Artist[] {
   const s = q.trim().toLowerCase();
   if (!s) return [];

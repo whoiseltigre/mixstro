@@ -2,12 +2,27 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ListenOn, Waveform, usePlayer, useDetails, type PlayRequest } from "@/components/player";
 import { PROVIDER_LABEL } from "@/lib/clips";
 import { artistTint } from "@/lib/artists";
 import { artworkOf, firstYear, isCurrent, nameWash, trackPlayer, yearsLabel, type Bandmate, type Project, type Track } from "@/lib/projects";
+import { parseClip } from "@/lib/clips";
 import { FadeImg } from "@/components/fade-image";
 
-type Playing = { track: Track; project: Project };
+const playRequest = (track: Track, project: Project): PlayRequest => ({
+  id: track.id,
+  url: track.url!,
+  provider: track.provider,
+  title: track.title,
+  sub: project.name,
+  artwork: track.thumb ?? artworkOf(project),
+});
+
+/** The song a profile leads with: the first song (not video) from what they play in now, else their latest. */
+function signatureOf(projects: Project[]): { track: Track; project: Project } | undefined {
+  const songs = projects.flatMap((p) => p.tracks.filter((t) => t.url && parseClip(t.url)?.shape === "square").map((track) => ({ track, project: p })));
+  return songs[0];
+}
 
 /**
  * A profile's Journey as a résumé of projects: artwork, name, role and years, then the
@@ -26,8 +41,9 @@ export function ProjectList({
   onEdit?: (project: Project) => void;
   empty?: React.ReactNode;
 }) {
-  const [playing, setPlaying] = useState<Playing | null>(null);
+  const player = usePlayer();
   const since = firstYear(projects);
+  const signature = onEdit ? undefined : signatureOf(projects);
 
   return (
     <section className="flex flex-col">
@@ -44,6 +60,8 @@ export function ProjectList({
         )}
       </div>
 
+      {signature && <SignatureTrack {...signature} />}
+
       {!projects.length
         ? empty
         : projects.map((p, i) => (
@@ -53,12 +71,10 @@ export function ProjectList({
               first={i === 0}
               compact={Boolean(onEdit)}
               onEdit={onEdit && (() => onEdit(p))}
-              playingId={playing?.track.id}
-              onPlay={(track) => setPlaying((now) => (now?.track.id === track.id ? null : { track, project: p }))}
+              playingId={player?.now && (player.playing || player.now.mode !== "audio") ? player.now.id : undefined}
+              onPlay={(track) => player?.play(playRequest(track, p))}
             />
           ))}
-
-      {playing && <MiniPlayer {...playing} onClose={() => setPlaying(null)} />}
     </section>
   );
 }
@@ -216,33 +232,48 @@ function TrackChip({ track, on, onPlay }: { track: Track; on: boolean; onPlay: (
   );
 }
 
-/** Floats above the tab bar so the profile stays in view while a track plays. */
-function MiniPlayer({ track, project, onClose }: Playing & { onClose: () => void }) {
-  const player = trackPlayer(track);
-  if (!player) return null;
-  const title = track.title || `${PROVIDER_LABEL[track.provider]} track`;
+/**
+ * The signature track: the song a profile leads with, in the Mixstro player. Artwork, a
+ * waveform that fills as the preview plays, and "Listen in full on…" for every service we found.
+ */
+function SignatureTrack({ track, project }: { track: Track; project: Project }) {
+  const player = usePlayer();
+  const details = useDetails(track.url);
+  const on = player?.now?.id === track.id;
+  const playing = on && player?.playing;
+  const year = details?.year ?? project.endYear ?? project.startYear;
+  const title = track.title || details?.title || `${PROVIDER_LABEL[track.provider]} track`;
   return (
-    <div className="fixed z-30 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] bottom-[calc(max(env(safe-area-inset-bottom),16px)+74px)] glass rounded-[24px] p-2 flex flex-col gap-2 shadow-[0_12px_40px_rgb(0_0_0/0.5)]">
-      <div className="flex items-center gap-3 pl-1">
+    <div className="glass !bg-[rgb(26_24_22/0.7)] rounded-[24px] p-4 mb-2 flex flex-col gap-3 relative overflow-hidden">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFB245, transparent)" }} />
+      <span className="relative text-[11px] font-semibold uppercase tracking-[0.14em] text-tungsten">Signature track</span>
+      <div className="relative flex items-center gap-3.5">
+        <span className="relative size-[60px] shrink-0 rounded-[14px] overflow-hidden" style={{ background: nameWash(project.name) }}>
+          {(details?.artwork ?? track.thumb) && <FadeImg src={(details?.artwork ?? track.thumb)!} alt="" className="absolute inset-0 size-full object-cover" />}
+        </span>
         <span className="flex-1 min-w-0 flex flex-col">
-          <span className="text-[14px] font-semibold truncate">{title}</span>
-          <span className="text-[12px] text-smoke truncate">
-            {project.name} · {PROVIDER_LABEL[track.provider]}
+          <span className="text-[17px] font-semibold leading-tight truncate">{title}</span>
+          <span className="text-[13px] text-smoke truncate">
+            {project.name} · {year}
           </span>
         </span>
-        <button type="button" onClick={onClose} aria-label="Close player" className="hit-slop relative size-9 rounded-full bg-paper/12 flex items-center justify-center shrink-0">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button
+          type="button"
+          onClick={() => player?.play(playRequest(track, project))}
+          aria-label={`${playing ? "Pause" : "Play"} ${title}`}
+          className="size-12 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 active:scale-95 transition"
+        >
+          {playing ? (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
+          ) : (
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="ml-0.5"><path d="M7 4l13 8-13 8z" /></svg>
+          )}
         </button>
       </div>
-      <iframe
-        key={player.embed}
-        src={player.embed}
-        title={title}
-        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-        allowFullScreen
-        style={player.height ? { height: player.height } : undefined}
-        className={`border-0 rounded-2xl w-full ${player.height ? "" : player.shape === "tall" ? "max-h-[50dvh] aspect-[9/16] w-auto mx-auto" : "aspect-video"}`}
-      />
+      <div className="relative">
+        <Waveform seed={track.url ?? track.id} progress={on && player?.now?.mode === "audio" ? player.progress : 0} onSeek={on && player?.now?.mode === "audio" ? player.seek : undefined} />
+      </div>
+      {details && <ListenOn links={details.links} className="relative" />}
     </div>
   );
 }
