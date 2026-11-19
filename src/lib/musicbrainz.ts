@@ -17,16 +17,21 @@ export const norm = (s = "") =>
     .replace(/\s*-\s*(ep|single)$/, "")
     .replace(/[^a-z0-9]/g, "");
 
-let last = 0;
+let next = 0;
 
-/** One request at a time, a little over a second apart, with one retry when MusicBrainz is busy. */
+/** Book the next start time, a little over a second after the last one, so requests can overlap. */
+function slot() {
+  const at = Math.max(Date.now(), next);
+  next = at + 1100;
+  return sleep(at - Date.now());
+}
+
+/** Requests start at most one a second; one retry when MusicBrainz is busy, and none hang forever. */
 async function mb<T>(path: string): Promise<T | null> {
   for (let i = 0; i < 2; i++) {
-    const wait = last + 1100 - Date.now();
-    if (wait > 0) await sleep(wait);
-    last = Date.now();
+    await slot();
     try {
-      const res = await fetch(`${MB}${path}${path.includes("?") ? "&" : "?"}fmt=json`, { headers: { Accept: "application/json" } });
+      const res = await fetch(`${MB}${path}${path.includes("?") ? "&" : "?"}fmt=json`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) });
       if (res.ok) return (await res.json()) as T;
       if (res.status !== 503) return null;
     } catch {
@@ -78,13 +83,22 @@ async function releases(mbid: string): Promise<JourneyRelease[]> {
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const span = (rs: JourneyRelease[]) => rs.map((r) => r.year).filter((y): y is number => Boolean(y));
 
-/** Your own releases plus up to four bands you were in, each with their releases (no links yet). */
+/** Your own releases plus up to six bands you were in, each with their releases (no links yet). */
 export async function mbJourney(mbid: string): Promise<{ name: string; acts: JourneyAct[] } | null> {
   const artist = await mb<MbArtist>(`/artist/${mbid}?inc=artist-rels`);
   if (!artist) return null;
   const acts: JourneyAct[] = [];
   const life = artist["life-span"];
-  const own = await releases(mbid);
+
+  // Bands this person was a member of, most recent first.
+  const bands = (artist.relations ?? [])
+    .filter((r) => r.type === "member of band" && r.direction === "forward")
+    .reduce<NonNullable<MbArtist["relations"]>>((list, r) => (list.some((x) => x.artist.id === r.artist.id) ? list : [...list, r]), [])
+    .sort((a, b) => (yearOf(b.begin) ?? 0) - (yearOf(a.begin) ?? 0))
+    .slice(0, 6);
+
+  // All the release lookups at once (still started a second apart): MusicBrainz can be slow to answer.
+  const [own, ...bandReleases] = await Promise.all([releases(mbid), ...bands.map((b) => releases(b.artist.id))]);
   const ownYears = span(own);
   const group = artist.type === "Group";
   if (own.length || group) {
@@ -97,15 +111,8 @@ export async function mbJourney(mbid: string): Promise<{ name: string; acts: Jou
     });
   }
 
-  // Bands this person was a member of, most recent first.
-  const bands = (artist.relations ?? [])
-    .filter((r) => r.type === "member of band" && r.direction === "forward")
-    .reduce<NonNullable<MbArtist["relations"]>>((list, r) => (list.some((x) => x.artist.id === r.artist.id) ? list : [...list, r]), [])
-    .sort((a, b) => (yearOf(b.begin) ?? 0) - (yearOf(a.begin) ?? 0))
-    .slice(0, 4);
-
-  for (const b of bands) {
-    const rs = await releases(b.artist.id);
+  bands.forEach((b, i) => {
+    const rs = bandReleases[i];
     const years = span(rs);
     const instruments = (b.attributes ?? []).filter((a) => !["original", "founder", "additional", "minor"].includes(a));
     acts.push({
@@ -116,6 +123,6 @@ export async function mbJourney(mbid: string): Promise<{ name: string; acts: Jou
       role: instruments.length ? cap(instruments.slice(0, 3).join(", ")) : undefined,
       releases: rs,
     });
-  }
+  });
   return { name: artist.name, acts };
 }
