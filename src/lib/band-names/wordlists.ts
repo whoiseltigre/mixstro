@@ -1,0 +1,42 @@
+// Nouns are regular plurals unless an exception is supplied below.
+function palette(adj: string, noun: string, place: string, object: string, ing: string) {
+  return { adj: adj.split(' '), noun: noun.split(' '), place: place.split(' '),
+    object: object.split(' '), ing: ing.split(' ') };
+}
+
+export const genres = {
+  rock: palette('Electric Rusted Wild Copper', 'Riot Jackal Motor Comet', 'Detroit Quarry Turnpike', 'Amplifier Axle Fuse', 'Rolling Burning Rattling'),
+  indie: palette('Paper Crooked Pocket Sunday', 'Moth Button Pigeon Kite', 'Attic Balcony Brighton', 'Postcard Teacup Pencil', 'Folding Borrowing Wandering'),
+  punk: palette('Frayed Cheap Feral Bent', 'Rat Pin Siren Boot', 'Alley Basement Underpass', 'Staple Patch Zipper', 'Kicking Ripping Rattling'),
+  metal: palette('Obsidian Hollow Black Ashen', 'Wraith Hammer Thorn Crypt', 'Abyss Barrow Cairn', 'Anvil Blade Chain', 'Forging Scorching Grinding'),
+  jazz: palette('Blue Satin Amber Late', 'Reed Bell Horn Brush', 'Harlem Uptown Lenox', 'Mute Cymbal Valve', 'Walking Brushing Swinging'),
+  'hip-hop': palette('Golden Dusty Lyrical Raw', 'Cypher Verse Drum Loop', 'Queens Brooklyn Corner', 'Sampler Deck Cassette', 'Flipping Cutting Spinning'),
+  country: palette('Dusty Painted Lonesome Red', 'Rider Spur Bridle Creek', 'Amarillo Abilene Mesa', 'Saddle Buckle Lantern', 'Riding Rambling Drifting'),
+  electronic: palette('Neon Liquid Modular Binary', 'Pulse Relay Circuit Pixel', 'Terminal Orbit Arcade', 'Diode Prism Laser', 'Pulsing Phasing Sampling'),
+  pop: palette('Candy Silver Fizzy Peach', 'Prism Spark Ribbon Balloon', 'Rooftop Boardwalk Boulevard', 'Mirror Camera Sequin', 'Glowing Skipping Shining'),
+  folk: palette('Willow Woven Mossy Quiet', 'Finch Wren Acorn Lark', 'Hollow Orchard Meadow', 'Fiddle Basket Spindle', 'Weaving Gathering Picking'),
+};
+export type Genre = keyof typeof genres;
+export const moods = new Map(Object.entries({
+  dark: palette('Sable Midnight Veiled', 'Raven Shade Thorn', 'Cellar Moor', 'Cinder Veil', 'Fading Sinking'),
+  dreamy: palette('Hazy Lunar Soft', 'Cloud Halo Petal', 'Lagoon Loft', 'Pillow Chime', 'Floating Drifting'),
+  funny: palette('Wobbly Crispy Wonky', 'Pickle Muffin Noodle', 'Pantry Diner', 'Spatula Kazoo', 'Wiggling Juggling'),
+  gritty: palette('Rusty Scuffed Ragged', 'Rivet Bolt Brick', 'Depot Yard', 'Wrench Socket', 'Scraping Grinding'),
+  retro: palette('Analog Velvet Sepia', 'Dial Groove Reel', 'Driveway Ballroom', 'Jukebox Vinyl', 'Rewinding Tuning'),
+}));
+export const irregular: Record<string,string> = { Finch:'Finches', Brush:'Brushes', Halo:'Halos', Cypher:'Cyphers' };
+export const famous = `CHVRCHES|Churches|CHRCHS|PVRIS|Paris|Alvvays|Always|Haim|Grimes|M83|The xx|Lynyrd Skynyrd|Limp Bizkit|The Beatles|The Rolling Stones|Led Zeppelin|Pink Floyd|Queen|The Who|The Kinks|The Doors|The Byrds|The Beach Boys|The Monkees|The Animals|The Hollies|The Yardbirds|Cream|Traffic|Blind Faith|The Zombies|Small Faces|Faces|Fleetwood Mac|Eagles|Journey|Boston|Kansas|Chicago|Styx|Foreigner|Toto|REO Speedwagon|Heart|Rush|Yes|Genesis|King Crimson|Jethro Tull|The Moody Blues|Supertramp|Electric Light Orchestra|The Alan Parsons Project|Procol Harum|Deep Purple|Black Sabbath|Rainbow|Dio|Iron Maiden|Judas Priest|Metallica|Megadeth|Slayer|Anthrax|Pantera|Sepultura|Soulfly|Motörhead|Scorpions|Accept|Helloween|Blind Guardian|Nightwish|Within Temptation|Epica|Opeth|Mastodon|Gojira|Meshuggah|Tool|A Perfect Circle|Dream Theater|Queensrÿche|System of a Down|Slipknot|Korn|Deftones|Limp Bizkit|Linkin Park|Disturbed|Evanescence|Avenged Sevenfold|Bring Me the Horizon|Ghost|Rammstein|Nine Inch Nails|Ministry|KMFDM|Aerosmith|Van Halen|Guns N' Roses|AC/DC|Def Leppard|Mötley Crüe|Poison|Cinderella|Bon Jovi|Kiss|ZZ Top|Lynyrd Skynyrd|The Allman Brothers Band|Creedence Clearwater Revival|The Band|Grateful Dead|Phish|Santana|The Doobie Brothers|Steely Dan|Dire Straits|Tom Petty and the Heartbreakers|Bruce Springsteen and the E Street Band|Nirvana|Pearl Jam|Soundgarden|Alice in Chains|Stone Temple Pilots|Mudhoney|Screaming Trees|Temple of the Dog|Foo Fighters|The Smashing Pumpkins|Hole|Garbage|Bush|Live|Collective Soul|Silverchair|Creed|Nickelback|Three Days Grace|Breaking Benjamin|Shinedown|Red Hot Chili Peppers|Rage Against the Machine|Audioslave|Faith No More|Jane's Addiction|Primus|Pixies|Sonic Youth|Dinosaur Jr|Pavement|Built to Spill|Modest Mouse|The Shins|The Decemberists|Death Cab for Cutie|The Postal Service|Neutral Milk Hotel|Belle and Sebastian|Arcade Fire|The National|Bon Iver|Fleet Foxes|Vampire Weekend|MGMT|Tame Impala|The Strokes|The White Stripes|The Black Keys|The Killers|Interpol|Yeah Yeah Yeahs|LCD Soundsystem|Franz Ferdinand|Bloc Party|Arctic Monkeys|The Libertines|Oasis|Blur|Pulp|Suede|Radiohead|Coldplay|Muse|Keane|Travis|Snow Patrol|The Verve|The Stone Roses|Happy Mondays|Primal Scream|The Smiths|Joy Division|New Order|The Cure|Siouxsie and the Banshees|Bauhaus|Echo and the Bunnymen|Depeche Mode|Erasure|Pet Shop Boys|Duran Duran|A-ha|Tears for Fears|Simple Minds|INXS|U2|R.E.M.|Talking Heads|Blondie|The Cars|The Police|The Clash|Ramones|Sex Pistols|Buzzcocks|The Damned|The Jam|Dead Kennedys|Black Flag|Minor Threat|Fugazi|Bad Brains|Bad Religion|Social Distortion|Descendents|Misfits|Rancid|NOFX|The Offspring|Green Day|Blink-182|Sum 41|Good Charlotte|Fall Out Boy|My Chemical Romance|Paramore|Panic! at the Disco|Weezer|Jimmy Eat World|Dashboard Confessional|Taking Back Sunday|All Time Low|No Doubt|Sublime|The Specials|Madness|UB40|The Wailers|Toots and the Maytals|Earth Wind and Fire|Kool and the Gang|Parliament|Funkadelic|Chic|The Isley Brothers|The Jackson 5|The Supremes|The Temptations|Four Tops|Boyz II Men|New Edition|TLC|Destiny's Child|En Vogue|Salt-N-Pepa|Run-DMC|Public Enemy|Beastie Boys|N.W.A|Wu-Tang Clan|A Tribe Called Quest|De La Soul|Outkast|The Roots|Fugees|Cypress Hill|Mobb Deep|Gang Starr|Migos|Black Eyed Peas|Daft Punk|The Chemical Brothers|The Prodigy|Underworld|Orbital|The Orb|Kraftwerk|Tangerine Dream|Air|Justice|Massive Attack|Portishead|Morcheeba|Faithless|Disclosure|Boards of Canada|ABBA|Bee Gees|Backstreet Boys|NSYNC|One Direction|Spice Girls|Little Mix|Girls Aloud|Take That|BTS|Blackpink|Twice|NewJeans|Maroon 5|Imagine Dragons|OneRepublic|The 1975|Twenty One Pilots|The Lumineers|Mumford and Sons|The Avett Brothers|Old Crow Medicine Show|The Chicks|Lady A|Little Big Town|Alabama|The Oak Ridge Boys|The Statler Brothers|Brooks and Dunn|Rascal Flatts|Zac Brown Band|The Highwaymen|Bill Evans Trio|Dave Brubeck Quartet|Modern Jazz Quartet|Weather Report|Return to Forever|Mahavishnu Orchestra|The Jazz Messengers|Snarky Puppy|Yellowjackets|Spyro Gyra`.split('|');
+
+export function fold(s: string) {
+  return s.normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase();
+}
+export function identity(s: string) {
+  return fold(s).replace(/^the\s+/,'').replace(/&/g,'and').replace(/[^a-z0-9]/g,'');
+}
+// Inputs are restricted to ASCII after accent folding. Screen compacted text too.
+export function clean(s: string) {
+  const flat = fold(s).replace(/0/g,'o').replace(/1/g,'i').replace(/3/g,'e')
+    .replace(/4/g,'a').replace(/5/g,'s').replace(/7/g,'t').replace(/[^a-z]/g,'');
+  return !/fuck|shit|bitch|cunt|nigg|fagg|kike|spic(?:k|s)?$|chink|trann[yi]|retard|whore|asshole|dickhead|bastard|motherf|wank|pussy|match|dating|hookup|tinder|soulmate|romance|boyfriend|girlfriend|swipe|crush/.test(flat)
+    && !/\b(?:ass|arse|cock|dick|piss|damn|slut|twat|dyke|date|dates|lover|lovers|love|sexy|kiss)\b/.test(fold(s));
+}
