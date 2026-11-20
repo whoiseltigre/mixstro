@@ -1,9 +1,13 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { generateNames } from "@/lib/band-names/generate.ts";
 import { checkAvailability, type Availability } from "@/lib/band-names/availability.ts";
 import { genres, moods, type Genre } from "@/lib/band-names/wordlists.ts";
+import { api, recentVotes, shareText, startBandUrl, track, type RecentVote } from "@/lib/band-names/client";
+import { shareStory, storyCard } from "@/lib/band-names/story-card";
 
 const GENRES = Object.keys(genres) as Genre[];
 const VIBES = [...moods.keys()];
@@ -12,7 +16,6 @@ const label = (s: string) => LABEL[s] ?? s[0]!.toUpperCase() + s.slice(1);
 
 const STORE = "mixstro-band-names-v1";
 const MAX = 3;
-const SIGNUP = "https://app.mixstro.com/?utm_source=band-name-generator&utm_medium=tool&utm_campaign=shortlist";
 
 type Options = { genre: Genre | ""; vibe: string; keyword: string; mode: "include" | "inspire"; stylize: boolean };
 type Saved = { names: string[]; options: Options; shortlist: string[] };
@@ -47,25 +50,35 @@ function verdict(c: Check | undefined): { text: string; tone: string } | null {
   }
 }
 
-export function Generator({ initial }: { initial: string[] }) {
+/** `genre` set: a genre page (/band-name-generator/metal). Its genre wins over the one saved in this browser. */
+export function Generator({ initial, genre }: { initial: string[]; genre?: Genre }) {
+  const router = useRouter();
   const [names, setNames] = useState(initial);
-  const [options, setOptions] = useState<Options>(DEFAULTS);
+  const [options, setOptions] = useState<Options>({ ...DEFAULTS, genre: genre ?? "" });
   const [shortlist, setShortlist] = useState<string[]>([]);
   const [checks, setChecks] = useState<Record<string, Check>>({});
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
+  const [story, setStory] = useState<string>();
+  const [busy, setBusy] = useState(false);
+  const [recent, setRecent] = useState<RecentVote[]>([]);
   const [ready, setReady] = useState(false);
 
   // Bring back the last batch and shortlist from this browser.
   useEffect(() => {
     const saved = load();
     if (saved) {
-      if (saved.names.length) setNames(saved.names);
-      setOptions(saved.options);
       setShortlist(saved.shortlist);
+      if (!genre || saved.options.genre === genre) {
+        if (saved.names.length) setNames(saved.names);
+        setOptions(saved.options);
+      } else {
+        setOptions({ ...saved.options, genre });
+      }
     }
+    setRecent(recentVotes());
     setReady(true);
-  }, []);
+  }, [genre]);
 
   useEffect(() => {
     if (!ready) return;
@@ -93,6 +106,7 @@ export function Generator({ initial }: { initial: string[] }) {
         }),
       );
       setError("");
+      track("bng_generate");
     } catch (err) {
       setError(err instanceof RangeError ? err.message : "Something went wrong. Try again.");
     }
@@ -100,31 +114,50 @@ export function Generator({ initial }: { initial: string[] }) {
 
   function toggle(name: string) {
     setNote("");
-    setShortlist((s) => (s.includes(name) ? s.filter((n) => n !== name) : s.length < MAX ? [...s, name] : s));
+    setStory(undefined);
+    setShortlist((s) => {
+      if (s.includes(name)) return s.filter((n) => n !== name);
+      if (s.length >= MAX) return s;
+      track("bng_shortlist");
+      return [...s, name];
+    });
   }
 
   async function check(name: string) {
     setChecks((c) => ({ ...c, [name]: "checking" }));
+    track("bng_check");
     const result = await checkAvailability(name);
     setChecks((c) => ({ ...c, [name]: result }));
   }
 
-  async function share() {
-    const url = `${location.origin}/band-name-generator`;
-    const text = `Help us pick a band name: ${shortlist.join(", ")}. Which one?`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: "Pick our band name", text, url });
-        return;
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") return;
-      }
-    }
+  async function startVote() {
+    setBusy(true);
+    setError("");
     try {
-      await navigator.clipboard.writeText(`${text} ${url}`);
-      setNote("Copied. Paste it in the band chat.");
+      const r = await api<{ id: string; url: string }>({ action: "create", options: shortlist });
+      router.push(r.url);
+    } catch (err) {
+      setError((err as Error).message);
+      setBusy(false);
+    }
+  }
+
+  async function share() {
+    track("bng_share");
+    const r = await shareText("Pick our band name", `Help us pick a band name: ${shortlist.join(", ")}. Which one?`, `${location.origin}/band-name-generator`);
+    if (r === "copied") setNote("Copied. Paste it in the band chat.");
+    else if (r !== "shared") setNote(r);
+  }
+
+  async function makeStory() {
+    setNote("");
+    try {
+      const blob = await storyCard({ question: "Pick our band name", options: shortlist, link: `${location.host}/band-name-generator`, footer: "Reply with A, B or C. Names from" });
+      track("bng_story");
+      const r = await shareStory(blob, "Pick our band name");
+      if (r !== "shared" && r !== "cancelled") setStory(r);
     } catch {
-      setNote(`${text} ${url}`);
+      setNote("Couldn't make the image on this browser.");
     }
   }
 
@@ -164,7 +197,7 @@ export function Generator({ initial }: { initial: string[] }) {
           <span>Stylized spelling (CHRMS, VELVT)</span>
         </label>
         <button className="mxb-btn paper bng-go" type="submit">Get 12 names</button>
-        {error && <p className="bng-error" role="alert">{error}</p>}
+        {error && !shortlist.length && <p className="bng-error" role="alert">{error}</p>}
       </form>
 
       <section className="bng-results" aria-label="Name ideas">
@@ -204,16 +237,48 @@ export function Generator({ initial }: { initial: string[] }) {
                     </span>
                   </div>
                   {v && <p className={`bng-verdict ${v.tone}`}>{v.text}</p>}
+                  <a className="bng-start" href={startBandUrl(name)} onClick={() => track("bng_signup_click")}>
+                    Start {name} on Mixstro <span aria-hidden="true">→</span>
+                  </a>
                 </li>
               );
             })}
           </ol>
           <div className="bng-cta">
-            <button type="button" className="mxb-btn paper sm" onClick={share}>Ask the band</button>
-            <a className="mxb-btn ghost sm" href={SIGNUP}>Claim your free profile on Mixstro</a>
+            {full ? (
+              <button type="button" className="mxb-btn paper sm" disabled={busy} onClick={startVote}>
+                {busy ? "Starting the vote…" : "Let the band vote"}
+              </button>
+            ) : (
+              <button type="button" className="mxb-btn paper sm" onClick={share}>Ask the band</button>
+            )}
+            {full && (
+              <button type="button" className="mxb-btn ghost sm" onClick={makeStory}>Make a story image</button>
+            )}
           </div>
+          {full && <p className="bng-small">The vote gets its own link. Anyone with it can vote in one tap, no sign-up.</p>}
+          {!full && <p className="bng-small">Shortlist three to start a band vote.</p>}
+          {error && <p className="bng-error" role="alert">{error}</p>}
           {note && <p className="bng-note" aria-live="polite">{note}</p>}
+          {story && (
+            <p className="bng-note">
+              <a className="bng-link" href={story} target="_blank" rel="noopener">Open the story image</a> and save it to your photos.
+            </p>
+          )}
           <p className="bng-small">The check searches MusicBrainz for real artists. It isn&apos;t a trademark search.</p>
+        </section>
+      )}
+
+      {recent.length > 0 && (
+        <section className="bng-recent" aria-labelledby="bng-recent">
+          <h2 id="bng-recent">Your band votes</h2>
+          <ul>
+            {recent.map((r) => (
+              <li key={r.id}>
+                <Link href={`/band-name-generator/vote/${r.id}`}>{r.label}</Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </div>

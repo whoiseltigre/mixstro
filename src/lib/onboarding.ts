@@ -126,6 +126,31 @@ function read(): Draft {
   }
 }
 
+export const FROM_GENERATOR = "mixstro-from-band-name-generator";
+
+/**
+ * Arrived from "Start <name> on Mixstro" in the band name generator (the mx_band cookie): sign up as a
+ * band with that name filled in, unless this draft already names a band. Only for a new signup.
+ */
+function seedBandFromGenerator(local: Draft): Draft | null {
+  const raw = document.cookie.split("; ").find((c) => c.startsWith("mx_band="))?.slice(8);
+  if (!raw) return null;
+  document.cookie = "mx_band=; Max-Age=0; path=/";
+  let name = "";
+  try {
+    name = decodeURIComponent(raw).trim().slice(0, 80);
+  } catch {
+    return null;
+  }
+  if (!name || local.band?.name.trim()) return null;
+  const next: Draft = { ...local, signupAs: "band", band: { name, since: new Date().getFullYear() } };
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(FROM_GENERATOR, "1");
+  } catch {}
+  return next;
+}
+
 /** Onboarding answers, persisted to localStorage so a reload or a quit resumes where you left off. */
 export function useDraft() {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -145,6 +170,9 @@ export function useDraft() {
             localStorage.setItem(KEY, JSON.stringify(synced));
           } catch {}
           setDraft(synced);
+        } else {
+          const seeded = seedBandFromGenerator(local);
+          if (seeded) setDraft(seeded);
         }
         setReady(true);
       })
