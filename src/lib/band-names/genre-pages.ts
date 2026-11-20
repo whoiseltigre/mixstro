@@ -11,7 +11,7 @@ export const GENRE_PAGES: GenrePage[] = [
     h1: "Metal band name generator",
     dek: "Heavy, cold and a little ominous. Twelve metal band names at a time, checked against real bands.",
     intro: "Metal names lean on weight: iron, ash, crypts, forges and single hard words that look good in a jagged logo. Pick Dark as the vibe for doom and black metal, Gritty for thrash and sludge.",
-    tips: ["One word names (Pyreward, Anvilforge) are easiest to turn into a logo.", "Read it in a growl. If it still sounds like a name, keep it.", "Check that the logo version is still readable on a shirt from across a room."],
+    tips: ["One word names (Pyreward, Ironwake) are easiest to turn into a logo.", "Read it in a growl. If it still sounds like a name, keep it.", "Check that the logo version is still readable on a shirt from across a room."],
   },
   {
     genre: "punk",
@@ -38,7 +38,7 @@ export const GENRE_PAGES: GenrePage[] = [
     h1: "Indie band name generator",
     dek: "Small, specific and a little odd. Indie band names that sound like a record you find by accident.",
     intro: "Indie names tend to be everyday objects and places seen sideways: postcards, attics, Sunday papers, borrowed things. Specific and quiet beats big and epic.",
-    tips: ["Dreamy as the vibe suits shoegaze and bedroom pop.", "Phrases ('Meet Me Sunday') work well for indie. Turn the word mode to 'Just set the mood'.", "Check the Instagram handle before you fall in love with it."],
+    tips: ["Dreamy as the vibe suits shoegaze and bedroom pop.", "Small everyday phrases ('Library Fines', 'Meet Me Sunday') are the classic indie shape.", "Check the Instagram handle before you fall in love with it."],
   },
   {
     genre: "country",
@@ -73,7 +73,7 @@ export const GENRE_PAGES: GenrePage[] = [
     label: "Hip-hop",
     h1: "Hip-hop group name generator",
     dek: "Cyphers, corners and crates of records. Names for hip-hop crews and collectives.",
-    intro: "Hip-hop crew names come from the block and the craft: corners, cyphers, samplers and cassettes. Collective and Edition style endings are common.",
+    intro: "Hip-hop crew names come from the block and the craft: corners, cyphers, samplers and cassettes. Collective, Society and Tapes style endings are common.",
     tips: ["Your neighborhood as the word makes it local.", "Check that it's searchable. A plain English word gets buried.", "Gritty vibe suits boom bap, Dreamy suits lo-fi."],
   },
   {
@@ -83,7 +83,7 @@ export const GENRE_PAGES: GenrePage[] = [
     h1: "Electronic band name generator",
     dek: "Signals, circuits and neon. Names for electronic acts, DJ duos and synth projects.",
     intro: "Electronic names borrow from machines and light: relays, prisms, pulses and grids. Single invented words work especially well on streaming services.",
-    tips: ["Stylized spelling fits electronic music. Turn it on.", "Short names fit better on a festival lineup.", "Make sure it isn't a gear brand. The check helps."],
+    tips: ["All lowercase suits electronic acts. Tick Stylized to see names that way.", "Short names fit better on a festival lineup.", "Make sure it isn't a gear brand. The check helps."],
   },
   {
     genre: "pop",

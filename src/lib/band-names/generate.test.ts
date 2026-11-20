@@ -2,14 +2,22 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateNames, safeBandName } from './generate.ts';
 import { checkAvailability } from './availability.ts';
-import { clean, famous, genres, identity } from './wordlists.ts';
+import { clean, famous, fold, genres, identity, moods } from './wordlists.ts';
 import type { Genre } from './wordlists.ts';
+
+const words = (s: string) => fold(s).replace(/&/g,' ').split(/[^a-z']+/).map(w => w.replace(/'s$|s$/,'')).filter(w => w.length > 1 && !['the','of','and','a','in','at','to','on','under','after'].includes(w));
 
 test('seeded batches reproduce, vary across seeds and respect word limits', () => {
   const names = generateNames({seed:0});
+  assert.equal(names.length, 12);
   assert.deepEqual(names, generateNames({seed:0}));
   assert.notDeepEqual(names, generateNames({seed:1}));
   assert.ok(names.every(n => n.split(' ').length <= 4));
+});
+
+test('every curated name is clean, safe and not a famous band', () => {
+  const all = [...Object.values(genres).flatMap(g => g.names), ...[...moods.values()].flat()];
+  for (const n of all) assert.ok(safeBandName(n), n);
 });
 
 test('all genres yield clean distinct names outside the famous catalog', () => {
@@ -24,17 +32,32 @@ test('all genres yield clean distinct names outside the famous catalog', () => {
   }
 });
 
-test('ensembles favor jazz, and vibe changes the vocabulary', () => {
-  const jazz = generateNames({genre:'jazz',seed:3,count:40});
-  assert.ok(jazz.filter(n => /Trio|Quartet/.test(n)).length >= 5);
-  const indie = generateNames({genre:'indie',seed:3,count:40,vibe:['funny']});
-  assert.ok(indie.some(n => /Pickle|Kazoo|Noodle|Wonky|Muffin|Wobbl|Spatula/i.test(n)));
+test('a batch of twelve never repeats a word, across genres, vibes and seeds', () => {
+  for (const genre of [undefined, ...Object.keys(genres)] as (Genre|undefined)[])
+    for (const seed of [1,2,3,4,5]) for (const vibe of [[], ['dark'], ['funny']]) {
+      const ws = generateNames({genre,seed,vibe}).flatMap(words);
+      assert.equal(new Set(ws).size, ws.length, `${genre} ${seed} ${vibe}: ${ws}`);
+    }
 });
 
-test('odd batches feature the keyword in at least half, including phrases', () => {
+test('the next batch leaves out the names already on screen', () => {
+  const first = generateNames({genre:'rock',seed:4});
+  const next = generateNames({genre:'rock',seed:5,exclude:first});
+  assert.ok(next.every(n => !first.includes(n)));
+});
+
+test('vibe and jazz ensembles change the vocabulary', () => {
+  const jazz = generateNames({genre:'jazz',seed:3,count:40});
+  assert.ok(jazz.filter(n => /Trio|Quartet|Quintet|Sextet|Five/.test(n)).length >= 5);
+  const indie = generateNames({genre:'indie',seed:3,vibe:['funny']});
+  const funny = new Set(moods.get('funny'));
+  assert.ok(indie.filter(n => funny.has(n)).length >= 3);
+});
+
+test('half the batch features a typed word, and bad words are refused', () => {
   for (const keyword of ['Ember','Copper Moon','Beneath Blue Skies']) {
-    const names = generateNames({keyword,count:21,seed:15});
-    assert.ok(names.filter(n => n.includes(keyword)).length >= 11);
+    const names = generateNames({keyword,count:12,seed:15});
+    assert.ok(names.filter(n => n.includes(keyword)).length >= 6, names.join());
     assert.ok(names.every(n => n.split(' ').length <= 4));
   }
   assert.throws(() => generateNames({keyword:'mAtCh'}),RangeError);
@@ -65,14 +88,13 @@ test('queued lookups classify results and recover from failures', async t => {
   assert.ok(starts.slice(1).every((n,i) => n-starts[i]! >= 1000));
 });
 
-test('stylization screens vowel substitutions, echoes and original spellings', () => {
+test('stylized only changes case, never spelling, and screens famous respellings', () => {
   for (const s of ['CHRCHS','CHVRCHES','Churches','RDOHD','NIRVNA','PVRIS','ALVVAYS']) assert.equal(safeBandName(s),false,s);
-  const opts={genre:'indie' as const,seed:8,stylize:true,keyword:'Rain'};
-  const names=generateNames(opts);
-  assert.deepEqual(names,generateNames(opts));
-  assert.ok(names.some(n=>/[A-Z]{3}/.test(n)));
-  assert.ok(names.every(safeBandName));
-  assert.ok(names.filter(n=>n.includes('Rain')).length>=6);
-  const themed=generateNames({...opts,keyword:'garage',keywordMode:'inspire'});
-  assert.ok(themed.some(n=>/Side Door|Bare Bulb|Concrete|Oil Rag|Practice Room/i.test(n)));
+  const plain = generateNames({genre:'punk',seed:8});
+  const styled = generateNames({genre:'punk',seed:8,stylize:true});
+  assert.deepEqual(styled.map(n => n.toLowerCase()), plain.map(n => n.toLowerCase()));
+  assert.ok(styled.some(n => n === n.toUpperCase()));
+  const themed = generateNames({genre:'folk',keyword:'garage',keywordMode:'inspire',seed:2});
+  assert.ok(themed.some(n => /Side Door|Bare Bulb|Concrete|Oil Rag|Practice Room|Workbench|Extension Cord/i.test(n)), themed.join());
+  assert.ok(themed.every(n => !/garage/i.test(n)));
 });
