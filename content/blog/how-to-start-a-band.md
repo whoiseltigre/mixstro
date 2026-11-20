@@ -86,7 +86,7 @@ Once a week is the sweet spot for most new bands. It's often enough to build mom
 
 ## How do you pick a band name?
 
-Brainstorm a long list, sleep on it, then test your favorites:
+Brainstorm a long list, sleep on it, then test your favorites. Stuck for ideas? Our free [band name generator](/band-name-generator) gives you twelve at a time, checks them against real bands and lets the whole band vote on a shortlist.
 
 - Search it on Spotify, Apple Music, Instagram and Google. If another active band has it, move on.
 - Check the handle is free on the socials you'll use.
