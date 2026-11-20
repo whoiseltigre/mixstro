@@ -59,9 +59,9 @@ export const TABS = [
 export const UNREAD = isSupabaseConfigured ? 0 : 2;
 
 export function TabBar() {
+  const [tapped, setTapped] = useState<{ index: number; from: string } | null>(null);
   const path = usePathname();
   const [creating, setCreating] = useState(false);
-  const [tapped, setTapped] = useState<{ index: number; from: string } | null>(null);
   // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
   if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
 
