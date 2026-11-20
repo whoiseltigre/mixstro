@@ -430,12 +430,21 @@ export const getChat = cache(async (username: string): Promise<ChatView | null> 
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }
   const supabase = (await createClient())!;
+  // The newest 500, newest first (id breaks ties), then flipped so the chat reads top to bottom.
+  // Reading oldest first would stop at message 500 and never show the latest ones.
   // "*" so the chat still loads before newer columns (voice_seconds) exist.
   const [{ data }, jams] = await Promise.all([
-    supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500),
+    supabase
+      .from("messages")
+      .select("*")
+      .eq("connection_id", view.connection.id)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(500),
     getJams(supabase, view.connection.id, view.viewerId),
   ]);
-  const rows = (data ?? []) as { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string }[];
+  type ChatRow = { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string };
+  const rows = ((data ?? []) as ChatRow[]).reverse();
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();
   if (paths.length) {
