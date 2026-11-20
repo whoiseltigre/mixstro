@@ -77,6 +77,11 @@ public class MixstroNativePlugin: CAPPlugin, CAPBridgedPlugin, UITabBarDelegate 
             scroll.refreshControl = control
             control.layer.zPosition = 100
             refresh = control
+            // The page runs under the status bar, so drop the spinner below the Dynamic Island.
+            DispatchQueue.main.async {
+                let top = root.window?.safeAreaInsets.top ?? root.safeAreaInsets.top
+                control.bounds = CGRect(x: control.bounds.origin.x, y: -top, width: control.bounds.width, height: control.bounds.height)
+            }
         }
 
         let center = NotificationCenter.default
