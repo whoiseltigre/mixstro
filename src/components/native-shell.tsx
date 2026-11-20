@@ -121,7 +121,9 @@ function longPressMenus(open: (href: string) => void) {
     timer = setTimeout(async () => {
       timer = null;
       swallowClick = true;
-      const name = (link.getAttribute("aria-label") || link.innerText || "").split("\n").map((t) => t.trim()).find((t) => t && !/^(sample|new|verified|open to .*)$/i.test(t))?.slice(0, 40);
+      const name = (link.getAttribute("aria-label") || link.innerText || "").split("\n").map((t) => t.trim())// Skip badges ("Sample") and all-caps eyebrows ("GUITAR · 3 MI"): the name is the first plain line.
+        .find((t) => t && t !== t.toUpperCase() && !/^(sample|new|verified|asked you)$/i.test(t))
+        ?.slice(0, 40);
       const url = new URL(href, location.origin).href;
       const picked = await nativeMenu(name, [{ title: "Open" }, { title: "Share" }, { title: "Copy link" }]);
       if (picked === 0) open(href);

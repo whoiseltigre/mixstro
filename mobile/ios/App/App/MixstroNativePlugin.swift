@@ -69,10 +69,13 @@ public class MixstroNativePlugin: CAPPlugin, CAPBridgedPlugin, UITabBarDelegate 
         tabBar = bar
 
         if let scroll = bridge?.webView?.scrollView {
+            scroll.bounces = true
+            scroll.alwaysBounceVertical = true
             let control = UIRefreshControl()
             control.tintColor = UIColor(red: 245 / 255, green: 241 / 255, blue: 236 / 255, alpha: 0.8)
             control.addTarget(self, action: #selector(pulled), for: .valueChanged)
             scroll.refreshControl = control
+            control.layer.zPosition = 100
             refresh = control
         }
 

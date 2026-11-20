@@ -9,6 +9,9 @@ class MixstroViewController: CAPBridgeViewController {
         // Swipe from the left edge to go back, like every iPhone app.
         webView?.allowsBackForwardNavigationGestures = true
         webView?.scrollView.contentInsetAdjustmentBehavior = .never
+        // Capacitor turns the page's bounce off; pull to refresh (MixstroNativePlugin) needs it.
+        webView?.scrollView.bounces = true
+        webView?.scrollView.alwaysBounceVertical = true
         view.backgroundColor = UIColor(red: 15 / 255, green: 13 / 255, blue: 11 / 255, alpha: 1)
     }
 }
