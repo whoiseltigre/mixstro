@@ -13,7 +13,7 @@ export const DESCRIPTION =
 const FAQS = [
   {
     q: "How do I know if a band name is taken?",
-    a: "Shortlist a name and tap Check. We search MusicBrainz, an open database of over two million artists, for the same or a very similar name. No result is a good sign, not a legal clearance: also search Spotify, Bandcamp and Instagram, and look up trademarks if you plan to sell merch.",
+    a: "Shortlist a name and tap Is it taken? We search MusicBrainz, an open database of over two million artists, and Apple Music for the same or a very similar name. No result is a good sign, not a legal clearance: also search Spotify, Bandcamp and Instagram, and look up trademarks if you plan to sell merch.",
   },
   {
     q: "Can I use a name from this generator?",

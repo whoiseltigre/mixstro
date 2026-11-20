@@ -266,7 +266,7 @@ export function Generator({ initial, genre }: { initial: string[]; genre?: Genre
               <a className="bng-link" href={story} target="_blank" rel="noopener">Open the story image</a> and save it to your photos.
             </p>
           )}
-          <p className="bng-small">The check searches MusicBrainz for real artists. It isn&apos;t a trademark search.</p>
+          <p className="bng-small">The check searches MusicBrainz and Apple Music for real artists. It isn&apos;t a trademark search.</p>
         </section>
       )}
 
