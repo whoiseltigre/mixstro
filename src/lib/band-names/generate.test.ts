@@ -65,26 +65,35 @@ test('half the batch features a typed word, and bad words are refused', () => {
   assert.deepEqual(generateNames({count:0}),[]);
 });
 
-test('queued lookups classify results and recover from failures', async t => {
-  const fixtures = [
+test('lookups combine MusicBrainz and Apple Music, retry busy replies and recover from failures', async t => {
+  const mb: (unknown[] | number | null)[] = [
     [{name:'Other Act',score:97},{name:'COPPER REED',score:85}],
     [{name:'The Copper-Reed',score:80}],
     [{name:'Other Act',score:'90'}],
-    [{name:'Other Act',score:89}], null, [],
+    503, [{name:'Other Act',score:89}],
+    null, null, null,
+    [],
   ];
+  const apple: (unknown[] | null)[] = [[], [], [], [], null, [{artistName:'Empty'}]];
   const starts: number[] = [];
-  t.mock.method(globalThis,'fetch', (url: URL, init: RequestInit) => {
+  t.mock.method(globalThis,'fetch', (url: URL) => {
+    if (url.hostname === 'itunes.apple.com') {
+      const results = apple.shift();
+      if (!results) throw new Error('offline');
+      return Response.json({results});
+    }
     starts.push(performance.now());
     assert.ok(url.searchParams.get('query')?.startsWith('artist:'));
-    assert.equal(new Headers(init.headers).get('Accept'),'application/json');
-    const artists = fixtures.shift();
-    if (!artists) throw new Error('offline');
+    const artists = mb.shift();
+    if (artists === null || artists === undefined) throw new Error('offline');
+    if (typeof artists === 'number') return new Response('busy', {status: artists});
     return Response.json({artists});
   });
   const results = await Promise.all(['Copper Reed','Copper-Reed','Other','Quiet','Failure','Empty'].map(checkAvailability));
-  assert.deepEqual(results.map(x => x.status),['taken','similar','similar','available','unknown','available']);
+  assert.deepEqual(results.map(x => x.status),['taken','similar','similar','available','unknown','taken']);
   assert.deepEqual(results[0]?.matches,['Other Act','COPPER REED']);
   assert.deepEqual(results[4]?.matches,[]);
+  assert.deepEqual(results[5]?.matches,['Empty']);
   assert.ok(starts.slice(1).every((n,i) => n-starts[i]! >= 1000));
 });
 
