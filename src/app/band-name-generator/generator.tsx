@@ -103,6 +103,7 @@ export function Generator({ initial, genre }: { initial: string[]; genre?: Genre
           keyword: options.keyword,
           keywordMode: options.mode,
           stylize: options.stylize,
+          exclude: names,
         }),
       );
       setError("");
@@ -194,7 +195,7 @@ export function Generator({ initial, genre }: { initial: string[]; genre?: Genre
         </fieldset>
         <label className="bng-check">
           <input id="bng-stylize" type="checkbox" checked={options.stylize} onChange={(e) => set("stylize", e.target.checked)} />
-          <span>Stylized spelling (CHRMS, VELVT)</span>
+          <span>Stylized (lowercase or ALL CAPS)</span>
         </label>
         <button className="mxb-btn paper bng-go" type="submit">Get 12 names</button>
         {error && !shortlist.length && <p className="bng-error" role="alert">{error}</p>}

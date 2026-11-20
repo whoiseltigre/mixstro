@@ -84,8 +84,9 @@ export function GeneratorPage({ page }: { page?: GenrePage }) {
           )}
           <h2>How the generator works</h2>
           <p>
-            Pick a genre and a vibe, or leave both open. Add a word you like and choose whether it should appear in the name or only set the mood. Turn on stylized
-            spelling if you want names with dropped vowels or a V for a U. Every batch skips well-known band names and near copies of them, plus anything crude.
+            Pick a genre and a vibe, or leave both open. Add a word you like and choose whether it should appear in the name or only set the mood. The names are
+            written to sound like real bands: found phrases, odd specific objects, places and small scenes. Every batch skips well-known band names and near copies of
+            them, plus anything crude, and never repeats a word within the twelve.
           </p>
           <h2>Before you settle on a name</h2>
           <ul>
