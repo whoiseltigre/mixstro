@@ -72,8 +72,15 @@ export default function Influences() {
     try {
       haptic("select");
     } catch {}
-    if (pickedIds.has(a.id)) update({ influences: picked.filter((p) => p.id !== a.id) });
-    else if (picked.length < MAX) {
+    if (pickedIds.has(a.id)) {
+      const rest = picked.filter((p) => p.id !== a.id);
+      update({ influences: rest });
+      // Removing a pick takes its "Because you picked" row with it (and re-picking brings it back),
+      // and your latest remaining picks fill in with their own rows.
+      setGroups((g) => g.filter((x) => x.from.id !== a.id));
+      asked.current.delete(a.id);
+      rest.slice(-2).forEach((r) => loadSimilar(r));
+    } else if (picked.length < MAX) {
       update({ influences: [...picked, a] });
       loadSimilar(a);
     }
@@ -168,7 +175,7 @@ export default function Influences() {
           </section>
         )}
 
-        {groups.map((g) => (
+        {groups.filter((g) => pickedIds.has(g.from.id)).map((g) => (
           <section key={g.from.id} className="rise-in flex flex-col gap-4">
             <h2 className="text-footnote font-medium text-smoke">
               Because you picked <span className="text-paper">{g.from.name}</span>
