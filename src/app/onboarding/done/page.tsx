@@ -33,24 +33,41 @@ export default function Done() {
     if (t && /^[0-9a-f]{32}$/.test(t)) setJoinToken(t);
   }, []);
 
+  function save() {
+    setState("saving");
+    setError(undefined);
+    saveProfile(draft)
+      .catch((e: unknown) => ({ error: e instanceof Error ? e.message : "Your profile didn't save." }))
+      .then((r) => {
+        if (r.error) {
+          setError(r.error);
+          setState("error");
+        } else {
+          setBandPage(savedBandPageId());
+          setState("saved");
+          // Drop any app pages the router kept from before the save (they'd still redirect to signup).
+          router.refresh();
+        }
+      });
+  }
+
   useEffect(() => {
     if (!ready) return;
-    saveProfile(draft).then((r) => {
-      if (r.error) {
-        setError(r.error);
-        setState("error");
-      } else {
-        setBandPage(savedBandPageId());
-        setState("saved");
-      }
-    });
+    save();
     // Save once when the draft has loaded.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
 
+  // Home is only reachable once the profile is saved: until then the app sends you back to signup.
+  // A full page load, not a client navigation, so no copy of Home fetched before the save
+  // (which would still say "no profile yet") can be reused.
+  function goHome() {
+    window.location.assign("/discover");
+  }
+
   async function enableNotifications() {
     await enablePush().catch(() => {});
-    router.push("/discover");
+    goHome();
   }
 
   const username = draft.username.replace(/^@/, "").trim().toLowerCase();
@@ -128,14 +145,22 @@ export default function Done() {
             </span>
           </div>
         )}
-        {(askPush || state !== "saved") && (
-          <Button variant={state === "saved" && username && !shared ? "glass" : "gel"} onClick={enableNotifications} disabled={state === "saving"}>
-            {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
+        {state === "error" ? (
+          <Button variant="gel" onClick={save}>
+            Try again
+          </Button>
+        ) : (
+          (askPush || state === "saving") && (
+            <Button variant={state === "saved" && username && !shared ? "glass" : "gel"} onClick={enableNotifications} disabled={state === "saving"}>
+              {state === "saving" ? "Saving your profile…" : "Turn on notifications"}
+            </Button>
+          )
+        )}
+        {state === "saved" && (
+          <Button variant="glass" onClick={goHome}>
+            Go to Home
           </Button>
         )}
-        <ButtonLink variant="glass" href="/discover">
-          Go to Home
-        </ButtonLink>
       </div>
       {sharing && username && (
         <SharePage
