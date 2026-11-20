@@ -39,11 +39,11 @@ export function NewPostForm({ neighborhood, signedIn }: { neighborhood: string; 
       <form onSubmit={submit} className="flex flex-col gap-6">
         <div className="mt-2 flex items-center gap-2.5">
           <BackButton href="/board" />
-          <h1 className="headline text-[28px] md:text-[34px]">New post</h1>
+          <h1 className="headline text-title-lg md:text-display">New post</h1>
         </div>
 
         <fieldset className="flex flex-col gap-2.5">
-          <legend className="text-[13px] font-semibold text-smoke mb-2.5">What are you looking for?</legend>
+          <legend className="text-footnote font-semibold text-smoke mb-2.5">What are you looking for?</legend>
           <div className="flex flex-wrap gap-2">
             {KINDS.map((k) => (
               <Chip key={k} selected={kind === k} onClick={() => setKind(k)}>
@@ -57,7 +57,7 @@ export function NewPostForm({ neighborhood, signedIn }: { neighborhood: string; 
         <Field id="role" label="Who you need" placeholder={hint.role} value={role} maxLength={60} onChange={(e) => setRole(e.target.value)} />
 
         <div className="flex flex-col gap-2">
-          <label htmlFor="details" className="text-[13px] font-semibold text-smoke">
+          <label htmlFor="details" className="text-footnote font-semibold text-smoke">
             Details
           </label>
           <textarea
@@ -67,7 +67,7 @@ export function NewPostForm({ neighborhood, signedIn }: { neighborhood: string; 
             rows={4}
             onChange={(e) => setDetails(e.target.value)}
             placeholder={hint.details}
-            className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-[17px] leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+            className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-body-lg leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
           />
         </div>
 
@@ -75,15 +75,15 @@ export function NewPostForm({ neighborhood, signedIn }: { neighborhood: string; 
 
         <div className="flex flex-col gap-3">
           <label className="flex items-center justify-between gap-3 h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 cursor-pointer">
-            <span className="text-[17px]">It&rsquo;s paid</span>
-            <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-[#FFB245]" />
+            <span className="text-body-lg">It&rsquo;s paid</span>
+            <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
           </label>
           {paid && <Field id="pay" label="Pay (optional)" placeholder="$300/day" value={pay} maxLength={40} onChange={(e) => setPay(e.target.value)} />}
         </div>
 
         <Field id="closes" label="Closes on (optional)" type="date" min={today} value={closesOn} onChange={(e) => setClosesOn(e.target.value)} />
 
-        {error && <p className="text-[14px] text-[#FF8A80]">{error}</p>}
+        {error && <p className="text-subhead text-danger-soft">{error}</p>}
         <Button type="submit" disabled={pending || title.trim().length < 3}>
           {pending ? "Posting…" : "Post to the Board"}
         </Button>

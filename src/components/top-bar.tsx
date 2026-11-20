@@ -7,9 +7,10 @@ import { useDraft } from "@/lib/onboarding";
 import { CreateSheet } from "./create-sheet";
 import { TABS, UNREAD } from "./tab-bar";
 import { Wordmark, cx } from "./ui";
+import { AREA_GEL, COLOR } from "@/lib/tokens";
 
 // Each tab's stage-spill color, the same gels the phone screens use.
-const GLOW: Record<string, string> = { "/discover": "#FFB245", "/board": "#B5C5FF", "/messages": "#67E2DA", "/me": "#F7BF77" };
+const GLOW = AREA_GEL;
 
 /** Tablet and desktop navigation: the phone's glass tab bar, moved to the top. Hidden below 768px. */
 export function TopBar() {
@@ -17,7 +18,7 @@ export function TopBar() {
   const { draft } = useDraft();
   const [creating, setCreating] = useState(false);
   const tab = TABS.find((t) => path === t.href || path.startsWith(t.href + "/"));
-  const glow = GLOW[tab?.href ?? ""] ?? "#FFB245";
+  const glow = GLOW[tab?.href ?? ""] ?? COLOR.tungsten;
 
   return (
     <>
@@ -40,13 +41,13 @@ export function TopBar() {
                   href={t.href}
                   aria-current={active ? "page" : undefined}
                   className={cx(
-                    "h-10 px-5 rounded-full flex items-center gap-2 text-[14px] transition",
+                    "h-10 px-5 rounded-full flex items-center gap-2 text-subhead transition",
                     active ? "bg-paper text-ink font-semibold" : "text-smoke hover:text-paper",
                   )}
                 >
                   {t.label}
                   {t.href === "/messages" && UNREAD > 0 && !active && (
-                    <span aria-label={`${UNREAD} unread`} className="min-w-5 h-5 px-1.5 rounded-full bg-paper text-ink text-[11px] font-bold flex items-center justify-center">
+                    <span aria-label={`${UNREAD} unread`} className="min-w-5 h-5 px-1.5 rounded-full bg-paper text-ink text-caption2 font-bold flex items-center justify-center">
                       {UNREAD}
                     </span>
                   )}
@@ -59,7 +60,7 @@ export function TopBar() {
               type="button"
               onClick={() => setCreating(true)}
               aria-haspopup="dialog"
-              className="h-11 px-4 rounded-full bg-tungsten text-ink text-[15px] font-semibold flex items-center gap-1.5 hover:brightness-105 transition"
+              className="h-11 px-4 rounded-full bg-tungsten text-ink text-callout font-semibold flex items-center gap-1.5 hover:brightness-105 transition"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
               Create
@@ -70,7 +71,7 @@ export function TopBar() {
                 <path d="M16 16l4.5 4.5" />
               </svg>
             </Link>
-            <Link href="/settings" aria-label="Settings" className="size-11 rounded-full overflow-hidden bg-riser border border-paper/12 flex items-center justify-center text-[15px] font-semibold">
+            <Link href="/settings" aria-label="Settings" className="size-11 rounded-full overflow-hidden bg-riser border border-paper/12 flex items-center justify-center text-callout font-semibold">
               {draft.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={draft.avatarUrl} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />

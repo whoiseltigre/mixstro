@@ -48,7 +48,7 @@ export function ProjectList({
   return (
     <section className="flex flex-col">
       <div className="flex justify-between items-center pb-1.5">
-        <h2 className="text-[20px] font-bold tracking-[-0.02em]">Projects</h2>
+        <h2 className="text-title3 font-bold tracking-[-0.02em]">Projects</h2>
         {editHref ? (
           <Link href={editHref} aria-label={projects.length ? "Edit projects" : "Add a project"} className="hit-slop relative glass size-10 rounded-full flex items-center justify-center">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
@@ -56,7 +56,7 @@ export function ProjectList({
             </svg>
           </Link>
         ) : (
-          since && <span className="text-[13px] text-smoke">Since {since}</span>
+          since && <span className="text-footnote text-smoke">Since {since}</span>
         )}
       </div>
 
@@ -113,18 +113,18 @@ function ProjectRow({
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
           {p.bandId && !compact ? (
-            <Link href={`/b/${p.bandId}`} className="text-[16px] font-semibold truncate hover:underline underline-offset-2">
+            <Link href={`/b/${p.bandId}`} className="text-body font-semibold truncate hover:underline underline-offset-2">
               {p.name}
             </Link>
           ) : (
-            <span className="text-[16px] font-semibold truncate">{p.name}</span>
+            <span className="text-body font-semibold truncate">{p.name}</span>
           )}
           {isCurrent(p) && !compact && (
-            <span className="shrink-0 text-[11px] font-bold tracking-[0.04em] px-[7px] py-0.5 rounded-full bg-[#67E2DA]/16 text-[#67E2DA]">NOW</span>
+            <span className="shrink-0 text-caption2 font-bold tracking-[0.04em] px-[7px] py-0.5 rounded-full bg-gel-teal/16 text-gel-teal">NOW</span>
           )}
         </div>
-        {p.role && <span className="text-[14px] text-paper/80 truncate">{p.role}</span>}
-        <span className="text-[13px] text-smoke">
+        {p.role && <span className="text-subhead text-paper/80 truncate">{p.role}</span>}
+        <span className="text-footnote text-smoke">
           {yearsLabel(p)}
           {compact && ` · ${p.tracks.length} ${p.tracks.length === 1 ? "track" : "tracks"}`}
         </span>
@@ -160,7 +160,7 @@ function PlayedWith({ mates, linked }: { mates: Bandmate[]; linked: boolean }) {
     <div className="flex items-center gap-2 mt-1.5 min-w-0">
       <span className="flex -space-x-1.5 shrink-0">
         {shown.map((m) => (
-          <span key={m.username} className="relative size-[22px] rounded-full overflow-hidden border-2 border-ink bg-riser flex items-center justify-center text-[10px] font-bold" style={{ background: artistTint(m.username) }}>
+          <span key={m.username} className="relative size-[22px] rounded-full overflow-hidden border-2 border-ink bg-riser flex items-center justify-center text-caption2 font-bold" style={{ background: artistTint(m.username) }}>
             {m.photo ? (
                
               <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
@@ -170,7 +170,7 @@ function PlayedWith({ mates, linked }: { mates: Bandmate[]; linked: boolean }) {
           </span>
         ))}
       </span>
-      <span className="text-[13px] text-smoke truncate">
+      <span className="text-footnote text-smoke truncate">
         With{" "}
         {mates.map((m, i) => (
           <span key={m.username}>
@@ -198,7 +198,7 @@ function TrackChip({ track, on, onPlay }: { track: Track; on: boolean; onPlay: (
         href={track.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="h-[34px] shrink-0 flex items-center gap-[7px] pl-1 pr-3 rounded-full border border-paper/14 hover:border-paper/30 text-[13px] font-semibold transition"
+        className="h-[34px] shrink-0 flex items-center gap-[7px] pl-1 pr-3 rounded-full border border-paper/14 hover:border-paper/30 text-footnote font-semibold transition"
       >
         <span className="size-[26px] rounded-full flex items-center justify-center bg-paper/16 text-paper">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" /></svg>
@@ -215,7 +215,7 @@ function TrackChip({ track, on, onPlay }: { track: Track; on: boolean; onPlay: (
       disabled={!playable}
       aria-pressed={on}
       aria-label={`${on ? "Pause" : "Play"} ${title}`}
-      className={`h-[34px] shrink-0 flex items-center gap-[7px] pl-1 pr-3 rounded-full border text-[13px] font-semibold transition disabled:cursor-default ${
+      className={`h-[34px] shrink-0 flex items-center gap-[7px] pl-1 pr-3 rounded-full border text-footnote font-semibold transition disabled:cursor-default ${
         on ? "border-paper/40 bg-paper/14" : "border-paper/14 hover:border-paper/30"
       }`}
     >
@@ -244,16 +244,16 @@ function SignatureTrack({ track, project }: { track: Track; project: Project }) 
   const year = details?.year ?? project.endYear ?? project.startYear;
   const title = track.title || details?.title || `${PROVIDER_LABEL[track.provider]} track`;
   return (
-    <div className="glass !bg-[rgb(26_24_22/0.7)] rounded-[24px] p-4 mb-2 flex flex-col gap-3 relative overflow-hidden">
+    <div className="glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 mb-2 flex flex-col gap-3 relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFB245, transparent)" }} />
-      <span className="relative text-[11px] font-semibold uppercase tracking-[0.14em] text-tungsten">Signature track</span>
+      <span className="relative text-caption2 font-semibold uppercase tracking-[0.14em] text-tungsten">Signature track</span>
       <div className="relative flex items-center gap-3.5">
-        <span className="relative size-[60px] shrink-0 rounded-[14px] overflow-hidden" style={{ background: nameWash(project.name) }}>
+        <span className="relative size-[60px] shrink-0 rounded-field overflow-hidden" style={{ background: nameWash(project.name) }}>
           {(details?.artwork ?? track.thumb) && <FadeImg src={(details?.artwork ?? track.thumb)!} alt="" className="absolute inset-0 size-full object-cover" />}
         </span>
         <span className="flex-1 min-w-0 flex flex-col">
-          <span className="text-[17px] font-semibold leading-tight truncate">{title}</span>
-          <span className="text-[13px] text-smoke truncate">
+          <span className="text-body-lg font-semibold leading-tight truncate">{title}</span>
+          <span className="text-footnote text-smoke truncate">
             {project.name} · {year}
           </span>
         </span>
@@ -261,7 +261,7 @@ function SignatureTrack({ track, project }: { track: Track; project: Project }) 
           type="button"
           onClick={() => player?.play(playRequest(track, project))}
           aria-label={`${playing ? "Pause" : "Play"} ${title}`}
-          className="size-12 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 active:scale-95 transition"
+          className="press size-12 rounded-full bg-paper text-ink flex items-center justify-center shrink-0"
         >
           {playing ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>

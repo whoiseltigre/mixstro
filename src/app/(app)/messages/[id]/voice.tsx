@@ -163,7 +163,7 @@ export function VoiceBubble({ url, seconds, mine, sending }: { url: string | nul
           <span key={i} className={`w-[3px] rounded-sm ${fg} transition-opacity`} style={{ height: h, opacity: i / BARS.length < progress ? 1 : 0.35 }} />
         ))}
       </div>
-      <span className="text-[12px] font-medium tabular-nums">{url ? clock(playing || at ? Math.max(0, length - at) : length) : "Unavailable"}</span>
+      <span className="text-caption font-medium tabular-nums">{url ? clock(playing || at ? Math.max(0, length - at) : length) : "Unavailable"}</span>
     </div>
   );
 }

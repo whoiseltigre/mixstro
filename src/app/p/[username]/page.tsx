@@ -61,7 +61,7 @@ export default async function PublicProfile({ params }: Params) {
         <Link href={join} aria-label="Mixstro home" className="drop-shadow-[0_1px_8px_rgb(0_0_0/0.6)] md:drop-shadow-none">
           <Wordmark size={24} />
         </Link>
-        <ButtonLink href={join} variant="glass" className="h-10 !w-auto px-4 text-[14px]">
+        <ButtonLink href={join} variant="glass" className="h-10 !w-auto px-4 text-subhead">
           Join Mixstro
         </ButtonLink>
       </header>
@@ -85,28 +85,28 @@ export default async function PublicProfile({ params }: Params) {
         }}
       />
       <main className="pb-36 md:pb-20 md:pt-8 md:grid md:grid-cols-[minmax(300px,400px)_1fr] md:gap-x-12 md:items-start">
-        <div className="relative h-[420px] md:h-auto md:aspect-[9/10] md:rounded-[28px] md:overflow-hidden md:sticky md:top-8">
+        <div className="relative h-[420px] md:h-auto md:aspect-[9/10] md:rounded-sheet md:overflow-hidden md:sticky md:top-8">
           <PersonPhoto person={m} priority sizes="(min-width: 768px) 400px, 100vw" initialsSize={88} className="object-[50%_35%]" />
           <div className="absolute inset-x-0 bottom-0 h-[190px] bg-gradient-to-b from-ink/0 to-ink md:hidden" />
         </div>
 
         <div className="relative -mt-24 md:mt-0 px-5 md:px-0 flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">
+            <span className="text-caption font-semibold tracking-[0.16em] uppercase text-smoke">
               {[plays(instruments.slice(0, 2)), m.genres !== "Open to anything" ? m.genres : "", m.neighborhood].filter(Boolean).join(" · ")}
             </span>
-            <h1 className="headline text-[48px] md:text-[64px] leading-[0.95] flex items-center gap-2">
+            <h1 className="headline text-display-lg md:text-[64px] leading-[0.95] flex items-center gap-2">
               {m.name}
               {m.verified && <VerifiedMark size={28} className="text-paper" />}
             </h1>
-            <div className="flex gap-2 flex-wrap text-[13px] pt-1">
+            <div className="flex gap-2 flex-wrap text-footnote pt-1">
               <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
             </div>
             <OpenToChips ids={openTo} className="pt-1" />
           </div>
 
           <div className="flex gap-2.5">
-            <ButtonLink href={join} className="h-12 text-[16px] min-w-0 flex-1 md:flex-none md:!w-auto md:px-7">
+            <ButtonLink href={join} className="h-12 text-body min-w-0 flex-1 md:flex-none md:!w-auto md:px-7">
               Connect with {first}
             </ButtonLink>
             <SharePage username={m.username} firstName={first} mine={false} url={`${origin}/@${m.username}`} className="shrink-0 md:px-6" />
@@ -117,33 +117,33 @@ export default async function PublicProfile({ params }: Params) {
               <ProjectList projects={projects} />
             </div>
           ) : (
-            <p className="text-[15px] text-smoke">{first} hasn&apos;t added their bands yet.</p>
+            <p className="text-callout text-smoke">{first} hasn&apos;t added their bands yet.</p>
           )}
 
           <HighlightList items={highlights} />
 
           {m.influences.length > 0 && (
             <section className="flex flex-col gap-2.5 pt-2">
-              <h2 className="text-[17px] font-semibold">Influences</h2>
+              <h2 className="text-body-lg font-semibold">Influences</h2>
               <div className="hscroll flex gap-4 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap">
                 {m.influences.map((a) => (
                   <div key={a.id} className="w-[88px] shrink-0 flex flex-col items-center gap-2">
                     <ArtistAvatar artist={a} size={80} />
-                    <span className="text-[13px] font-semibold truncate max-w-full">{a.name}</span>
+                    <span className="text-footnote font-semibold truncate max-w-full">{a.name}</span>
                   </div>
                 ))}
               </div>
             </section>
           )}
 
-          <section className="mt-4 gel-rim rounded-[26px]">
+          <section className="mt-4 gel-rim rounded-sheet">
             <div className="rounded-[24.5px] bg-stage p-6 flex flex-col gap-3">
-              <h2 className="headline text-[28px]">Make your music page</h2>
-              <p className="text-[15px] text-smoke leading-relaxed max-w-[460px]">
+              <h2 className="headline text-title-lg">Make your music page</h2>
+              <p className="text-callout text-smoke leading-relaxed max-w-[460px]">
                 Every band you&apos;ve played in, with the tracks to prove it. Then meet musicians near you to start a band, fill a spot, or just jam. Free.
               </p>
               <div className="pt-1">
-                <ButtonLink href={join} className="h-12 !w-auto text-[16px] px-6 inline-flex">
+                <ButtonLink href={join} className="h-12 !w-auto text-body px-6 inline-flex">
                   Get started
                 </ButtonLink>
               </div>
@@ -154,7 +154,7 @@ export default async function PublicProfile({ params }: Params) {
 
       {/* Phones: a slim join bar stays in reach while the page scrolls. */}
       <div className="md:hidden fixed z-20 inset-x-0 bottom-0 px-4 pb-[max(env(safe-area-inset-bottom),14px)] pt-3 bg-gradient-to-t from-ink via-ink/90 to-ink/0">
-        <ButtonLink href={join} className="h-12 text-[16px] w-full">
+        <ButtonLink href={join} className="h-12 text-body w-full">
           Make your own music page
         </ButtonLink>
       </div>

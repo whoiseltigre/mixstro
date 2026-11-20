@@ -22,7 +22,7 @@ export function BandInvites() {
   return (
     <section className="flex flex-col gap-2" aria-label="Bands waiting on you">
       {invites.map((i) => (
-        <Link key={i.token} href={`/join/${i.token}`} className="gel-rim rounded-[20px] block">
+        <Link key={i.token} href={`/join/${i.token}`} className="gel-rim rounded-card block">
           <span className="rounded-[18.5px] bg-stage flex items-center gap-3 p-3.5">
             <span className="relative size-11 rounded-full overflow-hidden bg-riser shrink-0">
               {i.from.avatar_url && (
@@ -31,8 +31,8 @@ export function BandInvites() {
               )}
             </span>
             <span className="flex-1 min-w-0 flex flex-col">
-              <span className="text-[15px] font-semibold">{i.from.first_name} added you to {i.band}</span>
-              <span className="text-[13px] text-smoke">Confirm your spot so it shows on your profile</span>
+              <span className="text-callout font-semibold">{i.from.first_name} added you to {i.band}</span>
+              <span className="text-footnote text-smoke">Confirm your spot so it shows on your profile</span>
             </span>
             <span aria-hidden="true" className="text-smoke">›</span>
           </span>

@@ -74,7 +74,7 @@ export function VerifyForm() {
             {Array.from({ length: LENGTH }, (_, i) => (
               <span
                 key={i}
-                className={`flex-1 h-[60px] rounded-2xl bg-stage border flex items-center justify-center headline text-[26px] ${
+                className={`flex-1 h-[60px] rounded-2xl bg-stage border flex items-center justify-center headline text-title-lg ${
                   i === code.length ? "border-paper/60" : "border-paper/12"
                 }`}
               >
@@ -83,8 +83,8 @@ export function VerifyForm() {
             ))}
           </div>
         </label>
-        {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
-        <p className="text-[14px] text-smoke">
+        {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
+        <p className="text-subhead text-smoke">
           Didn&apos;t get it?{" "}
           {wait > 0 ? (
             <span className="tabular-nums">Resend in 0:{String(wait).padStart(2, "0")}</span>

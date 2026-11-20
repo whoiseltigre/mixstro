@@ -21,15 +21,15 @@ export function ConfirmSpot({ token, band, canDecline }: { token: string; band: 
       }}
     >
       <Field id="role" label={`What did you play in ${band}?`} value={role} maxLength={80} onChange={(e) => setRole(e.target.value)} placeholder="Bass, vocals" />
-      <Button type="submit" disabled={busy} className="h-12 text-[16px]">
+      <Button type="submit" disabled={busy} className="h-12 text-body">
         {busy ? "Confirming…" : "Confirm your spot"}
       </Button>
       {canDecline && (
-        <button type="button" onClick={() => declineSpot(token)} className="text-[14px] text-smoke underline underline-offset-4 self-center">
+        <button type="button" onClick={() => declineSpot(token)} className="text-subhead text-smoke underline underline-offset-4 self-center">
           I wasn&apos;t in this band
         </button>
       )}
-      {error && <p role="alert" className="text-[13px] text-[#FF453A] text-center">{error}</p>}
+      {error && <p role="alert" className="text-footnote text-danger text-center">{error}</p>}
     </form>
   );
 }

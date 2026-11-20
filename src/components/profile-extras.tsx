@@ -8,11 +8,11 @@ export function OpenToChips({ ids, className = "" }: { ids: string[]; className?
   if (!items.length) return null;
   return (
     <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
-      <span className="text-[12px] font-semibold tracking-[0.12em] uppercase text-smoke mr-1">Open to</span>
+      <span className="text-caption font-semibold tracking-[0.12em] uppercase text-smoke mr-1">Open to</span>
       {items.map((o) => (
         <span
           key={o.id}
-          className="h-8 px-3 rounded-full text-[13px] font-semibold inline-flex items-center gap-1.5"
+          className="h-8 px-3 rounded-full text-footnote font-semibold inline-flex items-center gap-1.5"
           style={{ background: `color-mix(in srgb, ${o.color} 16%, transparent)`, color: o.color }}
         >
           <span className="size-1.5 rounded-full" style={{ background: o.color }} aria-hidden="true" />
@@ -28,8 +28,8 @@ export function HighlightList({ items, title = "Highlights" }: { items: Highligh
   if (!items.length) return null;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-[20px] font-bold tracking-[-0.02em]">{title}</h2>
-      <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8">
+      <h2 className="text-title3 font-bold tracking-[-0.02em]">{title}</h2>
+      <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8">
         {items.map((h) => {
           const kind = HIGHLIGHT_KINDS.find((k) => k.id === h.kind) ?? HIGHLIGHT_KINDS[4];
           const inner = (
@@ -42,8 +42,8 @@ export function HighlightList({ items, title = "Highlights" }: { items: Highligh
                 <KindIcon kind={h.kind} />
               </span>
               <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-                <span className="text-[15px] font-semibold text-pretty">{h.title}</span>
-                <span className="text-[13px] text-smoke">{[kind.label, h.detail, h.year].filter(Boolean).join(" · ")}</span>
+                <span className="text-callout font-semibold text-pretty">{h.title}</span>
+                <span className="text-footnote text-smoke">{[kind.label, h.detail, h.year].filter(Boolean).join(" · ")}</span>
               </span>
               {h.url && (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-smoke shrink-0" aria-hidden="true">

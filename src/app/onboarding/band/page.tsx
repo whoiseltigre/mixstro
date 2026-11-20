@@ -8,6 +8,7 @@ import { parseClip } from "@/lib/clips";
 import { headlineFor } from "@/lib/instruments";
 import { type Draft, STEP_GLOW, stepNav, useDraft } from "@/lib/onboarding";
 import type { FoundArtist } from "@/lib/music-finder";
+import { haptic } from "@/lib/haptics";
 
 const GLOW = STEP_GLOW.band;
 
@@ -41,14 +42,14 @@ export default function Band() {
         <div className="grid grid-cols-[minmax(0,1fr)_112px] gap-3 items-end">
           <Field id="band-role" label="Your part" placeholder="Lead guitar, backing vocals" value={band.role ?? ""} onChange={(e) => set({ role: e.target.value })} maxLength={80} />
           <div className="flex flex-col gap-2">
-            <label htmlFor="band-since" className="text-[13px] font-semibold text-smoke">
+            <label htmlFor="band-since" className="text-footnote font-semibold text-smoke">
               Since
             </label>
             <select
               id="band-since"
               value={band.since}
               onChange={(e) => set({ since: Number(e.target.value) })}
-              className="h-[52px] w-full rounded-2xl bg-stage border border-paper/12 px-3 text-[17px] text-paper outline-none focus:border-paper/50"
+              className="h-[52px] w-full rounded-2xl bg-stage border border-paper/12 px-3 text-body-lg text-paper outline-none focus:border-paper/50"
             >
               {Array.from({ length: now - 1969 }, (_, i) => now - i).map((y) => (
                 <option key={y} value={y}>
@@ -68,11 +69,11 @@ export default function Band() {
           onChange={(e) => set({ link: e.target.value })}
           hint={linkOk ? undefined : "We can't play that link yet. Try Spotify, YouTube, SoundCloud or Bandcamp."}
         />
-        <div className="rounded-[20px] p-4 flex items-center gap-3" style={{ background: `color-mix(in srgb, ${GLOW} 10%, var(--color-stage))` }}>
+        <div className="rounded-card p-4 flex items-center gap-3" style={{ background: `color-mix(in srgb, ${GLOW} 10%, var(--color-stage))` }}>
           <span className="size-9 rounded-full flex items-center justify-center text-ink shrink-0" style={{ background: GLOW }} aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
           </span>
-          <p className="text-[13.5px] text-smoke text-pretty">
+          <p className="text-footnote text-smoke text-pretty">
             <span className="text-paper">Bandmates confirm their own spot.</span> You&apos;ll get an invite link to send them once you&apos;re in.
           </p>
         </div>
@@ -119,16 +120,16 @@ function MusicFinder({ name, band, set }: { name: string; band: BandDraft; set: 
 
   if (linked) {
     return (
-      <div className="rise-in rounded-[20px] p-3.5 flex items-center gap-3 border-[1.5px] border-[#FFACBA]/60 bg-[color-mix(in_srgb,#FFACBA_10%,var(--color-stage))]">
+      <div className="rise-in rounded-card p-3.5 flex items-center gap-3 border-[1.5px] border-gel-pink/60 bg-[color-mix(in_srgb,#FFACBA_10%,var(--color-stage))]">
         <Cover src={band.photo ?? band.tracks![0].thumb} size={48} round />
         <span className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="text-[15px] font-medium flex items-center gap-1.5">
-            <span className="size-4 rounded-full bg-[#FFACBA] text-ink flex items-center justify-center"><CheckIcon size={10} /></span>
+          <span className="text-callout font-medium flex items-center gap-1.5">
+            <span className="size-4 rounded-full bg-gel-pink text-ink flex items-center justify-center"><CheckIcon size={10} /></span>
             {band.tracks!.length} {band.tracks!.length === 1 ? "song" : "songs"} linked
           </span>
-          <span className="text-[13px] text-smoke truncate">{band.tracks!.map((t) => t.title).join(" · ")}</span>
+          <span className="text-footnote text-smoke truncate">{band.tracks!.map((t) => t.title).join(" · ")}</span>
         </span>
-        <button type="button" onClick={() => set({ tracks: undefined, photo: undefined })} className="text-[13px] text-smoke hover:text-paper px-2">
+        <button type="button" onClick={() => set({ tracks: undefined, photo: undefined })} className="text-footnote text-smoke hover:text-paper px-2">
           Undo
         </button>
       </div>
@@ -137,42 +138,42 @@ function MusicFinder({ name, band, set }: { name: string; band: BandDraft; set: 
 
   const match = found.q === term ? found.artists.find((a) => !skipped.includes(a.id)) : undefined;
   if (!match) {
-    return looking && term.length > 1 ? <p className="text-[13px] text-smoke -mt-2">Looking for {term}&apos;s music…</p> : null;
+    return looking && term.length > 1 ? <p className="text-footnote text-smoke -mt-2">Looking for {term}&apos;s music…</p> : null;
   }
 
   return (
-    <div key={match.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-[24px] p-4 flex flex-col gap-3.5 relative overflow-hidden">
+    <div key={match.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 flex flex-col gap-3.5 relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFACBA, transparent)" }} />
       <div className="relative flex items-center gap-3">
         <Cover src={match.image ?? match.tracks[0]?.thumb} size={56} round />
         <span className="flex-1 flex flex-col">
-          <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#FFACBA]">Is this you?</span>
-          <span className="text-[18px] font-medium leading-tight">{match.name}</span>
-          <span className="text-[12.5px] text-smoke">{[match.genre, match.fans ? `${compact(match.fans)} fans` : null].filter(Boolean).join(" · ")}</span>
+          <span className="text-caption font-semibold uppercase tracking-[0.12em] text-gel-pink">Is this you?</span>
+          <span className="text-title4 font-medium leading-tight">{match.name}</span>
+          <span className="text-footnote text-smoke">{[match.genre, match.fans ? `${compact(match.fans)} fans` : null].filter(Boolean).join(" · ")}</span>
         </span>
       </div>
       <ul className="relative flex flex-col gap-1.5">
         {match.tracks.slice(0, 3).map((t) => (
           <li key={t.url} className="flex items-center gap-2.5">
             <Cover src={t.thumb} size={36} />
-            <span className="flex-1 text-[14px] truncate">{t.title}</span>
-            <span className="text-[11.5px] text-smoke shrink-0">{t.source}</span>
+            <span className="flex-1 text-subhead truncate">{t.title}</span>
+            <span className="text-caption text-smoke shrink-0">{t.source}</span>
           </li>
         ))}
       </ul>
       <div className="relative grid grid-cols-2 gap-2">
-        <button type="button" onClick={() => setSkipped((s) => [...s, match.id])} className="h-11 rounded-full border border-paper/20 text-[15px] hover:border-paper/40 transition">
+        <button type="button" onClick={() => setSkipped((s) => [...s, match.id])} className="h-11 rounded-full border border-paper/20 text-callout hover:border-paper/40 transition">
           Not us
         </button>
         <button
           type="button"
           onClick={() => {
             try {
-              navigator.vibrate?.(10);
+              haptic("select");
             } catch {}
             set({ name: band.name || match.name, photo: match.image, tracks: match.tracks.slice(0, 3).map(({ title, url, thumb }) => ({ title, url, thumb })) });
           }}
-          className="h-11 rounded-full bg-[#FFACBA] text-ink text-[15px] font-medium active:scale-[0.98] transition"
+          className="press h-11 rounded-full bg-gel-pink text-ink text-callout font-medium"
         >
           Yes, that&apos;s us
         </button>
@@ -184,9 +185,9 @@ function MusicFinder({ name, band, set }: { name: string; band: BandDraft; set: 
 function Cover({ src, size, round }: { src?: string; size: number; round?: boolean }) {
   return src ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="" width={size} height={size} className={`${round ? "rounded-full" : "rounded-[9px]"} object-cover shrink-0 bg-riser`} style={{ width: size, height: size }} />
+    <img src={src} alt="" width={size} height={size} className={`${round ? "rounded-full" : "rounded-xs"} object-cover shrink-0 bg-riser`} style={{ width: size, height: size }} />
   ) : (
-    <span className={`${round ? "rounded-full" : "rounded-[9px]"} bg-riser shrink-0`} style={{ width: size, height: size }} />
+    <span className={`${round ? "rounded-full" : "rounded-xs"} bg-riser shrink-0`} style={{ width: size, height: size }} />
   );
 }
 

@@ -47,14 +47,14 @@ export default function HighlightsEditor() {
     <main className="pt-safe md:pt-6 px-5 md:px-0 pb-32 md:pb-16 flex flex-col gap-6 md:max-w-[680px] md:mx-auto">
       <header className="mt-3 flex items-center gap-3">
         <BackButton href="/me" />
-        <h1 className="headline text-[28px]">Highlights</h1>
+        <h1 className="headline text-title-lg">Highlights</h1>
       </header>
-      <p className="text-[15px] text-smoke text-pretty -mt-2">
+      <p className="text-callout text-smoke text-pretty -mt-2">
         The moments you&apos;d want someone to know first: a release, a show you&apos;re proud of, press, an award. Up to {HIGHLIGHTS_MAX}.
       </p>
 
       {form ? (
-        <section className="flex flex-col gap-4 p-4 rounded-[22px] bg-stage border border-paper/8">
+        <section className="flex flex-col gap-4 p-4 rounded-card-lg bg-stage border border-paper/8">
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Kind">
             {HIGHLIGHT_KINDS.map((k) => {
               const on = form.kind === k.id;
@@ -65,7 +65,7 @@ export default function HighlightsEditor() {
                   role="radio"
                   aria-checked={on}
                   onClick={() => setForm({ ...form, kind: k.id as HighlightKind })}
-                  className={cx("h-9 px-3.5 rounded-full text-[14px] inline-flex items-center gap-1.5 border transition", on ? "font-semibold" : "border-paper/16 text-paper")}
+                  className={cx("h-9 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border transition", on ? "font-semibold" : "border-paper/16 text-paper")}
                   style={on ? { borderColor: k.color, background: `color-mix(in srgb, ${k.color} 18%, transparent)`, color: k.color } : undefined}
                 >
                   <KindIcon kind={k.id} />
@@ -87,15 +87,15 @@ export default function HighlightsEditor() {
             <Field id="h-url" label="Link (optional)" placeholder="https://" inputMode="url" autoCapitalize="none" value={form.url ?? ""} onChange={(e) => setForm({ ...form, url: e.target.value })} />
           </div>
           {error && (
-            <p role="alert" className="text-[13px] text-[#FF453A]">
+            <p role="alert" className="text-footnote text-danger">
               {error}
             </p>
           )}
           <div className="flex gap-2.5">
-            <Button onClick={save} disabled={busy || !form.title.trim()} className="h-12 text-[16px]">
+            <Button onClick={save} disabled={busy || !form.title.trim()} className="h-12 text-body">
               {busy ? "Saving…" : "Save"}
             </Button>
-            <Button variant="glass" onClick={() => (setForm(null), setError(undefined))} className="h-12 text-[16px]">
+            <Button variant="glass" onClick={() => (setForm(null), setError(undefined))} className="h-12 text-body">
               Cancel
             </Button>
           </div>
@@ -103,14 +103,14 @@ export default function HighlightsEditor() {
       ) : (
         ready &&
         highlights.length < HIGHLIGHTS_MAX && (
-          <Button variant="gel" onClick={() => setForm(blank())} className="h-12 text-[16px]">
+          <Button variant="gel" onClick={() => setForm(blank())} className="h-12 text-body">
             Add a highlight
           </Button>
         )
       )}
 
       {ready && shown.length > 0 && (
-        <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8">
+        <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8">
           {shown.map((h) => (
             <Row key={h.id} h={h} onEdit={() => setForm({ ...h })} onRemove={() => remove(h)} />
           ))}
@@ -128,10 +128,10 @@ function Row({ h, onEdit, onRemove }: { h: Highlight; onEdit: () => void; onRemo
         <KindIcon kind={h.kind} />
       </span>
       <span className="flex-1 min-w-0 flex flex-col gap-0.5">
-        <span className="text-[15px] font-semibold text-pretty">{h.title}</span>
-        <span className="text-[13px] text-smoke">{[kind.label, h.detail, h.year].filter(Boolean).join(" · ")}</span>
+        <span className="text-callout font-semibold text-pretty">{h.title}</span>
+        <span className="text-footnote text-smoke">{[kind.label, h.detail, h.year].filter(Boolean).join(" · ")}</span>
       </span>
-      <button type="button" onClick={onEdit} className="text-[14px] font-semibold underline underline-offset-2">
+      <button type="button" onClick={onEdit} className="text-subhead font-semibold underline underline-offset-2">
         Edit
       </button>
       <button type="button" onClick={onRemove} aria-label={`Remove ${h.title}`} className="hit-slop relative size-9 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">

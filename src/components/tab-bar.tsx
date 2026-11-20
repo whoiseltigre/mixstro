@@ -59,25 +59,34 @@ export const TABS = [
 export const UNREAD = isSupabaseConfigured ? 0 : 2;
 
 export function TabBar() {
+  const [tapped, setTapped] = useState<{ index: number; from: string } | null>(null);
   const path = usePathname();
   const [creating, setCreating] = useState(false);
   // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
   if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
 
-  const tab = (t: (typeof TABS)[number]) => {
-    const active = path === t.href || path.startsWith(t.href + "/");
+  // The pill moves the moment a tab is tapped, not when the next screen has loaded.
+  const current = TABS.findIndex((t) => path === t.href || path.startsWith(t.href + "/"));
+  const lit = tapped && tapped.from === path ? tapped.index : current;
+  // Five columns: two tabs, Create, two tabs.
+  const column = lit < 0 ? -1 : lit < 2 ? lit : lit + 1;
+
+  const tab = (t: (typeof TABS)[number], i: number) => {
+    const active = i === lit;
     return (
       <Link
         key={t.href}
         href={t.href}
-        aria-current={active ? "page" : undefined}
+        data-haptic="select"
+        onClick={() => setTapped({ index: i, from: path })}
+        aria-current={i === current ? "page" : undefined}
         className={cx(
-          "relative h-16 rounded-[32px] flex flex-col items-center justify-center gap-1 text-[12px] font-semibold transition active:scale-95",
-          active ? "bg-paper/12 text-paper" : "text-smoke",
+          "press relative z-10 h-16 rounded-hero flex flex-col items-center justify-center gap-1 text-caption font-semibold",
+          active ? "text-paper" : "text-smoke",
         )}
       >
         {t.href === "/messages" && UNREAD > 0 && (
-          <span aria-label={`${UNREAD} unread`} className="absolute top-1.5 right-[calc(50%-24px)] min-w-[18px] h-[18px] px-1 rounded-full bg-paper text-ink text-[11px] font-bold flex items-center justify-center">
+          <span aria-label={`${UNREAD} unread`} className="absolute top-1.5 right-[calc(50%-24px)] min-w-[18px] h-[18px] px-1 rounded-full bg-paper text-ink text-caption2 font-bold flex items-center justify-center">
             {UNREAD}
           </span>
         )}
@@ -96,19 +105,25 @@ export function TabBar() {
         aria-label="Main"
         className="md:hidden fixed z-20 left-3 right-3 bottom-[max(env(safe-area-inset-bottom),14px)] mx-auto max-w-[536px] h-[76px] rounded-[38px] glass grid grid-cols-5 items-center px-1.5 shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]"
       >
-        {TABS.slice(0, 2).map(tab)}
+        {/* One glass pill that slides to the lit tab on the snappy spring. */}
+        <span
+          aria-hidden="true"
+          className="absolute left-1.5 top-1.5 h-16 rounded-hero bg-paper/12 transition-[translate,opacity] duration-(--duration-spring) ease-spring-snappy"
+          style={{ width: "calc((100% - 12px) / 5)", translate: `${Math.max(column, 0) * 100}% 0`, opacity: column < 0 ? 0 : 1 }}
+        />
+        {TABS.slice(0, 2).map((t, i) => tab(t, i))}
         <button
           type="button"
           aria-label="Create"
           aria-haspopup="dialog"
           onClick={() => setCreating(true)}
-          className="justify-self-center size-[58px] rounded-full bg-tungsten text-ink flex items-center justify-center shadow-[0_8px_22px_-8px_#FFB245] transition active:scale-90"
+          className="justify-self-center size-[58px] rounded-full bg-tungsten text-ink flex items-center justify-center shadow-spotlight transition active:scale-90"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
             <path d="M12 5v14M5 12h14" />
           </svg>
         </button>
-        {TABS.slice(2).map(tab)}
+        {TABS.slice(2).map((t, i) => tab(t, i + 2))}
       </nav>
       <CreateSheet open={creating} onClose={() => setCreating(false)} />
     </>

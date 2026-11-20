@@ -22,7 +22,7 @@ export function AdultCheck({ checked, onChange, nudge }: { checked: boolean; onC
       >
         {checked && <CheckIcon size={14} />}
       </span>
-      <span className="text-[13px] leading-[1.45] text-smoke text-pretty">
+      <span className="text-footnote leading-[1.45] text-smoke text-pretty">
         I&apos;m 18 or older and agree to the Mixstro{" "}
         <Link href="/terms" className="text-paper underline underline-offset-2">Terms</Link> and{" "}
         <Link href="/privacy" className="text-paper underline underline-offset-2">Privacy Policy</Link>.

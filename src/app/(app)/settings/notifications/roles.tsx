@@ -45,8 +45,8 @@ export function AlertRoles() {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="text-[17px] font-semibold">Who you&apos;re looking for</h2>
-        <p className="text-[14px] text-smoke text-pretty">
+        <h2 className="text-body-lg font-semibold">Who you&apos;re looking for</h2>
+        <p className="text-subhead text-smoke text-pretty">
           When one of these joins within your radius and likes some of the same music, it shows at the top of Today.
           {suggested ? " We picked drums and bass because you're building a band." : ""}
         </p>
@@ -58,7 +58,7 @@ export function AlertRoles() {
           </Chip>
         ))}
       </div>
-      {error && <p className="text-[13px] text-[#FF453A]">{error}</p>}
+      {error && <p className="text-footnote text-danger">{error}</p>}
     </section>
   );
 }

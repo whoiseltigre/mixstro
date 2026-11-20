@@ -30,7 +30,7 @@ export default function Me() {
   if (!draft.firstName) {
     return (
       <main className="min-h-dvh md:min-h-[calc(100dvh-88px)] px-5 md:px-0 pt-safe flex flex-col justify-center gap-4 md:max-w-[480px] md:mx-auto">
-        <h1 className="headline text-[34px]">No profile yet</h1>
+        <h1 className="headline text-display">No profile yet</h1>
         <p className="text-smoke">
           Set up your profile to start meeting musicians.
         </p>
@@ -46,11 +46,11 @@ export default function Me() {
         <div className="mt-6 md:mt-0 flex items-center md:items-start md:flex-col gap-4 md:gap-5">
           <PhotoPicker url={draft.avatarUrl} onSaved={(avatarUrl) => update({ avatarUrl })} />
           <div className="flex flex-col gap-0.5 md:gap-1.5">
-            <h1 className="headline text-[32px] md:text-[44px] flex items-center gap-1.5">
+            <h1 className="headline text-display-sm md:text-display-lg flex items-center gap-1.5">
               {draft.firstName}
               {verified && <VerifiedMark size={22} className="text-paper" />}
             </h1>
-            <span className="text-[14px] md:text-[15px] text-smoke">
+            <span className="text-subhead md:text-callout text-smoke">
               @{draft.username.replace(/^@/, "")}
             </span>
           </div>
@@ -90,9 +90,9 @@ export default function Me() {
             projects={projects.projects}
             editHref="/me/projects"
             empty={
-              <Link href="/me/projects" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
-                <span className="text-[15px] font-semibold">Show what you&apos;ve played in</span>
-                <span className="text-[13px] text-smoke">Every band and project, old or new. Type your artist name and we&apos;ll find your releases.</span>
+              <Link href="/me/projects" className="flex flex-col gap-1 p-4 rounded-tile border border-dashed border-paper/20 transition hover:border-paper/40">
+                <span className="text-callout font-semibold">Show what you&apos;ve played in</span>
+                <span className="text-footnote text-smoke">Every band and project, old or new. Type your artist name and we&apos;ll find your releases.</span>
               </Link>
             }
           />
@@ -101,26 +101,26 @@ export default function Me() {
           (extras.highlights.length > 0 ? (
             <div className="flex flex-col gap-2">
               <HighlightList items={extras.highlights} />
-              <Link href="/me/highlights" className="self-start text-[14px] font-semibold underline underline-offset-2">
+              <Link href="/me/highlights" className="self-start text-subhead font-semibold underline underline-offset-2">
                 Edit highlights
               </Link>
             </div>
           ) : (
-            <Link href="/me/highlights" className="flex flex-col gap-1 p-4 rounded-[18px] border border-dashed border-paper/20 transition hover:border-paper/40">
-              <span className="text-[15px] font-semibold">Add your highlights</span>
-              <span className="text-[13px] text-smoke">A release, a show you&apos;re proud of, press, an award. What you&apos;d want someone to know first.</span>
+            <Link href="/me/highlights" className="flex flex-col gap-1 p-4 rounded-tile border border-dashed border-paper/20 transition hover:border-paper/40">
+              <span className="text-callout font-semibold">Add your highlights</span>
+              <span className="text-footnote text-smoke">A release, a show you&apos;re proud of, press, an award. What you&apos;d want someone to know first.</span>
             </Link>
           ))}
-        <Link href="/me/network" className="flex items-center gap-3 p-4 rounded-[18px] bg-stage border border-paper/8 transition hover:border-paper/40">
+        <Link href="/me/network" className="flex items-center gap-3 p-4 rounded-tile bg-stage border border-paper/8 transition hover:border-paper/40">
           <span className="flex-1 flex flex-col gap-0.5">
-            <span className="text-[15px] font-semibold">Your network</span>
-            <span className="text-[13px] text-smoke">Your connections, and people you may know through your bands.</span>
+            <span className="text-callout font-semibold">Your network</span>
+            <span className="text-footnote text-smoke">Your connections, and people you may know through your bands.</span>
           </span>
           <ChevronRight />
         </Link>
         {draft.influences.length > 0 && (
           <section className="flex flex-col gap-2.5">
-            <h2 className="text-[17px] font-semibold">Influences</h2>
+            <h2 className="text-body-lg font-semibold">Influences</h2>
             <div className="hscroll flex gap-4 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap">
               {draft.influences.map((a) => (
                 <div
@@ -128,7 +128,7 @@ export default function Me() {
                   className="w-[80px] shrink-0 flex flex-col items-center gap-2"
                 >
                   <ArtistAvatar artist={a} size={76} />
-                  <span className="text-[12px] font-semibold text-center truncate max-w-full">
+                  <span className="text-caption font-semibold text-center truncate max-w-full">
                     {a.name}
                   </span>
                 </div>
@@ -138,7 +138,7 @@ export default function Me() {
         )}
         {draft.clips.some((c) => c.kind === "clip") && (
           <section className="flex flex-col gap-2.5">
-            <h2 className="text-[17px] font-semibold">Clips</h2>
+            <h2 className="text-body-lg font-semibold">Clips</h2>
             <div className="hscroll flex gap-2.5 -mx-5 px-5 md:mx-0 md:px-0 md:flex-wrap items-start">
               {draft.clips.map((c) => {
                 const p = c.kind === "clip" ? parseClip(c.value) : null;
@@ -150,13 +150,13 @@ export default function Me() {
         <div className="flex gap-5">
           <Link
             href="/onboarding/basics"
-            className="text-[15px] font-semibold underline underline-offset-2"
+            className="text-callout font-semibold underline underline-offset-2"
           >
             Edit profile
           </Link>
           <Link
             href="/settings"
-            className="text-[15px] font-semibold underline underline-offset-2"
+            className="text-callout font-semibold underline underline-offset-2"
           >
             Settings
           </Link>
@@ -172,8 +172,8 @@ function OpenToPicker({ selected, onToggle }: { selected: string[]; onToggle: (i
   return (
     <section className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5">
-        <h2 className="text-[17px] font-semibold">Open to</h2>
-        <p className="text-[13px] text-smoke">Shows on your profile, so the right people reach out.</p>
+        <h2 className="text-body-lg font-semibold">Open to</h2>
+        <p className="text-footnote text-smoke">Shows on your profile, so the right people reach out.</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {OPEN_TO.map((o) => {
@@ -184,7 +184,7 @@ function OpenToPicker({ selected, onToggle }: { selected: string[]; onToggle: (i
               type="button"
               aria-pressed={on}
               onClick={async () => setError((await onToggle(o.id)).error ?? "")}
-              className="h-9 px-3.5 rounded-full text-[14px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]"
+              className="press h-9 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border"
               style={on ? { borderColor: o.color, background: `color-mix(in srgb, ${o.color} 18%, transparent)`, color: o.color, fontWeight: 600 } : { borderColor: "rgb(245 241 236 / 0.16)" }}
             >
               {on && <span className="size-1.5 rounded-full" style={{ background: o.color }} aria-hidden="true" />}
@@ -194,7 +194,7 @@ function OpenToPicker({ selected, onToggle }: { selected: string[]; onToggle: (i
         })}
       </div>
       {error && (
-        <p role="alert" className="text-[13px] text-[#FF453A]">
+        <p role="alert" className="text-footnote text-danger">
           {error}
         </p>
       )}
@@ -241,20 +241,20 @@ function FinishProfile({
   if (!todo.length) return null;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-[17px] font-semibold">Finish your profile</h2>
+      <h2 className="text-body-lg font-semibold">Finish your profile</h2>
       {todo.map((t) => (
         <Link
           key={t.href}
           href={t.href}
-          className="flex items-center gap-3 p-4 rounded-[18px] bg-stage border border-paper/8 transition hover:border-paper/40"
+          className="flex items-center gap-3 p-4 rounded-tile bg-stage border border-paper/8 transition hover:border-paper/40"
         >
           <span
             className="size-2 rounded-full bg-tungsten shrink-0"
             aria-hidden="true"
           />
           <span className="flex-1 flex flex-col gap-0.5">
-            <span className="text-[15px] font-semibold">{t.title}</span>
-            <span className="text-[13px] text-smoke">{t.sub}</span>
+            <span className="text-callout font-semibold">{t.title}</span>
+            <span className="text-footnote text-smoke">{t.sub}</span>
           </span>
           <ChevronRight />
         </Link>
@@ -266,8 +266,8 @@ function FinishProfile({
 function Fact({ label, value }: { label: string; value: string }) {
   return (
     <div className="p-3.5 rounded-2xl bg-stage flex flex-col gap-1">
-      <dt className="text-[12px] text-smoke">{label}</dt>
-      <dd className="text-[15px] font-medium">{value || "—"}</dd>
+      <dt className="text-caption text-smoke">{label}</dt>
+      <dd className="text-callout font-medium">{value || "—"}</dd>
     </div>
   );
 }
@@ -299,7 +299,7 @@ function PhotoPicker({ url, onSaved }: { url?: string; onSaved: (url: string) =>
         onClick={() => input.current?.click()}
         disabled={busy}
         aria-label={url ? "Change your photo" : "Add a photo"}
-        className="group relative block size-20 md:size-auto md:w-full md:aspect-[9/10] rounded-full md:rounded-[28px] bg-riser overflow-hidden"
+        className="group relative block size-20 md:size-auto md:w-full md:aspect-[9/10] rounded-full md:rounded-sheet bg-riser overflow-hidden"
       >
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -309,11 +309,11 @@ function PhotoPicker({ url, onSaved }: { url?: string; onSaved: (url: string) =>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
           </span>
         )}
-        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-3 md:right-3 rounded-full bg-ink/80 backdrop-blur px-2 py-1 md:px-3 md:py-1.5 text-[11px] md:text-[13px] font-semibold opacity-90 md:opacity-0 md:group-hover:opacity-100 md:group-focus-visible:opacity-100 transition">
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-3 md:right-3 rounded-full bg-ink/80 backdrop-blur px-2 py-1 md:px-3 md:py-1.5 text-caption2 md:text-footnote font-semibold opacity-90 md:opacity-0 md:group-hover:opacity-100 md:group-focus-visible:opacity-100 transition">
           {busy ? "Saving…" : url ? "Change" : "Add"}
         </span>
       </button>
-      {error && <span role="alert" className="text-[12px] text-smoke md:text-[13px]">{error}</span>}
+      {error && <span role="alert" className="text-caption text-smoke md:text-footnote">{error}</span>}
       <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />
     </span>
   );

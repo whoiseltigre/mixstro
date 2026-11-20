@@ -44,7 +44,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
       </button>
 
       {view !== "closed" && (
-        <Sheet onClose={() => setView("closed")} label="Safety options" center={false} scrimClassName="bg-ink/60" className="max-w-[440px] glass rounded-t-[28px] px-5 pt-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-3">
+        <Sheet onClose={() => setView("closed")} label="Safety options" center={false} scrimClassName="bg-ink/60" className="max-w-[440px] glass rounded-t-sheet px-5 pt-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-3">
           <SheetCloser>{(close) => (<>
             {view === "menu" && (
               <>
@@ -56,8 +56,8 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
 
             {view === "block" && (
               <>
-                <h2 className="text-[20px] font-semibold">Block {first}?</h2>
-                <p className="text-[15px] text-smoke text-pretty">
+                <h2 className="text-title3 font-semibold">Block {first}?</h2>
+                <p className="text-callout text-smoke text-pretty">
                   You won&apos;t see each other in Today, search, the Board, or Messages. {first} isn&apos;t told.
                 </p>
                 <Button onClick={block} disabled={busy} variant="danger">Block</Button>
@@ -67,7 +67,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
 
             {view === "report" && (
               <>
-                <h2 className="text-[20px] font-semibold">What&apos;s wrong?</h2>
+                <h2 className="text-title3 font-semibold">What&apos;s wrong?</h2>
                 <div className="flex flex-col gap-2" role="radiogroup" aria-label="Reason">
                   {REPORT_REASONS.map((r) => (
                     <button
@@ -76,7 +76,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
                       role="radio"
                       aria-checked={reason === r.id}
                       onClick={() => setReason(r.id)}
-                      className={`h-12 px-4 rounded-2xl text-left text-[15px] border transition ${reason === r.id ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16"}`}
+                      className={`h-12 px-4 rounded-2xl text-left text-callout border transition ${reason === r.id ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16"}`}
                     >
                       {r.label}
                     </button>
@@ -89,7 +89,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder="Anything else we should know? (optional)"
                   rows={2}
-                  className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-[16px] placeholder:text-smoke/60 outline-none focus:border-paper/50"
+                  className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-body placeholder:text-smoke/60 outline-none focus:border-paper/50"
                 />
                 <Button onClick={report} disabled={!reason || busy}>Send report</Button>
               </>
@@ -97,13 +97,13 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
 
             {view === "reported" && (
               <>
-                <h2 className="text-[20px] font-semibold">Thanks for telling us</h2>
-                <p className="text-[15px] text-smoke text-pretty">We review every report. {first} won&apos;t know it was you. Want to block them too?</p>
+                <h2 className="text-title3 font-semibold">Thanks for telling us</h2>
+                <p className="text-callout text-smoke text-pretty">We review every report. {first} won&apos;t know it was you. Want to block them too?</p>
                 <Button onClick={block} disabled={busy} variant="danger">Block {first}</Button>
                 <Button variant="glass" onClick={close}>Done</Button>
               </>
             )}
-            {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
+            {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
           </>)}</SheetCloser>
         </Sheet>
       )}
@@ -113,7 +113,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
 
 function SheetButton({ children, danger, onClick }: { children: React.ReactNode; danger?: boolean; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className={`h-14 rounded-2xl bg-stage text-[17px] font-semibold ${danger ? "text-[#FF453A]" : ""}`}>
+    <button type="button" onClick={onClick} className={`h-14 rounded-2xl bg-stage text-body-lg font-semibold ${danger ? "text-danger" : ""}`}>
       {children}
     </button>
   );

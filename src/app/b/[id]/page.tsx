@@ -77,7 +77,7 @@ export default async function BandPageView({ params }: Params) {
             <Wordmark size={24} />
           </Link>
           {!signedIn && (
-            <ButtonLink href="/" variant="glass" className="h-10 !w-auto px-4 text-[14px]">
+            <ButtonLink href="/" variant="glass" className="h-10 !w-auto px-4 text-subhead">
               Join Mixstro
             </ButtonLink>
           )}
@@ -114,16 +114,16 @@ export default async function BandPageView({ params }: Params) {
         />
         <main className={`${band.photo ? "pt-[180px] md:pt-[250px]" : "pt-14 md:pt-20"} flex flex-col gap-8`}>
           <div className="flex flex-col gap-3">
-            <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-paper/75">{eyebrow}</span>
-            <h1 className="headline text-[52px] md:text-[80px] leading-[0.92] text-balance">{band.name}</h1>
+            <span className="text-caption font-semibold tracking-[0.16em] uppercase text-paper/75">{eyebrow}</span>
+            <h1 className="headline text-hero md:text-[80px] leading-[0.92] text-balance">{band.name}</h1>
             {(band.genres.length > 0 || band.status !== "active") && (
               <div className="flex flex-wrap gap-1.5">
                 {band.genres.map((g) => (
-                  <span key={g} className="h-8 px-3 rounded-full bg-riser/90 text-[13px] font-medium flex items-center">
+                  <span key={g} className="h-8 px-3 rounded-full bg-riser/90 text-footnote font-medium flex items-center">
                     {g}
                   </span>
                 ))}
-                <span className={`h-8 px-3 rounded-full text-[13px] font-semibold flex items-center ${band.status === "done" ? "bg-riser/90 text-smoke" : "bg-tungsten/16 text-tungsten"}`}>
+                <span className={`h-8 px-3 rounded-full text-footnote font-semibold flex items-center ${band.status === "done" ? "bg-riser/90 text-smoke" : "bg-tungsten/16 text-tungsten"}`}>
                   {STATUS_LABEL[band.status]}
                 </span>
               </div>
@@ -133,7 +133,7 @@ export default async function BandPageView({ params }: Params) {
             </div>
           </div>
 
-          {band.bio && <p className="text-[16px] leading-[1.55] text-paper/90 max-w-[620px] whitespace-pre-line -mt-2">{band.bio}</p>}
+          {band.bio && <p className="text-body leading-[1.55] text-paper/90 max-w-[620px] whitespace-pre-line -mt-2">{band.bio}</p>}
 
           {band.spots.map((s) => (
             <SpotCard key={s.id} spot={s} band={band} signedIn={signedIn} />
@@ -141,25 +141,25 @@ export default async function BandPageView({ params }: Params) {
 
           {band.shows.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-[20px] font-bold tracking-[-0.02em]">Next shows</h2>
-              <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8 max-w-[620px]">
+              <h2 className="text-title3 font-bold tracking-[-0.02em]">Next shows</h2>
+              <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.shows.map((s) => {
                   const d = showDate(s.date);
                   const bill = [...s.withBands.map((b) => b.name), s.withText].filter(Boolean).join(", ");
                   return (
                     <li key={s.id} className="flex items-center gap-3.5 px-4 py-3">
                       <span className="w-11 flex flex-col items-center shrink-0">
-                        <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
-                        <span className="text-[22px] font-bold leading-none mt-0.5">{d.day}</span>
+                        <span className="text-caption2 font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                        <span className="text-title2 font-bold leading-none mt-0.5">{d.day}</span>
                       </span>
                       <span className="flex-1 min-w-0 flex flex-col">
-                        <span className="text-[16px] font-semibold truncate">{s.venue}</span>
-                        <span className="text-[13px] text-smoke">
+                        <span className="text-body font-semibold truncate">{s.venue}</span>
+                        <span className="text-footnote text-smoke">
                           {[d.weekday + (s.time ? ` ${s.time}` : ""), s.city, bill && `with ${bill}`].filter(Boolean).join(" · ")}
                         </span>
                       </span>
                       {s.ticketUrl && (
-                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="h-8 px-3.5 rounded-full border border-paper/20 text-[13px] font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
+                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="h-8 px-3.5 rounded-full border border-paper/20 text-footnote font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
                           Tickets
                         </a>
                       )}
@@ -171,13 +171,13 @@ export default async function BandPageView({ params }: Params) {
           )}
 
           <section className="flex flex-col gap-3">
-            <h2 className="text-[20px] font-bold tracking-[-0.02em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
+            <h2 className="text-title3 font-bold tracking-[-0.02em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
             <MemberGrid members={lineup} spots={now.length ? band.spots : []} signedIn={signedIn} sample={band.sample} />
           </section>
 
           {before.length > 0 && now.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-[16px] font-bold text-smoke">Played in it before</h2>
+              <h2 className="text-body font-bold text-smoke">Played in it before</h2>
               <ul className="flex flex-col gap-2.5">
                 {before.map((m) => (
                   <li key={m.username}>
@@ -186,12 +186,12 @@ export default async function BandPageView({ params }: Params) {
                         {m.photo ? (
                           <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
                         ) : (
-                          <span className="absolute inset-0 flex items-center justify-center text-[15px] font-bold">{m.name.slice(0, 1)}</span>
+                          <span className="absolute inset-0 flex items-center justify-center text-callout font-bold">{m.name.slice(0, 1)}</span>
                         )}
                       </span>
                       <span className="flex flex-col">
-                        <span className="text-[15px] font-semibold group-hover:underline underline-offset-2">{m.name}</span>
-                        <span className="text-[13px] text-smoke">
+                        <span className="text-callout font-semibold group-hover:underline underline-offset-2">{m.name}</span>
+                        <span className="text-footnote text-smoke">
                           {m.role || m.instrument} · {m.endYear === m.startYear ? m.startYear : `${m.startYear} to ${m.endYear}`}
                         </span>
                       </span>
@@ -204,8 +204,8 @@ export default async function BandPageView({ params }: Params) {
 
           {band.tracks.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-[20px] font-bold tracking-[-0.02em]">Music</h2>
-              <ul className="flex flex-col rounded-[22px] bg-stage divide-y divide-paper/8 max-w-[620px]">
+              <h2 className="text-title3 font-bold tracking-[-0.02em]">Music</h2>
+              <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.tracks.map((t) => (
                   <li key={t.id}>
                     <a href={t.url ?? "#"} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-4 py-3.5 transition hover:bg-paper/4">
@@ -215,8 +215,8 @@ export default async function BandPageView({ params }: Params) {
                         </svg>
                       </span>
                       <span className="flex-1 min-w-0 flex flex-col">
-                        <span className="text-[15px] font-semibold truncate">{t.title || `${PROVIDER_LABEL[t.provider]} track`}</span>
-                        <span className="text-[13px] text-smoke">
+                        <span className="text-callout font-semibold truncate">{t.title || `${PROVIDER_LABEL[t.provider]} track`}</span>
+                        <span className="text-footnote text-smoke">
                           {PROVIDER_LABEL[t.provider]} · added by {t.by}
                         </span>
                       </span>
@@ -229,17 +229,17 @@ export default async function BandPageView({ params }: Params) {
 
           {band.sharedStage.length > 0 && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-[20px] font-bold tracking-[-0.02em]">Shared the stage with</h2>
+              <h2 className="text-title3 font-bold tracking-[-0.02em]">Shared the stage with</h2>
               <ul className="hscroll flex gap-2.5 -mx-5 px-5 md:mx-0 md:px-0">
                 {band.sharedStage.map((b) => (
                   <li key={b.id} className="shrink-0">
-                    <Link href={`/b/${b.id}`} className="flex items-center gap-3 pl-2 pr-4 py-2 rounded-[18px] bg-stage hover:bg-riser transition">
+                    <Link href={`/b/${b.id}`} className="flex items-center gap-3 pl-2 pr-4 py-2 rounded-tile bg-stage hover:bg-riser transition">
                       <span className="relative size-11 rounded-[13px] overflow-hidden shrink-0" style={{ background: nameWash(b.name) }}>
                         {b.photo && <FadeImg src={b.photo} alt="" className="absolute inset-0 size-full object-cover" />}
                       </span>
                       <span className="flex flex-col">
-                        <span className="text-[15px] font-semibold whitespace-nowrap">{b.name}</span>
-                        <span className="text-[12px] text-smoke">
+                        <span className="text-callout font-semibold whitespace-nowrap">{b.name}</span>
+                        <span className="text-caption text-smoke">
                           {b.shows} {b.shows === 1 ? "show" : "shows"} together
                         </span>
                       </span>
@@ -250,19 +250,19 @@ export default async function BandPageView({ params }: Params) {
             </section>
           )}
 
-          <p className="text-[13px] text-smoke text-pretty max-w-[520px]">
+          <p className="text-footnote text-smoke text-pretty max-w-[520px]">
             Everyone here confirmed they played in {band.name}. Played in it too? Ask a member to tag you on their project, and you&apos;ll show up here.
           </p>
 
           {!signedIn && (
-            <section className="gel-rim rounded-[26px]">
+            <section className="gel-rim rounded-sheet">
               <div className="rounded-[24.5px] bg-stage p-6 flex flex-col gap-3">
-                <h2 className="headline text-[28px]">Put your band on Mixstro</h2>
-                <p className="text-[15px] text-smoke leading-relaxed max-w-[460px]">
+                <h2 className="headline text-title-lg">Put your band on Mixstro</h2>
+                <p className="text-callout text-smoke leading-relaxed max-w-[460px]">
                   Every band you&apos;ve played in, confirmed by your bandmates, with the tracks and shows to prove it. Free.
                 </p>
                 <div className="pt-1">
-                  <ButtonLink href="/" className="h-12 !w-auto text-[16px] px-6 inline-flex">
+                  <ButtonLink href="/" className="h-12 !w-auto text-body px-6 inline-flex">
                     Get started
                   </ButtonLink>
                 </div>
@@ -284,26 +284,26 @@ function spotHref(spot: BandSpot, signedIn: boolean, sample?: boolean) {
 
 function SpotCard({ spot, band, signedIn }: { spot: BandSpot; band: BandPage; signedIn: boolean }) {
   return (
-    <section className="rounded-[24px] p-5 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.14),var(--color-stage)_60%)] flex flex-col gap-1.5 max-w-[620px]" aria-label="Open spot">
-      <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-tungsten">Open spot</span>
-      <h2 className="text-[21px] font-bold tracking-[-0.02em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
+    <section className="rounded-panel p-5 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.14),var(--color-stage)_60%)] flex flex-col gap-1.5 max-w-[620px]" aria-label="Open spot">
+      <span className="text-caption font-semibold tracking-[0.16em] uppercase text-tungsten">Open spot</span>
+      <h2 className="text-title2 font-bold tracking-[-0.02em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
       {(spot.details || spot.pay) && (
-        <p className="text-[14px] text-smoke leading-[1.45]">{[spot.details, spot.paid ? spot.pay || "Paid" : null].filter(Boolean).join(" · ")}</p>
+        <p className="text-subhead text-smoke leading-[1.45]">{[spot.details, spot.paid ? spot.pay || "Paid" : null].filter(Boolean).join(" · ")}</p>
       )}
       <div className="flex items-center gap-3 pt-2.5">
         {band.isMember ? (
-          <Link href={`/bands/${band.id}`} className="h-10 px-4 rounded-full glass text-[14px] font-semibold flex items-center">
+          <Link href={`/bands/${band.id}`} className="h-10 px-4 rounded-full glass text-subhead font-semibold flex items-center">
             Manage
           </Link>
         ) : spot.answered ? (
-          <span className="h-10 px-4 rounded-full bg-riser text-[14px] font-semibold flex items-center text-smoke">You asked</span>
+          <span className="h-10 px-4 rounded-full bg-riser text-subhead font-semibold flex items-center text-smoke">You asked</span>
         ) : (
-          <Link href={spotHref(spot, signedIn, band.sample)} className="h-10 px-4 rounded-full bg-paper text-ink text-[14px] font-semibold flex items-center hover:bg-white transition">
+          <Link href={spotHref(spot, signedIn, band.sample)} className="h-10 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center hover:bg-white transition">
             {spotAnswer(spot.role)}
           </Link>
         )}
         {spot.asked > 0 && (
-          <span className="text-[13px] text-smoke">
+          <span className="text-footnote text-smoke">
             {spot.asked} {spot.asked === 1 ? "musician" : "musicians"} asked
           </span>
         )}
@@ -318,20 +318,20 @@ function MemberGrid({ members, spots, signedIn, sample }: { members: BandMember[
       {members.map((m) => (
         <li key={m.username}>
           <Link href={`/@${m.username}`} className="group flex flex-col gap-2.5">
-            <span className="relative block aspect-[4/5] rounded-[22px] overflow-hidden bg-riser" style={m.photo ? undefined : { background: artistTint(m.username) }}>
+            <span className="relative block aspect-[4/5] rounded-card-lg overflow-hidden bg-riser" style={m.photo ? undefined : { background: artistTint(m.username) }}>
               {m.photo ? (
                 <FadeImg src={m.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover transition group-hover:scale-[1.03]" />
               ) : (
-                <span className="absolute inset-0 flex items-center justify-center headline text-[44px] text-paper/80">{m.name.slice(0, 1)}</span>
+                <span className="absolute inset-0 flex items-center justify-center headline text-display-lg text-paper/80">{m.name.slice(0, 1)}</span>
               )}
             </span>
             <span className="flex flex-col gap-0.5 px-0.5">
-              <span className="text-[16px] font-semibold flex items-center gap-1">
+              <span className="text-body font-semibold flex items-center gap-1">
                 {m.name}
                 {m.verified && <VerifiedMark size={15} className="text-paper" />}
               </span>
-              <span className="text-[13px] text-paper/80 truncate">{m.role || m.instrument}</span>
-              <span className="text-[12px] text-smoke">{m.endYear === undefined ? `Since ${m.startYear}` : m.endYear === m.startYear ? `${m.startYear}` : `${m.startYear} to ${m.endYear}`}</span>
+              <span className="text-footnote text-paper/80 truncate">{m.role || m.instrument}</span>
+              <span className="text-caption text-smoke">{m.endYear === undefined ? `Since ${m.startYear}` : m.endYear === m.startYear ? `${m.startYear}` : `${m.startYear} to ${m.endYear}`}</span>
             </span>
           </Link>
         </li>
@@ -341,15 +341,15 @@ function MemberGrid({ members, spots, signedIn, sample }: { members: BandMember[
         .map((s) => (
           <li key={`spot-${s.id}`}>
             <Link href={sample ? "/board" : signedIn ? `/board/${s.id}` : "/"} className="group flex flex-col gap-2.5" aria-label={`Open spot: ${s.role}`}>
-              <span className="relative aspect-[4/5] rounded-[22px] border-[1.5px] border-dashed border-tungsten/55 flex flex-col items-center justify-center gap-1 text-tungsten transition group-hover:bg-tungsten/6">
+              <span className="relative aspect-[4/5] rounded-card-lg border-[1.5px] border-dashed border-tungsten/55 flex flex-col items-center justify-center gap-1 text-tungsten transition group-hover:bg-tungsten/6">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M12 5v14M5 12h14" />
                 </svg>
-                <span className="text-[14px] font-semibold">{s.role}</span>
+                <span className="text-subhead font-semibold">{s.role}</span>
               </span>
               <span className="flex flex-col gap-0.5 px-0.5">
-                <span className="text-[16px] font-semibold text-tungsten">You?</span>
-                <span className="text-[13px] text-smoke">Open spot</span>
+                <span className="text-body font-semibold text-tungsten">You?</span>
+                <span className="text-footnote text-smoke">Open spot</span>
               </span>
             </Link>
           </li>

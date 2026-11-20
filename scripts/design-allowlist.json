@@ -1,0 +1,22 @@
+{
+  "app/(app)/discover/today/today-deck.tsx text-[60px]": 1,
+  "app/(app)/pulse/view.tsx bg-[#FF6B5A]": 1,
+  "app/b/[id]/page.tsx text-[80px]": 1,
+  "app/b/[id]/page.tsx rounded-[13px]": 1,
+  "app/onboarding/done/page.tsx rounded-[2px]": 1,
+  "app/onboarding/influences/page.tsx rounded-[13px]": 1,
+  "app/onboarding/play/page.tsx rounded-t-[30px]": 1,
+  "app/onboarding/play/page.tsx rounded-[30px]": 1,
+  "app/onboarding/who/page.tsx rounded-[17px]": 1,
+  "app/p/[username]/page.tsx text-[64px]": 1,
+  "app/page.tsx text-[60px]": 1,
+  "components/clip-recorder.tsx rounded-[3px]": 1,
+  "components/quick-replies.tsx rounded-bl-[6px]": 1,
+  "components/tab-bar.tsx rounded-[38px]": 1,
+  "components/ui.tsx bg-[#ff6159]": 1,
+  "components/ui.tsx bg-[#131314]": 1,
+  "components/ui.tsx border-[#8E918F]": 1,
+  "components/ui.tsx text-[#E3E3E3]": 1,
+  "components/ui.tsx bg-[#1f1f20]": 1,
+  "components/ui.tsx border-[#E3E3E3]": 1
+}

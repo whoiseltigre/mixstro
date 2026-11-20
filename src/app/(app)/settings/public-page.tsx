@@ -33,10 +33,10 @@ export function PublicPageToggle() {
   }
 
   return (
-    <section className="flex items-center gap-3 p-4 rounded-[20px] bg-stage">
+    <section className="flex items-center gap-3 p-4 rounded-card bg-stage">
       <span className="flex-1 flex flex-col gap-0.5">
-        <span className="text-[15px] font-semibold">Public music page</span>
-        <span className="text-[13px] text-smoke text-pretty">
+        <span className="text-callout font-semibold">Public music page</span>
+        <span className="text-footnote text-smoke text-pretty">
           {error ? "That didn't save. Try again." : "Anyone with your link can see your bands and play your tracks, even without an account. Turn off to show your profile to members only."}
         </span>
       </span>
@@ -47,7 +47,7 @@ export function PublicPageToggle() {
         aria-label="Public music page"
         disabled={on === null}
         onClick={flip}
-        className={`relative w-[51px] h-[31px] rounded-full shrink-0 transition ${on ? "bg-[#30D158]" : "bg-paper/16"} disabled:opacity-40`}
+        className={`relative w-[51px] h-[31px] rounded-full shrink-0 transition ${on ? "bg-success" : "bg-paper/16"} disabled:opacity-40`}
       >
         <span className={`absolute top-[2px] size-[27px] rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-[2px]"}`} />
       </button>

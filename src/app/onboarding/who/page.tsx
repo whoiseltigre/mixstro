@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { type Draft, STEP_GLOW, stepNav, useDraft } from "@/lib/onboarding";
+import { haptic } from "@/lib/haptics";
 
 /** The first question: just you, or you and your band. Band signups get a band step and a band page. */
 const CHOICES: { id: NonNullable<Draft["signupAs"]>; title: string; sub: string; hue: string; icon: React.ReactNode }[] = [
@@ -53,14 +54,14 @@ export default function Who() {
               aria-pressed={on}
               onClick={() => {
                 try {
-                  navigator.vibrate?.(8);
+                  haptic("select");
                 } catch {}
                 // Switching to "Just me" drops a band started on the band step.
                 update(c.id === "solo" ? { signupAs: c.id, band: undefined } : { signupAs: c.id });
               }}
               style={{ "--hue": c.hue, animationDelay: `${i * 60}ms` } as React.CSSProperties}
               className={cx(
-                "rise-in w-full flex items-center gap-4 p-5 rounded-[24px] border-[1.5px] text-left transition hover:-translate-y-0.5 active:scale-[0.98]",
+                "press rise-in w-full flex items-center gap-4 p-5 rounded-panel border-[1.5px] text-left hover:-translate-y-0.5",
                 on
                   ? "border-[var(--hue)] bg-[color-mix(in_srgb,var(--hue)_14%,var(--color-stage))] shadow-[0_12px_34px_-14px_var(--hue)]"
                   : "border-paper/6 bg-stage hover:border-paper/20",
@@ -77,8 +78,8 @@ export default function Who() {
                 </svg>
               </span>
               <span className="flex-1 flex flex-col gap-1">
-                <span className="text-[18px] font-medium">{c.title}</span>
-                <span className="text-[13.5px] leading-snug text-smoke text-pretty">{c.sub}</span>
+                <span className="text-title4 font-medium">{c.title}</span>
+                <span className="text-footnote leading-snug text-smoke text-pretty">{c.sub}</span>
               </span>
               <span className={cx("size-6 rounded-full flex items-center justify-center shrink-0 transition", on ? "bg-[var(--hue)] text-ink" : "border-[1.5px] border-paper/25")}>
                 {on && <CheckIcon size={13} />}

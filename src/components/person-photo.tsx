@@ -10,18 +10,22 @@ export function PersonPhoto({
   priority,
   className,
   initialsSize = 32,
+  under,
 }: {
   person: Pick<Musician, "id" | "name" | "photo" | "photoAlt">;
   sizes: string;
   priority?: boolean;
   className?: string;
   initialsSize?: number;
+  /** Painted between their color and the photo (the hero handoff image). */
+  under?: React.ReactNode;
 }) {
   if (person.photo) {
     // Their own color sits underneath while the photo loads, then the photo fades in over it.
     return (
       <>
         <span aria-hidden="true" className="absolute inset-0" style={{ background: artistTint(person.id) }} />
+        {under}
         <FadeImage src={person.photo} alt={person.photoAlt} fill priority={priority} sizes={sizes} className={cx("object-cover", className)} />
       </>
     );

@@ -19,7 +19,7 @@ import { addShow, answerBill, closeSpot, findBands, postSpot, removeShow, saveBa
 type Panel = "edit" | "show" | "spot" | "invite" | null;
 
 const SHEET =
-  "md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-[32px] md:rounded-[32px] bg-stage border border-paper/10 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4";
+  "md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-hero md:rounded-hero bg-stage border border-paper/10 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4";
 
 /** Your band: the chat, invites, open spots, shows and the page's details, in one list. */
 export function BandHubView({ hub }: { hub: BandHub }) {
@@ -47,50 +47,50 @@ export function BandHubView({ hub }: { hub: BandHub }) {
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-4 h-[320px] -z-10 md:hidden" style={{ background: BAND_GLOW }} />
       <div className="mt-2 flex items-center justify-between">
         <BackButton href="/me" />
-        <Link href={`/b/${band.id}`} className="glass h-10 px-4 rounded-full text-[14px] font-semibold flex items-center">
+        <Link href={`/b/${band.id}`} className="glass h-10 px-4 rounded-full text-subhead font-semibold flex items-center">
           View page
         </Link>
       </div>
 
       <div className="flex items-center gap-4 pt-3">
-        <span className="relative size-[72px] rounded-[22px] overflow-hidden shrink-0" style={{ background: nameWash(band.name) }}>
+        <span className="relative size-[72px] rounded-card-lg overflow-hidden shrink-0" style={{ background: nameWash(band.name) }}>
           {band.photo && <FadeImg src={band.photo} alt="" className="absolute inset-0 size-full object-cover" />}
         </span>
         <div className="flex flex-col min-w-0">
-          <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-smoke">Your band</span>
-          <h1 className="headline text-[34px] leading-none truncate">{band.name}</h1>
+          <span className="text-caption font-semibold tracking-[0.16em] uppercase text-smoke">Your band</span>
+          <h1 className="headline text-display leading-none truncate">{band.name}</h1>
         </div>
       </div>
 
       {done < list.length && (
-        <button type="button" onClick={() => setPanel(band.photo && band.bio && band.genres.length ? "show" : "edit")} className="text-left rounded-[22px] bg-stage p-4 flex flex-col gap-2.5">
+        <button type="button" onClick={() => setPanel(band.photo && band.bio && band.genres.length ? "show" : "edit")} className="text-left rounded-card-lg bg-stage p-4 flex flex-col gap-2.5">
           <span className="flex justify-between items-center">
-            <span className="text-[16px] font-semibold">
+            <span className="text-body font-semibold">
               Your page is {done} of {list.length} done
             </span>
-            <span className="text-[14px] font-semibold text-tungsten">Finish</span>
+            <span className="text-subhead font-semibold text-tungsten">Finish</span>
           </span>
           <span className="h-1.5 rounded-full bg-riser overflow-hidden">
             <span className="block h-full rounded-full" style={{ width: `${(done / list.length) * 100}%`, background: "var(--gel-linear)" }} />
           </span>
-          <span className="text-[13px] text-smoke">Add {todo.length > 1 ? `${todo.slice(0, -1).join(", ")} and ${todo[todo.length - 1]}` : todo[0]}</span>
+          <span className="text-footnote text-smoke">Add {todo.length > 1 ? `${todo.slice(0, -1).join(", ")} and ${todo[todo.length - 1]}` : todo[0]}</span>
         </button>
       )}
 
       {hub.bills.map((b) => {
         const d = showDate(b.date);
         return (
-          <div key={b.showId} className="rounded-[22px] p-4 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
-            <span className="text-[12px] font-semibold tracking-[0.16em] uppercase text-tungsten">Shared bill</span>
-            <span className="text-[15px] font-semibold">
+          <div key={b.showId} className="rounded-card-lg p-4 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
+            <span className="text-caption font-semibold tracking-[0.16em] uppercase text-tungsten">Shared bill</span>
+            <span className="text-callout font-semibold">
               {b.fromName} says you played {b.venue} together on {d.month} {d.day}
             </span>
-            <span className="text-[13px] text-smoke -mt-1">Confirm and both bands show it under &ldquo;Shared the stage with&rdquo;.</span>
+            <span className="text-footnote text-smoke -mt-1">Confirm and both bands show it under &ldquo;Shared the stage with&rdquo;.</span>
             <span className="flex gap-2 pt-1">
-              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-9 px-4 rounded-full bg-paper text-ink text-[14px] font-semibold">
+              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
                 We played it
               </button>
-              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-9 px-4 rounded-full border border-paper/20 text-[14px] font-semibold">
+              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-9 px-4 rounded-full border border-paper/20 text-subhead font-semibold">
                 Not us
               </button>
             </span>
@@ -98,7 +98,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         );
       })}
 
-      <ul className="rounded-[22px] bg-stage divide-y divide-paper/8 overflow-hidden">
+      <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">
         <Row
           href={`/messages/b/${band.id}`}
           hue="#FFB245"
@@ -116,15 +116,15 @@ export function BandHubView({ hub }: { hub: BandHub }) {
 
       {band.spots.length > 0 && (
         <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-[18px] font-bold tracking-[-0.02em]">Open spots</h2>
-          <ul className="rounded-[22px] bg-stage divide-y divide-paper/8">
+          <h2 className="text-title4 font-bold tracking-[-0.02em]">Open spots</h2>
+          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
             {band.spots.map((s) => (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3">
                 <Link href={hub.demo ? "/board" : `/board/${s.id}`} className="flex-1 min-w-0 flex flex-col">
-                  <span className="text-[15px] font-semibold truncate">{s.role ?? s.title}</span>
-                  <span className="text-[13px] text-smoke">{s.asked ? `${s.asked} ${s.asked === 1 ? "musician" : "musicians"} asked · see them` : "No one yet"}</span>
+                  <span className="text-callout font-semibold truncate">{s.role ?? s.title}</span>
+                  <span className="text-footnote text-smoke">{s.asked ? `${s.asked} ${s.asked === 1 ? "musician" : "musicians"} asked · see them` : "No one yet"}</span>
                 </Link>
-                <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="h-8 px-3 rounded-full border border-paper/20 text-[13px] font-semibold shrink-0">
+                <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
                   Filled
                 </button>
               </li>
@@ -135,19 +135,19 @@ export function BandHubView({ hub }: { hub: BandHub }) {
 
       {band.shows.length > 0 && (
         <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-[18px] font-bold tracking-[-0.02em]">Next shows</h2>
-          <ul className="rounded-[22px] bg-stage divide-y divide-paper/8">
+          <h2 className="text-title4 font-bold tracking-[-0.02em]">Next shows</h2>
+          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
             {band.shows.map((s) => {
               const d = showDate(s.date);
               return (
                 <li key={s.id} className="flex items-center gap-3 px-4 py-3">
                   <span className="w-10 flex flex-col items-center shrink-0">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
-                    <span className="text-[19px] font-bold leading-none mt-0.5">{d.day}</span>
+                    <span className="text-caption2 font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                    <span className="text-title3 font-bold leading-none mt-0.5">{d.day}</span>
                   </span>
                   <span className="flex-1 min-w-0 flex flex-col">
-                    <span className="text-[15px] font-semibold truncate">{s.venue}</span>
-                    <span className="text-[13px] text-smoke truncate">{[d.weekday + (s.time ? ` ${s.time}` : ""), s.city].filter(Boolean).join(" · ")}</span>
+                    <span className="text-callout font-semibold truncate">{s.venue}</span>
+                    <span className="text-footnote text-smoke truncate">{[d.weekday + (s.time ? ` ${s.time}` : ""), s.city].filter(Boolean).join(" · ")}</span>
                   </span>
                   <button type="button" onClick={() => run(() => removeShow(band.id, s.id), "Show removed")} aria-label={`Remove ${s.venue}`} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
@@ -161,7 +161,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         </section>
       )}
 
-      <p className="text-[13px] text-smoke leading-[1.5] pt-1">Everyone who plays in {band.name} now can edit it. There&apos;s no owner and no admin. Past members stay on the page.</p>
+      <p className="text-footnote text-smoke leading-[1.5] pt-1">Everyone who plays in {band.name} now can edit it. There&apos;s no owner and no admin. Past members stay on the page.</p>
 
       {panel && (
         <Sheet onClose={() => setPanel(null)} label={panel} scrimClassName="bg-ink/70 backdrop-blur-sm" className={SHEET}>
@@ -178,37 +178,37 @@ export function BandHubView({ hub }: { hub: BandHub }) {
 function Row({ href, onClick, hue, solid, icon, title, sub, badge }: { href?: string; onClick?: () => void; hue: string; solid?: boolean; icon: React.ReactNode; title: string; sub: string; badge?: number }) {
   const body = (
     <>
-      <span className="size-[34px] rounded-[10px] flex items-center justify-center shrink-0" style={solid ? { background: hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${hue} 18%, transparent)`, color: hue }}>
+      <span className="size-[34px] rounded-xs flex items-center justify-center shrink-0" style={solid ? { background: hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${hue} 18%, transparent)`, color: hue }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           {icon}
         </svg>
       </span>
       <span className="flex-1 min-w-0 flex flex-col">
-        <span className="text-[16px] font-semibold">{title}</span>
-        <span className="text-[13px] text-smoke truncate">{sub}</span>
+        <span className="text-body font-semibold">{title}</span>
+        <span className="text-footnote text-smoke truncate">{sub}</span>
       </span>
-      {badge ? <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-[12px] font-bold flex items-center justify-center">{badge}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
+      {badge ? <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-caption font-bold flex items-center justify-center">{badge}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
     </>
   );
   const cls = "w-full flex items-center gap-3.5 px-4 py-3.5 text-left transition hover:bg-paper/4";
   return <li>{href ? <Link href={href} className={cls}>{body}</Link> : <button type="button" onClick={onClick} className={cls}>{body}</button>}</li>;
 }
 
-const input = "h-[50px] w-full rounded-2xl bg-ink/60 border border-paper/12 px-4 text-[16px] text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50";
-const labelCls = "text-[13px] font-semibold text-smoke";
+const input = "h-[50px] w-full rounded-2xl bg-ink/60 border border-paper/12 px-4 text-body text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50";
+const labelCls = "text-footnote font-semibold text-smoke";
 
 function Heading({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <h2 className="font-display text-[24px] font-bold tracking-[-0.02em]">{children}</h2>
-      {sub && <p className="text-[14px] text-smoke">{sub}</p>}
+      <h2 className="font-display text-title1 font-bold tracking-[-0.02em]">{children}</h2>
+      {sub && <p className="text-subhead text-smoke">{sub}</p>}
     </div>
   );
 }
 
 function ErrorLine({ text }: { text?: string }) {
   return text ? (
-    <p role="alert" className="text-[13px] text-[#FF453A]">
+    <p role="alert" className="text-footnote text-danger">
       {text}
     </p>
   ) : null;
@@ -263,9 +263,9 @@ function EditForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
       }}
     >
       <Heading>Edit {band.name}</Heading>
-      <label className="relative h-[150px] rounded-[22px] overflow-hidden cursor-pointer flex items-center justify-center" style={{ background: nameWash(band.name) }}>
+      <label className="relative h-[150px] rounded-card-lg overflow-hidden cursor-pointer flex items-center justify-center" style={{ background: nameWash(band.name) }}>
         {photo && <FadeImg src={photo} alt="" className="absolute inset-0 size-full object-cover" />}
-        <span className="relative glass h-10 px-4 rounded-full text-[14px] font-semibold flex items-center">{uploading ? "Uploading…" : photo ? "Change band photo" : "Add a band photo"}</span>
+        <span className="relative glass h-10 px-4 rounded-full text-subhead font-semibold flex items-center">{uploading ? "Uploading…" : photo ? "Change band photo" : "Add a band photo"}</span>
         <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && pick(e.target.files[0])} />
       </label>
       <div className="flex flex-col gap-2">
@@ -285,13 +285,13 @@ function EditForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
           Genres
         </label>
         <input id="band-genres" value={genres} onChange={(e) => setGenres(e.target.value)} placeholder="Indie rock, post-punk" className={input} />
-        <p className="text-[12px] text-smoke">Up to 5, separated by commas</p>
+        <p className="text-caption text-smoke">Up to 5, separated by commas</p>
       </div>
       <fieldset className="flex flex-col gap-2">
         <legend className={cx(labelCls, "mb-2")}>Right now</legend>
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
-            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-9 px-3.5 rounded-full text-[14px] border transition", status === s ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", status === s ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
               {STATUS_LABEL[s]}
             </button>
           ))}
@@ -387,7 +387,7 @@ function ShowForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
                     setFound([]);
                     setQ("");
                   }}
-                  className="w-full text-left px-4 py-2.5 text-[15px] hover:bg-paper/5"
+                  className="w-full text-left px-4 py-2.5 text-callout hover:bg-paper/5"
                 >
                   {b.name}
                 </button>
@@ -398,14 +398,14 @@ function ShowForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         {tagged.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tagged.map((t) => (
-              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="h-8 px-3 rounded-full bg-tungsten/16 text-tungsten text-[13px] font-semibold">
+              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="h-8 px-3 rounded-full bg-tungsten/16 text-tungsten text-footnote font-semibold">
                 {t.name} ✕
               </button>
             ))}
           </div>
         )}
         <input aria-label="Other acts not on Mixstro" placeholder="Other acts not on Mixstro (optional)" maxLength={120} className={input} {...field("withText")} />
-        <p className="text-[12px] text-smoke">Bands you tag confirm it, then you both show &ldquo;Shared the stage with&rdquo;.</p>
+        <p className="text-caption text-smoke">Bands you tag confirm it, then you both show &ldquo;Shared the stage with&rdquo;.</p>
       </div>
       <ErrorLine text={error} />
       <Button type="submit" disabled={pending} className="h-12">
@@ -442,7 +442,7 @@ function SpotForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
         <div className="flex flex-wrap gap-2">
           {ROLE_IDS.map((r) => (
-            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-[14px] border transition", role === r ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
               {r}
             </button>
           ))}
@@ -456,8 +456,8 @@ function SpotForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <textarea id="spot-details" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} rows={3} placeholder="How often you rehearse, where, what you sound like." className={cx(input, "h-auto py-3 leading-[1.45] resize-none")} />
       </div>
       <label className="flex items-center justify-between gap-3">
-        <span className="text-[15px] font-semibold">It&apos;s paid</span>
-        <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-[#FFB245]" />
+        <span className="text-callout font-semibold">It&apos;s paid</span>
+        <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
       </label>
       {paid && <input aria-label="Pay" placeholder="$150 a show" maxLength={40} value={pay} onChange={(e) => setPay(e.target.value)} className={input} />}
       <ErrorLine text={error} />
@@ -521,10 +521,10 @@ function InviteForm({ hub }: { hub: BandHub }) {
             <li key={c.id} className="flex items-center gap-3 py-2">
               <span className="relative size-10 rounded-full overflow-hidden bg-riser shrink-0">{c.photo && <FadeImg src={c.photo} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />}</span>
               <span className="flex-1 min-w-0 flex flex-col">
-                <span className="text-[15px] font-semibold">{c.name}</span>
-                <span className="text-[13px] text-smoke">{c.instrument}</span>
+                <span className="text-callout font-semibold">{c.name}</span>
+                <span className="text-footnote text-smoke">{c.instrument}</span>
               </span>
-              <button type="button" onClick={() => invite(c.id, c.name)} disabled={pending} className="h-9 px-4 rounded-full bg-paper text-ink text-[14px] font-semibold">
+              <button type="button" onClick={() => invite(c.id, c.name)} disabled={pending} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
                 Invite
               </button>
             </li>
