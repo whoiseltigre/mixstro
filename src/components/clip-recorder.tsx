@@ -84,11 +84,11 @@ export function ClipRecorder({ onSaved, disabled }: { onSaved: (url: string) => 
   }
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-[20px] bg-stage border border-paper/10">
+    <div className="flex flex-col gap-3 p-4 rounded-card bg-stage border border-paper/10">
       <div className="flex items-center gap-3">
         <span className="flex-1 flex flex-col gap-0.5">
-          <span className="text-[16px] font-semibold">Record a clip</span>
-          <span className="text-[13px] text-smoke">Up to {MAX_SECONDS} seconds. A phone recording is perfect.</span>
+          <span className="text-body font-semibold">Record a clip</span>
+          <span className="text-footnote text-smoke">Up to {MAX_SECONDS} seconds. A phone recording is perfect.</span>
         </span>
         {state.kind === "idle" && (
           <button
@@ -96,9 +96,9 @@ export function ClipRecorder({ onSaved, disabled }: { onSaved: (url: string) => 
             onClick={start}
             disabled={disabled}
             aria-label="Start recording"
-            className="size-14 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 active:scale-95 transition disabled:opacity-40"
+            className="press size-14 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 disabled:opacity-40"
           >
-            <span className="size-5 rounded-full bg-[#FF453A]" />
+            <span className="size-5 rounded-full bg-danger" />
           </button>
         )}
         {state.kind === "recording" && (
@@ -106,42 +106,42 @@ export function ClipRecorder({ onSaved, disabled }: { onSaved: (url: string) => 
             type="button"
             onClick={() => (state.seconds >= MIN_SECONDS ? recorder.current?.stop() : undefined)}
             aria-label="Stop recording"
-            className="size-14 rounded-full glass flex items-center justify-center shrink-0 active:scale-95 transition"
+            className="press size-14 rounded-full glass flex items-center justify-center shrink-0"
           >
-            <span className="size-4 rounded-[3px] bg-[#FF453A]" />
+            <span className="size-4 rounded-[3px] bg-danger" />
           </button>
         )}
       </div>
 
       {state.kind === "recording" && (
         <div className="flex items-center gap-3" aria-live="polite">
-          <span className="size-2 rounded-full bg-[#FF453A] animate-pulse" aria-hidden="true" />
+          <span className="size-2 rounded-full bg-danger animate-pulse" aria-hidden="true" />
           <div className="flex-1 h-1 rounded-full bg-paper/15 overflow-hidden">
             <div className="h-full bg-paper transition-[width] duration-200" style={{ width: `${(state.seconds / MAX_SECONDS) * 100}%` }} />
           </div>
-          <span className="text-[13px] tabular-nums text-smoke">
+          <span className="text-footnote tabular-nums text-smoke">
             0:{String(state.seconds).padStart(2, "0")}
           </span>
         </div>
       )}
       {state.kind === "recording" && state.seconds < MIN_SECONDS && (
-        <p className="text-[12px] text-smoke">Keep going, at least {MIN_SECONDS} seconds.</p>
+        <p className="text-caption text-smoke">Keep going, at least {MIN_SECONDS} seconds.</p>
       )}
 
       {state.kind === "preview" && (
         <div className="flex flex-col gap-3">
           <audio src={state.url} controls className="w-full h-10" />
           <div className="flex gap-2">
-            <Button variant="glass" onClick={reset} className="h-11 text-[15px]">
+            <Button variant="glass" onClick={reset} className="h-11 text-callout">
               Re-record
             </Button>
-            <Button onClick={save} disabled={saving} className="h-11 text-[15px]">
+            <Button onClick={save} disabled={saving} className="h-11 text-callout">
               {saving ? "Saving…" : "Use this clip"}
             </Button>
           </div>
         </div>
       )}
-      {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
+      {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
     </div>
   );
 }

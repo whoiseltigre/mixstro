@@ -99,11 +99,11 @@ function ToastRow({ t }: { t: Toast }) {
   return (
     <div
       role="status"
-      className={`pointer-events-auto glass !bg-[rgb(41_38_36/0.88)] rounded-full pl-5 ${t.action ? "pr-1.5" : "pr-5"} h-12 max-w-[440px] flex items-center gap-3 shadow-[0_12px_40px_rgb(0_0_0/0.45)] transition duration-200 ease-out ${
+      className={`pointer-events-auto glass !bg-[rgb(41_38_36/0.88)] rounded-full pl-5 ${t.action ? "pr-1.5" : "pr-5"} h-12 max-w-[440px] flex items-center gap-3 shadow-float transition duration-200 ease-out ${
         visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-2 scale-[0.97]"
       }`}
     >
-      <span className="text-[15px] truncate">{t.message}</span>
+      <span className="text-callout truncate">{t.message}</span>
       {t.action && (
         <button
           type="button"
@@ -111,7 +111,7 @@ function ToastRow({ t }: { t: Toast }) {
             t.action!.run();
             dismiss(t.id);
           }}
-          className="h-9 px-4 rounded-full bg-paper/12 hover:bg-paper/20 text-[15px] font-semibold text-tungsten shrink-0"
+          className="h-9 px-4 rounded-full bg-paper/12 hover:bg-paper/20 text-callout font-semibold text-tungsten shrink-0"
         >
           {t.action.label}
         </button>

@@ -74,7 +74,7 @@ export default function Basics() {
       <StepTitle eyebrow="About you" color={STEP_GLOW.basics} title="This is you" sub={fromGoogle ? "We brought your name and photo over from Google. Change anything you like." : "Musicians connect faster with a real photo and name."} />
       <div className="px-5 pt-7 flex flex-col gap-5">
         <button type="button" onClick={() => fileRef.current?.click()} className="group flex items-center gap-4 text-left">
-          <span className="size-24 rounded-full bg-stage border-[1.5px] border-[#FFB245]/50 shadow-[0_0_0_5px_rgb(255_178_69/0.08)] overflow-hidden flex items-center justify-center shrink-0 transition group-hover:border-paper/40">
+          <span className="size-24 rounded-full bg-stage border-[1.5px] border-tungsten/50 shadow-[0_0_0_5px_rgb(255_178_69/0.08)] overflow-hidden flex items-center justify-center shrink-0 transition group-hover:border-paper/40">
             {draft.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={draft.avatarUrl} alt="Your photo" referrerPolicy="no-referrer" className="size-full object-cover" />
@@ -83,8 +83,8 @@ export default function Basics() {
             )}
           </span>
           <span className="flex flex-col gap-1">
-            <span className="text-[16px] font-medium">{draft.avatarUrl ? "Change photo" : "Add a photo"}</span>
-            <span className="text-[13px] text-smoke">
+            <span className="text-body font-medium">{draft.avatarUrl ? "Change photo" : "Add a photo"}</span>
+            <span className="text-footnote text-smoke">
               {photoError
                 ? "That photo didn't open. Try a JPEG or PNG."
                 : fromGoogle

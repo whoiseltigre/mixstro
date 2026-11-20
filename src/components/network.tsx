@@ -8,7 +8,7 @@ export function MutualsRow({ mutuals, first }: { mutuals: Mutual[]; first: strin
   const [lead] = mutuals;
   const rest = mutuals.length - 1;
   return (
-    <Link href={`/m/${lead.username}`} className="self-start flex items-center gap-2.5 text-[14px] text-smoke hover:text-paper transition">
+    <Link href={`/m/${lead.username}`} className="self-start flex items-center gap-2.5 text-subhead text-smoke hover:text-paper transition">
       <span className="flex -space-x-2" aria-hidden="true">
         {mutuals.slice(0, 3).map((m) => (
           <span key={m.username} className="relative size-7 rounded-full overflow-hidden ring-2 ring-ink">

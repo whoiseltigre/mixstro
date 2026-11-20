@@ -67,7 +67,7 @@ export function SignInButtons() {
         Continue with email
       </ButtonLink>
       {error && (
-        <p role="alert" className="text-center text-[13px] text-[#FF453A]">
+        <p role="alert" className="text-center text-footnote text-danger">
           {error}
         </p>
       )}

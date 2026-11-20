@@ -17,7 +17,7 @@ export function HomeHeader() {
   }, []);
   return (
     <div className="relative mt-3 md:mt-0 px-5 md:px-0 flex items-center justify-between gap-4">
-      <h1 className="headline text-[30px] md:text-[44px] truncate">
+      <h1 className="headline text-display-sm md:text-display-lg truncate">
         {part}
         {draft.firstName ? `, ${draft.firstName}` : ""}
       </h1>
@@ -142,13 +142,13 @@ export function YourStage({ stage }: { stage: Stage }) {
   if (complete || hidden) {
     return (
       <>
-        <div className="relative mx-5 md:mx-0 p-4 rounded-[22px] border border-[#67E2DA]/35 flex items-center gap-3.5" style={{ background: "linear-gradient(135deg, rgb(103 226 218 / 0.16), rgb(181 197 255 / 0.1))" }}>
+        <div className="relative mx-5 md:mx-0 p-4 rounded-card-lg border border-gel-teal/35 flex items-center gap-3.5" style={{ background: "linear-gradient(135deg, rgb(103 226 218 / 0.16), rgb(181 197 255 / 0.1))" }}>
           <Avatar stage={stage} size={52} />
           <span className="flex-1 flex flex-col gap-0.5 min-w-0">
-            <span className="text-[15px] font-semibold">Your page is ready to share</span>
-            <span className="text-[13px] text-paper/75 text-pretty">Post it in your band&apos;s group chat or a local musicians group.</span>
+            <span className="text-callout font-semibold">Your page is ready to share</span>
+            <span className="text-footnote text-paper/75 text-pretty">Post it in your band&apos;s group chat or a local musicians group.</span>
           </span>
-          <button type="button" onClick={share} className="h-10 px-4 rounded-full bg-[#67E2DA] text-ink text-[14px] font-semibold shrink-0">
+          <button type="button" onClick={share} className="h-10 px-4 rounded-full bg-gel-teal text-ink text-subhead font-semibold shrink-0">
             Share
           </button>
         </div>
@@ -160,29 +160,29 @@ export function YourStage({ stage }: { stage: Stage }) {
   return (
     <section aria-labelledby="your-stage" className="relative mx-5 md:mx-0 flex flex-col gap-3.5 md:max-w-[720px]">
       <div className="flex items-center justify-between">
-        <span id="your-stage" className="text-[13px] font-semibold tracking-[0.14em] uppercase text-tungsten">
+        <span id="your-stage" className="text-footnote font-semibold tracking-[0.14em] uppercase text-tungsten">
           Your stage
         </span>
-        <span className="text-[13px] text-smoke">
+        <span className="text-footnote text-smoke">
           {done} of {total} done
         </span>
       </div>
-      <h2 className="font-display text-[26px] md:text-[30px] font-bold leading-[1.08] tracking-[-0.03em] text-pretty">
+      <h2 className="font-display text-title-lg md:text-display-sm font-bold leading-[1.08] tracking-[-0.03em] text-pretty">
         Your page is live. Make it worth sharing.
       </h2>
 
-      <Link href={`/@${stage.username}`} className="flex items-center gap-3.5 p-3 rounded-[22px] bg-stage border border-paper/8 transition hover:border-paper/30">
+      <Link href={`/@${stage.username}`} className="flex items-center gap-3.5 p-3 rounded-card-lg bg-stage border border-paper/8 transition hover:border-paper/30">
         <Avatar stage={stage} size={64} />
         <span className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="text-[17px] font-semibold truncate">{stage.firstName}</span>
-          {stage.headline && <span className="text-[13px] text-smoke truncate">{stage.headline}</span>}
-          <span className="text-[12.5px] text-tungsten truncate">app.mixstro.com/@{stage.username}</span>
+          <span className="text-body-lg font-semibold truncate">{stage.firstName}</span>
+          {stage.headline && <span className="text-footnote text-smoke truncate">{stage.headline}</span>}
+          <span className="text-footnote text-tungsten truncate">app.mixstro.com/@{stage.username}</span>
         </span>
-        <span className="h-9 px-3.5 rounded-full bg-paper/10 text-[13px] font-semibold flex items-center shrink-0">View</span>
+        <span className="h-9 px-3.5 rounded-full bg-paper/10 text-footnote font-semibold flex items-center shrink-0">View</span>
       </Link>
 
       <div className="h-1.5 rounded-full bg-paper/10 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label="Your stage progress">
-        <div className="h-full rounded-full bg-[linear-gradient(90deg,#F7BF77,#FFACBA)] transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} />
+        <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-gel-peach),var(--color-gel-pink))] transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} />
       </div>
 
       <ul className="flex flex-col gap-2">
@@ -193,7 +193,7 @@ export function YourStage({ stage }: { stage: Stage }) {
             const inner = (
               <>
                 <span
-                  className="size-11 rounded-[14px] flex items-center justify-center shrink-0"
+                  className="size-11 rounded-field flex items-center justify-center shrink-0"
                   style={now ? { background: s.hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${s.hue} 16%, transparent)`, color: s.hue }}
                 >
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -201,13 +201,13 @@ export function YourStage({ stage }: { stage: Stage }) {
                   </svg>
                 </span>
                 <span className="flex-1 flex flex-col gap-0.5 text-left">
-                  <span className="text-[15.5px] font-semibold">{s.title}</span>
-                  <span className={now ? "text-[13px] leading-snug text-paper/75" : "text-[13px] leading-snug text-smoke"}>{s.sub}</span>
+                  <span className="text-callout font-semibold">{s.title}</span>
+                  <span className={now ? "text-footnote leading-snug text-paper/75" : "text-footnote leading-snug text-smoke"}>{s.sub}</span>
                 </span>
                 <ChevronRight />
               </>
             );
-            const cls = "w-full flex items-center gap-3 p-3.5 rounded-[20px] transition";
+            const cls = "w-full flex items-center gap-3 p-3.5 rounded-card transition";
             const style = now
               ? { background: `linear-gradient(135deg, color-mix(in srgb, ${s.hue} 20%, transparent), rgb(255 172 186 / 0.1))`, border: `1.5px solid color-mix(in srgb, ${s.hue} 55%, transparent)` }
               : { background: "var(--color-stage)", border: "1px solid rgb(245 241 236 / 0.08)" };
@@ -229,7 +229,7 @@ export function YourStage({ stage }: { stage: Stage }) {
           .filter((s) => s.done)
           .concat({ id: "signup", done: true, title: "Instruments, sound and influences", sub: "", hue: "", icon: null })
           .map((s) => (
-            <li key={s.id} className="flex items-center gap-3 px-3.5 py-1.5 text-[14px] text-smoke">
+            <li key={s.id} className="flex items-center gap-3 px-3.5 py-1.5 text-subhead text-smoke">
               <span className="size-[22px] rounded-full bg-tungsten text-ink flex items-center justify-center shrink-0">
                 <CheckIcon size={12} />
               </span>
@@ -246,7 +246,7 @@ export function YourStage({ stage }: { stage: Stage }) {
             localStorage.setItem(HIDE_KEY, "1");
           } catch {}
         }}
-        className="self-center h-11 px-4 text-[14px] font-medium text-smoke hover:text-paper"
+        className="self-center h-11 px-4 text-subhead font-medium text-smoke hover:text-paper"
       >
         Hide for now
       </button>
@@ -258,9 +258,9 @@ export function YourStage({ stage }: { stage: Stage }) {
 function Avatar({ stage, size }: { stage: Stage; size: number }) {
   return stage.photo ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={stage.photo} alt="" width={size} height={size} referrerPolicy="no-referrer" className="rounded-[18px] object-cover shrink-0" style={{ width: size, height: size }} />
+    <img src={stage.photo} alt="" width={size} height={size} referrerPolicy="no-referrer" className="rounded-tile object-cover shrink-0" style={{ width: size, height: size }} />
   ) : (
-    <span className="rounded-[18px] bg-riser flex items-center justify-center font-display font-bold text-[22px] shrink-0" style={{ width: size, height: size }}>
+    <span className="rounded-tile bg-riser flex items-center justify-center font-display font-bold text-title2 shrink-0" style={{ width: size, height: size }}>
       {stage.firstName[0]?.toUpperCase()}
     </span>
   );

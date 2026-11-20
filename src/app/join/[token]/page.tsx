@@ -57,7 +57,7 @@ export default async function Join({ params }: Params) {
         </Link>
       </header>
       <div className="w-full max-w-[440px] my-auto py-10 flex flex-col gap-6">
-        <div className="gel-rim rounded-[28px]">
+        <div className="gel-rim rounded-sheet">
           <div className="rounded-[26.5px] bg-stage p-6 flex flex-col items-center text-center gap-4">
             <span className="relative size-20 rounded-full overflow-hidden bg-riser">
               {invite.from.avatar_url && (
@@ -65,10 +65,10 @@ export default async function Join({ params }: Params) {
                 <FadeImg src={invite.from.avatar_url} alt="" referrerPolicy="no-referrer" className="absolute inset-0 size-full object-cover" />
               )}
             </span>
-            <h1 className="headline text-[30px] leading-[1.05] text-balance">
+            <h1 className="headline text-display-sm leading-[1.05] text-balance">
               {invite.from.first_name} added you to {invite.band}
             </h1>
-            <p className="text-[15px] text-smoke text-pretty">
+            <p className="text-callout text-smoke text-pretty">
               {[years, others > 0 ? `${invite.from.first_name} and ${others} other${others === 1 ? "" : "s"} confirmed` : ""].filter(Boolean).join(" · ")}
               {years || others > 0 ? <br /> : null}
               Confirm your spot and the band shows on your profile too, with everyone who played in it.
@@ -78,23 +78,23 @@ export default async function Join({ params }: Params) {
 
         {invite.status !== "pending" ? (
           <div className="flex flex-col gap-3 text-center">
-            <p className="text-[15px] text-smoke">This link was already used. Ask {invite.from.first_name} to send you a new one.</p>
-            <ButtonLink href={viewer ? "/me" : "/"} variant="glass" className="h-12 text-[16px]">{viewer ? "Go to your profile" : "Open Mixstro"}</ButtonLink>
+            <p className="text-callout text-smoke">This link was already used. Ask {invite.from.first_name} to send you a new one.</p>
+            <ButtonLink href={viewer ? "/me" : "/"} variant="glass" className="h-12 text-body">{viewer ? "Go to your profile" : "Open Mixstro"}</ButtonLink>
           </div>
         ) : invite.for_someone_else && viewer ? (
-          <p className="text-[15px] text-smoke text-center">This invite was sent to someone else.</p>
+          <p className="text-callout text-smoke text-center">This invite was sent to someone else.</p>
         ) : viewer?.profile?.onboarded_at ? (
           <ConfirmSpot token={token} band={invite.band} canDecline={!invite.for_someone_else} />
         ) : (
           <div className="flex flex-col gap-3">
-            <ButtonLink href={viewer ? "/onboarding/basics" : "/"} className="h-12 text-[16px]">Join Mixstro to confirm</ButtonLink>
-            <p className="text-[13px] text-smoke text-center text-pretty">
+            <ButtonLink href={viewer ? "/onboarding/basics" : "/"} className="h-12 text-body">Join Mixstro to confirm</ButtonLink>
+            <p className="text-footnote text-smoke text-center text-pretty">
               Free. Make your music page with every band you&apos;ve played in, then come back here to confirm. We&apos;ll remember this link.
             </p>
           </div>
         )}
 
-        <Link href={`/@${invite.from.username}`} className="text-[14px] text-smoke underline underline-offset-4 self-center">
+        <Link href={`/@${invite.from.username}`} className="text-subhead text-smoke underline underline-offset-4 self-center">
           See {invite.from.first_name}&apos;s music page
         </Link>
       </div>

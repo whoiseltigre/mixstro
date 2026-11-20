@@ -63,7 +63,7 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
     const line =
       jam.status === "replaced" ? "Moved to another time" : jam.status === "cancelled" ? "Invite cancelled" : jam.mine ? `${first} can't make it` : "You couldn't make it";
     return (
-      <div className={`${jam.mine ? "self-end" : "self-start"} text-[13px] text-smoke px-3 py-1.5 rounded-full border border-paper/10`} suppressHydrationWarning>
+      <div className={`${jam.mine ? "self-end" : "self-start"} text-footnote text-smoke px-3 py-1.5 rounded-full border border-paper/10`} suppressHydrationWarning>
         <span className="line-through">{jamWhen(jam.startsAt)}</span> · {line}
       </div>
     );
@@ -72,24 +72,24 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
   const checkinOpen = jam.status === "accepted" && Date.now() > new Date(jam.startsAt).getTime() + CHECKIN_AFTER_MS;
 
   return (
-    <div className={`${jam.mine ? "self-end" : "self-start"} w-[272px] rounded-[20px] bg-stage p-3.5 flex flex-col gap-2.5 border border-paper/10`}>
+    <div className={`${jam.mine ? "self-end" : "self-start"} w-[272px] rounded-card bg-stage p-3.5 flex flex-col gap-2.5 border border-paper/10`}>
       <div className="flex items-center gap-2">
         {CAL}
-        <span className="text-[14px] font-semibold">{jam.status === "accepted" ? "Jam's on" : "Jam session"}</span>
+        <span className="text-subhead font-semibold">{jam.status === "accepted" ? "Jam's on" : "Jam session"}</span>
       </div>
       <div className="flex flex-col gap-0.5">
-        <span className="text-[16px] font-semibold" suppressHydrationWarning>
+        <span className="text-body font-semibold" suppressHydrationWarning>
           {jamWhen(jam.startsAt)}
         </span>
-        <span className="text-[14px] text-smoke">{jam.place}</span>
-        {jam.note && <span className="text-[14px] leading-[1.4] pt-1">{jam.note}</span>}
+        <span className="text-subhead text-smoke">{jam.place}</span>
+        {jam.note && <span className="text-subhead leading-[1.4] pt-1">{jam.note}</span>}
       </div>
 
       {jam.status === "proposed" &&
         (jam.mine ? (
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[13px] text-smoke">Waiting on {first}</span>
-            <button type="button" disabled={pending} onClick={() => run(() => answerJam(jam.id, "cancelled"))} className="text-[13px] text-smoke underline underline-offset-2">
+            <span className="text-footnote text-smoke">Waiting on {first}</span>
+            <button type="button" disabled={pending} onClick={() => run(() => answerJam(jam.id, "cancelled"))} className="text-footnote text-smoke underline underline-offset-2">
               Cancel
             </button>
           </div>
@@ -100,36 +100,36 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
                 type="button"
                 disabled={pending}
                 onClick={() => run(() => answerJam(jam.id, "accepted"))}
-                className="flex-1 h-9 rounded-full bg-paper text-ink text-[14px] font-semibold disabled:opacity-50"
+                className="flex-1 h-9 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-50"
               >
                 I&apos;m in
               </button>
-              <button type="button" disabled={pending} onClick={() => onAnotherTime(jam)} className="flex-1 h-9 rounded-full border border-paper/20 text-[14px] disabled:opacity-50">
+              <button type="button" disabled={pending} onClick={() => onAnotherTime(jam)} className="flex-1 h-9 rounded-full border border-paper/20 text-subhead disabled:opacity-50">
                 Another time
               </button>
             </div>
-            <button type="button" disabled={pending} onClick={() => run(() => answerJam(jam.id, "declined"))} className="self-center text-[13px] text-smoke">
+            <button type="button" disabled={pending} onClick={() => run(() => answerJam(jam.id, "declined"))} className="self-center text-footnote text-smoke">
               Can&apos;t make it
             </button>
           </div>
         ))}
 
       {jam.status === "accepted" && !checkinOpen && (
-        <button type="button" onClick={() => downloadIcs(jam, first)} className="h-9 rounded-full border border-paper/20 text-[14px] font-medium">
+        <button type="button" onClick={() => downloadIcs(jam, first)} className="h-9 rounded-full border border-paper/20 text-subhead font-medium">
           Add to calendar
         </button>
       )}
 
       {checkinOpen && jam.played === null && (
         <div className="flex flex-col gap-2 pt-1 border-t border-paper/10">
-          <span className="text-[14px] pt-2">Did you end up playing together?</span>
+          <span className="text-subhead pt-2">Did you end up playing together?</span>
           <div className="flex gap-2">
             <button
               type="button"
               disabled={pending}
               onClick={() => run(() => checkInJam(jam.id, true))}
               aria-label="Yes, we played"
-              className="flex-1 h-9 rounded-full bg-paper text-ink text-[16px] disabled:opacity-50"
+              className="flex-1 h-9 rounded-full bg-paper text-ink text-body disabled:opacity-50"
             >
               👍
             </button>
@@ -138,16 +138,16 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
               disabled={pending}
               onClick={() => run(() => checkInJam(jam.id, false))}
               aria-label="No, it didn't happen"
-              className="flex-1 h-9 rounded-full border border-paper/20 text-[16px] disabled:opacity-50"
+              className="flex-1 h-9 rounded-full border border-paper/20 text-body disabled:opacity-50"
             >
               👎
             </button>
           </div>
-          <span className="text-[12px] text-smoke">Only you see your answer until {first} answers too.</span>
+          <span className="text-caption text-smoke">Only you see your answer until {first} answers too.</span>
         </div>
       )}
       {checkinOpen && jam.played !== null && (
-        <span className="text-[13px] pt-2 border-t border-paper/10 text-smoke">
+        <span className="text-footnote pt-2 border-t border-paper/10 text-smoke">
           {jam.outcome === "played"
             ? "You both said you played together."
             : jam.outcome === "not_played"
@@ -155,7 +155,7 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
               : `Thanks. You'll both see how it went once ${first} answers.`}
         </span>
       )}
-      {error && <span className="text-[12px] text-[#FF453A]">{error}</span>}
+      {error && <span className="text-caption text-danger">{error}</span>}
     </div>
   );
 }
@@ -183,7 +183,7 @@ export function PlanJamSheet(props: PlanProps) {
       z="z-40"
       labelledBy="plan-jam-title"
       scrimClassName="bg-ink/70"
-      className="md:max-w-[440px] rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10"
+      className="md:max-w-[440px] rounded-t-sheet md:rounded-sheet bg-stage border border-paper/10"
     >
       <PlanJamForm {...props} />
     </Sheet>
@@ -216,7 +216,7 @@ function PlanJamForm({ connectionId, first, replacing, onSent }: PlanProps) {
       <form onSubmit={submit} className="p-5 pb-[max(env(safe-area-inset-bottom),20px)] flex flex-col gap-4" aria-labelledby="plan-jam-title">
         <div className="flex items-center gap-2">
           {CAL}
-          <h2 id="plan-jam-title" className="text-[20px] font-semibold tracking-[-0.01em]">
+          <h2 id="plan-jam-title" className="text-title3 font-semibold tracking-[-0.01em]">
             {replacing ? "Suggest another time" : `Plan a jam with ${first}`}
           </h2>
         </div>
@@ -226,12 +226,12 @@ function PlanJamForm({ connectionId, first, replacing, onSent }: PlanProps) {
         </div>
         <Field id="jam-place" label="Where" placeholder="Our rehearsal space in Silver Lake" value={place} maxLength={120} onChange={(e) => setPlace(e.target.value)} required />
         <Field id="jam-note" label="Anything to bring? (optional)" placeholder="Bring your bass, we have a drum kit" value={note} maxLength={280} onChange={(e) => setNote(e.target.value)} />
-        {error && <p className="text-[13px] text-[#FF453A]">{error}</p>}
+        {error && <p className="text-footnote text-danger">{error}</p>}
         <div className="flex gap-2">
-          <Button type="button" variant="glass" onClick={close} className="h-12 text-[16px]">
+          <Button type="button" variant="glass" onClick={close} className="h-12 text-body">
             Not now
           </Button>
-          <Button type="submit" disabled={pending || place.trim().length < 2} className="h-12 text-[16px]">
+          <Button type="submit" disabled={pending || place.trim().length < 2} className="h-12 text-body">
             {pending ? "Sending…" : "Send invite"}
           </Button>
         </div>

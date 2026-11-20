@@ -7,6 +7,7 @@ import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon } from "@/components/ui";
 import { searchArtists } from "@/lib/artists";
 import { type Artist, type Draft, STEP_GLOW, saveProfile, stepNav, useDraft } from "@/lib/onboarding";
+import { haptic } from "@/lib/haptics";
 
 // A signup step ("Who do you sound like?"), and also reachable from the Profile tab (?from=profile).
 const GLOW = STEP_GLOW.influences;
@@ -69,7 +70,7 @@ export default function Influences() {
 
   function flip(a: Artist) {
     try {
-      navigator.vibrate?.(8);
+      haptic("select");
     } catch {}
     if (pickedIds.has(a.id)) update({ influences: picked.filter((p) => p.id !== a.id) });
     else if (picked.length < MAX) {
@@ -105,7 +106,7 @@ export default function Influences() {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search any artist or band"
             autoComplete="off"
-            className="h-[52px] w-full rounded-2xl bg-stage pl-11 pr-3 text-[16px] placeholder:text-smoke outline-none border border-paper/10 focus:border-[var(--glow)] transition"
+            className="h-[52px] w-full rounded-2xl bg-stage pl-11 pr-3 text-body placeholder:text-smoke outline-none border border-paper/10 focus:border-[var(--glow)] transition"
             style={{ "--glow": GLOW } as React.CSSProperties}
           />
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="absolute left-4 top-[17px] text-smoke" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
@@ -115,8 +116,8 @@ export default function Influences() {
                 <li key={a.id}>
                   <button type="button" onClick={() => add(a)} className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-paper/5 text-left">
                     <ArtistAvatar artist={a} size={40} />
-                    <span className="flex-1 text-[15px]">{a.name}</span>
-                    <span className="text-[13px] text-smoke pr-1">Add</span>
+                    <span className="flex-1 text-callout">{a.name}</span>
+                    <span className="text-footnote text-smoke pr-1">Add</span>
                   </button>
                 </li>
               ))}
@@ -131,7 +132,7 @@ export default function Influences() {
                       update({ band: { ...draft.band, name, since: draft.band?.since ?? new Date().getFullYear() } });
                       setQ("");
                     }}
-                    className="w-full p-2.5 rounded-xl hover:bg-paper/5 text-left text-[14px] text-smoke"
+                    className="w-full p-2.5 rounded-xl hover:bg-paper/5 text-left text-subhead text-smoke"
                   >
                     &ldquo;<span className="text-paper">{q.trim()}</span>&rdquo; is my band
                   </button>
@@ -145,7 +146,7 @@ export default function Influences() {
 
         {picked.length > 0 && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-[13px] font-medium text-smoke">
+            <h2 className="text-footnote font-medium text-smoke">
               Your picks <span className="tabular-nums">· {picked.length}</span>
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -155,12 +156,12 @@ export default function Influences() {
                   type="button"
                   onClick={() => flip(a)}
                   aria-label={`Remove ${a.name}`}
-                  className="rise-in h-10 pl-1 pr-3 rounded-full inline-flex items-center gap-2 text-[14px] border-[1.5px] transition active:scale-[0.97]"
+                  className="press rise-in h-10 pl-1 pr-3 rounded-full inline-flex items-center gap-2 text-subhead border-[1.5px]"
                   style={{ borderColor: GLOW, background: `color-mix(in srgb, ${GLOW} 14%, var(--color-stage))` }}
                 >
                   <ArtistAvatar artist={a} size={30} />
                   <span className="max-w-[140px] truncate">{a.name}</span>
-                  <span aria-hidden="true" className="text-smoke text-[16px] leading-none">×</span>
+                  <span aria-hidden="true" className="text-smoke text-body leading-none">×</span>
                 </button>
               ))}
             </div>
@@ -169,7 +170,7 @@ export default function Influences() {
 
         {groups.map((g) => (
           <section key={g.from.id} className="rise-in flex flex-col gap-4">
-            <h2 className="text-[13px] font-medium text-smoke">
+            <h2 className="text-footnote font-medium text-smoke">
               Because you picked <span className="text-paper">{g.from.name}</span>
             </h2>
             <div className="grid grid-cols-3 gap-x-2 gap-y-5">
@@ -181,22 +182,22 @@ export default function Influences() {
         ))}
 
         {!picked.length && !q && (
-          <div className="rise-in rounded-[24px] border border-dashed border-paper/15 p-6 flex flex-col items-center text-center gap-3">
+          <div className="rise-in rounded-panel border border-dashed border-paper/15 p-6 flex flex-col items-center text-center gap-3">
             <div className="flex -space-x-3" aria-hidden="true">
               {["#FFB245", "#FFACBA", "#C9B6FF"].map((c) => (
                 <span key={c} className="size-12 rounded-full border-2 border-ink" style={{ background: `radial-gradient(circle at 35% 30%, ${c}, color-mix(in srgb, ${c} 30%, var(--color-ink)))` }} />
               ))}
             </div>
-            <p className="text-[15px] text-pretty">Start with one artist who shaped your sound.</p>
-            <p className="text-[13px] text-smoke text-pretty -mt-2">
+            <p className="text-callout text-pretty">Start with one artist who shaped your sound.</p>
+            <p className="text-footnote text-smoke text-pretty -mt-2">
               Anyone works, from The Beatles to your friend&apos;s band. Got your own music? Search your band name and tap &ldquo;is my band&rdquo; at the bottom.
             </p>
           </div>
         )}
       </div>
       <StepFooter>
-        {picked.length < MIN && <p className="text-center text-[12px] text-smoke">Pick at least {MIN}</p>}
-        {error && <p role="alert" className="text-center text-[13px] text-[#FF453A]">{error}</p>}
+        {picked.length < MIN && <p className="text-center text-caption text-smoke">Pick at least {MIN}</p>}
+        {error && <p role="alert" className="text-center text-footnote text-danger">{error}</p>}
         <Button disabled={picked.length < MIN || saving} onClick={save}>
           {saving ? "Saving…" : `${fromProfile ? "Save" : "Continue"}${picked.length ? ` · ${picked.length} picked` : ""}`}
         </Button>
@@ -210,27 +211,27 @@ function OwnBand({ draft, update }: { draft: Draft; update: ReturnType<typeof us
   const own = draft.band!;
   const now = new Date().getFullYear();
   return (
-    <section className="rise-in rounded-[22px] p-4 flex flex-col gap-3 border-[1.5px] border-tungsten/60 bg-[color-mix(in_srgb,#FFB245_10%,var(--color-stage))]">
+    <section className="rise-in rounded-card-lg p-4 flex flex-col gap-3 border-[1.5px] border-tungsten/60 bg-[color-mix(in_srgb,#FFB245_10%,var(--color-stage))]">
       <div className="flex items-start gap-3">
         <span className="size-10 rounded-[13px] bg-tungsten text-ink flex items-center justify-center shrink-0" aria-hidden="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 15.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8z" /></svg>
         </span>
         <span className="flex-1 flex flex-col gap-0.5">
-          <span className="text-[15px]">
+          <span className="text-callout">
             <span className="font-medium">{own.name}</span> goes on your profile
           </span>
-          <span className="text-[13px] text-smoke text-pretty">As one of your projects, so people can hear your music. Add songs to it after signup.</span>
+          <span className="text-footnote text-smoke text-pretty">As one of your projects, so people can hear your music. Add songs to it after signup.</span>
         </span>
-        <button type="button" onClick={() => update({ band: undefined })} aria-label="Remove" className="text-smoke hover:text-paper text-[18px] leading-none px-1">
+        <button type="button" onClick={() => update({ band: undefined })} aria-label="Remove" className="text-smoke hover:text-paper text-title4 leading-none px-1">
           ×
         </button>
       </div>
-      <label className="flex items-center gap-2 text-[13px] text-smoke pl-[52px]">
+      <label className="flex items-center gap-2 text-footnote text-smoke pl-[52px]">
         Since
         <select
           value={own.since}
           onChange={(e) => update({ band: { ...own, since: Number(e.target.value) } })}
-          className="h-8 rounded-full bg-ink border border-paper/15 px-3 text-paper text-[13px]"
+          className="h-8 rounded-full bg-ink border border-paper/15 px-3 text-paper text-footnote"
         >
           {Array.from({ length: now - 1969 }, (_, i) => now - i).map((y) => (
             <option key={y} value={y}>
@@ -256,7 +257,7 @@ function ArtistTile({ artist: a, on, onClick, delay }: { artist: Artist; on: boo
           </span>
         )}
       </span>
-      <span className={`text-[13px] text-center leading-tight ${on ? "text-paper font-medium" : "text-smoke"}`}>{a.name}</span>
+      <span className={`text-footnote text-center leading-tight ${on ? "text-paper font-medium" : "text-smoke"}`}>{a.name}</span>
     </button>
   );
 }

@@ -135,7 +135,7 @@ export function TodayDeck({
 
         <header className="absolute inset-x-5 top-0 pt-safe mt-2 flex items-center justify-between">
           <LogoMark size={24} />
-          <span className="glass h-8 px-3 rounded-full flex items-center text-[13px] font-semibold">
+          <span className="glass h-8 px-3 rounded-full flex items-center text-footnote font-semibold">
             {index + 1} of {people.length} today
           </span>
         </header>
@@ -143,39 +143,39 @@ export function TodayDeck({
         <div className="absolute inset-x-0 bottom-0 pb-[calc(max(env(safe-area-inset-bottom),16px)+96px)] flex flex-col gap-6">
           <div className="px-5 flex flex-col gap-2">
             {m.sample && (
-              <span className="self-start glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold text-smoke">
+              <span className="self-start glass h-7 px-3 rounded-full flex items-center text-caption font-semibold text-smoke">
                 Sample profile
               </span>
             )}
             {asked && (
-              <span className="self-start glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold">
+              <span className="self-start glass h-7 px-3 rounded-full flex items-center text-caption font-semibold">
                 {first} wants to play with you
               </span>
             )}
-            <span className="flex items-center gap-2 text-[12px] font-semibold tracking-[0.16em] uppercase">
+            <span className="flex items-center gap-2 text-caption font-semibold tracking-[0.16em] uppercase">
               <span className="size-2 rounded-full bg-tungsten" />
               {m.instrument} · {m.genres} ·{" "}
               {m.distanceMi ? `${m.distanceMi} mi` : m.neighborhood}
             </span>
-            <h1 className="headline text-[52px] leading-[0.95]">
+            <h1 className="headline text-hero leading-[0.95]">
               <Link href={`/m/${m.username}`}>{m.name}</Link>
             </h1>
-            <p className="text-[15px] leading-[1.35] text-paper/80 text-pretty">
+            <p className="text-callout leading-[1.35] text-paper/80 text-pretty">
               {why}
             </p>
           </div>
 
           <section
             aria-label="Influence overlap"
-            className="glass mx-4 rounded-[24px] py-3.5 flex flex-col gap-2.5 overflow-hidden"
+            className="glass mx-4 rounded-panel py-3.5 flex flex-col gap-2.5 overflow-hidden"
           >
             <div className="px-4 flex items-baseline justify-between gap-2">
-              <span className="text-[16px] font-semibold">
+              <span className="text-body font-semibold">
                 {m.shared.length
                   ? `${m.shared.length} shared influence${m.shared.length === 1 ? "" : "s"}`
                   : "New sounds for you"}
               </span>
-              <span className="text-[13px] text-smoke">
+              <span className="text-footnote text-smoke">
                 {m.commitment}
                 {m.sameCommitment ? ", like you" : ""}
               </span>
@@ -185,7 +185,7 @@ export function TodayDeck({
                 (a) => (
                   <span
                     key={a.id}
-                    className="shrink-0 flex items-center gap-2 h-8 pl-1 pr-3 rounded-full bg-paper/8 border border-paper/12 text-[13px] whitespace-nowrap"
+                    className="shrink-0 flex items-center gap-2 h-8 pl-1 pr-3 rounded-full bg-paper/8 border border-paper/12 text-footnote whitespace-nowrap"
                   >
                     <ArtistAvatar artist={a} size={24} />
                     {a.name}
@@ -204,12 +204,12 @@ export function TodayDeck({
             <SampleNote first={first} onNext={next} />
           ) : sentTo === m.id ? (
             <div className="px-5 flex items-center gap-3">
-              <p className="flex-1 text-[15px] leading-[1.4]">
+              <p className="flex-1 text-callout leading-[1.4]">
                 Sent. We&apos;ll tell you when {first} says yes.
               </p>
               <button
                 onClick={next}
-                className="h-[51px] px-6 rounded-full bg-paper text-ink text-[17px] font-semibold"
+                className="h-[51px] px-6 rounded-full bg-paper text-ink text-body-lg font-semibold"
               >
                 Next
               </button>
@@ -235,7 +235,7 @@ export function TodayDeck({
                 <button
                   disabled={pending}
                   onClick={doConnect}
-                  className="w-full h-[51px] rounded-full bg-paper text-ink text-[17px] font-semibold flex items-center justify-center disabled:opacity-70"
+                  className="w-full h-[51px] rounded-full bg-paper text-ink text-body-lg font-semibold flex items-center justify-center disabled:opacity-70"
                 >
                   {asked ? `Connect with ${first}` : "Connect"}
                 </button>
@@ -324,14 +324,14 @@ function Gallery({
     <main className="hidden md:flex flex-col gap-6 pt-6 pb-10 min-h-[calc(100dvh-88px)]">
       <div className="flex items-end justify-between gap-6">
         <div className="flex flex-col gap-1">
-          <h1 className="headline text-[44px]">
+          <h1 className="headline text-display-lg">
             Today&apos;s {total === 5 ? "five" : "musicians"}
           </h1>
-          <p className="text-[15px] text-smoke">
+          <p className="text-callout text-smoke">
             Musicians near you who want what you want. New every morning.
           </p>
         </div>
-        <span className="glass h-8 px-3.5 rounded-full flex items-center text-[13px] font-semibold shrink-0">
+        <span className="glass h-8 px-3.5 rounded-full flex items-center text-footnote font-semibold shrink-0">
           {total - people.length + 1} of {total} today
         </span>
       </div>
@@ -340,7 +340,7 @@ function Gallery({
         className={`flex-1 min-h-[560px] grid gap-3.5 ${others.length ? "grid-cols-[1.7fr_1fr] lg:grid-cols-[1.4fr_repeat(var(--n),1fr)]" : "grid-cols-1 max-w-[720px]"}`}
         style={{ "--n": others.length } as React.CSSProperties}
       >
-        <article className="relative rounded-[28px] overflow-hidden ring-2 ring-tungsten">
+        <article className="relative rounded-sheet overflow-hidden ring-2 ring-tungsten">
           <PersonPhoto
             person={m}
             priority
@@ -352,17 +352,17 @@ function Gallery({
           <div className="absolute inset-x-6 bottom-6 flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
               {m.sample && (
-                <span className="glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold text-smoke">
+                <span className="glass h-7 px-3 rounded-full flex items-center text-caption font-semibold text-smoke">
                   Sample profile
                 </span>
               )}
               {asked && (
-                <span className="glass h-7 px-3 rounded-full flex items-center text-[12px] font-semibold">
+                <span className="glass h-7 px-3 rounded-full flex items-center text-caption font-semibold">
                   {first} wants to play with you
                 </span>
               )}
             </div>
-            <span className="flex items-center gap-2 text-[12px] font-semibold tracking-[0.16em] uppercase">
+            <span className="flex items-center gap-2 text-caption font-semibold tracking-[0.16em] uppercase">
               <span className="size-2 rounded-full bg-tungsten" />
               {m.instrument} ·{" "}
               {m.distanceMi ? `${m.distanceMi} mi` : m.neighborhood}
@@ -375,7 +375,7 @@ function Gallery({
                 {m.name}
               </Link>
             </h2>
-            <p className="text-[15px] leading-[1.4] text-paper/80 text-pretty max-w-[460px]">
+            <p className="text-callout leading-[1.4] text-paper/80 text-pretty max-w-[460px]">
               {why}
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -384,7 +384,7 @@ function Gallery({
                 .map((a) => (
                   <span
                     key={a.id}
-                    className="flex items-center gap-2 h-8 pl-1 pr-3 rounded-full bg-paper/8 border border-paper/12 text-[13px] whitespace-nowrap"
+                    className="flex items-center gap-2 h-8 pl-1 pr-3 rounded-full bg-paper/8 border border-paper/12 text-footnote whitespace-nowrap"
                   >
                     <ArtistAvatar artist={a} size={24} />
                     {a.name}
@@ -396,12 +396,12 @@ function Gallery({
               <SampleNote first={first} onNext={onNext} wide />
             ) : sent ? (
               <div className="flex items-center gap-3 pt-1">
-                <p className="flex-1 text-[15px]">
+                <p className="flex-1 text-callout">
                   Sent. We&apos;ll tell you when {first} says yes.
                 </p>
                 <button
                   onClick={onNext}
-                  className="h-12 px-6 rounded-full bg-paper text-ink text-[16px] font-semibold hover:bg-paper/90"
+                  className="h-12 px-6 rounded-full bg-paper text-ink text-body font-semibold hover:bg-paper/90"
                 >
                   Next
                 </button>
@@ -411,7 +411,7 @@ function Gallery({
                 <button
                   disabled={pending}
                   onClick={onPass}
-                  className="glass h-12 px-6 rounded-full text-[16px] font-semibold hover:bg-paper/10 transition"
+                  className="glass h-12 px-6 rounded-full text-body font-semibold hover:bg-paper/10 transition"
                 >
                   Pass
                 </button>
@@ -419,14 +419,14 @@ function Gallery({
                   <button
                     disabled={pending}
                     onClick={onConnect}
-                    className="w-full h-12 rounded-full bg-paper text-ink text-[16px] font-semibold disabled:opacity-70 hover:bg-paper/90"
+                    className="w-full h-12 rounded-full bg-paper text-ink text-body font-semibold disabled:opacity-70 hover:bg-paper/90"
                   >
                     {asked ? `Connect with ${first}` : "Connect"}
                   </button>
                 </div>
                 <Link
                   href={`/m/${m.username}`}
-                  className="glass h-12 px-5 rounded-full text-[15px] font-semibold flex items-center hover:bg-paper/10 transition"
+                  className="glass h-12 px-5 rounded-full text-callout font-semibold flex items-center hover:bg-paper/10 transition"
                 >
                   Profile
                 </Link>
@@ -442,7 +442,7 @@ function Gallery({
             onClick={() => onPick(p.id)}
             aria-label={`Show ${p.name}`}
             // Tablets have room for the next musician only; desktops show the rest of today.
-            className={`group relative rounded-[28px] overflow-hidden text-left ${i > 0 ? "hidden lg:block" : ""}`}
+            className={`group relative rounded-sheet overflow-hidden text-left ${i > 0 ? "hidden lg:block" : ""}`}
           >
             <PersonPhoto
               person={p}
@@ -452,18 +452,18 @@ function Gallery({
             />
             <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgb(15_13_11/0.92))] transition group-hover:bg-[linear-gradient(180deg,transparent_35%,rgb(15_13_11/0.92))]" />
             <div className="absolute inset-x-5 bottom-5 flex flex-col gap-1.5">
-              <span className="text-[11px] font-semibold tracking-[0.16em] uppercase text-paper/85">
+              <span className="text-caption2 font-semibold tracking-[0.16em] uppercase text-paper/85">
                 {p.instrument} ·{" "}
                 {p.distanceMi ? `${p.distanceMi} mi` : p.neighborhood}
               </span>
-              <span className="headline text-[36px] leading-none">
+              <span className="headline text-display leading-none">
                 {p.name.split(" ")[0]}
               </span>
             </div>
           </button>
         ))}
       </div>
-      <p className="text-[12px] text-smoke/70">
+      <p className="text-caption text-smoke/70">
         Tip: ← → to move, C to connect, P to pass.
       </p>
     </main>
@@ -479,7 +479,7 @@ function AllCaughtUp({ total, early }: { total: number; early?: Early }) {
         <header className="relative mt-2 px-5 flex items-center md:hidden">
           <LogoMark size={24} />
         </header>
-        <p className="px-5 md:px-0 text-[15px] text-smoke">That&apos;s all for today.</p>
+        <p className="px-5 md:px-0 text-callout text-smoke">That&apos;s all for today.</p>
         <EarlyArea area={early.area} username={early.username} firstName={early.firstName} />
       </main>
     );
@@ -496,12 +496,12 @@ function AllCaughtUp({ total, early }: { total: number; early?: Early }) {
       </header>
       <div className="relative flex-1 flex flex-col justify-center gap-3">
         <h1
-          className="headline text-[40px] leading-none"
+          className="headline text-display-md leading-none"
           style={{ fontWeight: 700 }}
         >
           {total ? "That's today." : "You're early."}
         </h1>
-        <p className="text-[16px] leading-[1.5] text-smoke">
+        <p className="text-body leading-[1.5] text-smoke">
           {total
             ? "New musicians land here tomorrow. Meanwhile, see who's posting on the Board."
             : "Musicians near you will show up here as they join. Post on the Board so they can find you first."}
@@ -509,13 +509,13 @@ function AllCaughtUp({ total, early }: { total: number; early?: Early }) {
         <div className="flex gap-2.5 pt-3">
           <Link
             href="/board"
-            className="h-12 px-5 rounded-full bg-paper text-ink text-[16px] font-semibold flex items-center"
+            className="h-12 px-5 rounded-full bg-paper text-ink text-body font-semibold flex items-center"
           >
             Open the Board
           </Link>
           <Link
             href="/search"
-            className="glass h-12 px-5 rounded-full text-[16px] font-medium flex items-center"
+            className="glass h-12 px-5 rounded-full text-body font-medium flex items-center"
           >
             Search
           </Link>
@@ -549,10 +549,10 @@ function rememberSample(id: string) {
 function SampleNote({ first, onNext, wide }: { first: string; onNext: () => void; wide?: boolean }) {
   return (
     <div className={wide ? "flex items-center gap-3 pt-1" : "px-5 flex items-center gap-3"}>
-      <p className="flex-1 text-[14.5px] leading-[1.4] text-paper/85 text-pretty">
+      <p className="flex-1 text-callout leading-[1.4] text-paper/85 text-pretty">
         {first} is a sample, here to show how Today works. Real musicians near you come first as they join.
       </p>
-      <button onClick={onNext} className="h-[51px] px-6 rounded-full bg-paper text-ink text-[17px] font-semibold shrink-0">
+      <button onClick={onNext} className="h-[51px] px-6 rounded-full bg-paper text-ink text-body-lg font-semibold shrink-0">
         Next
       </button>
     </div>

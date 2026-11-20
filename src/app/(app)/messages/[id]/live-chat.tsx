@@ -126,7 +126,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
         <div className="mt-auto" />
         {timeline.length === 0 && (
-          <p className="self-center max-w-[260px] text-center text-[14px] leading-[1.5] text-smoke py-6">
+          <p className="self-center max-w-[260px] text-center text-subhead leading-[1.5] text-smoke py-6">
             You and {first} are connected.
             {person.shared[0] ? ` Ask what they love about ${person.shared[0].name}.` : " Say hi and share a clip."}
           </p>
@@ -138,7 +138,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
                 key={t}
                 type="button"
                 onClick={() => setDraft(t)}
-                className="h-9 px-3.5 rounded-full border border-paper/20 text-[13px] hover:bg-paper/10 transition"
+                className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition"
               >
                 {t}
               </button>
@@ -151,7 +151,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
           const m = item.message;
           return (
             <div key={item.key} className="contents">
-              {gap && <TimeAgo iso={item.at} className="self-center text-[12px] text-smoke py-1" />}
+              {gap && <TimeAgo iso={item.at} className="self-center text-caption text-smoke py-1" />}
               {item.jam ? (
                 <JamCard jam={item.jam} first={first} onAnotherTime={(jam) => setPlanning({ replacing: jam })} />
               ) : !m ? null : m.voiceUrl !== null || m.voiceSeconds ? (
@@ -160,8 +160,8 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
                 <div
                   className={
                     m.mine
-                      ? "self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-[15px] leading-[1.4] whitespace-pre-wrap break-words"
-                      : "self-start max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-[15px] leading-[1.4] whitespace-pre-wrap break-words"
+                      ? "self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-callout leading-[1.4] whitespace-pre-wrap break-words"
+                      : "self-start max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout leading-[1.4] whitespace-pre-wrap break-words"
                   }
                   style={m.id < 0 ? { opacity: 0.6 } : undefined}
                 >
@@ -175,13 +175,13 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
           <button
             type="button"
             onClick={() => setPlanning({ replacing: null })}
-            className="self-center mt-2 h-9 px-4 rounded-full border border-tungsten/50 text-[13px] font-semibold text-tungsten hover:bg-tungsten/10 transition"
+            className="self-center mt-2 h-9 px-4 rounded-full border border-tungsten/50 text-footnote font-semibold text-tungsten hover:bg-tungsten/10 transition"
           >
             Sounds like a fit. Plan a jam with {first}?
           </button>
         )}
         {(error || voice.error) && (
-          <p role="alert" className="self-end text-[12px] text-[#FF453A]">
+          <p role="alert" className="self-end text-caption text-danger">
             {error ?? voice.error}
           </p>
         )}
@@ -190,7 +190,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
 
       <form
         onSubmit={submit}
-        className="glass fixed md:absolute z-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-4 md:right-4 w-[calc(min(100%,440px)-24px)] md:w-auto bottom-[max(env(safe-area-inset-bottom),16px)] md:bottom-4 h-[54px] rounded-[27px] flex items-center gap-2 pl-4 pr-[7px]"
+        className="glass fixed md:absolute z-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-4 md:right-4 w-[calc(min(100%,440px)-24px)] md:w-auto bottom-[max(env(safe-area-inset-bottom),16px)] md:bottom-4 h-[54px] rounded-sheet flex items-center gap-2 pl-4 pr-[7px]"
       >
         {voice.recording ? (
           <>
@@ -205,9 +205,9 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
               </svg>
             </button>
             <span className="flex-1 flex items-center gap-2.5" aria-live="polite">
-              <span className="size-2.5 rounded-full bg-[#FF453A] animate-pulse" aria-hidden="true" />
-              <span className="text-[16px] tabular-nums">{clock(voice.seconds)}</span>
-              <span className="text-[13px] text-smoke truncate">Recording for {first}</span>
+              <span className="size-2.5 rounded-full bg-danger animate-pulse" aria-hidden="true" />
+              <span className="text-body tabular-nums">{clock(voice.seconds)}</span>
+              <span className="text-footnote text-smoke truncate">Recording for {first}</span>
             </span>
             <button
               type="button"
@@ -242,7 +242,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
               placeholder={`Message ${first}`}
               autoComplete="off"
               maxLength={4000}
-              className="flex-1 h-10 bg-transparent text-[16px] outline-none placeholder:text-smoke"
+              className="flex-1 h-10 bg-transparent text-body outline-none placeholder:text-smoke"
             />
             {draft.trim() ? (
               <button type="submit" aria-label="Send" className="hit-slop relative size-10 rounded-full bg-paper text-ink flex items-center justify-center">

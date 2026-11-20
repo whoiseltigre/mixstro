@@ -35,12 +35,13 @@ export function Wordmark({ size = 24 }: { size?: number }) {
 
 type Variant = "primary" | "glass" | "danger" | "gel";
 
+/** Every button: a finger-sized pill that dips the instant it's pressed and springs back (`press`). */
 const base =
-  "h-14 w-full rounded-full text-[17px] flex items-center justify-center gap-2 cursor-pointer transition duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgb(0_0_0/0.35)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper motion-reduce:transform-none disabled:opacity-40 disabled:pointer-events-none";
+  "press h-14 w-full rounded-full text-body-lg flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper motion-reduce:transform-none disabled:opacity-40 disabled:pointer-events-none";
 const variants: Record<Exclude<Variant, "gel">, string> = {
   primary: "bg-paper text-ink font-semibold hover:bg-white",
   glass: "glass text-paper font-medium hover:bg-paper/10",
-  danger: "bg-[#FF453A] text-paper font-semibold hover:bg-[#ff6159]",
+  danger: "bg-danger text-paper font-semibold hover:bg-[#ff6159]",
 };
 
 /** Primary actions. "gel" adds the Gel rim, reserved for Connect-type peak moments. */
@@ -53,14 +54,14 @@ export function Button({
   if (variant === "gel") {
     return (
       <div className="gel-rim rounded-full w-full">
-        <button {...props} className={cx(base, variants.primary, "h-[53px]", className)}>
+        <button data-haptic="tap" {...props} className={cx(base, variants.primary, "h-[53px]", className)}>
           {children}
         </button>
       </div>
     );
   }
   return (
-    <button {...props} className={cx(base, variants[variant], className)}>
+    <button data-haptic="tap" {...props} className={cx(base, variants[variant], className)}>
       {children}
     </button>
   );
@@ -73,7 +74,7 @@ export function ButtonLink({
   ...props
 }: ComponentProps<typeof Link> & { variant?: Exclude<Variant, "gel"> }) {
   return (
-    <Link {...props} className={cx(base, variants[variant], className)}>
+    <Link data-haptic="tap" {...props} className={cx(base, variants[variant], className)}>
       {children}
     </Link>
   );
@@ -89,9 +90,10 @@ export function Chip({
     <button
       type="button"
       aria-pressed={selected}
+      data-haptic="select"
       {...props}
       className={cx(
-        "h-11 px-4 rounded-full text-[15px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]",
+        "press h-11 px-4 rounded-full text-callout inline-flex items-center gap-1.5 border",
         selected ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16 text-paper",
         className,
       )}
@@ -111,24 +113,24 @@ export function Field({
 }: ComponentProps<"input"> & { label: string; hint?: string; id: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[13px] font-semibold text-smoke">
+      <label htmlFor={id} className="text-footnote font-semibold text-smoke">
         {label}
       </label>
       <input
         id={id}
         {...props}
         className={cx(
-          "h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 text-[17px] text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50",
+          "h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 text-body-lg text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50",
           className,
         )}
       />
-      {hint && <p className="text-[12px] text-smoke">{hint}</p>}
+      {hint && <p className="text-caption text-smoke">{hint}</p>}
     </div>
   );
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <h2 className="text-[13px] font-semibold text-smoke">{children}</h2>;
+  return <h2 className="text-footnote font-semibold text-smoke">{children}</h2>;
 }
 
 export function BackButton({ href, onClick }: { href?: string; onClick?: () => void }) {
@@ -213,7 +215,7 @@ export function GoogleButton({ className, ...props }: ComponentProps<"button">) 
       {...props}
       className={cx(
         base,
-        "bg-[#131314] border border-[#8E918F] text-[#E3E3E3] text-[16px] font-medium gap-3 hover:bg-[#1f1f20] hover:border-[#E3E3E3]",
+        "bg-[#131314] border border-[#8E918F] text-[#E3E3E3] text-body font-medium gap-3 hover:bg-[#1f1f20] hover:border-[#E3E3E3]",
         className,
       )}
       style={{ fontFamily: "var(--font-roboto), Roboto, Arial, sans-serif" }}

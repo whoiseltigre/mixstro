@@ -198,8 +198,8 @@ export default function ImportJourney() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me/projects" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-[34px] font-bold tracking-[-0.03em] leading-tight">{acts.length ? "We found your journey" : "Find your releases"}</h1>
-          <p className="text-[15px] text-smoke leading-snug">
+          <h1 className="text-display font-bold tracking-[-0.03em] leading-tight">{acts.length ? "We found your journey" : "Find your releases"}</h1>
+          <p className="text-callout text-smoke leading-snug">
             {acts.length
               ? "Your releases by year, and the bands you were in. Untick anything that isn't yours."
               : "Type the name you release under, or a band you were in. We'll lay out your releases by year."}
@@ -217,34 +217,34 @@ export default function ImportJourney() {
             autoComplete="off"
             enterKeyHint="search"
             placeholder="Your artist or band name"
-            className="h-[56px] px-5 rounded-full bg-stage border border-paper/12 text-[16px] placeholder:text-smoke/50 outline-none focus:border-paper/50 transition"
+            className="h-[56px] px-5 rounded-full bg-stage border border-paper/12 text-body placeholder:text-smoke/50 outline-none focus:border-paper/50 transition"
           />
           {candidate ? (
-            <div key={candidate.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-[24px] p-4 flex flex-col gap-3.5 relative overflow-hidden">
+            <div key={candidate.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 flex flex-col gap-3.5 relative overflow-hidden">
               <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFB245, transparent)" }} />
               <div className="relative flex items-center gap-3">
                 <Cover src={candidate.image} size={56} round />
                 <span className="flex-1 flex flex-col min-w-0">
-                  <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-tungsten">Is this you?</span>
-                  <span className="text-[18px] font-medium leading-tight truncate">{candidate.name}</span>
-                  <span className="text-[12.5px] text-smoke truncate">
+                  <span className="text-caption font-semibold uppercase tracking-[0.12em] text-tungsten">Is this you?</span>
+                  <span className="text-title4 font-medium leading-tight truncate">{candidate.name}</span>
+                  <span className="text-footnote text-smoke truncate">
                     {[candidate.kind === "group" ? "Band" : "Artist", candidate.hint, candidate.since && `since ${candidate.since}`].filter(Boolean).join(" · ")}
                   </span>
                 </span>
               </div>
               <div className="relative grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => setSkipped((s) => [...s, candidate.id])} className="h-11 rounded-full border border-paper/20 text-[15px] hover:border-paper/40 transition">
+                <button type="button" onClick={() => setSkipped((s) => [...s, candidate.id])} className="h-11 rounded-full border border-paper/20 text-callout hover:border-paper/40 transition">
                   Not me
                 </button>
-                <button type="button" onClick={() => confirm(candidate)} className="h-11 rounded-full bg-tungsten text-ink text-[15px] font-semibold active:scale-[0.98] transition">
+                <button type="button" onClick={() => confirm(candidate)} className="press h-11 rounded-full bg-tungsten text-ink text-callout font-semibold">
                   {candidate.kind === "group" ? "I play in it" : "Yes, that's me"}
                 </button>
               </div>
             </div>
           ) : looking ? (
-            <p className="text-[13px] text-smoke px-1">Looking for {term}…</p>
+            <p className="text-footnote text-smoke px-1">Looking for {term}…</p>
           ) : exhausted ? (
-            <p className="text-[13px] text-smoke px-1">We couldn&apos;t find that name in the music catalogs. You can still add a project yourself and paste links.</p>
+            <p className="text-footnote text-smoke px-1">We couldn&apos;t find that name in the music catalogs. You can still add a project yourself and paste links.</p>
           ) : null}
         </div>
       )}
@@ -252,13 +252,13 @@ export default function ImportJourney() {
       {chosen && loading && !acts.length && (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
           <span aria-hidden="true" className="size-10 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin" />
-          <p className="text-[15px]">Looking through {chosen.name}&apos;s releases…</p>
+          <p className="text-callout">Looking through {chosen.name}&apos;s releases…</p>
         </div>
       )}
 
       {chosen && !loading && !acts.length && (
         <div className="flex flex-col gap-3">
-          <p className="text-[15px] text-smoke">We couldn&apos;t find releases for {chosen.name}. Add a project yourself and paste a link or two.</p>
+          <p className="text-callout text-smoke">We couldn&apos;t find releases for {chosen.name}. Add a project yourself and paste a link or two.</p>
           <Button variant="glass" onClick={() => setChosen(undefined)} className="h-12">Try another name</Button>
         </div>
       )}
@@ -271,7 +271,7 @@ export default function ImportJourney() {
             </div>
           ))}
           {loading && chosen?.id.startsWith("mb:") && (
-            <div className="flex items-center gap-3 p-3.5 rounded-[18px] border border-dashed border-paper/16 text-[14px] text-smoke">
+            <div className="flex items-center gap-3 p-3.5 rounded-tile border border-dashed border-paper/16 text-subhead text-smoke">
               <span aria-hidden="true" className="size-5 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin shrink-0" />
               Finding the bands you were in and older releases…
             </div>
@@ -285,7 +285,7 @@ export default function ImportJourney() {
             type="button"
             onClick={addAll}
             disabled={busy || !ready || chosenCount === 0}
-            className="w-full h-[53px] rounded-full bg-tungsten text-ink text-[16px] font-semibold shadow-[0_12px_40px_rgb(0_0_0/0.5)] active:scale-[0.99] transition disabled:opacity-50"
+            className="press w-full h-[53px] rounded-full bg-tungsten text-ink text-body font-semibold shadow-float disabled:opacity-50"
           >
             {busy ? "Adding…" : `Add ${chosenCount} to my journey`}
           </button>
@@ -317,12 +317,12 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
         role="checkbox"
         aria-checked={on}
         onClick={() => toggle(`act:${act.name}`)}
-        className={`flex items-center gap-3 p-3.5 rounded-[18px] text-left border transition ${act.relation === "band" ? "bg-[#FFACBA]/8 border-[#FFACBA]/25" : "bg-stage border-paper/10"}`}
+        className={`flex items-center gap-3 p-3.5 rounded-tile text-left border transition ${act.relation === "band" ? "bg-gel-pink/8 border-gel-pink/25" : "bg-stage border-paper/10"}`}
       >
         <span className="flex-1 min-w-0 flex flex-col">
-          {act.relation === "band" && <span className="text-[12px] font-semibold text-[#FFACBA]">Band found</span>}
-          <span className="text-[17px] font-semibold truncate">{act.name}</span>
-          <span className="text-[13px] text-smoke truncate">{[act.role, years, playable.length ? `${playable.length} on Apple Music` : undefined].filter(Boolean).join(" · ")}</span>
+          {act.relation === "band" && <span className="text-caption font-semibold text-gel-pink">Band found</span>}
+          <span className="text-body-lg font-semibold truncate">{act.name}</span>
+          <span className="text-footnote text-smoke truncate">{[act.role, years, playable.length ? `${playable.length} on Apple Music` : undefined].filter(Boolean).join(" · ")}</span>
         </span>
         <Check on={on} />
       </button>
@@ -332,7 +332,7 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
           <span aria-hidden="true" className="absolute left-[5px] top-2 bottom-2 w-[1.5px] bg-gradient-to-b from-tungsten to-tungsten/10" />
           {byYear.map(([year, list]) => (
             <div key={year} className="flex flex-col">
-              <span className="relative text-[12px] font-bold tracking-[0.04em] text-smoke mt-2 mb-1">
+              <span className="relative text-caption font-bold tracking-[0.04em] text-smoke mt-2 mb-1">
                 <span aria-hidden="true" className="absolute -left-[19px] top-[3px] size-2 rounded-full bg-tungsten" />
                 {year}
               </span>
@@ -348,17 +348,17 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
                 >
                   <Cover src={r.artwork} size={44} />
                   <span className="flex-1 min-w-0 flex flex-col">
-                    <span className={`text-[15px] font-medium truncate ${r.url ? "" : "text-paper/60"}`}>{r.title}</span>
-                    <span className="text-[12px] text-smoke truncate">{r.url ? `${r.type} · Apple Music` : `${r.type} · no streaming link found`}</span>
+                    <span className={`text-callout font-medium truncate ${r.url ? "" : "text-paper/60"}`}>{r.title}</span>
+                    <span className="text-caption text-smoke truncate">{r.url ? `${r.type} · Apple Music` : `${r.type} · no streaming link found`}</span>
                   </span>
                   {r.url && <Check on={picked.has(r.id)} />}
                 </button>
               ))}
             </div>
           ))}
-          {others > 0 && <p className="text-[12px] text-smoke pt-2">Plus {others} more without a streaming link, like live tapes. You can paste links for those yourself.</p>}
+          {others > 0 && <p className="text-caption text-smoke pt-2">Plus {others} more without a streaming link, like live tapes. You can paste links for those yourself.</p>}
           {act.releases.filter((r) => r.url && picked.has(r.id)).length > TRACKS_MAX && (
-            <p className="text-[12px] text-smoke pt-2">A project shows up to {TRACKS_MAX} releases. We&apos;ll add the first {TRACKS_MAX} you ticked.</p>
+            <p className="text-caption text-smoke pt-2">A project shows up to {TRACKS_MAX} releases. We&apos;ll add the first {TRACKS_MAX} you ticked.</p>
           )}
         </div>
       )}

@@ -18,12 +18,12 @@ export function ClipCard({ clip, onRemove }: { clip: ParsedClip; onRemove?: () =
         <div className="absolute inset-0 flex flex-col justify-end gap-3 p-3" style={{ background: "linear-gradient(160deg, #292624, #0F0D0B)" }}>
           <Waveform />
           <audio src={clip.url} controls preload="metadata" className="w-full h-9" />
-          <span className="absolute left-2 top-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-ink/60">{PROVIDER_LABEL.upload}</span>
+          <span className="absolute left-2 top-2 text-caption2 font-semibold px-2 py-0.5 rounded-full bg-ink/60">{PROVIDER_LABEL.upload}</span>
         </div>
       ) : !clip.embed ? (
         <a href={clip.url} target="_blank" rel="noopener noreferrer" aria-label={`Listen on ${PROVIDER_LABEL[clip.provider]}`} className="absolute inset-0 flex items-center justify-center">
           <span className="absolute inset-0" style={{ background: "linear-gradient(160deg, #292624, #0F0D0B)" }} />
-          <span className="relative glass h-10 px-4 rounded-full flex items-center text-[13px] font-semibold">Listen on {PROVIDER_LABEL[clip.provider]}</span>
+          <span className="relative glass h-10 px-4 rounded-full flex items-center text-footnote font-semibold">Listen on {PROVIDER_LABEL[clip.provider]}</span>
         </a>
       ) : playing ? (
         <iframe
@@ -44,7 +44,7 @@ export function ClipCard({ clip, onRemove }: { clip: ParsedClip; onRemove?: () =
           <span className="relative glass size-12 rounded-full flex items-center justify-center">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg>
           </span>
-          <span className="absolute left-2 bottom-2 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-ink/60">
+          <span className="absolute left-2 bottom-2 text-caption2 font-semibold px-2 py-0.5 rounded-full bg-ink/60">
             {PROVIDER_LABEL[clip.provider]}
           </span>
         </button>

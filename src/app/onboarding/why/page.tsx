@@ -5,6 +5,7 @@ import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { useState } from "react";
 import { REASONS, STEP_GLOW, saveProfile, useDraft } from "@/lib/onboarding";
+import { haptic } from "@/lib/haptics";
 
 /** "What are you here for?", from "Finish your profile" (no longer a signup step). */
 
@@ -25,7 +26,7 @@ export default function Why() {
   // One tap per reason. "Find bandmates" covers starting, rebuilding and joining a band alike.
   function tapReason(ids: string[]) {
     try {
-      navigator.vibrate?.(8);
+      haptic("select");
     } catch {}
     const on = ids.some((id) => draft.goals.includes(id));
     update({ goals: on ? draft.goals.filter((g) => !ids.includes(g)) : [...draft.goals, ...ids] });
@@ -47,7 +48,7 @@ export default function Why() {
               onClick={() => tapReason(ids)}
               style={{ "--hue": r.color, animationDelay: `${i * 50}ms` } as React.CSSProperties}
               className={cx(
-                "rise-in w-full flex items-center gap-4 p-4 rounded-[22px] border-[1.5px] text-left transition hover:-translate-y-0.5 active:scale-[0.98]",
+                "press rise-in w-full flex items-center gap-4 p-4 rounded-card-lg border-[1.5px] text-left hover:-translate-y-0.5",
                 on
                   ? "border-[var(--hue)] bg-[color-mix(in_srgb,var(--hue)_14%,var(--color-stage))] shadow-[0_10px_30px_-14px_var(--hue)]"
                   : "border-paper/6 bg-stage hover:border-paper/20",
@@ -55,15 +56,15 @@ export default function Why() {
             >
               <span
                 className={cx(
-                  "size-12 rounded-[15px] flex items-center justify-center shrink-0 transition",
+                  "size-12 rounded-field flex items-center justify-center shrink-0 transition",
                   on ? "bg-[var(--hue)] text-ink" : "bg-[color-mix(in_srgb,var(--hue)_16%,transparent)] text-[var(--hue)]",
                 )}
               >
                 <ReasonIcon id={r.id} />
               </span>
               <span className="flex-1 flex flex-col gap-0.5">
-                <span className="text-[17px] font-medium">{r.title}</span>
-                <span className="text-[13px] text-smoke">{r.sub}</span>
+                <span className="text-body-lg font-medium">{r.title}</span>
+                <span className="text-footnote text-smoke">{r.sub}</span>
               </span>
               <span
                 className={cx(
@@ -79,7 +80,7 @@ export default function Why() {
       </div>
       <StepFooter>
         {error && (
-          <p role="alert" className="text-[13px] text-[#FF453A]">
+          <p role="alert" className="text-footnote text-danger">
             {error}
           </p>
         )}

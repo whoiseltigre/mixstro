@@ -3,6 +3,7 @@ import { PmfSurvey } from "@/components/pmf-survey";
 import { PushPrompt } from "@/components/push-prompt";
 import { TabBar } from "@/components/tab-bar";
 import { Toaster } from "@/components/toast";
+import { MotionProvider } from "@/components/motion-provider";
 import { TopBar } from "@/components/top-bar";
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/people";
@@ -22,6 +23,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <PushPrompt />
       <PmfSurvey />
       <Toaster />
+      <MotionProvider />
     </div>
   );
 }

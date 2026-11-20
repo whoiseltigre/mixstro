@@ -14,22 +14,22 @@ export default function NotificationSettings() {
     <main className="pt-safe md:pt-6 px-5 md:px-0 pb-32 md:pb-16 flex flex-col gap-6 md:max-w-[680px] md:mx-auto">
       <header className="mt-3 flex items-center gap-3">
         <BackButton href="/settings" />
-        <h1 className="headline text-[28px]">Notifications</h1>
+        <h1 className="headline text-title-lg">Notifications</h1>
       </header>
-      <p className="text-[15px] text-smoke text-pretty -mt-2">Pick what reaches you and how. You can change this any time.</p>
+      <p className="text-callout text-smoke text-pretty -mt-2">Pick what reaches you and how. You can change this any time.</p>
       <ThisDevice />
 
-      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 text-[12px] font-semibold text-smoke px-1">
+      <div className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 text-caption font-semibold text-smoke px-1">
         <span />
         <span className="w-[51px] text-center">Push</span>
         <span className="w-[51px] text-center">Email</span>
       </div>
-      <ul className="-mt-4 flex flex-col rounded-[20px] bg-stage divide-y divide-paper/8">
+      <ul className="-mt-4 flex flex-col rounded-card bg-stage divide-y divide-paper/8">
         {NOTIFICATION_TYPES.map((t) => (
           <li key={t.id} className="grid grid-cols-[1fr_auto_auto] items-center gap-x-4 px-4 py-3.5">
             <span className="flex flex-col gap-0.5 min-w-0">
-              <span className="text-[15px] font-semibold">{t.title}</span>
-              <span className="text-[13px] text-smoke">{t.sub}</span>
+              <span className="text-callout font-semibold">{t.title}</span>
+              <span className="text-footnote text-smoke">{t.sub}</span>
             </span>
             {(["push", "email"] as Channel[]).map((c) => (
               <Toggle
@@ -61,12 +61,12 @@ function ThisDevice() {
   };
   const c = copy[state];
   return (
-    <section className="flex flex-col gap-3 p-4 rounded-[20px] bg-stage border border-paper/8">
+    <section className="flex flex-col gap-3 p-4 rounded-card bg-stage border border-paper/8">
       <div className="flex items-center gap-3">
-      <span className={`size-2.5 rounded-full shrink-0 ${state === "on" ? "bg-[#30D158]" : "bg-tungsten"}`} aria-hidden="true" />
+      <span className={`size-2.5 rounded-full shrink-0 ${state === "on" ? "bg-success" : "bg-tungsten"}`} aria-hidden="true" />
       <span className="flex-1 flex flex-col gap-0.5 min-w-0">
-        <span className="text-[15px] font-semibold">{c.title}</span>
-        <span className="text-[13px] text-smoke text-pretty">{c.sub}</span>
+        <span className="text-callout font-semibold">{c.title}</span>
+        <span className="text-footnote text-smoke text-pretty">{c.sub}</span>
       </span>
       {(state === "on" || state === "off") && <Toggle label="Push on this device" on={state === "on"} onChange={(on) => (on ? enable() : disable())} />}
       </div>
@@ -89,11 +89,11 @@ function TestPush() {
           setBusy(false);
           setNote(r.ok ? "Sent. It should pop up in a few seconds." : r.error);
         }}
-        className="h-9 px-3.5 rounded-full border border-paper/20 text-[14px] font-semibold disabled:opacity-50"
+        className="h-9 px-3.5 rounded-full border border-paper/20 text-subhead font-semibold disabled:opacity-50"
       >
         {busy ? "Sending…" : "Send me a test"}
       </button>
-      {note && <span className="text-[13px] text-smoke">{note}</span>}
+      {note && <span className="text-footnote text-smoke">{note}</span>}
     </div>
   );
 }
@@ -107,7 +107,7 @@ function Toggle({ on, label, disabled, onChange }: { on: boolean; label: string;
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!on)}
-      className={`relative w-[51px] h-[31px] rounded-full transition-colors disabled:opacity-40 ${on ? "bg-[#30D158]" : "bg-paper/16"}`}
+      className={`relative w-[51px] h-[31px] rounded-full transition-colors disabled:opacity-40 ${on ? "bg-success" : "bg-paper/16"}`}
     >
       <span className={`absolute top-[2px] left-[2px] size-[27px] rounded-full bg-paper shadow transition-transform ${on ? "translate-x-[20px]" : ""}`} />
     </button>

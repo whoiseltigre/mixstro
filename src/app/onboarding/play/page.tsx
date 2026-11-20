@@ -8,12 +8,13 @@ import { StepFooter, StepHeader, StepTitle } from "@/components/step-header";
 import { Button, CheckIcon, cx } from "@/components/ui";
 import { FAMILIES, type Family, familyOf, headlineFor } from "@/lib/instruments";
 import { STEP_GLOW, stepNav, toggle, useDraft, type Draft } from "@/lib/onboarding";
+import { haptic } from "@/lib/haptics";
 
 
 /** A tiny tap you can feel on phones that support it. */
 const tick = () => {
   try {
-    navigator.vibrate?.(8);
+    haptic("select");
   } catch {}
 };
 
@@ -63,7 +64,7 @@ export default function Play() {
                 }}
                 style={{ "--hue": f.hue, animationDelay: `${i * 25}ms` } as React.CSSProperties}
                 className={cx(
-                  "rise-in relative min-h-[96px] p-3.5 rounded-[22px] flex flex-col items-start justify-between gap-3 text-left border-[1.5px] transition hover:-translate-y-0.5 active:scale-[0.98]",
+                  "press rise-in relative min-h-[96px] p-3.5 rounded-card-lg flex flex-col items-start justify-between gap-3 text-left border-[1.5px] hover:-translate-y-0.5",
                   on
                     ? "border-[var(--hue)] bg-[color-mix(in_srgb,var(--hue)_16%,var(--color-stage))] shadow-[0_10px_30px_-12px_var(--hue)]"
                     : "border-paper/6 bg-stage hover:border-paper/20",
@@ -73,21 +74,21 @@ export default function Play() {
                 <span className="flex w-full items-start justify-between">
                   <span
                     className={cx(
-                      "size-11 rounded-[14px] flex items-center justify-center transition",
+                      "size-11 rounded-field flex items-center justify-center transition",
                       on ? "bg-[var(--hue)] text-ink" : "bg-[color-mix(in_srgb,var(--hue)_16%,transparent)] text-[var(--hue)]",
                     )}
                   >
                     <InstrumentIcon family={f.id} />
                   </span>
                   {on && (
-                    <span className="h-6 min-w-6 px-1.5 rounded-full bg-[var(--hue)] text-ink text-[12px] font-semibold flex items-center justify-center tabular-nums">
+                    <span className="h-6 min-w-6 px-1.5 rounded-full bg-[var(--hue)] text-ink text-caption font-semibold flex items-center justify-center tabular-nums">
                       {picks.length}
                     </span>
                   )}
                 </span>
                 <span className="flex flex-col gap-0.5 w-full min-w-0">
-                  <span className="text-[16px] font-medium leading-tight">{f.label}</span>
-                  <span className={cx("text-[12.5px] leading-snug truncate", on ? "text-[var(--hue)]" : "text-smoke")}>
+                  <span className="text-body font-medium leading-tight">{f.label}</span>
+                  <span className={cx("text-footnote leading-snug truncate", on ? "text-[var(--hue)]" : "text-smoke")}>
                     {on ? picks.join(", ") : f.peek}
                   </span>
                 </span>
@@ -98,7 +99,7 @@ export default function Play() {
 
         {draft.instruments.length > 1 && (
           <div className="flex flex-col gap-2.5 rise-in" role="radiogroup" aria-label="Your main instrument">
-            <span className="text-[13px] font-medium text-smoke">Which one do you play most?</span>
+            <span className="text-footnote font-medium text-smoke">Which one do you play most?</span>
             <div className="flex flex-wrap gap-2">
               {draft.instruments.map((name) => {
                 const on = draft.mainInstrument === name;
@@ -115,7 +116,7 @@ export default function Play() {
                     }}
                     style={{ "--hue": hue } as React.CSSProperties}
                     className={cx(
-                      "h-9 px-3.5 rounded-full text-[14px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]",
+                      "press h-9 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border",
                       on ? "bg-[var(--hue)] text-ink border-[var(--hue)] font-medium" : "border-paper/16 text-paper",
                     )}
                   >
@@ -130,7 +131,7 @@ export default function Play() {
       </div>
       <StepFooter>
         {headline && (
-          <div className="rise-in self-center glass rounded-full pl-1.5 pr-4 h-10 flex items-center gap-2.5 text-[14px] mb-1" key={headline}>
+          <div className="rise-in self-center glass rounded-full pl-1.5 pr-4 h-10 flex items-center gap-2.5 text-subhead mb-1" key={headline}>
             <span className="size-7 rounded-full overflow-hidden bg-riser shrink-0">
               {draft.avatarUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -218,14 +219,14 @@ function FamilySheet({
         />
         <div className="relative mx-auto mb-4 h-1.5 w-10 rounded-full bg-paper/25 md:hidden" />
         <div className="relative flex items-center gap-3.5">
-          <span className="size-12 rounded-[15px] bg-[var(--hue)] text-ink flex items-center justify-center shrink-0">
+          <span className="size-12 rounded-field bg-[var(--hue)] text-ink flex items-center justify-center shrink-0">
             <InstrumentIcon family={f.id} size={30} />
           </span>
           <span className="flex flex-col">
-            <h2 id="sheet-title" className="font-display text-[22px] font-semibold tracking-[-0.02em]">
+            <h2 id="sheet-title" className="font-display text-title2 font-semibold tracking-[-0.02em]">
               {f.label}
             </h2>
-            <span className="text-[13px] text-smoke">{picks.length ? `${picks.length} picked` : "Pick everything you play"}</span>
+            <span className="text-footnote text-smoke">{picks.length ? `${picks.length} picked` : "Pick everything you play"}</span>
           </span>
         </div>
 
@@ -240,7 +241,7 @@ function FamilySheet({
                 onClick={() => onToggle(name)}
                 style={{ animationDelay: `${60 + i * 30}ms` }}
                 className={cx(
-                  "rise-in h-11 px-4 rounded-full text-[15px] inline-flex items-center gap-1.5 border-[1.5px] transition active:scale-[0.96]",
+                  "press rise-in h-11 px-4 rounded-full text-callout inline-flex items-center gap-1.5 border-[1.5px]",
                   on ? "bg-[var(--hue)] text-ink border-[var(--hue)] font-medium" : "border-paper/18 text-paper hover:border-paper/40",
                 )}
               >
@@ -265,9 +266,9 @@ function FamilySheet({
                 placeholder="What else?"
                 maxLength={30}
                 aria-label={`Another ${f.label.toLowerCase()} instrument`}
-                className="w-32 bg-transparent text-[15px] outline-none placeholder:text-smoke"
+                className="w-32 bg-transparent text-callout outline-none placeholder:text-smoke"
               />
-              <button type="submit" className="h-8 px-3 rounded-full bg-[var(--hue)] text-ink text-[13px] font-medium">
+              <button type="submit" className="h-8 px-3 rounded-full bg-[var(--hue)] text-ink text-footnote font-medium">
                 Add
               </button>
             </form>
@@ -275,7 +276,7 @@ function FamilySheet({
             <button
               type="button"
               onClick={() => setTyping(true)}
-              className="rise-in h-11 px-4 rounded-full text-[15px] inline-flex items-center gap-1.5 border-[1.5px] border-dashed border-paper/25 text-smoke hover:text-paper"
+              className="rise-in h-11 px-4 rounded-full text-callout inline-flex items-center gap-1.5 border-[1.5px] border-dashed border-paper/25 text-smoke hover:text-paper"
               style={{ animationDelay: `${60 + options.length * 30}ms` }}
             >
               <span aria-hidden="true">+</span> Something else

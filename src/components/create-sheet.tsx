@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useDraft } from "@/lib/onboarding";
 import { SharePage } from "./share-page";
 import { Sheet } from "./sheet";
+import { COLOR, GEL } from "@/lib/tokens";
 
 type Action = { id: string; href?: string; title: string; sub: string; hue: string; icon: React.ReactNode };
 
@@ -14,7 +15,7 @@ const ACTIONS: Action[] = [
     href: "/board/new",
     title: "Looking for someone",
     sub: "Post a role, a gig or a jam to the Board",
-    hue: "#FFB245",
+    hue: COLOR.tungsten,
     icon: (
       <>
         <rect x="3.5" y="6.5" width="17" height="13.5" rx="2.5" />
@@ -27,7 +28,7 @@ const ACTIONS: Action[] = [
     href: "/onboarding/sound",
     title: "Add a song or clip",
     sub: "New release, old demo, a 30-second take",
-    hue: "#FFACBA",
+    hue: GEL.pink,
     icon: (
       <>
         <path d="M9 18V5l11-2v13" />
@@ -41,7 +42,7 @@ const ACTIONS: Action[] = [
     href: "/me/projects",
     title: "Add a band or project",
     sub: "Your journey, old bands too. Bandmates confirm.",
-    hue: "#B5C5FF",
+    hue: GEL.blue,
     icon: (
       <>
         <rect x="3" y="5" width="18" height="16" rx="3" />
@@ -53,7 +54,7 @@ const ACTIONS: Action[] = [
     id: "share",
     title: "Share my page",
     sub: "Story card, link, or your band's group chat",
-    hue: "#67E2DA",
+    hue: GEL.teal,
     icon: (
       <>
         <path d="M12 3v12M7 8l5-5 5 5" />
@@ -66,7 +67,7 @@ const ACTIONS: Action[] = [
     href: "/me/projects",
     title: "Invite a bandmate",
     sub: "Tag them on a band so they confirm your spot",
-    hue: "#F7BF77",
+    hue: GEL.peach,
     icon: (
       <>
         <circle cx="9" cy="8" r="3.4" />
@@ -93,17 +94,17 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
           labelledBy="create-title"
           handle={false}
           scrimClassName="bg-ink/70 backdrop-blur-sm"
-          className="md:max-w-[460px] rounded-t-[32px] md:rounded-[32px] bg-stage border border-paper/10 px-4 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-1.5"
+          className="md:max-w-[460px] rounded-t-hero md:rounded-hero bg-stage border border-paper/10 px-4 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-1.5"
         >
             <span aria-hidden="true" className="md:hidden self-center w-10 h-[5px] rounded-full bg-paper/25 mb-2" />
-            <h2 id="create-title" className="px-1 pb-2 font-display text-[24px] font-bold tracking-[-0.02em]">
+            <h2 id="create-title" className="px-1 pb-2 font-display text-title1 font-bold tracking-[-0.02em]">
               What are you up to?
             </h2>
             {ACTIONS.map((a, i) => {
               const body = (
                 <>
                   <span
-                    className="size-12 rounded-[15px] flex items-center justify-center shrink-0"
+                    className="size-12 rounded-field flex items-center justify-center shrink-0"
                     style={i === 0 ? { background: a.hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${a.hue} 16%, transparent)`, color: a.hue }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -111,12 +112,12 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
                     </svg>
                   </span>
                   <span className="flex flex-col gap-0.5 text-left">
-                    <span className="text-[16px] font-semibold">{a.title}</span>
-                    <span className="text-[13px] text-smoke">{a.sub}</span>
+                    <span className="text-body font-semibold">{a.title}</span>
+                    <span className="text-footnote text-smoke">{a.sub}</span>
                   </span>
                 </>
               );
-              const cls = "flex items-center gap-3.5 p-3 rounded-[20px] transition hover:bg-paper/6 active:scale-[0.99]";
+              const cls = "press flex items-center gap-3.5 p-3 rounded-card hover:bg-paper/6";
               if (!a.href) {
                 return (
                   <button

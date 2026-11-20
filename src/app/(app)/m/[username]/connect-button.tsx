@@ -15,7 +15,7 @@ export function ConnectButton({
   person,
   label,
   asked,
-  className = "h-12 text-[16px]",
+  className = "h-12 text-body",
 }: {
   person: ConnectPerson;
   label: string;

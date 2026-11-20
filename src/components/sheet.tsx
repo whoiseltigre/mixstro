@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { cx } from "./ui";
+import { haptic } from "@/lib/haptics";
 
 /**
  * A bottom sheet that behaves like a native one: it rises in, you can drag it down to
@@ -202,6 +203,7 @@ export function Sheet({ onClose, children, className, scrimClassName = "bg-ink/6
       if (mode !== "drag") return void (mode = "idle");
       mode = "idle";
       if (dy > el.offsetHeight * DISMISS_FRACTION || speed > FLICK_SPEED) {
+        haptic("tap");
         close();
       } else {
         el.style.transition = "";

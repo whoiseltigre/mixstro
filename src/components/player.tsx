@@ -188,7 +188,7 @@ function MiniPlayer() {
     <div
       role="region"
       aria-label="Now playing"
-      className={`fixed z-30 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] glass !bg-[rgb(26_24_22/0.82)] rounded-[24px] p-2 flex flex-col gap-2 shadow-[0_12px_40px_rgb(0_0_0/0.5)] md:bottom-6 ${
+      className={`fixed z-30 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] glass !bg-[rgb(26_24_22/0.82)] rounded-panel p-2 flex flex-col gap-2 shadow-float md:bottom-6 ${
         above ? "bottom-[calc(max(env(safe-area-inset-bottom),16px)+74px)]" : "bottom-[calc(max(env(safe-area-inset-bottom),16px))]"
       }`}
     >
@@ -196,14 +196,14 @@ function MiniPlayer() {
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={open ? "Show less" : "Show more"} className="flex-1 min-w-0 flex items-center gap-3 text-left">
           <Cover src={now.artwork ?? now.details?.artwork} size={44} />
           <span className="flex-1 min-w-0 flex flex-col">
-            <span className="text-[14px] font-semibold truncate">{title}</span>
-            <span className="text-[12px] text-smoke truncate">
+            <span className="text-subhead font-semibold truncate">{title}</span>
+            <span className="text-caption text-smoke truncate">
               {now.mode === "loading" ? "Finding the song…" : now.mode === "audio" && now.provider !== "upload" ? `${sub ? `${sub} · ` : ""}Preview` : sub ?? PROVIDER_LABEL[now.provider]}
             </span>
           </span>
         </button>
         {now.mode === "audio" && (
-          <button type="button" onClick={p.toggle} aria-label={p.playing ? "Pause" : "Play"} className="size-10 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 active:scale-95 transition">
+          <button type="button" onClick={p.toggle} aria-label={p.playing ? "Pause" : "Play"} className="press size-10 rounded-full bg-paper text-ink flex items-center justify-center shrink-0">
             {p.playing ? (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
             ) : (
@@ -245,7 +245,7 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
   const keys = PLATFORM_ORDER.filter((k) => links[k]);
   if (!keys.length) return null;
   return (
-    <div className={`flex items-center gap-1.5 flex-wrap text-[12px] text-smoke ${className}`}>
+    <div className={`flex items-center gap-1.5 flex-wrap text-caption text-smoke ${className}`}>
       <span className="mr-0.5">Listen in full on</span>
       {keys.map((k) => (
         <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
@@ -259,7 +259,7 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
 export function Cover({ src, size, round, className = "" }: { src?: string; size: number; round?: boolean; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
-    <span className={`relative shrink-0 overflow-hidden bg-riser ${round ? "rounded-full" : size > 48 ? "rounded-[14px]" : "rounded-[10px]"} ${className}`} style={{ width: size, height: size }}>
+    <span className={`relative shrink-0 overflow-hidden bg-riser ${round ? "rounded-full" : size > 48 ? "rounded-field" : "rounded-xs"} ${className}`} style={{ width: size, height: size }}>
       {src && !failed && <FadeImg src={src} alt="" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />}
     </span>
   );

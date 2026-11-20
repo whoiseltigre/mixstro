@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { isHeroTransitionActive } from "@/lib/view-transition";
 
 /**
  * How a screen arrives. Going deeper (a profile, a post, a chat) slides in from the
@@ -28,6 +29,8 @@ export function ScreenEnter({ children }: { children: ReactNode }) {
   if (kind.current === null) {
     const now = mountedAt;
     if (!hydrated || typeof window === "undefined") kind.current = "none";
+    // A photo is already growing into this screen; a slide on top would fight it.
+    else if (isHeroTransitionActive()) kind.current = "none";
     // The outer template is already animating this same navigation.
     else if (parentMount !== null && now - parentMount < 80) kind.current = "none";
     else if (now - lastPop < 600 || TABS.includes(path)) kind.current = "fade";

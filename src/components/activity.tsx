@@ -31,7 +31,7 @@ export function ActivityBadge({ lastActiveAt, className }: { lastActiveAt: strin
   if (!label) return null;
   return (
     <span className={cx("inline-flex items-center gap-1.5", className)}>
-      <span className="size-2 rounded-full bg-[#30D158]" aria-hidden="true" />
+      <span className="size-2 rounded-full bg-success" aria-hidden="true" />
       {label}
     </span>
   );

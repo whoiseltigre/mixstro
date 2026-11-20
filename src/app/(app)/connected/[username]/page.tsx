@@ -25,7 +25,7 @@ export default async function Connected({ params }: { params: Promise<{ username
     <main className="relative min-h-dvh md:min-h-[calc(100dvh-88px)] flex flex-col px-5 pt-safe pb-safe overflow-hidden md:max-w-[560px] md:mx-auto">
       <div aria-hidden="true" className="absolute left-1/2 top-[190px] -translate-x-1/2 w-[200px] h-[240px] rounded-full opacity-25 blur-[70px]" style={{ background: "var(--gel)" }} />
       <div className="relative flex items-center justify-between h-12 mt-2">
-        <span className="text-[13px] font-medium text-smoke">New collaboration</span>
+        <span className="text-footnote font-medium text-smoke">New collaboration</span>
         <Link href="/discover" aria-label="Close" className="glass size-11 rounded-full flex items-center justify-center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
         </Link>
@@ -64,20 +64,20 @@ export default async function Connected({ params }: { params: Promise<{ username
       </svg>
 
       <div className="relative mt-4 flex flex-col items-center gap-3 text-center">
-        <h1 className="headline text-[40px] leading-none">Time to make<br />something.</h1>
-        <p className="text-[15px] leading-[1.5] text-smoke">
+        <h1 className="headline text-display-md leading-none">Time to make<br />something.</h1>
+        <p className="text-callout leading-[1.5] text-smoke">
           {first} is in too. {overlap}
         </p>
         <div className="flex flex-wrap justify-center gap-1.5">
           {m.shared.map((a) => (
-            <span key={a.id} className="text-[13px] px-3 py-1.5 rounded-full bg-paper/8 border border-paper/12">{a.name}</span>
+            <span key={a.id} className="text-footnote px-3 py-1.5 rounded-full bg-paper/8 border border-paper/12">{a.name}</span>
           ))}
         </div>
       </div>
 
       <div className="relative mt-auto pt-8 flex flex-col gap-2.5">
         <div className="gel-rim rounded-full">
-          <Link href={`/messages/${m.username}`} className="h-[53px] rounded-full bg-paper text-ink text-[17px] font-semibold flex items-center justify-center gap-2">
+          <Link href={`/messages/${m.username}`} className="h-[53px] rounded-full bg-paper text-ink text-body-lg font-semibold flex items-center justify-center gap-2">
             Plan a jam session
           </Link>
         </div>

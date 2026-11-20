@@ -60,21 +60,21 @@ export function PushPrompt() {
   if (!ask) return null;
   const who = ask.name ?? "they";
   return (
-    <Sheet onClose={() => setAsk(null)} labelledBy="push-title" scrimClassName="bg-ink/60 backdrop-blur-sm" className="glass md:max-w-[420px] rounded-t-[28px] md:rounded-[28px] p-6 pb-safe md:pb-6 flex flex-col gap-4">
+    <Sheet onClose={() => setAsk(null)} labelledBy="push-title" scrimClassName="bg-ink/60 backdrop-blur-sm" className="glass md:max-w-[420px] rounded-t-sheet md:rounded-sheet p-6 pb-safe md:pb-6 flex flex-col gap-4">
       <SheetCloser>{(close) => (<>
         <span className="size-12 rounded-2xl bg-tungsten/20 text-tungsten flex items-center justify-center" aria-hidden="true">
           <BellIcon />
         </span>
         <div className="flex flex-col gap-1.5">
-          <h2 id="push-title" className="headline text-[24px]">
+          <h2 id="push-title" className="headline text-title1">
             {ask.name ? `Know when ${ask.name} answers` : "Know when musicians answer"}
           </h2>
           {ask.state === "install" ? (
-            <p className="text-[15px] leading-[1.45] text-smoke text-pretty">
+            <p className="text-callout leading-[1.45] text-smoke text-pretty">
               On iPhone, notifications work once Mixstro is on your Home Screen. Tap <ShareIcon /> Share below, then <b className="text-paper font-semibold">Add to Home Screen</b>, and open Mixstro from there.
             </p>
           ) : (
-            <p className="text-[15px] leading-[1.45] text-smoke text-pretty">
+            <p className="text-callout leading-[1.45] text-smoke text-pretty">
               We&apos;ll only tell you about Connects, messages, jams and Board answers. Change it any time in Settings.
             </p>
           )}
@@ -95,7 +95,7 @@ export function PushPrompt() {
             >
               {busy ? "Turning on…" : "Turn on notifications"}
             </Button>
-            <button type="button" onClick={close} className="h-11 text-[15px] font-semibold text-smoke">
+            <button type="button" onClick={close} className="h-11 text-callout font-semibold text-smoke">
               {who === "they" ? "Not now" : "Not now, I'll check back"}
             </button>
           </>

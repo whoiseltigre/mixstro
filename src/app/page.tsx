@@ -26,12 +26,12 @@ export default async function Welcome({ searchParams }: { searchParams: Promise<
 
         <section className="mt-auto px-6 pb-safe flex flex-col gap-8 md:px-0 md:my-auto md:max-w-[420px]">
           <div className="flex flex-col gap-3.5">
-            <h1 className="headline text-[40px] md:text-[52px] lg:text-[60px]">
+            <h1 className="headline text-display-md md:text-hero lg:text-[60px]">
               Where musicians
               <br />
               meet.
             </h1>
-            <p className="max-w-[320px] md:max-w-[400px] text-[16px] md:text-[17px] leading-[1.45] text-smoke text-pretty">
+            <p className="max-w-[320px] md:max-w-[400px] text-body md:text-body-lg leading-[1.45] text-smoke text-pretty">
               Show off your whole musical journey, find the people to start or fill out a band, and meet the musicians and gigs near you.
             </p>
           </div>

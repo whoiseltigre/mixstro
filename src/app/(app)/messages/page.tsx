@@ -10,8 +10,8 @@ export default function Messages() {
           <path d="M19 8.5h.5A1.5 1.5 0 0121 10v6.5a1.5 1.5 0 01-1.5 1.5H19v3l-3.5-3H11" />
         </svg>
       </span>
-      <h2 className="text-[18px] font-semibold">Pick a conversation</h2>
-      <p className="text-[14px] text-smoke max-w-[280px]">Your chats with musicians you&apos;ve connected with show up on the left.</p>
+      <h2 className="text-title4 font-semibold">Pick a conversation</h2>
+      <p className="text-subhead text-smoke max-w-[280px]">Your chats with musicians you&apos;ve connected with show up on the left.</p>
     </main>
   );
 }

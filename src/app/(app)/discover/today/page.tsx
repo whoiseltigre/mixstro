@@ -31,12 +31,12 @@ function YourTurnPause({ count }: { count: number }) {
         className="absolute left-1/2 top-[-120px] -translate-x-1/2 w-[520px] h-[360px] rounded-full opacity-25 blur-[90px] pointer-events-none"
         style={{ background: "radial-gradient(#67E2DA, transparent 70%)" }}
       />
-      <h1 className="relative headline text-[40px] leading-none">Your turn first</h1>
-      <p className="relative text-[16px] leading-[1.5] text-smoke">
+      <h1 className="relative headline text-display-md leading-none">Your turn first</h1>
+      <p className="relative text-body leading-[1.5] text-smoke">
         {count} musicians are waiting on a reply from you. Answer a few, even with a quick &ldquo;not the right fit&rdquo;, and Today opens back up. Only you can see this.
       </p>
       <div className="relative flex gap-2.5 pt-3">
-        <Link href="/messages" className="h-12 px-5 rounded-full bg-paper text-ink text-[16px] font-semibold flex items-center">
+        <Link href="/messages" className="h-12 px-5 rounded-full bg-paper text-ink text-body font-semibold flex items-center">
           Open your chats
         </Link>
       </div>
