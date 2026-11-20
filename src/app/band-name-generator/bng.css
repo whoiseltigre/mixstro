@@ -56,3 +56,46 @@
 .bng-note{margin:12px 0 0;font-size:14.5px;color:var(--paper);overflow-wrap:anywhere}
 .bng-small{margin:12px 0 0;font-size:13px;color:var(--smoke)}
 @media (prefers-reduced-motion:reduce){.bng-name{transition:none}}
+
+/* "Start <name> on Mixstro" under each shortlisted name */
+.bng-start{display:inline-flex;gap:6px;margin-top:8px;font-size:14px;font-weight:600;color:var(--paper);opacity:.85}
+.bng-start:hover{opacity:1;color:var(--tungsten)}
+.bng-error.center{text-align:center}
+.bng-cta button:disabled{opacity:.6;cursor:default}
+
+/* genre links in the article */
+.mxb-article .bng-genres{display:flex;flex-wrap:wrap;gap:8px}
+.mxb-article .bng-genres a{text-decoration:none;color:var(--paper);padding:7px 14px;border-radius:999px;border:1px solid rgba(245,241,236,.16);font-size:15px}
+.mxb-article .bng-genres a:hover,.mxb-article .bng-genres a[aria-current]{border-color:var(--tungsten);color:var(--tungsten)}
+
+/* recent votes on the generator */
+.bng-recent h2{margin:8px 0 10px;font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:-.02em}
+.bng-recent ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.bng-recent a{display:inline-block;padding:8px 14px;border-radius:999px;background:var(--stage);border:1px solid var(--line);font-size:14.5px;color:var(--smoke)}
+.bng-recent a:hover{color:var(--paper)}
+
+/* the vote page */
+.bng-vote{max-width:720px;margin:0 auto}
+.bng-vote .mxb-post-hero h1{max-width:14ch}
+.bng-options{list-style:none;margin:44px 0 0;padding:0;display:grid;gap:12px}
+.bng-option{position:relative;isolation:isolate;overflow:hidden;width:100%;display:flex;align-items:center;gap:16px;text-align:left;cursor:pointer;
+  min-height:84px;padding:16px 20px;border-radius:24px;border:1px solid var(--line);background:var(--stage);color:var(--paper);transition:border-color .2s,transform .3s var(--settle)}
+.bng-option:hover:not(:disabled){transform:translateY(-1px);border-color:rgba(245,241,236,.2)}
+.bng-option[aria-pressed="true"]{border-color:var(--hue)}
+.bng-option .bar{position:absolute;inset:0 auto 0 0;z-index:-1;background:color-mix(in srgb,var(--hue) 18%,transparent);transition:width .6s var(--settle)}
+.bng-option .letter{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--hue);color:var(--ink);font-family:var(--display);font-size:17px}
+.bng-option .name{flex:1;min-width:0;overflow-wrap:anywhere;font-family:var(--display);font-weight:600;font-size:clamp(20px,3vw,26px);letter-spacing:-.025em;line-height:1.1}
+.bng-option .tally{flex:none;font-weight:600;font-size:17px;font-variant-numeric:tabular-nums}
+.bng-option .tally small{font-weight:400;color:var(--smoke);font-size:14px}
+.bng-option:disabled{cursor:progress}
+.bng-vote .bng-hint{margin-top:14px}
+.bng-vote .bng-short{margin-top:28px}
+.bng-round{display:grid;gap:12px;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.bng-round .bng-seg{grid-column:auto}
+.bng-history{margin-top:16px}
+.bng-history h2{margin:0;font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.03em}
+.bng-history ol{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
+.bng-history li{display:grid;gap:4px;border-radius:18px;background:var(--riser);padding:14px 16px}
+.bng-history strong{font-family:var(--display);font-weight:600;font-size:19px;letter-spacing:-.02em}
+.bng-history .bng-small{margin:0}
+@media (prefers-reduced-motion:reduce){.bng-option,.bng-option .bar{transition:none}}

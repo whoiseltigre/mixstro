@@ -88,7 +88,44 @@ const STATE = {
   early: { label: "Too early to tell", dot: "bg-paper/30" },
 } as const;
 
-export function PulseView({ p }: { p: Pulse }) {
+/** tool_pulse(): band name generator counts for the last 28 days. */
+export type ToolPulse = { days: number; counts: Record<string, number>; votes_made: number; votes_two_voters: number; votes_second_round: number };
+
+const FUNNEL: [key: string, label: string][] = [
+  ["bng_generate", "Batches generated"],
+  ["bng_shortlist", "Names shortlisted"],
+  ["bng_check", "Is it taken? checks"],
+  ["bng_share", "Ask the band shares"],
+  ["bng_story", "Story images made"],
+  ["bng_vote_cast", "Votes cast"],
+  ["bng_signup_click", "Start on Mixstro clicks"],
+  ["bng_profile_done", "Profiles finished"],
+];
+
+function Generator({ t }: { t: ToolPulse }) {
+  const stats: [string, number][] = [
+    ...FUNNEL.map(([k, label]) => [label, t.counts[k] ?? 0] as [string, number]),
+    ["Band votes started", t.votes_made],
+    ["Votes with 2+ voters", t.votes_two_voters],
+    ["Votes with a 2nd round", t.votes_second_round],
+  ];
+  return (
+    <section aria-labelledby="generator" className="flex flex-col gap-3">
+      <h2 id="generator" className="text-body-lg font-semibold">Band name generator</h2>
+      <p className="text-footnote text-smoke text-pretty -mt-1">Last {t.days} days, everyone who used it (no sign-in needed, so test visits count too).</p>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        {stats.map(([label, n]) => (
+          <li key={label} className="p-4 rounded-card bg-stage border border-paper/8 flex flex-col gap-1">
+            <span className="text-title-lg font-semibold leading-none tabular-nums">{n.toLocaleString("en-US")}</span>
+            <span className="text-footnote text-smoke">{label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function PulseView({ p, tool }: { p: Pulse; tool?: ToolPulse }) {
   const replies = new Map(p.replies.map((r) => [r.week, r]));
 
   return (
@@ -168,6 +205,8 @@ export function PulseView({ p }: { p: Pulse }) {
           </table>
         </div>
       </section>
+
+      {tool && <Generator t={tool} />}
 
       <div className="grid md:grid-cols-2 gap-8">
         <section aria-labelledby="instead" className="flex flex-col gap-3">

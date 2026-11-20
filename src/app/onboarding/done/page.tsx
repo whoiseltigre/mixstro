@@ -6,9 +6,21 @@ import { ArtistAvatar } from "@/components/artist-avatar";
 import { SharePage } from "@/components/share-page";
 import { Button, ButtonLink } from "@/components/ui";
 import { headlineFor } from "@/lib/instruments";
-import { saveProfile, savedBandPageId, useDraft } from "@/lib/onboarding";
+import { FROM_GENERATOR, saveProfile, savedBandPageId, useDraft } from "@/lib/onboarding";
+import { createClient } from "@/lib/supabase/client";
 import { ShareIcon } from "@/components/push-prompt";
 import { currentPushState, enablePush, type PushState } from "@/lib/push-client";
+
+/** Pulse counts signups that started from the band name generator. Once, best effort. */
+function countGeneratorSignup() {
+  try {
+    if (!localStorage.getItem(FROM_GENERATOR)) return;
+    localStorage.removeItem(FROM_GENERATOR);
+  } catch {
+    return;
+  }
+  createClient()?.rpc("tool_event", { p_name: "bng_profile_done" }).then(() => {}, () => {});
+}
 
 export default function Done() {
   const router = useRouter();
@@ -45,6 +57,7 @@ export default function Done() {
         } else {
           setBandPage(savedBandPageId());
           setState("saved");
+          countGeneratorSignup();
           // Drop any app pages the router kept from before the save (they'd still redirect to signup).
           router.refresh();
         }

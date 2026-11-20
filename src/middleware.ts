@@ -9,6 +9,16 @@ const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/
 const VANITY = /^\/@([A-Za-z0-9_.]{3,24})\/?$/;
 const PROFILE = /^\/m\/([A-Za-z0-9_.]{3,24})\/?$/;
 const REF_COOKIE = "mx_ref";
+/** "Start <name> on Mixstro" from the band name generator: carry the name through signup. */
+const BAND_COOKIE = "mx_band";
+
+function rememberBand(request: NextRequest, response: NextResponse) {
+  const raw = request.nextUrl.searchParams.get("band");
+  if (!raw) return response;
+  const name = raw.replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+  if (name) response.cookies.set(BAND_COOKIE, name, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+  return response;
+}
 
 // The public website lives on the apex domain; the app lives on app.mixstro.com.
 const SITE_HOST = "mixstro.com";
@@ -41,7 +51,7 @@ export async function middleware(request: NextRequest) {
   const vanity = path.match(VANITY)?.[1];
 
   if (!isSupabaseConfigured) {
-    return vanity ? NextResponse.rewrite(new URL(`/m/${vanity.toLowerCase()}`, request.url)) : NextResponse.next();
+    return rememberBand(request, vanity ? NextResponse.rewrite(new URL(`/m/${vanity.toLowerCase()}`, request.url)) : NextResponse.next());
   }
 
   let response = NextResponse.next({ request });
@@ -79,6 +89,7 @@ export async function middleware(request: NextRequest) {
   // A "Confirm your spot" link: remember it through signup so onboarding can bring them back.
   const join = path.match(/^\/join\/([0-9a-f]{32})\/?$/)?.[1];
   if (join) response.cookies.set("mx_join", join, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+  rememberBand(request, response);
 
   if (!user && (APP_ROUTES.some((r) => path.startsWith(r)) || path.startsWith("/m/"))) {
     return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));
