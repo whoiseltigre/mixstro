@@ -164,7 +164,7 @@ export async function getBandChat(id: string): Promise<BandChat | null> {
   if (!isMember) return null;
   const [{ data: band }, { data: rows }, { data: memberRows }, { data: shows }] = await Promise.all([
     viewer.supabase.from("bands").select("id, name, photo_url").eq("id", n).maybeSingle<{ id: number; name: string; photo_url: string | null }>(),
-    viewer.supabase.from("band_messages").select("id, kind, sender_id, body, voice_url, voice_seconds, ref_id, created_at").eq("band_id", n).order("created_at", { ascending: false }).limit(300),
+    viewer.supabase.from("band_messages").select("id, kind, sender_id, body, voice_url, voice_seconds, ref_id, created_at").eq("band_id", n).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(300),
     viewer.supabase.from("band_members").select("profile_id, projects(end_year)").eq("band_id", n),
     viewer.supabase.from("band_shows").select("show_date, show_time, venue").eq("band_id", n).gte("show_date", new Date().toISOString().slice(0, 10)).order("show_date").limit(1),
     viewer.supabase.rpc("mark_band_read", { p_band: n }),

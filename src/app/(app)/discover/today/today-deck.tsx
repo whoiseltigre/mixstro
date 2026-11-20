@@ -65,6 +65,10 @@ export function TodayDeck({
       try {
         const res = await connect(id, m.username);
         if (res && "sent" in res && res.sent) announceConnect(first);
+        else if (res && "error" in res) {
+          setSentTo((s) => (s === id ? undefined : s));
+          toast(res.error);
+        }
       } catch {
         setSentTo((s) => (s === id ? undefined : s));
         toast("That didn't send. Check your connection and try again.");
@@ -76,7 +80,9 @@ export function TodayDeck({
     // On to the next musician at once; the pass saves in the background.
     const id = m.id;
     next();
-    pass(id).catch(() => toast("Couldn't save that pass. They may show up again."));
+    pass(id)
+      .then((r) => r?.error && toast("Couldn't save that pass. They may show up again."))
+      .catch(() => toast("Couldn't save that pass. They may show up again."));
   };
   const why = m.sample && !m.shared.length && m.distanceMi == null
     ? "A sample musician, here so you can see how Today works."

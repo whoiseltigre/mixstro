@@ -66,12 +66,10 @@ export async function answerPost(postId: number, authorId: string, note: string)
   const { error } = await viewer.supabase.from("board_replies").insert({ post_id: postId, from_id: viewer.id, note: note.trim().slice(0, 280) || null });
   if (error) return { error: error.code === "23505" ? "You already answered this one." : "That didn't send. The post may have closed." };
 
-  const { data: pair } = await viewer.supabase
-    .from("connections")
-    .select("id")
-    .or(`and(from_id.eq.${viewer.id},to_id.eq.${authorId}),and(from_id.eq.${authorId},to_id.eq.${viewer.id})`);
-  if (!pair?.length) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: authorId });
   const said = note.trim().slice(0, 280) || null;
+  // Your answer is the introduction, so no song is needed. Already connected or asked: nothing changes.
+  // A failure here leaves the answer itself in place, which is what the author sees first.
+  await viewer.supabase.rpc("request_connection", { p_to: authorId, p_note: said });
   after(() => notifyBoardReply(postId, viewer.id, authorId, said));
 
   revalidatePath("/board", "layout");

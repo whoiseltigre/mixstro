@@ -44,7 +44,8 @@ export default function PrivacyPage() {
       <section>
         <h2>Your choices</h2>
         <p>
-          You can edit your profile at any time. You can ask us to export or delete your account and data by emailing
+          You can edit your profile at any time, and delete your account and data yourself in Settings (see{" "}
+          <a href="/delete-account">how to delete your account</a>). You can also ask us to export or delete it by emailing
           privacy@mixstro.com.
         </p>
       </section>

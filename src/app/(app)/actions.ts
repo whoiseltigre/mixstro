@@ -7,25 +7,30 @@ import { notifyConnect, notifyConnectBack, notifyJamAccepted, notifyJamInvite, n
 import { getViewer, withMusic } from "@/lib/people";
 
 /**
- * Connect, pass and send. Each action re-checks who you are; row-level security in
- * the database is the real guard (you can only create connections from yourself,
- * answer ones sent to you, and message inside an accepted connection).
+ * Connect, pass and send. Each action re-checks who you are, and the database enforces the
+ * rules: Connects, answers and passes go through request_connection / answer_connection /
+ * pass_connection (one relationship per pair, only the person asked can say yes), and you can
+ * only message inside an accepted connection.
  */
-
-type Pair = { id: number; from_id: string; to_id: string; status: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-async function pairWith(otherId: string) {
+type Outcome = { outcome: "sent" | "accepted" | "connected" | "pending" | "declined" | "passed" | "closed"; id?: number };
+
+/** Signed in, and the other person is a real account (sample musicians have other ids). */
+async function realPair(otherId: string) {
   const viewer = await getViewer();
-  if (viewer && !UUID.test(otherId)) return null; // a sample musician
-  if (!viewer) return null;
-  const { data } = await viewer.supabase
-    .from("connections")
-    .select("id, from_id, to_id, status")
-    .or(`and(from_id.eq.${viewer.id},to_id.eq.${otherId}),and(from_id.eq.${otherId},to_id.eq.${viewer.id})`);
-  const rows = (data ?? []) as Pair[];
-  return { viewer, outgoing: rows.find((r) => r.from_id === viewer.id), incoming: rows.find((r) => r.to_id === viewer.id) };
+  if (!viewer || !UUID.test(otherId)) return null;
+  return viewer;
+}
+
+/** The database's reasons, in the app's words. */
+function connectError(message: string | undefined): { error: string } | { needSong: true } {
+  if (message?.includes("add a song")) return { needSong: true };
+  if (message?.includes("add a note")) return { error: "Add a short note first." };
+  if (message?.includes("sign in")) return { error: "You're signed out. Sign in and try again." };
+  if (message?.includes("not available")) return { error: "You can't connect with them right now." };
+  return { error: "That didn't send. Try again." };
 }
 
 /** Notes on a Connect: a few words at least, a short paragraph at most. */
@@ -40,42 +45,35 @@ export async function connectReady(): Promise<{ hasMusic: boolean }> {
 
 /**
  * Say you'd like to play together, with a short note. If they already asked you, this
- * accepts instead (their note becomes the first message in your chat).
+ * accepts instead (their note becomes the first message in your chat, yours follows it).
  */
 export async function connect(otherId: string, username: string, note?: string) {
-  const pair = await pairWith(otherId);
-  if (!pair) redirect(`/connected/${username}`); // demo mode
+  const viewer = await realPair(otherId);
+  if (!viewer) redirect(`/connected/${username}`); // demo mode or a sample musician
 
-  const { viewer, outgoing, incoming } = pair;
-  if (incoming?.status === "pending") {
-    await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
+  const text = (note ?? "").replace(/\s+/g, " ").trim().slice(0, NOTE_MAX);
+  const { data, error } = await viewer.supabase.rpc("request_connection", { p_to: otherId, p_note: text || null });
+  if (error) return connectError(error.message);
+  const { outcome } = data as Outcome;
+  if (outcome === "accepted") {
     after(() => notifyConnectBack(viewer.id, otherId));
     revalidatePath("/", "layout");
     redirect(`/connected/${username}`);
   }
-  if (!outgoing) {
-    const text = (note ?? "").replace(/\s+/g, " ").trim().slice(0, NOTE_MAX);
-    if (text.length < 2) return { error: "Add a short note first." };
-    if (!(await withMusic(viewer.supabase, [viewer.id])).has(viewer.id)) return { needSong: true };
-    let { error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId, note: text });
-    // Before the connect-notes SQL runs there's no note column: still send the Connect.
-    if (error?.code === "PGRST204" || error?.code === "42703") ({ error } = await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId }));
-    if (error) return { error: "That didn't send. Try again." };
-    after(() => notifyConnect(viewer.id, otherId, text));
-  }
+  if (outcome === "connected") redirect(`/messages/${username}`);
+  if (outcome === "sent") after(() => notifyConnect(viewer.id, otherId, text));
   revalidatePath("/", "layout");
   return { sent: true };
 }
 
-/** Not the right fit. They drop out of your Today, and a request they sent is closed. */
-export async function pass(otherId: string) {
-  const pair = await pairWith(otherId);
-  if (!pair) return;
-  const { viewer, outgoing, incoming } = pair;
-  // Passing on someone who asked you is a kind "not the right fit" they get told about.
-  if (incoming?.status === "pending") await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
-  else if (!outgoing) await viewer.supabase.from("connections").insert({ from_id: viewer.id, to_id: otherId, status: "passed" });
+/** Not the right fit. They drop out of your Today, and a request they sent is closed kindly. */
+export async function pass(otherId: string): Promise<{ error?: string }> {
+  const viewer = await realPair(otherId);
+  if (!viewer) return {};
+  const { error } = await viewer.supabase.rpc("pass_connection", { p_other: otherId });
+  if (error) return { error: "That didn't save. Try again." };
   revalidatePath("/discover");
+  return {};
 }
 
 /**
@@ -180,18 +178,17 @@ const QUICK = { jam: "Down to jam!", clip: "Love it. Send me a clip of what you'
  * accept and open the chat with that line; "Not the right fit" closes it kindly.
  */
 export async function quickReply(otherId: string, username: string, kind: "jam" | "clip" | "no") {
-  const pair = await pairWith(otherId);
-  if (!pair) return { error: "Try again." };
-  const { viewer, incoming } = pair;
-  if (incoming?.status !== "pending") return { error: "That Connect isn't open anymore." };
+  const viewer = await realPair(otherId);
+  if (!viewer) return { error: "Try again." };
+  const { data, error } = await viewer.supabase.rpc("answer_connection", { p_from: otherId, p_accept: kind !== "no" });
+  if (error) return { error: error.message.includes("not available") ? "That Connect isn't open anymore." : "That didn't go through. Try again." };
+  const { outcome, id } = data as Outcome;
+  if (outcome === "closed" || !id) return { error: "That Connect isn't open anymore." };
   if (kind === "no") {
-    await viewer.supabase.from("connections").update({ status: "declined" }).eq("id", incoming.id);
     revalidatePath("/", "layout");
     return { closed: true };
   }
-  const { error } = await viewer.supabase.from("connections").update({ status: "accepted" }).eq("id", incoming.id);
-  if (error) return { error: "Try again." };
-  await viewer.supabase.from("messages").insert({ connection_id: incoming.id, sender_id: viewer.id, body: QUICK[kind] });
+  await viewer.supabase.from("messages").insert({ connection_id: id, sender_id: viewer.id, body: QUICK[kind] });
   after(() => notifyConnectBack(viewer.id, otherId));
   revalidatePath("/", "layout");
   redirect(`/messages/${username}`);
