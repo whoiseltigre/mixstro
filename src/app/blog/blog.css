@@ -114,6 +114,8 @@
 .mxb-article ul{list-style:disc}.mxb-article ol{list-style:decimal}
 .mxb-article li{margin-top:8px;padding-left:4px}
 .mxb-article li::marker{color:var(--tungsten)}
+.mxb-article ul.mxb-names{columns:2;column-gap:28px}.mxb-article ul.mxb-names li{break-inside:avoid;margin:0;padding-bottom:8px}
+@media (min-width:700px){.mxb-article ul.mxb-names{columns:3}}
 .mxb-article blockquote{margin:28px 0 0;padding:4px 0 4px 20px;border-left:2px solid var(--tungsten);color:var(--paper)}
 .mxb-article blockquote p:first-child{margin-top:0}
 .mxb-article pre{margin:24px 0 0;padding:20px 22px;border-radius:22px;background:var(--stage);border:1px solid var(--line);overflow-x:auto;font-size:14px;line-height:1.6;white-space:pre-wrap}

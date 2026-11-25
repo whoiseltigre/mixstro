@@ -2,7 +2,9 @@
 """
 Blog photo pipeline. Run it after editing scripts/blog-images.json:
 
-    python3 scripts/blog_images.py <folder with the source photos>
+    python3 scripts/blog_images.py <folder with the source photos> [slug ...]
+
+With slugs, only those posts are processed (the others keep their files).
 
 For every entry it:
   * gives the photo the House Lights grade (warm Ink shadows, Paper highlights, a touch of Tungsten),
@@ -183,7 +185,10 @@ def title_and_cat(slug: str):
 def main():
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT
     manifest = json.loads(MANIFEST.read_text())
+    only = set(sys.argv[2:])
     for slug, entry in manifest.items():
+        if only and slug not in only:
+            continue
         cover = entry["cover"]
         photo = grade(Image.open(src / cover["file"]))
         base = write_webps(crop(photo, 16 / 9, cover.get("focus", (0.5, 0.5))), slug, "cover")

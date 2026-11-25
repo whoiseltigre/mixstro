@@ -312,5 +312,36 @@
         "section": "Musician resume example"
       }
     ]
+  },
+  "band-name-ideas": {
+    "cover": {
+      "file": "unsplash/electronic-press-kit/band-photoshoot-IzUyV6BbfQw.jpg",
+      "alt": "A four-piece band posing together in an old industrial building",
+      "credit": "Ethan Johnson",
+      "credit_url": "https://unsplash.com/@ezj"
+    },
+    "inline": [
+      {
+        "file": "unsplash/how-to-start-a-band/bar-gig-_TJ22WxXJ8U.jpg",
+        "alt": "A rock band playing under red stage lights with stacked amps behind them",
+        "credit": "Noah Carter",
+        "credit_url": "https://unsplash.com/@granoahbars",
+        "section": "Band name ideas by genre"
+      },
+      {
+        "file": "pexels/how-to-start-a-band/garage-band-39284159.jpeg",
+        "alt": "Two guitarists in a punk band singing into one mic at a show",
+        "credit": "tirina",
+        "credit_url": "https://www.pexels.com/photo/energetic-punk-band-performing-live-outdoors-39284159/",
+        "section": "How do you come up with band name ideas?"
+      },
+      {
+        "file": "unsplash/how-to-start-a-band/drummer-bRG2C0FAQEY.jpg",
+        "alt": "Drumsticks resting on a snare drum",
+        "credit": "Matthijs Smit",
+        "credit_url": "https://unsplash.com/@matthijssm",
+        "section": "How do you know if a band name is taken?"
+      }
+    ]
   }
 }
