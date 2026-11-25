@@ -7,6 +7,7 @@ import { BackButton } from "@/components/ui";
 import { getPost, type BoardPost } from "@/lib/board";
 import type { Musician } from "@/lib/mock";
 import { AnswerForm, ClosePostButton } from "./answer";
+import { OpeningPanel } from "./opening";
 import { COLOR, POST_KIND_GEL } from "@/lib/tokens";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,8 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
       <PostHeader post={post} />
 
+      {view.kind === "mine" && post.opening && <OpeningPanel postId={Number(post.id)} opening={post.opening} candidates={view.candidates} clips={view.clips} />}
+
       {view.kind === "mine" && (
         <section className="flex flex-col gap-3">
           <h2 className="text-title4 font-semibold tracking-[-0.01em]">
@@ -45,7 +48,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
               </li>
             ))}
           </ul>
-          <ClosePostButton postId={Number(post.id)} />
+          {!post.opening && <ClosePostButton postId={Number(post.id)} />}
         </section>
       )}
 

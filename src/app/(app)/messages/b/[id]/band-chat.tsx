@@ -11,7 +11,7 @@ import type { BandChat, BandChatMessage } from "@/lib/band-hub";
 import { showDate } from "@/lib/band-shared";
 import { nameWash } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/client";
-import { sendBandMessage, sendBandVoice } from "../../../bands/actions";
+import { markBandRead, sendBandMessage, sendBandVoice } from "../../../bands/actions";
 import { VoiceBubble, clock, uploadVoice, useVoiceRecorder, type Recording } from "../../[id]/voice";
 
 /** The band chat: members talk, and the band's updates (new show, someone asked about the open spot) land here too. */
@@ -24,21 +24,37 @@ export function BandChatView({ chat }: { chat: BandChat }) {
   const [pending, start] = useTransition();
   const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
+  /** The send id of a text that seemed to fail, so sending the same text again can't double it. */
+  const failed = useRef<{ body: string; clientId: string } | null>(null);
   const shown = [...chat.messages, ...optimistic];
   const names = chat.members.map((m) => m.name);
   const who = names.length ? `${names.slice(0, 3).join(", ")}${names.length > 3 ? ` and ${names.length - 3} more` : ""} and you` : "Just you so far";
 
   useEffect(() => setOptimistic([]), [chat.messages]);
 
+  // Read means seen: mark it when the chat is actually open on screen, not when the page loads.
+  useEffect(() => {
+    if (chat.demo || document.visibilityState !== "visible") return;
+    void markBandRead(band.id).catch(() => {});
+  }, [band.id, chat.demo, chat.messages.length]);
+
   useEffect(() => {
     const supabase = createClient();
     if (!supabase || chat.demo) return;
+    let joined = false;
     const channel = supabase
       .channel(`band:${band.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "band_messages", filter: `band_id=eq.${band.id}` }, () => router.refresh())
-      .subscribe();
+      .subscribe((status) => {
+        // Back after a dropped connection: fetch what was missed.
+        if (status === "SUBSCRIBED" && joined) router.refresh();
+        if (status === "SUBSCRIBED") joined = true;
+      });
+    const onVisible = () => document.visibilityState === "visible" && router.refresh();
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [band.id, chat.demo, router]);
 
@@ -54,14 +70,17 @@ export function BandChatView({ chat }: { chat: BandChat }) {
     setError(undefined);
     const temp: BandChatMessage = { id: -Date.now(), kind: "text", mine: true, body, voiceUrl: null, createdAt: new Date().toISOString() };
     setOptimistic((o) => [...o, temp]);
+    const clientId = failed.current?.body === body ? failed.current.clientId : crypto.randomUUID();
     start(async () => {
-      const res = await sendBandMessage(band.id, body).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
+      const res = await sendBandMessage(band.id, body, clientId).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
       if (res.error) {
+        failed.current = { body, clientId };
         setError(res.error);
         setDraft(body);
         setOptimistic((o) => o.filter((m) => m.id !== temp.id));
         return;
       }
+      failed.current = null;
       router.refresh();
     });
   }

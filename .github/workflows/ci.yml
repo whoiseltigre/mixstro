@@ -1,7 +1,8 @@
 name: CI
 
 # Runs on every pull request and on main. Fails the PR if types, lint, design tokens,
-# migration names or the production build break.
+# tests, migrations, database authorization, dependency advisories, secrets or the
+# production build break.
 on:
   pull_request:
   push:
@@ -31,9 +32,53 @@ jobs:
         run: npm run lint
       - name: Design tokens
         run: npm run lint:design
+      - name: Unit tests
+        run: npm test
       - name: Migration names
         run: node scripts/check-migrations.mjs
+      - name: Dependency advisories
+        run: node scripts/check-audit.mjs
       - name: Build
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: "1"
+
+  # Replays every migration on a fresh database and on synthetic production-shaped data,
+  # then runs supabase/tests/*.test.sql as the anon, signed-in and server roles.
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Postgres client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client
+      - name: Migrations and authorization tests
+        run: npm run test:db
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan for committed secrets
+        run: |
+          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.24.2 \
+            git /repo --no-banner --redact --log-opts="${{ github.event_name == 'pull_request' && format('{0}..{1}', github.event.pull_request.base.sha, github.event.pull_request.head.sha) || '-50' }}"

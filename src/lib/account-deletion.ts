@@ -62,7 +62,9 @@ export async function deleteAccountNow(uid: string): Promise<DeletionResult> {
     // Already gone (a run that stopped right after this step) counts as done.
     if (authErr && !/not.?found/i.test(authErr.message)) return fail("delete account", authErr.message);
 
-    await db.from("account_deletions").update({ completed_at: new Date().toISOString(), last_error: null }).eq("profile_id", uid);
+    // Only report done once the record says so; otherwise the next run finishes the bookkeeping.
+    const { error: doneErr } = await db.from("account_deletions").update({ completed_at: new Date().toISOString(), last_error: null }).eq("profile_id", uid);
+    if (doneErr) return fail("record completion", doneErr.message);
     return { done: true };
   } catch (e) {
     return fail("unexpected", e instanceof Error ? e.message : String(e));
@@ -84,5 +86,25 @@ export async function resumeDeletions(): Promise<number> {
     .limit(5);
   let done = 0;
   for (const r of (data ?? []) as { profile_id: string }[]) if ((await deleteAccountNow(r.profile_id)).done) done++;
+  await reportStuckDeletions();
   return done;
+}
+
+/**
+ * Deletions an operator needs to look at: out of retries (20 attempts), or still open after a
+ * day. Logged on every reminder run as one line without personal data, so a log alert can
+ * catch it. To resume one safely, reset its `attempts` to 0 in account_deletions; the next
+ * run carries on from where it stopped.
+ */
+export async function reportStuckDeletions(): Promise<{ exhausted: number; aged: number }> {
+  const db = adminClient();
+  if (!db) return { exhausted: 0, aged: 0 };
+  const day = new Date(Date.now() - 24 * 3600_000).toISOString();
+  const [{ count: exhausted }, { count: aged }] = await Promise.all([
+    db.from("account_deletions").select("profile_id", { count: "exact", head: true }).is("completed_at", null).gte("attempts", 20),
+    db.from("account_deletions").select("profile_id", { count: "exact", head: true }).is("completed_at", null).lt("requested_at", day),
+  ]);
+  const result = { exhausted: exhausted ?? 0, aged: aged ?? 0 };
+  if (result.exhausted || result.aged) console.error(`[account-deletion] needs an operator: ${result.exhausted} out of retries, ${result.aged} open over 24h`);
+  return result;
 }

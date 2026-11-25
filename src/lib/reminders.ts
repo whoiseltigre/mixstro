@@ -1,4 +1,5 @@
 import { resumeDeletions } from "./account-deletion";
+import { drainNotificationIntents } from "./notification-intents";
 import { adminClient, notifyJamSoon, notifyRoleAlert, notifyYourTurn } from "./notify";
 import { familyOf, fillsRole } from "./instruments";
 
@@ -14,13 +15,14 @@ const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
 export async function runReminders() {
   const db = adminClient();
   if (!db) return { skipped: "no service role key" };
-  const [yourTurn, jams, alerts, deletions] = await Promise.all([
+  const [yourTurn, jams, alerts, deletions, notifications] = await Promise.all([
     yourTurnNudges().catch((e) => (console.error("reminders: your turn", e), -1)),
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
     resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
+    openingUpkeep().then(() => drainNotificationIntents()).catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
   ]);
-  return { yourTurn, jams, alerts, deletions };
+  return { yourTurn, jams, alerts, deletions, notifications };
 }
 
 /** Last message in an accepted chat, from the other person, sent 48 to 72 hours ago and still unanswered. */
@@ -160,4 +162,12 @@ function distanceMi(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   const rad = (d: number) => (d * Math.PI) / 180;
   const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lng - a.lng) / 2) ** 2;
   return 2 * 3958.8 * Math.asin(Math.sqrt(h));
+}
+
+/** Close openings past their expiry and queue alerts for ones just opened or renewed. */
+async function openingUpkeep() {
+  const db = adminClient()!;
+  const [expired, queued] = await Promise.all([db.rpc("expire_openings"), db.rpc("queue_opening_alerts")]);
+  if (expired.error && expired.error.code !== "PGRST202") console.error("reminders: expire openings", expired.error.message);
+  if (queued.error && queued.error.code !== "PGRST202") console.error("reminders: opening alerts", queued.error.message);
 }

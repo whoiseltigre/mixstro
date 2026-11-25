@@ -14,7 +14,8 @@ import { FadeImg } from "@/components/fade-image";
  * to the platform's own embed. It lives in the root layout, so it keeps playing while you browse.
  */
 
-export type PlayRequest = { id: string; url: string; provider: ClipProvider; title?: string; sub?: string; artwork?: string };
+/** `at` starts a recording or video at that second (a clip reply's moment). Song previews are excerpts, so they start at the top. */
+export type PlayRequest = { id: string; url: string; provider: ClipProvider; title?: string; sub?: string; artwork?: string; at?: number | null };
 type Now = PlayRequest & { details?: TrackDetails; mode: "loading" | "audio" | "embed" };
 
 type Player = {
@@ -37,13 +38,20 @@ const SILENCE = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2
 
 const cache = new Map<string, Promise<TrackDetails>>();
 
-/** Details for a link, fetched once per page load. */
+/**
+ * Details for a link, fetched once per page load and shared by everyone asking at the same
+ * time. A failed or rate-limited answer isn't kept, so the next tap tries again.
+ */
 export function loadDetails(url: string): Promise<TrackDetails> {
   let p = cache.get(url);
   if (!p) {
+    const forget = () => {
+      cache.delete(url);
+      return { links: {} } as TrackDetails;
+    };
     p = fetch(`/api/music/track?url=${encodeURIComponent(url)}`)
-      .then((r) => (r.ok ? r.json() : { links: {} }))
-      .catch(() => ({ links: {} }));
+      .then((r) => (r.ok ? (r.json() as Promise<TrackDetails>) : forget()))
+      .catch(forget);
     cache.set(url, p);
   }
   return p;
@@ -88,19 +96,32 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const startAudio = useCallback((src: string) => {
+  const startAudio = useCallback((src: string, at?: number | null) => {
     const a = audio.current;
     if (!a) return;
     a.src = src;
     setProgress(0);
+    if (at) {
+      const jump = () => {
+        if (a.src === src || a.currentSrc === src) a.currentTime = Math.min(at, Math.max(0, (a.duration || at) - 0.5));
+      };
+      a.addEventListener("loadedmetadata", jump, { once: true });
+    }
     a.play().catch(() => setPlaying(false));
   }, []);
 
   const play = useCallback(
     (req: PlayRequest) => {
       const a = audio.current;
-      // Same song: play or pause it.
+      // Same song: play or pause it (or jump to a new moment in it).
       if (now?.id === req.id) {
+        if (now.mode === "audio" && a && req.at != null && req.at !== now.at) {
+          a.currentTime = req.at;
+          setNow({ ...now, at: req.at });
+          if (a.paused) a.play().catch(() => {});
+          return;
+        }
+        if (now.mode === "embed" && req.at != null && req.at !== now.at) return setNow({ ...now, at: req.at });
         if (now.mode === "audio" && a) {
           if (a.paused) a.play().catch(() => {});
           else a.pause();
@@ -114,7 +135,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!audioFirst) return setNow({ ...req, mode: "embed" });
       if (req.provider === "upload") {
         setNow({ ...req, mode: "audio" });
-        return startAudio(req.url);
+        return startAudio(req.url, req.at);
       }
       // Unlock playback inside the tap, then swap in the preview once we know it.
       if (a) {
@@ -179,7 +200,9 @@ function MiniPlayer() {
   const now = p.now!;
   const [open, setOpen] = useState(false);
   const above = useAboveTabBar();
-  const embed: (ParsedClip & { height?: number }) | null = now.mode === "embed" ? (trackPlayer({ id: now.id, provider: now.provider, url: now.url }) ?? parseClip(now.url)) : null;
+  const parsed: (ParsedClip & { height?: number }) | null = now.mode === "embed" ? (trackPlayer({ id: now.id, provider: now.provider, url: now.url }) ?? parseClip(now.url)) : null;
+  // YouTube honours a start time; other embeds open at the top.
+  const embed = parsed && now.at && parsed.provider === "youtube" && parsed.embed ? { ...parsed, embed: `${parsed.embed}&start=${Math.floor(now.at)}` } : parsed;
   const links = PLATFORM_ORDER.filter((k) => now.details?.links[k]);
   const title = now.title || now.details?.title || `${PROVIDER_LABEL[now.provider]} track`;
   const sub = now.sub ?? now.details?.artist;

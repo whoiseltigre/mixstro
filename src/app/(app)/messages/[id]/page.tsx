@@ -17,7 +17,7 @@ export default async function Chat({ params }: { params: Promise<{ id: string }>
   const chat = await getChat(id);
   if (!chat) notFound();
   if (chat.kind === "demo") return <DemoChat person={chat.person} />;
-  if (chat.kind === "live") return <LiveChat person={chat.person} connectionId={chat.connectionId} messages={chat.messages} jams={chat.jams} />;
+  if (chat.kind === "live") return <LiveChat person={chat.person} connectionId={chat.connectionId} messages={chat.messages} jams={chat.jams} more={chat.more} clips={chat.clips} />;
 
   const first = chat.person.name.split(" ")[0];
   const c = chat.connection;

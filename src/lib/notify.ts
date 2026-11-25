@@ -1,6 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { adminClient } from "./supabase/admin";
 import { nounFor } from "./instruments";
-import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
 import { sendPush } from "./push";
 
@@ -59,13 +58,7 @@ export type Email = {
   push?: { title?: string; body?: string };
 };
 
-let admin: SupabaseClient | null | undefined;
-export function adminClient() {
-  if (admin !== undefined) return admin;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  admin = key && SUPABASE_URL ? createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } }) : null;
-  return admin;
-}
+export { adminClient };
 
 /** Anything to send with: the service role key is the only must (push keys come from Supabase). */
 export const emailEnabled = () => Boolean(adminClient());
@@ -527,6 +520,34 @@ export async function notifyRoleAlert(recipientId: string, joinerId: string, rol
     preheader: `${from.first_name} · ${line(from)}`,
     blocks: [{ kind: "badge", text: "New nearby" }, who(from), { kind: "headline", text: head }],
     cta: { label: `See ${from.first_name}'s music`, path: `/m/${from.username}` },
+    alt: { label: "Change these alerts", path: "/settings/notifications" },
+  });
+}
+
+/**
+ * Someone nearby opened (or renewed) an opening for what you play. One per opening and renewal
+ * (the intent key), at most three a week (opening_alert_targets), and only if alerts are on.
+ */
+export async function notifyOpening(recipientId: string, postId: number, authorId: string, miles: number) {
+  const db = adminClient();
+  if (!db) return;
+  const [{ data: post }, map] = await Promise.all([
+    db.from("board_posts").select("title, needed_role, offered_role, rehearsal_days, status").eq("id", postId).maybeSingle<{ title: string; needed_role: string; offered_role: string | null; rehearsal_days: string[]; status: string }>(),
+    people([authorId]),
+  ]);
+  const from = map.get(authorId);
+  if (!post || post.status !== "open" || !from) return;
+  const where = miles <= 1 ? "nearby" : `${Math.round(miles)} mi away`;
+  const asker = post.offered_role ? `${/^[aeiou]/i.test(nounFor(post.offered_role)) ? "An" : "A"} ${nounFor(post.offered_role)}` : from.first_name;
+  const head = `${asker} ${where} is looking for a ${nounFor(post.needed_role)}`;
+  await notify(recipientId, {
+    type: "alerts",
+    ref: `opening:${postId}`,
+    throttleMinutes: 60 * 24 * 7,
+    subject: head,
+    preheader: [post.title, post.rehearsal_days?.length ? `Rehearses ${post.rehearsal_days.join("/")}` : null].filter(Boolean).join(" · "),
+    blocks: [{ kind: "badge", text: "Opening near you" }, who(from), { kind: "headline", text: head }],
+    cta: { label: "See the opening", path: `/board/${postId}` },
     alt: { label: "Change these alerts", path: "/settings/notifications" },
   });
 }

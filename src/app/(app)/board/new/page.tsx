@@ -1,3 +1,4 @@
+import { roleOf } from "@/lib/openings";
 import { getViewer } from "@/lib/people";
 import { NewPostForm } from "./form";
 
@@ -6,5 +7,6 @@ export const dynamic = "force-dynamic";
 
 export default async function NewPost() {
   const viewer = await getViewer();
-  return <NewPostForm neighborhood={viewer?.profile?.neighborhood ?? ""} signedIn={Boolean(viewer)} />;
+  const p = viewer?.profile;
+  return <NewPostForm neighborhood={p?.neighborhood ?? ""} signedIn={Boolean(viewer)} myRole={roleOf(p?.main_instrument ?? p?.instruments[0])} />;
 }
