@@ -12,6 +12,9 @@ export type Opening = {
   eventDate?: string;
   status: OpeningStatus;
   expiresAt: string | null;
+  /** Set when the poster turned on the public link (/o/<id>). */
+  sharedAt?: string;
+  shareClipId?: number;
 };
 
 export type OpeningRow = {
@@ -22,6 +25,8 @@ export type OpeningRow = {
   event_date?: string | null;
   status?: string | null;
   expires_at?: string | null;
+  shared_at?: string | null;
+  share_clip_id?: number | null;
 };
 
 export function toOpening(r: OpeningRow): Opening | undefined {
@@ -34,6 +39,8 @@ export function toOpening(r: OpeningRow): Opening | undefined {
     eventDate: r.event_date ?? undefined,
     status: (r.status as OpeningStatus) ?? "open",
     expiresAt: r.expires_at ?? null,
+    sharedAt: r.shared_at ?? undefined,
+    shareClipId: r.share_clip_id ?? undefined,
   };
 }
 
@@ -67,4 +74,12 @@ export async function openingCandidates(viewer: Viewer, postId: number, opening:
 /** The role family a profile's main instrument belongs to ("Electric bass" → "Bass"). */
 export function roleOf(instrument: string | null | undefined): string | undefined {
   return instrument ? familyOf(instrument)?.id : undefined;
+}
+
+export type MyClip = { id: number; url: string; provider: string | null };
+
+/** Your own clips, to pick the one a shared link may play. */
+export async function myClips(viewer: Viewer): Promise<MyClip[]> {
+  const { data } = await viewer.supabase.from("clips").select("id, url, provider").eq("profile_id", viewer.id).eq("kind", "clip").order("id");
+  return (data ?? []) as MyClip[];
 }

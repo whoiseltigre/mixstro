@@ -33,7 +33,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
       <PostHeader post={post} />
 
-      {view.kind === "mine" && post.opening && <OpeningPanel postId={Number(post.id)} opening={post.opening} candidates={view.candidates} />}
+      {view.kind === "mine" && post.opening && <OpeningPanel postId={Number(post.id)} opening={post.opening} candidates={view.candidates} clips={view.clips} />}
 
       {view.kind === "mine" && (
         <section className="flex flex-col gap-3">

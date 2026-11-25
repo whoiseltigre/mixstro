@@ -133,3 +133,20 @@ export async function alertMeFor(role: string): Promise<{ error?: string }> {
   const { error } = await viewer.supabase.from("profiles").update({ alert_roles: roles }).eq("id", viewer.id);
   return error ? { error: "That didn't save." } : {};
 }
+
+/**
+ * Turn the public link on (with the one clip it may play) or off. Only the poster can, and
+ * only with their own clip (the database checks both).
+ */
+export async function shareOpening(postId: number, on: boolean, clipId: number | null): Promise<{ error?: string }> {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "Sign in again." };
+  const { error } = await viewer.supabase
+    .from("board_posts")
+    .update({ shared_at: on ? new Date().toISOString() : null, share_clip_id: on && Number.isSafeInteger(clipId) ? clipId : null })
+    .eq("id", postId)
+    .eq("author_id", viewer.id);
+  if (error) return { error: "That didn't save. Try again." };
+  revalidatePath(`/board/${postId}`);
+  return {};
+}
