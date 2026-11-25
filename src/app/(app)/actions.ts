@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { notifyConnect, notifyConnectBack, notifyJamAccepted, notifyJamInvite, notifyMessage } from "@/lib/notify";
+import { boundClipAt, messagePreview } from "@/lib/clip-reply";
 import { dispatchMessageNotification } from "@/lib/notification-intents";
 import { getOlderMessages, getViewer, withMusic } from "@/lib/people";
 
@@ -89,7 +90,7 @@ const isMissingColumn = (e: { code?: string; message?: string } | null) => Boole
  */
 async function storeMessage(
   viewer: NonNullable<Awaited<ReturnType<typeof getViewer>>>,
-  row: { connection_id: number; body?: string; voice_url?: string; voice_seconds?: number },
+  row: { connection_id: number; body?: string; voice_url?: string; voice_seconds?: number; clip_id?: number; clip_at?: number | null },
   clientId: string | undefined,
 ): Promise<SendResult> {
   const client_id = clientId && UUID.test(clientId) ? clientId : null;
@@ -111,12 +112,17 @@ async function storeMessage(
       .maybeSingle<{ id: number; created_at: string }>();
     if (landed) return { message: { id: landed.id, clientId: client_id, createdAt: landed.created_at } };
   }
+  // Before the database has clip replies, say so plainly rather than "try again".
+  if (row.clip_id && error && (error.code === "42703" || error.code === "PGRST204") && /clip/.test(error.message ?? "")) return { error: "Clip replies aren't switched on yet." };
   // Before the database has send ids (older schema), store it the old way.
   if (isMissingColumn(error)) ({ data, error } = await insert(false));
+  // The database refuses a clip that isn't yours or theirs, is gone, or a moment past its end.
+  if (error?.code === "23514" && row.clip_id) return { error: "That clip isn't available anymore." };
   if (error || !data) return { error: "That didn't send. Try again." };
   const id = data.id;
+  const preview = row.body ?? (row.clip_id ? messagePreview({ body: null, clipAt: row.clip_at }) : null);
   after(async () => {
-    if (!(await dispatchMessageNotification(id).catch(() => false))) await notifyMessage(row.connection_id, viewer.id, row.body ?? null, row.voice_seconds ?? null);
+    if (!(await dispatchMessageNotification(id).catch(() => false))) await notifyMessage(row.connection_id, viewer.id, preview, row.voice_seconds ?? null);
   });
   return { message: { id, clientId: client_id, createdAt: data.created_at } };
 }
@@ -129,6 +135,20 @@ export async function sendMessage(connectionId: number, body: string, clientId?:
   const viewer = await getViewer();
   if (!viewer) return { error: "You're signed out. Sign in again to send." };
   return storeMessage(viewer, { connection_id: connectionId, body: text }, clientId);
+}
+
+/**
+ * Reply with a clip (theirs or yours), optionally at a moment and with a note. The send id
+ * covers the whole message, attachment included, so a retry can't double it.
+ */
+export async function sendClipReply(connectionId: number, clipId: number, at: number | null, body: string, clientId?: string): Promise<SendResult> {
+  if (!Number.isSafeInteger(connectionId) || !Number.isSafeInteger(clipId)) return { error: "That didn't send. Try again." };
+  const clip_at = boundClipAt(at);
+  if (clip_at === "invalid") return { error: "Pick a moment inside the clip." };
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out. Sign in again to send." };
+  const text = body.trim().slice(0, 4000);
+  return storeMessage(viewer, { connection_id: connectionId, clip_id: clipId, clip_at, ...(text ? { body: text } : {}) }, clientId);
 }
 
 /** A voice note already uploaded to voice/<connection>/<you>/…; this posts it to the chat. */

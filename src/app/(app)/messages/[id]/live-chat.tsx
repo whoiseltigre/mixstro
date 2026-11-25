@@ -5,11 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { TimeAgo } from "@/components/time-ago";
 import type { Musician } from "@/lib/mock";
 import type { Jam } from "@/lib/jams";
-import type { ChatMessage } from "@/lib/people";
+import type { ChatMessage, ClipOption } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
-import { olderMessages, sendMessage, sendVoice, type SendResult } from "../../actions";
+import { olderMessages, sendClipReply, sendMessage, sendVoice, type SendResult } from "../../actions";
 import { mergeById, pendingNotIn, settle, type OutboxItem } from "@/lib/outbox";
 import { ChatHeader } from "./chat-header";
+import { AttachmentChip, ClipBubble, ClipPickerSheet, type Attachment } from "./clip-reply";
 import { JamCard, PlanJamSheet } from "./jam";
 import { VoiceBubble, clock, uploadVoice, useVoiceRecorder, type Recording } from "./voice";
 
@@ -26,12 +27,15 @@ export function LiveChat({
   messages,
   jams,
   more,
+  clips = [],
 }: {
   person: Musician;
   connectionId: number;
   messages: ChatMessage[];
   jams: Jam[];
   more: boolean;
+  /** Their clips and yours, to reply to. */
+  clips?: ClipOption[];
 }) {
   const router = useRouter();
   const first = person.name.split(" ")[0];
@@ -44,6 +48,10 @@ export function LiveChat({
   const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
   const [planning, setPlanning] = useState<{ replacing: Jam | null } | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [attached, setAttached] = useState<Attachment | null>(null);
+  const attachedOption = attached ? clips.find((c) => c.id === attached.id) : undefined;
+  const canSend = Boolean(draft.trim() || attached);
 
   const stored = mergeById(older, messages);
   const pending = pendingNotIn(outbox, stored);
@@ -57,6 +65,7 @@ export function LiveChat({
       voiceSeconds: o.voiceSeconds,
       createdAt: o.createdAt,
       clientId: o.clientId,
+      clip: o.clip ? pendingClip(o.clip, clips) : null,
       pending: o,
     })),
   ];
@@ -99,9 +108,11 @@ export function LiveChat({
     end.current?.scrollIntoView({ block: "end" });
   }, [messages.length, outbox.length]);
 
-  /** Sends one queued text (first try or Retry) and settles just that send. */
+  /** Sends one queued text or clip reply (first try or Retry) and settles just that send. */
   async function deliver(item: OutboxItem) {
-    const res = await sendMessage(connectionId, item.body ?? "", item.clientId).catch(() => ({ error: "That didn't send. Check your connection and try again." }) as SendResult);
+    const res = await (item.clip ? sendClipReply(connectionId, item.clip.id, item.clip.at, item.body ?? "", item.clientId) : sendMessage(connectionId, item.body ?? "", item.clientId)).catch(
+      () => ({ error: "That didn't send. Check your connection and try again." }) as SendResult,
+    );
     setOutbox((o) => settle(o, item.clientId, res.error ? { error: res.error } : { storedId: res.message!.id }));
     if (!res.error) router.refresh();
   }
@@ -109,10 +120,11 @@ export function LiveChat({
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const body = draft.trim();
-    if (!body) return;
+    if (!body && !attached) return;
     setDraft("");
+    setAttached(null);
     setError(undefined);
-    const item: OutboxItem = { clientId: newClientId(), body, createdAt: new Date().toISOString(), status: "sending" };
+    const item: OutboxItem = { clientId: newClientId(), body: body || null, clip: attached, createdAt: new Date().toISOString(), status: "sending" };
     setOutbox((o) => [...o, item]);
     void deliver(item);
   }
@@ -154,7 +166,7 @@ export function LiveChat({
     <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={person} onPlanJam={() => setPlanning({ replacing: null })} />
 
-      <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
+      <div className={`flex-1 overflow-y-auto px-3.5 pt-4 flex flex-col gap-2 ${attached ? "pb-[136px]" : "pb-[90px]"}`}>
         <div className="mt-auto" />
         {hasOlder && (
           <button
@@ -195,7 +207,9 @@ export function LiveChat({
               {gap && <TimeAgo iso={item.at} className="self-center text-caption text-smoke py-1" />}
               {item.jam ? (
                 <JamCard jam={item.jam} first={first} onAnotherTime={(jam) => setPlanning({ replacing: jam })} />
-              ) : !m ? null : m.voiceUrl !== null || m.voiceSeconds ? (
+              ) : !m ? null : m.clip ? (
+                <ClipBubble clip={m.clip} body={m.body} mine={m.mine} first={first} faded={m.pending ? (m.pending.status === "failed" ? 0.45 : 0.6) : undefined} />
+              ) : m.voiceUrl !== null || m.voiceSeconds ? (
                 <VoiceBubble url={m.voiceUrl} seconds={m.voiceSeconds} mine={m.mine} sending={m.pending?.status === "sending"} />
               ) : (
                 <div
@@ -288,12 +302,26 @@ export function LiveChat({
               id="msg"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder={`Message ${first}`}
+              placeholder={attached ? "Add a note (optional)" : `Message ${first}`}
               autoComplete="off"
               maxLength={4000}
               className="flex-1 h-10 bg-transparent text-body outline-none placeholder:text-smoke"
             />
-            {draft.trim() ? (
+            {clips.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setPicking(true)}
+                aria-label="Reply to a clip"
+                className={`hit-slop relative size-9 rounded-full flex items-center justify-center shrink-0 ${attached ? "bg-tungsten text-ink" : "bg-paper/12 text-paper"}`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M9 18V5l11-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="17" cy="16" r="3" />
+                </svg>
+              </button>
+            )}
+            {canSend ? (
               <button type="submit" aria-label="Send" className="hit-slop relative size-10 rounded-full bg-paper text-ink flex items-center justify-center">
                 <svg
                   width="18"
@@ -328,6 +356,8 @@ export function LiveChat({
           </>
         )}
       </form>
+      {attached && attachedOption && <AttachmentChip option={attachedOption} at={attached.at} first={first} onRemove={() => setAttached(null)} />}
+      {picking && <ClipPickerSheet options={clips} first={first} onPick={setAttached} onClose={() => setPicking(false)} />}
       {planning && (
         <PlanJamSheet
           connectionId={connectionId}
@@ -352,6 +382,12 @@ function starters(person: Musician) {
     "Down to jam this week?",
     "Send me a clip of what you've been playing?",
   ].filter((x): x is string => Boolean(x));
+}
+
+/** The clip on a send still in flight, from the clips this chat already knows. */
+function pendingClip(clip: { id: number; at: number | null }, options: ClipOption[]): ChatMessage["clip"] {
+  const o = options.find((c) => c.id === clip.id);
+  return o ? { id: clip.id, at: clip.at, available: true, url: o.url, provider: o.provider, mine: o.mine, duration: o.duration } : { id: clip.id, at: clip.at, available: false };
 }
 
 /** A fresh id for one send, kept across its retries. */

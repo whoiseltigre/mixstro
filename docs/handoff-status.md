@@ -87,3 +87,17 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Link open / listen counts, budgeted, no personal data | Verified working (DB) | `opening_link_counts`, `opening_link_count` (service role), `/api/openings` with per-IP and global budgets |
 | Not indexed | Implemented | `noindex` metadata on `/o/[id]` |
 | Real-device share sheet, Instagram/WhatsApp previews | Blocked on external access | Needs physical phones |
+
+## 5. Release 3: clip replies
+
+| Item | Status | Evidence / next step |
+|---|---|---|
+| Optional clip reference and moment on a message, independent of text | Verified working (DB) | Migration `20261125040000` (`messages.clip_id`, `clip_at`; content rule is now text, voice or clip); `clip-replies.test.sql` |
+| Sender may only reference a clip of someone in the conversation; band entries aren't clips | Verified working (DB) | `messages_clip_check` trigger |
+| Moment bounded by the clip's length when known (6 h cap otherwise) | Verified working (DB + unit) | `clips.duration_s` (new, nullable) + trigger; `src/lib/clip-reply.ts` + tests. Lengths aren't filled in yet for existing clips (change required: set on recording/import) |
+| Viewer may play it; removed clips render as unavailable, conversation stays readable | Verified working (DB) / unverified (UI on device) | No foreign key on purpose; the chat reads the clip as the viewer and shows "This clip is no longer available" |
+| Attachment in send idempotency and retry | Verified working (DB + unit) | Same send id refuses a second clip reply; outbox keeps the clip across a failed send and Retry (`outbox.test.ts`) |
+| Reuse the persistent player and seek to the moment | Implemented but unverified | `PlayRequest.at`: in-app recordings jump to the moment, YouTube starts there; song previews (30-second excerpts) start at the top |
+| Older messages and older clients | Verified working (DB) | Plain text/voice inserts unchanged; inbox and notifications say "Sent a clip at 1:23" instead of "Voice note" |
+| Note: editing music in signup replaces clips with new ids | Change required | Replies to those clips then show as unavailable; keep ids stable when clips are unchanged |
+| Two-time rehearsal proposals | Not started (by design) | Build only if replied conversations stall during coordination |

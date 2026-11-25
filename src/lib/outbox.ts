@@ -9,6 +9,8 @@ export type OutboxItem = {
   /** Local object URL for a voice note recorded on this phone. */
   voiceUrl?: string | null;
   voiceSeconds?: number | null;
+  /** A clip reply keeps its attachment across retries, under the same send id. */
+  clip?: { id: number; at: number | null } | null;
   createdAt: string;
   status: "sending" | "failed";
   /** Set once the server confirmed it, before the stored copy arrives in the list. */
