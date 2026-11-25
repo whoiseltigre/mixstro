@@ -100,10 +100,10 @@ export function GeneratorPage({ page }: { page?: GenrePage }) {
             Shortlist three names and tap Let the band vote. You get one link for the group chat. Everyone votes in one tap without signing up, sees the totals
             after voting, and can change their mind. Later, open a new round on the same link to pick your next single or your set closer.
           </p>
-          <h2>Band name ideas to browse</h2>
+          <h2>Where famous bands got their names</h2>
           <p>
-            Prefer a list? Our <Link href="/blog/band-name-ideas">band name ideas</Link> post has 132 original names sorted by genre, plus where famous bands got
-            their names and how to pick one as a group.
+            Led Zeppelin started as a joke and AC/DC came off a sewing machine. Our <Link href="/blog/band-name-ideas">band name ideas</Link> post tells the
+            stories behind 19 famous band names, with tips for finding yours.
           </p>
           <h2>Band names by genre</h2>
           <p className="bng-genres">

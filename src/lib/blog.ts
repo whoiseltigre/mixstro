@@ -59,7 +59,7 @@ function extractFaqs(body: string): Faq[] {
     .filter((f) => f.question && f.answer);
 }
 
-/** Anchors on H2s (for links to a section), a class on the opening "short answer" paragraph and on lists of short names. */
+/** Anchors on H2s (for links to a section) and a class on the opening "short answer" paragraph. */
 function decorate(html: string) {
   const used = new Set<string>();
   return html
@@ -70,9 +70,7 @@ function decorate(html: string) {
       for (let i = 2; used.has(id); i++) id = `${base}-${i}`;
       used.add(id);
       return `<h2 id="${id}">${inner}</h2>`;
-    })
-    // Lists of 8+ short plain names (band name ideas) flow into columns instead of one long column.
-    .replace(/<ul>\n((?:<li>[^<]{1,28}<\/li>\n){8,})<\/ul>/g, (_, items: string) => `<ul class="mxb-names">\n${items}</ul>`);
+    });
 }
 
 /** " on Unsplash" / " on Pexels" after a photographer's credit. */
