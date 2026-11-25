@@ -1,3 +1,4 @@
+import { messagePreview } from "./clip-reply";
 import { adminClient, notifyMessage, notifyOpening } from "./notify";
 
 /**
@@ -20,9 +21,19 @@ async function deliver(intent: Intent): Promise<"sent" | "skipped"> {
   if (p.kind !== "message" || !p.message_id) return "skipped";
   // Eligibility is checked right before sending: the message must still exist and be readable
   // in an accepted, unblocked conversation (notifyMessage re-checks the pair and preferences).
-  const { data: m } = await db.from("messages").select("id, connection_id, sender_id, body, voice_seconds").eq("id", p.message_id).maybeSingle<{ id: number; connection_id: number; sender_id: string; body: string | null; voice_seconds: number | null }>();
+  // "*" so it reads the same before and after the clip columns exist.
+  const { data: m } = await db.from("messages").select("*").eq("id", p.message_id).maybeSingle<{
+    id: number;
+    connection_id: number;
+    sender_id: string;
+    body: string | null;
+    voice_url: string | null;
+    voice_seconds: number | null;
+    clip_at?: number | null;
+  }>();
   if (!m) return "skipped";
-  await notifyMessage(m.connection_id, m.sender_id, m.body, m.voice_seconds);
+  const preview = m.body ?? (m.voice_url ? null : messagePreview({ body: null, clipAt: m.clip_at ?? null }));
+  await notifyMessage(m.connection_id, m.sender_id, preview, m.voice_seconds);
   return "sent";
 }
 

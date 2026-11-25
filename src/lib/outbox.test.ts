@@ -32,3 +32,13 @@ test("pages merge without duplicates, oldest first", () => {
   const newest = [{ id: 2, createdAt: "2026-01-02" }, { id: 3, createdAt: "2026-01-03" }];
   assert.deepEqual(mergeById(older, newest).map((m) => m.id), [1, 2, 3]);
 });
+
+test("a retried clip reply keeps its attachment and its send id", () => {
+  const sent: OutboxItem = { clientId: "c1", body: null, clip: { id: 7, at: 83 }, createdAt: "2026-11-25T10:00:00Z", status: "sending" };
+  const failed = settle([sent], "c1", { error: "offline" });
+  assert.deepEqual(failed[0].clip, { id: 7, at: 83 });
+  const retried = settle(failed, "c1", { storedId: 42 });
+  assert.equal(retried[0].clientId, "c1");
+  assert.deepEqual(retried[0].clip, { id: 7, at: 83 });
+  assert.equal(pendingNotIn(retried, [{ id: 42, clientId: "c1" }]).length, 0);
+});

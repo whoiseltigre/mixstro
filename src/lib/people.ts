@@ -7,6 +7,8 @@ import { distancesFromMe, ensureLocation } from "./geo";
 import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
 import { isSupabaseConfigured } from "./supabase/config";
+import { messagePreview } from "./clip-reply";
+import type { ClipProvider } from "./clips";
 
 /**
  * Server-side reads for Today, profiles, search and Messages. With Supabase configured
@@ -435,7 +437,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
         preview: checkins.has(c.id)
           ? `Did you end up playing with ${person.name}?`
           : last
-            ? (last.body ?? "Voice note")
+            ? messagePreview(last)
             : `You're connected. Say hi to ${person.name}.`,
         at,
         mine: checkins.has(c.id) ? false : last?.sender_id === viewer.id,
@@ -458,14 +460,30 @@ export type ChatMessage = {
   createdAt: string;
   /** The phone's id for the send, so the optimistic copy and the stored one are matched. */
   clientId?: string | null;
+  /** A clip this message points at, and the moment in it. */
+  clip?: ChatClip | null;
 };
+
+/** A clip in a chat. `available` is false once the clip was removed: the reply stays readable. */
+export type ChatClip = {
+  id: number;
+  at: number | null;
+  available: boolean;
+  url?: string;
+  provider?: ClipProvider | null;
+  mine?: boolean;
+  duration?: number | null;
+};
+
+/** A clip you can reply to in this chat: theirs and yours. */
+export type ClipOption = { id: number; url: string; provider: ClipProvider | null; mine: boolean; duration: number | null };
 
 /** Messages per page in a chat. The newest page loads first; older pages load on request. */
 export const CHAT_PAGE = 150;
 
 export type ChatView =
   | { kind: "demo"; person: Musician }
-  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[]; more: boolean }
+  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[]; more: boolean; clips: ClipOption[] }
   | { kind: "not-connected"; person: Musician; connection: ConnectionRow | null; viewerId: string };
 
 /** The conversation with one musician. Messages only exist inside an accepted connection. */
@@ -477,11 +495,34 @@ export const getChat = cache(async (username: string): Promise<ChatView | null> 
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }
   const supabase = (await createClient())!;
-  const [page, jams] = await Promise.all([chatPage(supabase, view.connection.id, view.viewerId, null), getJams(supabase, view.connection.id, view.viewerId)]);
-  return { kind: "live", person: view.person, connectionId: view.connection.id, jams, ...page };
+  const [page, jams, clips] = await Promise.all([
+    chatPage(supabase, view.connection.id, view.viewerId, null),
+    getJams(supabase, view.connection.id, view.viewerId),
+    chatClipOptions(supabase, view.viewerId, view.person.id),
+  ]);
+  return { kind: "live", person: view.person, connectionId: view.connection.id, jams, clips, ...page };
 });
 
-type ChatRow = { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string; client_id?: string | null };
+type ChatRow = {
+  id: number;
+  sender_id: string;
+  body: string | null;
+  voice_url: string | null;
+  voice_seconds?: number | null;
+  created_at: string;
+  client_id?: string | null;
+  clip_id?: number | null;
+  clip_at?: number | null;
+};
+type ClipRow = { id: number; profile_id: string; url: string; provider: ClipProvider | null; duration_s?: number | null };
+
+/** Your clips and theirs, to reply to. "*" so it loads before duration_s exists. */
+async function chatClipOptions(supabase: Viewer["supabase"], viewerId: string, otherId: string): Promise<ClipOption[]> {
+  const { data } = await supabase.from("clips").select("*").in("profile_id", [otherId, viewerId]).eq("kind", "clip").order("id", { ascending: false }).limit(40);
+  return ((data ?? []) as ClipRow[])
+    .map((c) => ({ id: c.id, url: c.url, provider: c.provider, mine: c.profile_id === viewerId, duration: c.duration_s ?? null }))
+    .sort((a, b) => Number(a.mine) - Number(b.mine));
+}
 
 /**
  * One page of a chat, newest first with the id breaking ties, then flipped to read top to
@@ -501,10 +542,20 @@ async function chatPage(
   const rows = all.slice(0, CHAT_PAGE).reverse();
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();
-  if (paths.length) {
-    const { data: links } = await supabase.storage.from("voice").createSignedUrls(paths, 60 * 60 * 6);
-    for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
-  }
+  const clipIds = [...new Set(rows.flatMap((m) => (m.clip_id ? [m.clip_id] : [])))];
+  const [, clipRows] = await Promise.all([
+    paths.length
+      ? supabase.storage
+          .from("voice")
+          .createSignedUrls(paths, 60 * 60 * 6)
+          .then(({ data: links }) => {
+            for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
+          })
+      : null,
+    // Read as the viewer: a clip that's gone (or that they can't read) comes back missing and shows as unavailable.
+    clipIds.length ? supabase.from("clips").select("*").in("id", clipIds).eq("kind", "clip").then(({ data: c }) => (c ?? []) as ClipRow[]) : ([] as ClipRow[]),
+  ]);
+  const clipsById = new Map(clipRows.map((c) => [c.id, c]));
   return {
     more: all.length > CHAT_PAGE,
     messages: rows.map((m) => ({
@@ -515,8 +566,14 @@ async function chatPage(
       voiceSeconds: m.voice_seconds ?? null,
       createdAt: m.created_at,
       clientId: m.client_id ?? null,
+      clip: m.clip_id ? toChatClip(m.clip_id, m.clip_at ?? null, clipsById.get(m.clip_id), viewerId) : null,
     })),
   };
+}
+
+function toChatClip(id: number, at: number | null, row: ClipRow | undefined, viewerId: string): ChatClip {
+  if (!row) return { id, at, available: false };
+  return { id, at, available: true, url: row.url, provider: row.provider, mine: row.profile_id === viewerId, duration: row.duration_s ?? null };
 }
 
 /** Older messages in your chat with someone (Load earlier). Same visibility rules as the chat. */
