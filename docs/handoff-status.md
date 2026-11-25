@@ -29,3 +29,12 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Secret scanning | Implemented but unverified | Job `secrets` (gitleaks) runs on GitHub only |
 | Deployed build SHA | Implemented but unverified | `/api/health`; verify on staging after merge |
 | Production health fails without auth settings | Implemented but unverified | `/api/health` answers 503 in production without database or server key |
+| Anonymous ballots: server-only mutation boundary | Verified working (DB) | Migration `20261125000000`: ballot and tool-count functions execute only as service_role; `supabase/tests/ballots.test.sql` proves anon and members are refused. Voter id comes only from the httpOnly cookie. Existing links and organizers keep working (same organizer hash) |
+| Ballots: one vote per browser per round, choice changes, atomic rounds | Verified working (DB) | `ballots.test.sql` |
+| Ballot and telemetry budgets: per browser, per address and global | Implemented but unverified (app) / verified (DB limiter) | `src/lib/request-guard.ts` `withinBudget` + `rate_hit`; per-organizer cap of 20/hour beside the global 300/hour. Limiter outage lets requests through (logged) and the DB brakes still hold |
+| Tool counts are low-trust telemetry | Verified working | Counted only within budget; completed signups come from committed profile rows (Pulse), never from these counts |
+| Music lookups: body cap before parsing, field validation, budgets, dedupe, miss caching | Implemented but unverified (routes) / verified (validator) | `readJson` caps at 64 KB even without Content-Length; `src/lib/journey-validate.ts` (+ unit tests); `memoLookup` shares in-flight reads, keeps successes, briefly keeps misses, never keeps errors; player cache now forgets failures |
+| Edge and direct backend per route family | Blocked on external access | Needs AWS (CloudFront/WAF) and Supabase dashboards to document protection per route family |
+| Consent, blocks | Verified working (DB) | `connections.test.sql` (crossed requests converge, only the recipient accepts, blocked pair can't connect or message, connection hidden) |
+| Private media URL expiry, push device caps | Implemented but unverified | Unchanged from PR #61; needs a staging check |
+| Account deletion | Change made, unverified end to end | Completion update is now checked; `reportStuckDeletions` logs out-of-retry and day-old jobs with a safe resume path (reset attempts). Needs a staging run with an interrupted deletion |

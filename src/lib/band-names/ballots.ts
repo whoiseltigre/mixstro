@@ -1,7 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
-import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
+import { adminClient } from "@/lib/supabase/admin";
 import { clean } from "./wordlists.ts";
 import { safeBandName } from "./generate.ts";
 
@@ -9,6 +8,10 @@ import { safeBandName } from "./generate.ts";
  * Band votes on mixstro.com: no sign-in. Each browser gets a random id in an httpOnly cookie.
  * It identifies the browser's vote, and the browser that made a vote can open new rounds
  * (the database keeps only a sha256 of the id). See supabase/migrations/20261120000000_band_name_votes.sql.
+ *
+ * Only this server can call the ballot functions (service role, migration 20261125000000), so a
+ * voter id always comes from this browser's cookie, never from whatever a script sends. An
+ * anonymous vote means "one browser", never "one verified person".
  */
 
 export type Kind = "band" | "single" | "closer";
@@ -34,10 +37,7 @@ const COOKIE = "mx_nb";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export const isBallotId = (id: string) => UUID.test(id);
 
-function db() {
-  if (!isSupabaseConfigured) return null;
-  return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
-}
+const db = adminClient;
 
 /** This browser's id; made (and set as a cookie) when `create` is true. */
 export async function voterId(create: boolean): Promise<string | null> {
@@ -69,12 +69,14 @@ export async function getBallot(id: string): Promise<Ballot | null> {
   return (data as Ballot | null) ?? null;
 }
 
+/** The new ballot's id, "busy" when a budget is used up, or null on failure. */
 export async function createBallot(options: string[]): Promise<string | null> {
   const client = db();
   if (!client) return null;
   const voter = await voterId(true);
   const { data, error } = await client.rpc("name_ballot_create", { p_options: options, p_organizer_hash: hash(voter) });
-  return error ? null : (data as string);
+  if (error) return error.message.includes("busy") ? "busy" : null;
+  return data as string;
 }
 
 export async function castVote(id: string, round: number, choice: number): Promise<{ ballot?: Ballot; error?: string }> {

@@ -1,6 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { adminClient } from "./supabase/admin";
 import { nounFor } from "./instruments";
-import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
 import { sendPush } from "./push";
 
@@ -59,13 +58,7 @@ export type Email = {
   push?: { title?: string; body?: string };
 };
 
-let admin: SupabaseClient | null | undefined;
-export function adminClient() {
-  if (admin !== undefined) return admin;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  admin = key && SUPABASE_URL ? createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } }) : null;
-  return admin;
-}
+export { adminClient };
 
 /** Anything to send with: the service role key is the only must (push keys come from Supabase). */
 export const emailEnabled = () => Boolean(adminClient());
