@@ -153,14 +153,22 @@ export async function closeSpot(id: string, postId: string): Promise<Result> {
   return {};
 }
 
-export async function sendBandMessage(id: string, body: string): Promise<Result> {
+/**
+ * `clientId`: the phone's id for this send, the same on a retry. The database keeps one row per
+ * band, sender and send id, so a retry after a lost answer doesn't post twice.
+ */
+export async function sendBandMessage(id: string, body: string, clientId?: string): Promise<Result> {
   const n = bandId(id);
   if (n === null) return DEMO;
   const text = body.trim().slice(0, 4000);
   if (!text) return { error: "Write something first." };
   const viewer = await getViewer();
   if (!viewer) return SIGNED_OUT;
-  const { error } = await viewer.supabase.from("band_messages").insert({ band_id: n, sender_id: viewer.id, kind: "text", body: text });
+  const client_id = clientId && /^[0-9a-f-]{36}$/i.test(clientId) ? clientId : undefined;
+  const row = { band_id: n, sender_id: viewer.id, kind: "text", body: text };
+  let { error } = await viewer.supabase.from("band_messages").insert(client_id ? { ...row, client_id } : row);
+  if (error?.code === "23505" && client_id) return {}; // landed on an earlier try
+  if (error && client_id && (error.code === "42703" || error.code === "PGRST204")) ({ error } = await viewer.supabase.from("band_messages").insert(row));
   if (error) return { error: "That didn't send. Try again." };
   after(() => notifyBandMessage(n, viewer.id, text));
   revalidatePath("/messages", "layout");
@@ -216,4 +224,13 @@ export async function startBand(projectId: string): Promise<{ id?: string; error
   if (error || data == null) return { error: "That didn't work. Try again." };
   revalidatePath("/me");
   return { id: String(data) };
+}
+
+/** Opening the band chat marks it read. Called by the chat itself, not its loader, so prefetching the page never clears unread counts. */
+export async function markBandRead(id: string): Promise<void> {
+  const n = bandId(id);
+  if (n === null) return;
+  const viewer = await getViewer();
+  if (!viewer) return;
+  await viewer.supabase.rpc("mark_band_read", { p_band: n });
 }

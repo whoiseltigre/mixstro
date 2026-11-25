@@ -218,18 +218,32 @@ export async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
 /** Past this many chats waiting on you, Today pauses until you answer some (#4). */
 export const YOUR_TURN_LIMIT = 8;
 
+type Latest = { connection_id: number; sender_id: string; body: string | null; voice_url: string | null; created_at: string };
+
+/**
+ * The newest message in each conversation, however busy the others are (latest_messages, one
+ * row per thread). Before that function exists it falls back to the old capped scan.
+ */
+async function latestPerThread(viewer: Viewer, connectionIds: number[]): Promise<Latest[]> {
+  if (!connectionIds.length) return [];
+  const { data, error } = await viewer.supabase.rpc("latest_messages", { p_connections: connectionIds });
+  if (!error) return (data ?? []) as Latest[];
+  const { data: rows } = await viewer.supabase
+    .from("messages")
+    .select("connection_id, sender_id, body, voice_url, created_at")
+    .in("connection_id", connectionIds)
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  const seen = new Set<number>();
+  return ((rows ?? []) as Latest[]).filter((m) => !seen.has(m.connection_id) && Boolean(seen.add(m.connection_id)));
+}
+
 /** How many accepted conversations end with a message from the other person. */
 async function yourTurnCount(viewer: Viewer, connections: ConnectionRow[]) {
   const accepted = connections.filter((c) => c.status === "accepted").map((c) => c.id);
   if (accepted.length < YOUR_TURN_LIMIT) return 0;
-  const { data } = await viewer.supabase
-    .from("messages")
-    .select("connection_id, sender_id")
-    .in("connection_id", accepted)
-    .order("created_at", { ascending: false })
-    .limit(1000);
-  const last = new Map<number, string>();
-  for (const m of (data ?? []) as { connection_id: number; sender_id: string }[]) if (!last.has(m.connection_id)) last.set(m.connection_id, m.sender_id);
+  const latest = await latestPerThread(viewer, accepted);
+  const last = new Map<number, string>(latest.map((m) => [m.connection_id, m.sender_id]));
   return [...last.values()].filter((sender) => sender !== viewer.id).length;
 }
 
@@ -375,14 +389,9 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
   if (!accepted.length) return { threads: SAMPLE_THREADS(viewer), demo: false };
 
   const otherIds = accepted.map((c) => (c.from_id === viewer.id ? c.to_id : c.from_id));
-  const [{ data: rows }, { data: messages }] = await Promise.all([
+  const [{ data: rows }, messages] = await Promise.all([
     viewer.supabase.from("profiles").select(PROFILE_COLUMNS).in("id", otherIds),
-    viewer.supabase
-      .from("messages")
-      .select("connection_id, sender_id, body, voice_url, created_at")
-      .in("connection_id", accepted.map((c) => c.id))
-      .order("created_at", { ascending: false })
-      .limit(500),
+    latestPerThread(viewer, accepted.map((c) => c.id)),
   ]);
   const [people, checkins] = await Promise.all([
     hydrate(viewer, (rows ?? []) as ProfileRow[]),
@@ -391,7 +400,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
   const threads = accepted.flatMap((c) => {
     const person = people.find((p) => p.id === (c.from_id === viewer.id ? c.to_id : c.from_id));
     if (!person) return [];
-    const last = (messages ?? []).find((m) => m.connection_id === c.id);
+    const last = messages.find((m) => m.connection_id === c.id);
     const at = last?.created_at ?? c.created_at;
     return [
       {
@@ -414,11 +423,23 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
 }
 
 /** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */
-export type ChatMessage = { id: number; mine: boolean; body: string | null; voiceUrl: string | null; voiceSeconds?: number | null; createdAt: string };
+export type ChatMessage = {
+  id: number;
+  mine: boolean;
+  body: string | null;
+  voiceUrl: string | null;
+  voiceSeconds?: number | null;
+  createdAt: string;
+  /** The phone's id for the send, so the optimistic copy and the stored one are matched. */
+  clientId?: string | null;
+};
+
+/** Messages per page in a chat. The newest page loads first; older pages load on request. */
+export const CHAT_PAGE = 150;
 
 export type ChatView =
   | { kind: "demo"; person: Musician }
-  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[] }
+  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[]; more: boolean }
   | { kind: "not-connected"; person: Musician; connection: ConnectionRow | null; viewerId: string };
 
 /** The conversation with one musician. Messages only exist inside an accepted connection. */
@@ -430,21 +451,28 @@ export const getChat = cache(async (username: string): Promise<ChatView | null> 
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }
   const supabase = (await createClient())!;
-  // The newest 500, newest first (id breaks ties), then flipped so the chat reads top to bottom.
-  // Reading oldest first would stop at message 500 and never show the latest ones.
-  // "*" so the chat still loads before newer columns (voice_seconds) exist.
-  const [{ data }, jams] = await Promise.all([
-    supabase
-      .from("messages")
-      .select("*")
-      .eq("connection_id", view.connection.id)
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
-      .limit(500),
-    getJams(supabase, view.connection.id, view.viewerId),
-  ]);
-  type ChatRow = { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string };
-  const rows = ((data ?? []) as ChatRow[]).reverse();
+  const [page, jams] = await Promise.all([chatPage(supabase, view.connection.id, view.viewerId, null), getJams(supabase, view.connection.id, view.viewerId)]);
+  return { kind: "live", person: view.person, connectionId: view.connection.id, jams, ...page };
+});
+
+type ChatRow = { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string; client_id?: string | null };
+
+/**
+ * One page of a chat, newest first with the id breaking ties, then flipped to read top to
+ * bottom. `before` is the oldest message already on screen; null means the newest page.
+ * "*" so it still loads before newer columns (voice_seconds, client_id) exist.
+ */
+async function chatPage(
+  supabase: Viewer["supabase"],
+  connectionId: number,
+  viewerId: string,
+  before: { id: number; createdAt: string } | null,
+): Promise<{ messages: ChatMessage[]; more: boolean }> {
+  let q = supabase.from("messages").select("*").eq("connection_id", connectionId);
+  if (before) q = q.or(`created_at.lt."${before.createdAt}",and(created_at.eq."${before.createdAt}",id.lt.${before.id})`);
+  const { data } = await q.order("created_at", { ascending: false }).order("id", { ascending: false }).limit(CHAT_PAGE + 1);
+  const all = (data ?? []) as ChatRow[];
+  const rows = all.slice(0, CHAT_PAGE).reverse();
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();
   if (paths.length) {
@@ -452,20 +480,26 @@ export const getChat = cache(async (username: string): Promise<ChatView | null> 
     for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
   }
   return {
-    kind: "live",
-    person: view.person,
-    connectionId: view.connection.id,
-    jams,
+    more: all.length > CHAT_PAGE,
     messages: rows.map((m) => ({
       id: m.id,
-      mine: m.sender_id === view.viewerId,
+      mine: m.sender_id === viewerId,
       body: m.body,
       voiceUrl: m.voice_url ? (signed.get(m.voice_url) ?? null) : null,
       voiceSeconds: m.voice_seconds ?? null,
       createdAt: m.created_at,
+      clientId: m.client_id ?? null,
     })),
   };
-});
+}
+
+/** Older messages in your chat with someone (Load earlier). Same visibility rules as the chat. */
+export async function getOlderMessages(username: string, before: { id: number; createdAt: string }) {
+  const view = await getProfile(username);
+  if (!view?.viewerId || view.connection?.status !== "accepted") return { messages: [] as ChatMessage[], more: false };
+  const supabase = (await createClient())!;
+  return chatPage(supabase, view.connection.id, view.viewerId, before);
+}
 
 /** Starting or rebuilding a band? Drummers and bassists are the classic hard finds. */
 export const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
