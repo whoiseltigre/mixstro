@@ -1,7 +1,7 @@
 import { BOARD, findMusician } from "./mock";
 import { SHOW_SAMPLES, getMusicians, getViewer, locate, type Viewer } from "./people";
 import type { Musician } from "./mock";
-import { openingCandidates, toOpening, type CandidateView, type Opening, type OpeningRow } from "./openings";
+import { myClips, openingCandidates, toOpening, type CandidateView, type MyClip, type Opening, type OpeningRow } from "./openings";
 
 /**
  * The Board: bands, sessions and collabs post open spots, and musicians answer with their
@@ -201,7 +201,7 @@ export type Reply = { id: number; person: Musician; note: string | null; created
 export type PostView =
   | { kind: "sample"; post: BoardPost }
   | { kind: "theirs"; post: BoardPost; me: Musician | null; myNote: string | null }
-  | { kind: "mine"; post: BoardPost; replies: Reply[]; candidates?: CandidateView };
+  | { kind: "mine"; post: BoardPost; replies: Reply[]; candidates?: CandidateView; clips?: MyClip[] };
 
 /** One post. The author also sees who answered; everyone else sees whether they already did. */
 export async function getPost(id: string): Promise<PostView | null> {
@@ -226,10 +226,11 @@ export async function getPost(id: string): Promise<PostView | null> {
       .order("created_at", { ascending: false });
     const list = (rows ?? []) as { id: number; from_id: string; note: string | null; created_at: string }[];
     const people = await getMusicians(viewer, list.map((r) => r.from_id));
-    const candidates = post.opening ? await openingCandidates(viewer, data.id, post.opening) : undefined;
+    const [candidates, clips] = post.opening ? await Promise.all([openingCandidates(viewer, data.id, post.opening), myClips(viewer)]) : [undefined, undefined];
     return {
       kind: "mine",
       candidates,
+      clips,
       post: bandMember ? { ...post, mine: true, replies: list.length, foot: `${list.length} musician${list.length === 1 ? "" : "s"} answered` } : post,
       replies: list.flatMap((r) => {
         const person = people.find((p) => p.id === r.from_id);

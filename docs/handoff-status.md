@@ -73,3 +73,17 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Alerts when an opening opens or renews, deduped and capped | Verified working (DB) / unverified (delivery) | `queue_opening_alerts` → intents (one per opening, renewal and person; max 3 a week; blocks excluded); delivered by `notifyOpening` under the "Musicians you're looking for" preference |
 | Activation instrumentation | Implemented but unverified | Pulse "Openings" section (`opening_pulse`): open, zero supply by role, opened/filled/expired |
 | Primary measure (two-way conversation within 7 days of an opening) | Change required | Needs attribution of conversations to openings (PR 5 adds the source on replies); cohort query next |
+
+## 4. Release 2: shareable opening links
+
+| Item | Status | Evidence / next step |
+|---|---|---|
+| Owner chooses to share; link shows only role, approximate area, days, author, band and one chosen clip | Verified working (DB) | Migration `20261125030000`; `public_opening()` (anon) returns neighborhood only, never exact location, never other clips; `opening-links.test.sql` |
+| Shared clip must be the poster's own | Verified working (DB) | `board_post_share_check` trigger |
+| Paused / filled / expired / unshared links show the real state | Verified working (DB) / unverified (UI) | `public_opening` status; `/o/[id]` headline and CTA per state |
+| Blocked viewer can't see the link | Implemented but unverified | `/o/[id]` returns 404 for a signed-in viewer across a block |
+| Signed-out reply: draft kept, sign in, come back to the same opening | Implemented but unverified | Draft in localStorage for 24 h; `mx_return` cookie (only `/o/<id>`, see `return-path.ts` + tests); middleware sends the signed-in user back once. Sending is always a manual tap |
+| Reply outcomes typed (sent / already / closed / own / signed out) | Implemented but unverified | `src/app/o/actions.ts`; reply recorded with source `link`, then a connection request and the reply notification |
+| Link open / listen counts, budgeted, no personal data | Verified working (DB) | `opening_link_counts`, `opening_link_count` (service role), `/api/openings` with per-IP and global budgets |
+| Not indexed | Implemented | `noindex` metadata on `/o/[id]` |
+| Real-device share sheet, Instagram/WhatsApp previews | Blocked on external access | Needs physical phones |

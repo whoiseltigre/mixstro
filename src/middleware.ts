@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { RETURN_COOKIE, isReturnPath } from "@/lib/return-path";
 import { publicOrigin } from "@/lib/redirect";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -24,7 +25,7 @@ function rememberBand(request: NextRequest, response: NextResponse) {
 const SITE_HOST = "mixstro.com";
 const APP_ORIGIN = "https://app.mixstro.com";
 // Paths on mixstro.com that belong to the app, sent over to app.mixstro.com.
-const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/b/", "/join"];
+const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/b/", "/join", "/o/"];
 
 function siteRouting(request: NextRequest): NextResponse | null {
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")
@@ -90,6 +91,15 @@ export async function middleware(request: NextRequest) {
   const join = path.match(/^\/join\/([0-9a-f]{32})\/?$/)?.[1];
   if (join) response.cookies.set("mx_join", join, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
   rememberBand(request, response);
+
+  // Back to the shared opening that sent you to sign in (only /o/<id>, set by that page).
+  const back = request.cookies.get(RETURN_COOKIE)?.value;
+  if (user && path === "/discover" && isReturnPath(back)) {
+    const res = NextResponse.redirect(new URL(back, publicOrigin(request.headers, request.nextUrl.origin)));
+    response.cookies.getAll().forEach((c) => res.cookies.set(c));
+    res.cookies.delete(RETURN_COOKIE);
+    return res;
+  }
 
   if (!user && (APP_ROUTES.some((r) => path.startsWith(r)) || path.startsWith("/m/"))) {
     return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));
