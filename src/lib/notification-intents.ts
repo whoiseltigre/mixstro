@@ -1,4 +1,4 @@
-import { adminClient, notifyMessage } from "./notify";
+import { adminClient, notifyMessage, notifyOpening } from "./notify";
 
 /**
  * Message notifications from durable intents (migration 20261125010000). The database writes
@@ -8,11 +8,15 @@ import { adminClient, notifyMessage } from "./notify";
  * never send the same intent.
  */
 
-type Intent = { id: number; event_key: string; recipient_id: string; payload: { kind?: string; message_id?: number; connection_id?: number; sender_id?: string } };
+type Intent = { id: number; event_key: string; recipient_id: string; payload: { kind?: string; message_id?: number; connection_id?: number; sender_id?: string; post_id?: number; author_id?: string; miles?: number } };
 
 async function deliver(intent: Intent): Promise<"sent" | "skipped"> {
   const db = adminClient()!;
   const p = intent.payload;
+  if (p.kind === "opening" && p.post_id && p.author_id) {
+    await notifyOpening(intent.recipient_id, p.post_id, p.author_id, p.miles ?? 0);
+    return "sent";
+  }
   if (p.kind !== "message" || !p.message_id) return "skipped";
   // Eligibility is checked right before sending: the message must still exist and be readable
   // in an accepted, unblocked conversation (notifyMessage re-checks the pair and preferences).

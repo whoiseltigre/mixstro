@@ -56,3 +56,20 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Signed-out or expired session never acknowledged | Verified working (DB) | `messages.test.sql` |
 | Production/demo separation | Implemented but unverified | `/api/health` (PR 1). Sample people stay on by decision |
 | Pass / Connect / quick replies typed outcomes | Change required | Connect and Pass already return outcomes; quick reply should check its message insert |
+
+## 3. Release 1: openings and local discovery
+
+| Item | Status | Evidence / next step |
+|---|---|---|
+| Opening on a Board post (one identity): needed / offered role, rehearsal days, radius, optional date, status, expiry | Verified working (DB) | Migration `20261125020000`; `openings.test.sql` |
+| Open / paused / filled / expired, explicit renew, owner can pause or fill now | Verified working (DB) | `set_opening_status`, `renew_opening`, `expire_openings` (15-minute job); status and `closed_at` kept in step for older clients |
+| Transitions recorded | Verified working (DB) | `opening_events` |
+| Eligible local selection before the limit | Verified working (DB) | `opening_candidates`: blocks, self, known relationships, discoverability, role (family synonyms via `expandRoles`), status, distance, then limit. Survives 220 newer Dallas accounts |
+| Today: pending invitations fetched on their own; local filter before the limit | Verified working (DB) / unverified (app) | `local_candidates`; `todayCandidates` in `people.ts` (old read kept as fallback) |
+| Missing location distinct from zero supply | Verified working (DB) | State `no_location` vs empty `ok`; zero supply recorded in `opening_supply` |
+| Ranking: reciprocal fit, overlapping days, shared artists, distance, id | Verified working (DB) | Interpretable order in SQL; compare against replies once there's data |
+| Honest reasons, no implied availability | Verified working | `src/lib/opening-reasons.ts` + tests ("Also rehearses Thursdays", never "free Thursday at 7") |
+| Sparse market state with alert action | Implemented but unverified (UI) | Opening panel on your post: "No drummers within 15 mi have joined yet" + "Tell me when a drummer joins" |
+| Alerts when an opening opens or renews, deduped and capped | Verified working (DB) / unverified (delivery) | `queue_opening_alerts` → intents (one per opening, renewal and person; max 3 a week; blocks excluded); delivered by `notifyOpening` under the "Musicians you're looking for" preference |
+| Activation instrumentation | Implemented but unverified | Pulse "Openings" section (`opening_pulse`): open, zero supply by role, opened/filled/expired |
+| Primary measure (two-way conversation within 7 days of an opening) | Change required | Needs attribution of conversations to openings (PR 5 adds the source on replies); cohort query next |

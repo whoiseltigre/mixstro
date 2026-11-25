@@ -125,7 +125,48 @@ function Generator({ t }: { t: ToolPulse }) {
   );
 }
 
-export function PulseView({ p, tool }: { p: Pulse; tool?: ToolPulse }) {
+export type OpeningPulse = {
+  open: number;
+  opened_28d: number;
+  filled_28d: number;
+  expired_28d: number;
+  checked: number;
+  zero_supply: number;
+  by_role: Record<string, { open: number; zero: number }>;
+};
+
+/** Openings: local supply (open requests with nobody eligible nearby) and outcomes. */
+function Openings({ o }: { o: OpeningPulse }) {
+  const stats: [string, string][] = [
+    ["Open now", String(o.open)],
+    ["Nobody eligible nearby", `${o.zero_supply} of ${o.checked}`],
+    ["Opened, 28 days", String(o.opened_28d)],
+    ["Filled, 28 days", String(o.filled_28d)],
+    ["Expired, 28 days", String(o.expired_28d)],
+  ];
+  const roles = Object.entries(o.by_role).sort((a, b) => b[1].open - a[1].open);
+  return (
+    <section aria-labelledby="openings" className="flex flex-col gap-3">
+      <h2 id="openings" className="text-body-lg font-semibold">Openings</h2>
+      <p className="text-footnote text-smoke text-pretty -mt-1">Requests with nobody eligible nearby tell you which roles to recruit, and where.</p>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        {stats.map(([label, n]) => (
+          <li key={label} className="p-4 rounded-card bg-stage border border-paper/8 flex flex-col gap-1">
+            <span className="text-title-lg font-semibold leading-none tabular-nums">{n}</span>
+            <span className="text-footnote text-smoke">{label}</span>
+          </li>
+        ))}
+      </ul>
+      {roles.length > 0 && (
+        <p className="text-footnote text-smoke">
+          {roles.map(([role, r]) => `${role}: ${r.open} open, ${r.zero} with nobody nearby`).join(" · ")}
+        </p>
+      )}
+    </section>
+  );
+}
+
+export function PulseView({ p, tool, openings }: { p: Pulse; tool?: ToolPulse; openings?: OpeningPulse }) {
   const replies = new Map(p.replies.map((r) => [r.week, r]));
 
   return (
@@ -206,6 +247,7 @@ export function PulseView({ p, tool }: { p: Pulse; tool?: ToolPulse }) {
         </div>
       </section>
 
+      {openings && <Openings o={openings} />}
       {tool && <Generator t={tool} />}
 
       <div className="grid md:grid-cols-2 gap-8">
