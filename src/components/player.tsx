@@ -37,13 +37,20 @@ const SILENCE = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2
 
 const cache = new Map<string, Promise<TrackDetails>>();
 
-/** Details for a link, fetched once per page load. */
+/**
+ * Details for a link, fetched once per page load and shared by everyone asking at the same
+ * time. A failed or rate-limited answer isn't kept, so the next tap tries again.
+ */
 export function loadDetails(url: string): Promise<TrackDetails> {
   let p = cache.get(url);
   if (!p) {
+    const forget = () => {
+      cache.delete(url);
+      return { links: {} } as TrackDetails;
+    };
     p = fetch(`/api/music/track?url=${encodeURIComponent(url)}`)
-      .then((r) => (r.ok ? r.json() : { links: {} }))
-      .catch(() => ({ links: {} }));
+      .then((r) => (r.ok ? (r.json() as Promise<TrackDetails>) : forget()))
+      .catch(forget);
     cache.set(url, p);
   }
   return p;
