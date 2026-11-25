@@ -20,7 +20,7 @@ export async function runReminders() {
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
     resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
-    drainNotificationIntents().catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
+    openingUpkeep().then(() => drainNotificationIntents()).catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
   ]);
   return { yourTurn, jams, alerts, deletions, notifications };
 }
@@ -162,4 +162,12 @@ function distanceMi(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   const rad = (d: number) => (d * Math.PI) / 180;
   const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lng - a.lng) / 2) ** 2;
   return 2 * 3958.8 * Math.asin(Math.sqrt(h));
+}
+
+/** Close openings past their expiry and queue alerts for ones just opened or renewed. */
+async function openingUpkeep() {
+  const db = adminClient()!;
+  const [expired, queued] = await Promise.all([db.rpc("expire_openings"), db.rpc("queue_opening_alerts")]);
+  if (expired.error && expired.error.code !== "PGRST202") console.error("reminders: expire openings", expired.error.message);
+  if (queued.error && queued.error.code !== "PGRST202") console.error("reminders: opening alerts", queued.error.message);
 }

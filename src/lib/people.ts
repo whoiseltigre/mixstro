@@ -281,6 +281,38 @@ export type Area = {
 export const EARLY_AREA = 3;
 
 /**
+ * Who Today chooses from. People who asked to play with you are fetched by id, on their own,
+ * so a busy market can never push them out. Everyone else comes from local_candidates, which
+ * keeps only discoverable, unblocked, not-yet-known people inside your radius BEFORE taking a
+ * limit (200 newer accounts in another city can't crowd out your neighbors). Before that
+ * function exists, the older "200 most recent anywhere" read is used.
+ */
+async function todayCandidates(viewer: Viewer, exclude: Set<string>, incoming: string[]): Promise<ProfileRow[]> {
+  const [{ data: asked }, local] = await Promise.all([
+    incoming.length ? viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", incoming) : Promise.resolve({ data: [] }),
+    viewer.supabase.rpc("local_candidates", { p_limit: 60 }),
+  ]);
+  let organic: ProfileRow[];
+  if (!local.error) {
+    const ids = ((local.data ?? []) as { profile_id: string }[]).map((r) => r.profile_id).filter((id) => !exclude.has(id));
+    const { data } = ids.length ? await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", ids) : { data: [] };
+    organic = (data ?? []) as ProfileRow[];
+    // Few people local yet: add recent people further out, for the early-area card's "nearest
+    // musicians past your radius" (they're still filtered by radius for the deck itself).
+    if (organic.length < EARLY_AREA) {
+      const { data: recent } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).order("last_active_at", { ascending: false }).limit(60);
+      organic = [...organic, ...((recent ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id))];
+    }
+  } else {
+    // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
+    const { data } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).order("last_active_at", { ascending: false }).limit(200);
+    organic = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
+  }
+  const seen = new Set<string>();
+  return [...((asked ?? []) as ProfileRow[]), ...organic].filter((r) => r.id !== viewer.id && !seen.has(r.id) && Boolean(seen.add(r.id)));
+}
+
+/**
  * Today: up to five musicians you haven't connected with or passed on. People who
  * already reached out to you come first, then the most shared influences.
  */
@@ -296,13 +328,7 @@ export async function getToday(): Promise<Today> {
   // Only needs the connections, so it runs alongside the rest instead of after it.
   const yourTurn = yourTurnCount(viewer, connections);
   const alertRoles = getAlertRoles(viewer).catch(() => ({ roles: [] as string[], picked: false }));
-  // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
-  const { data } = await viewer.supabase
-    .from("discoverable_profiles")
-    .select(PROFILE_COLUMNS)
-    .order("last_active_at", { ascending: false })
-    .limit(200);
-  const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
+  const candidates = await todayCandidates(viewer, exclude, incoming);
   const [nearby, music] = await Promise.all([
     hydrate(viewer, candidates),
     withMusic(viewer.supabase, candidates.map((r) => r.id)),

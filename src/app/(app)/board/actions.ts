@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { notifyBoardReply } from "@/lib/notify";
 import { redirect } from "next/navigation";
 import { KINDS, type BoardKind } from "@/lib/board-kinds";
+import { ROLE_IDS, expandRoles } from "@/lib/instruments";
 import { getViewer } from "@/lib/people";
 
 /**
@@ -21,7 +22,14 @@ export type PostInput = {
   paid: boolean;
   pay: string;
   closesOn: string;
+  /** A structured opening: the role family you need ("Drums"). Empty for a plain post. */
+  neededRole?: string;
+  offeredRole?: string;
+  days?: string[];
+  radiusMi?: number;
 };
+
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -34,10 +42,20 @@ export async function createPost(input: PostInput): Promise<{ error?: string }> 
   const title = clean(input.title, 80);
   if (!title || title.length < 3) return { error: "Give your post a short title." };
   const closesOn = /^\d{4}-\d{2}-\d{2}$/.test(input.closesOn) ? input.closesOn : null;
+  const needed = input.neededRole && ROLE_IDS.includes(input.neededRole) ? input.neededRole : null;
+  const opening = needed
+    ? {
+        needed_role: needed,
+        needed_instruments: expandRoles([needed]),
+        offered_role: input.offeredRole && ROLE_IDS.includes(input.offeredRole) ? input.offeredRole : null,
+        rehearsal_days: (input.days ?? []).filter((d) => DAYS.includes(d)),
+        radius_mi: Number.isInteger(input.radiusMi) && input.radiusMi! >= 1 && input.radiusMi! <= 100 ? input.radiusMi : null,
+        // A session or dated sub request ends on its date; an ongoing search expires in 14 days.
+        event_date: input.kind === "session" ? closesOn : null,
+      }
+    : {};
 
-  const { data, error } = await viewer.supabase
-    .from("board_posts")
-    .insert({
+  const base = {
       author_id: viewer.id,
       kind: input.kind,
       title,
@@ -47,9 +65,10 @@ export async function createPost(input: PostInput): Promise<{ error?: string }> 
       paid: Boolean(input.paid),
       pay: input.paid ? clean(input.pay, 40) : null,
       closes_on: closesOn,
-    })
-    .select("id")
-    .single();
+  };
+  let { data, error } = await viewer.supabase.from("board_posts").insert({ ...base, ...opening }).select("id").single();
+  // Before the openings migration: post it as a plain Board post.
+  if (error && needed && (error.code === "PGRST204" || error.code === "42703")) ({ data, error } = await viewer.supabase.from("board_posts").insert(base).select("id").single());
   if (error || !data) return { error: "That didn't post. Try again." };
   revalidatePath("/board");
   redirect(`/board/${data.id}`);
@@ -83,4 +102,34 @@ export async function closePost(postId: number) {
   await viewer.supabase.from("board_posts").update({ closed_at: new Date().toISOString() }).eq("id", postId); // RLS: your own post, or your band's open spot.
   revalidatePath("/board", "layout");
   redirect("/board");
+}
+
+/** Pause, mark filled, or reopen an opening (yours, or your band's). */
+export async function setOpeningStatus(postId: number, status: "open" | "paused" | "filled"): Promise<{ error?: string }> {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "Sign in again." };
+  const { error } = await viewer.supabase.rpc("set_opening_status", { p_post: postId, p_status: status });
+  if (error) return { error: "That didn't save. Try again." };
+  revalidatePath("/board", "layout");
+  return {};
+}
+
+/** Keep an opening up for another two weeks. */
+export async function renewOpening(postId: number): Promise<{ error?: string }> {
+  const viewer = await getViewer();
+  if (!viewer) return { error: "Sign in again." };
+  const { error } = await viewer.supabase.rpc("renew_opening", { p_post: postId, p_days: 14 });
+  if (error) return { error: error.message.includes("filled") ? "Filled openings stay filled. Post a new one." : "That didn't save. Try again." };
+  revalidatePath("/board", "layout");
+  return {};
+}
+
+/** Nobody nearby yet: get an alert when someone who plays this role joins. */
+export async function alertMeFor(role: string): Promise<{ error?: string }> {
+  const viewer = await getViewer();
+  if (!viewer || !ROLE_IDS.includes(role)) return { error: "That didn't save." };
+  const { data } = await viewer.supabase.from("profiles").select("alert_roles").eq("id", viewer.id).maybeSingle<{ alert_roles: string[] | null }>();
+  const roles = [...new Set([...(data?.alert_roles ?? []), role])].slice(0, 10);
+  const { error } = await viewer.supabase.from("profiles").update({ alert_roles: roles }).eq("id", viewer.id);
+  return error ? { error: "That didn't save." } : {};
 }
