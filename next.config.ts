@@ -23,7 +23,14 @@ function blogRedirects() {
   return [...fromPosts, ...dropped].map((r) => ({ ...r, permanent: true }));
 }
 
+/** The commit being built: Amplify sets AWS_COMMIT_ID, GitHub Actions GITHUB_SHA. Served at /api/health. */
+const BUILD_SHA = process.env.AWS_COMMIT_ID || process.env.GITHUB_SHA || "";
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_SHA: BUILD_SHA.slice(0, 40),
+    NEXT_PUBLIC_BUILT_AT: new Date().toISOString(),
+  },
   experimental: {
     // Keep pages you just saw in the browser's router cache for 30s, so hopping back and forth
     // between tabs is instant. Any save (server action + revalidatePath) clears it right away.
