@@ -1,4 +1,5 @@
 import { resumeDeletions } from "./account-deletion";
+import { drainNotificationIntents } from "./notification-intents";
 import { adminClient, notifyJamSoon, notifyRoleAlert, notifyYourTurn } from "./notify";
 import { familyOf, fillsRole } from "./instruments";
 
@@ -14,13 +15,14 @@ const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
 export async function runReminders() {
   const db = adminClient();
   if (!db) return { skipped: "no service role key" };
-  const [yourTurn, jams, alerts, deletions] = await Promise.all([
+  const [yourTurn, jams, alerts, deletions, notifications] = await Promise.all([
     yourTurnNudges().catch((e) => (console.error("reminders: your turn", e), -1)),
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
     resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
+    drainNotificationIntents().catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
   ]);
-  return { yourTurn, jams, alerts, deletions };
+  return { yourTurn, jams, alerts, deletions, notifications };
 }
 
 /** Last message in an accepted chat, from the other person, sent 48 to 72 hours ago and still unanswered. */

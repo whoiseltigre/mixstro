@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { notifyConnect, notifyConnectBack, notifyJamAccepted, notifyJamInvite, notifyMessage } from "@/lib/notify";
-import { getViewer, withMusic } from "@/lib/people";
+import { dispatchMessageNotification } from "@/lib/notification-intents";
+import { getOlderMessages, getViewer, withMusic } from "@/lib/people";
 
 /**
  * Connect, pass and send. Each action re-checks who you are, and the database enforces the
@@ -76,48 +77,73 @@ export async function pass(otherId: string): Promise<{ error?: string }> {
   return {};
 }
 
+/** What a send returns: the stored message as the database has it, or why it failed. */
+export type SendResult = { error: string; message?: undefined } | { error?: undefined; message: { id: number; clientId: string | null; createdAt: string } };
+
+const isMissingColumn = (e: { code?: string; message?: string } | null) => Boolean(e && (e.code === "42703" || e.code === "PGRST204" || /client_id/.test(e.message ?? "")));
+
 /**
- * `retry`: the same text again after a send that looked like it failed. On a weak signal
- * the first one can land even though the answer never came back, so skip it if it did.
+ * Stores one message. `clientId` is made by the phone for this send and stays the same when it
+ * retries, so a retry after a lost answer returns the message that already landed instead of
+ * adding a second one (the database enforces one row per conversation, sender and send id).
  */
-export async function sendMessage(connectionId: number, body: string, retry = false) {
-  const text = body.trim().slice(0, 4000);
-  if (!text) return { error: "Write something first." };
-  const viewer = await getViewer();
-  if (!viewer) return { error: "You're signed out." };
-  if (retry) {
-    const since = new Date(Date.now() - 10 * 60_000).toISOString();
+async function storeMessage(
+  viewer: NonNullable<Awaited<ReturnType<typeof getViewer>>>,
+  row: { connection_id: number; body?: string; voice_url?: string; voice_seconds?: number },
+  clientId: string | undefined,
+): Promise<SendResult> {
+  const client_id = clientId && UUID.test(clientId) ? clientId : null;
+  const insert = (withId: boolean) =>
+    viewer.supabase
+      .from("messages")
+      .insert({ ...row, sender_id: viewer.id, ...(withId && client_id ? { client_id } : {}) })
+      .select("id, created_at")
+      .single<{ id: number; created_at: string }>();
+  let { data, error } = await insert(true);
+  if (error?.code === "23505" && client_id) {
+    // Already landed on an earlier try: hand back that message.
     const { data: landed } = await viewer.supabase
       .from("messages")
-      .select("id")
-      .eq("connection_id", connectionId)
+      .select("id, created_at")
+      .eq("connection_id", row.connection_id)
       .eq("sender_id", viewer.id)
-      .eq("body", text)
-      .gte("created_at", since)
-      .limit(1);
-    if (landed?.length) {
-      revalidatePath("/messages");
-      return {};
-    }
+      .eq("client_id", client_id)
+      .maybeSingle<{ id: number; created_at: string }>();
+    if (landed) return { message: { id: landed.id, clientId: client_id, createdAt: landed.created_at } };
   }
-  const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, body: text });
-  if (error) return { error: "That didn't send. Try again." };
-  after(() => notifyMessage(connectionId, viewer.id, text));
-  revalidatePath("/messages");
-  return {};
+  // Before the database has send ids (older schema), store it the old way.
+  if (isMissingColumn(error)) ({ data, error } = await insert(false));
+  if (error || !data) return { error: "That didn't send. Try again." };
+  const id = data.id;
+  after(async () => {
+    if (!(await dispatchMessageNotification(id).catch(() => false))) await notifyMessage(row.connection_id, viewer.id, row.body ?? null, row.voice_seconds ?? null);
+  });
+  return { message: { id, clientId: client_id, createdAt: data.created_at } };
+}
+
+/** Send a text. Signed-out or expired sessions never get a success back. */
+export async function sendMessage(connectionId: number, body: string, clientId?: string): Promise<SendResult> {
+  const text = body.trim().slice(0, 4000);
+  if (!text) return { error: "Write something first." };
+  if (!Number.isSafeInteger(connectionId)) return { error: "That didn't send. Try again." };
+  const viewer = await getViewer();
+  if (!viewer) return { error: "You're signed out. Sign in again to send." };
+  return storeMessage(viewer, { connection_id: connectionId, body: text }, clientId);
 }
 
 /** A voice note already uploaded to voice/<connection>/<you>/…; this posts it to the chat. */
-export async function sendVoice(connectionId: number, path: string, seconds: number) {
+export async function sendVoice(connectionId: number, path: string, seconds: number, clientId?: string): Promise<SendResult> {
   const viewer = await getViewer();
-  if (!viewer) return { error: "You're signed out." };
+  if (!viewer) return { error: "You're signed out. Sign in again to send." };
   if (!Number.isInteger(connectionId) || !path.startsWith(`${connectionId}/${viewer.id}/`) || path.includes("..")) return { error: "That didn't send. Try again." };
   const voice_seconds = Math.min(120, Math.max(1, Math.round(seconds)));
-  const { error } = await viewer.supabase.from("messages").insert({ connection_id: connectionId, sender_id: viewer.id, voice_url: path, voice_seconds });
-  if (error) return { error: "That didn't send. Try again." };
-  after(() => notifyMessage(connectionId, viewer.id, null, voice_seconds));
-  revalidatePath("/messages");
-  return {};
+  return storeMessage(viewer, { connection_id: connectionId, voice_url: path, voice_seconds }, clientId);
+}
+
+/** Older messages in a chat, before a cursor (the oldest message on screen). */
+export async function olderMessages(username: string, before: { id: number; createdAt: string }) {
+  if (!Number.isSafeInteger(before.id) || Number.isNaN(Date.parse(before.createdAt))) return { messages: [], more: false };
+  return getOlderMessages(username, before);
 }
 
 /** #7 Propose a jam. With `replacesId`, this is "Another time" on an invite they sent you. */
@@ -131,8 +157,22 @@ export async function proposeJam(connectionId: number, startsAt: string, place: 
   if (where.length < 2) return { error: "Say where you'll play." };
 
   if (replacesId !== undefined) {
-    const { error } = await viewer.supabase.from("jams").update({ status: "replaced" }).eq("id", replacesId).eq("connection_id", connectionId);
-    if (error) return { error: "That invite was already answered." };
+    // Replacing the old invite and proposing the new one happen together, or not at all.
+    const { error } = await viewer.supabase.rpc("reschedule_jam", {
+      p_replaces: replacesId,
+      p_starts_at: when.toISOString(),
+      p_place: where,
+      p_note: note.trim().slice(0, 280) || null,
+    });
+    if (!error) {
+      after(() => notifyJamInvite(connectionId, viewer.id, when.toISOString(), where, true, note.trim().slice(0, 280) || null));
+      revalidatePath("/messages", "layout");
+      return {};
+    }
+    if (error.code !== "PGRST202" && error.code !== "42883") return { error: "That invite was already answered." };
+    // Older database without reschedule_jam: the previous two-step way.
+    const { error: upErr } = await viewer.supabase.from("jams").update({ status: "replaced" }).eq("id", replacesId).eq("connection_id", connectionId);
+    if (upErr) return { error: "That invite was already answered." };
   }
   const { error } = await viewer.supabase.from("jams").insert({
     connection_id: connectionId,

@@ -167,7 +167,6 @@ export async function getBandChat(id: string): Promise<BandChat | null> {
     viewer.supabase.from("band_messages").select("id, kind, sender_id, body, voice_url, voice_seconds, ref_id, created_at").eq("band_id", n).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(300),
     viewer.supabase.from("band_members").select("profile_id, projects(end_year)").eq("band_id", n),
     viewer.supabase.from("band_shows").select("show_date, show_time, venue").eq("band_id", n).gte("show_date", new Date().toISOString().slice(0, 10)).order("show_date").limit(1),
-    viewer.supabase.rpc("mark_band_read", { p_band: n }),
   ]);
   if (!band) return null;
   type Msg = { id: number; kind: BandChatMessage["kind"]; sender_id: string | null; body: string | null; voice_url: string | null; voice_seconds: number | null; ref_id: number | null; created_at: string };

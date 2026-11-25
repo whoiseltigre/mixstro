@@ -38,3 +38,21 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Consent, blocks | Verified working (DB) | `connections.test.sql` (crossed requests converge, only the recipient accepts, blocked pair can't connect or message, connection hidden) |
 | Private media URL expiry, push device caps | Implemented but unverified | Unchanged from PR #61; needs a staging check |
 | Account deletion | Change made, unverified end to end | Completion update is now checked; `reportStuckDeletions` logs out-of-retry and day-old jobs with a safe resume path (reset attempts). Needs a staging run with an interrupted deletion |
+
+## 2. Reliable actions and messaging
+
+| Item | Status | Evidence / next step |
+|---|---|---|
+| Stable send ids, unique per sender and conversation, canonical row returned | Verified working (DB + merge logic) | Migration `20261125010000` (`client_id` + partial unique index); `messages.test.sql` (retry = one, two intentional = two, no-id rows still accepted); `src/lib/outbox.ts` + tests. App falls back to id-less inserts before the SQL runs |
+| Optimistic, acknowledgment and realtime merged by identity; per-send pending / failed / Retry | Implemented but unverified (UI) | `live-chat.tsx` outbox; unit tests cover realtime-before-ack and one failure among several sends. Needs a two-phone check |
+| Newest-first with id tie-break, cursor paging to the oldest | Verified working (DB) | `messages.test.sql` (600+ rows, tie-break, cursor reaches all); chat opens on the newest 150 with "Load earlier messages" |
+| Latest-per-thread inbox and waiting-on-me | Verified working (DB) | `latest_messages()` (RLS applies); `getThreads` and `yourTurnCount` use it, with the old scan as fallback |
+| Realtime reconnect catches up | Implemented but unverified | Refresh on re-subscribe, on returning to the app and on `online` (DM and band chat) |
+| Band chat read marker split from the loader | Implemented but unverified | `markBandRead` runs from the open chat, so prefetching the page leaves unread counts alone |
+| Band chat send ids | Implemented but unverified | `band_messages.client_id`; retry of the same failed text reuses its id |
+| Atomic signup | Verified working (DB) | `finish_onboarding()`: profile, influences and clips commit together, then onboarded; a bad clip leaves nothing behind (`messages.test.sql`) |
+| Atomic "Another time" | Verified working (DB) | `reschedule_jam()`; a failed reschedule keeps the original invite |
+| Durable notification intents | Verified working (DB) / unverified (delivery) | Intent written by trigger with the message; `claim_notification_intents` (SKIP LOCKED), backoff, 6-attempt cap, `notification_intent_health`; sent right after the send and drained by the 15-minute job. Provider idempotency for email/push not added yet (change required) |
+| Signed-out or expired session never acknowledged | Verified working (DB) | `messages.test.sql` |
+| Production/demo separation | Implemented but unverified | `/api/health` (PR 1). Sample people stay on by decision |
+| Pass / Connect / quick replies typed outcomes | Change required | Connect and Pass already return outcomes; quick reply should check its message insert |

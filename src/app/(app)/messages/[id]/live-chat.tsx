@@ -1,122 +1,153 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TimeAgo } from "@/components/time-ago";
 import type { Musician } from "@/lib/mock";
 import type { Jam } from "@/lib/jams";
 import type { ChatMessage } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
-import { sendMessage, sendVoice } from "../../actions";
+import { olderMessages, sendMessage, sendVoice, type SendResult } from "../../actions";
+import { mergeById, pendingNotIn, settle, type OutboxItem } from "@/lib/outbox";
 import { ChatHeader } from "./chat-header";
 import { JamCard, PlanJamSheet } from "./jam";
 import { VoiceBubble, clock, uploadVoice, useVoiceRecorder, type Recording } from "./voice";
 
-/** A real conversation. New messages arrive over Supabase Realtime; sending goes through a server action. */
-export function LiveChat({ person, connectionId, messages, jams }: { person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[] }) {
+/**
+ * A real conversation. New messages arrive over Supabase Realtime. Each send gets its own id
+ * (kept across retries) and shows straight away; the server answers with the stored message,
+ * and the copy is swapped in by that id. A send that fails stays on screen with Retry, without
+ * touching any other send in flight. Reconnecting or coming back to the app fetches anything
+ * missed while away.
+ */
+export function LiveChat({
+  person,
+  connectionId,
+  messages,
+  jams,
+  more,
+}: {
+  person: Musician;
+  connectionId: number;
+  messages: ChatMessage[];
+  jams: Jam[];
+  more: boolean;
+}) {
   const router = useRouter();
   const first = person.name.split(" ")[0];
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string>();
-  const [optimistic, setOptimistic] = useState<ChatMessage[]>([]);
-  /** The text of a send that seemed to fail, so sending it again can't double it. */
-  const failed = useRef<string | null>(null);
-  const [pending, start] = useTransition();
+  const [outbox, setOutbox] = useState<OutboxItem[]>([]);
+  const [older, setOlder] = useState<ChatMessage[]>([]);
+  const [hasOlder, setHasOlder] = useState(more);
+  const [loadingOlder, setLoadingOlder] = useState(false);
   const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
   const [planning, setPlanning] = useState<{ replacing: Jam | null } | null>(null);
 
-  const shown = [...messages, ...optimistic];
+  const stored = mergeById(older, messages);
+  const pending = pendingNotIn(outbox, stored);
+  const shown: (ChatMessage & { pending?: OutboxItem })[] = [
+    ...stored,
+    ...pending.map((o, i) => ({
+      id: -(i + 1),
+      mine: true,
+      body: o.body,
+      voiceUrl: o.voiceUrl ?? null,
+      voiceSeconds: o.voiceSeconds,
+      createdAt: o.createdAt,
+      clientId: o.clientId,
+      pending: o,
+    })),
+  ];
   // Messages and jam invites share one timeline, in the order they happened.
-  type Item = { at: string; key: string; message?: ChatMessage; jam?: Jam };
+  type Item = { at: string; key: string; message?: (typeof shown)[number]; jam?: Jam };
   const timeline: Item[] = [
-    ...shown.map((m) => ({ at: m.createdAt, key: `m${m.id}`, message: m })),
+    ...shown.map((m) => ({ at: m.createdAt, key: m.pending ? `p${m.pending.clientId}` : `m${m.id}`, message: m })),
     ...jams.map((j) => ({ at: j.createdAt, key: `j${j.id}`, jam: j })),
   ].sort((a, b) => a.at.localeCompare(b.at));
   // After a few messages back and forth with no plans yet, nudge toward actually playing.
   const suggestJam = jams.length === 0 && messages.length >= 6;
 
-  // A refresh brings the server's copy of anything we just sent, so drop the optimistic bubbles.
-  useEffect(() => setOptimistic([]), [messages]);
+  // Confirmed sends whose stored copy has arrived drop out of the outbox.
+  useEffect(() => setOutbox((o) => pendingNotIn(o, messages)), [messages]);
 
   useEffect(() => {
     const supabase = createClient();
     if (!supabase) return;
+    let joined = false;
     const channel = supabase
       .channel(`messages:${connectionId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `connection_id=eq.${connectionId}`,
-        },
-        () => router.refresh(),
-      )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `connection_id=eq.${connectionId}` }, () => router.refresh())
       .on("postgres_changes", { event: "*", schema: "public", table: "jams", filter: `connection_id=eq.${connectionId}` }, () => router.refresh())
-      .subscribe();
+      .subscribe((status) => {
+        // After a dropped connection, catch up on anything sent while we were away.
+        if (status === "SUBSCRIBED" && joined) router.refresh();
+        if (status === "SUBSCRIBED") joined = true;
+      });
+    const onVisible = () => document.visibilityState === "visible" && router.refresh();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", onVisible);
     return () => {
       supabase.removeChannel(channel);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", onVisible);
     };
   }, [connectionId, router]);
 
   useEffect(() => {
     end.current?.scrollIntoView({ block: "end" });
-  }, [timeline.length]);
+  }, [messages.length, outbox.length]);
+
+  /** Sends one queued text (first try or Retry) and settles just that send. */
+  async function deliver(item: OutboxItem) {
+    const res = await sendMessage(connectionId, item.body ?? "", item.clientId).catch(() => ({ error: "That didn't send. Check your connection and try again." }) as SendResult);
+    setOutbox((o) => settle(o, item.clientId, res.error ? { error: res.error } : { storedId: res.message!.id }));
+    if (!res.error) router.refresh();
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const body = draft.trim();
-    if (!body || pending) return;
+    if (!body) return;
     setDraft("");
     setError(undefined);
-    const temp: ChatMessage = {
-      id: -Date.now(),
-      mine: true,
-      body,
-      voiceUrl: null,
-      createdAt: new Date(Date.now() - 1000).toISOString(),
-    };
-    setOptimistic((o) => [...o, temp]);
-    const retry = failed.current === body;
-    start(async () => {
-      const res = await sendMessage(connectionId, body, retry).catch(() => ({ error: "That didn't send. Check your connection and try again." }));
-      if (res.error) {
-        failed.current = body;
-        setError(res.error);
-        setDraft(body);
-        setOptimistic((o) => o.filter((m) => m.id !== temp.id));
-        return;
-      }
-      failed.current = null;
-      router.refresh();
-    });
+    const item: OutboxItem = { clientId: newClientId(), body, createdAt: new Date().toISOString(), status: "sending" };
+    setOutbox((o) => [...o, item]);
+    void deliver(item);
+  }
+
+  function retry(item: OutboxItem) {
+    // A voice note that failed is dismissed and recorded again rather than re-uploaded from memory.
+    if (item.voiceUrl) return setOutbox((o) => o.filter((x) => x.clientId !== item.clientId));
+    setOutbox((o) => o.map((x) => (x.clientId === item.clientId ? { ...x, status: "sending", error: undefined } : x)));
+    void deliver(item);
   }
 
   /** Shows the note straight away from the local recording, then uploads and posts it. */
   function sendRecording({ blob, seconds }: Recording) {
     setError(undefined);
-    const local = URL.createObjectURL(blob);
-    const temp: ChatMessage = {
-      id: -Date.now(),
-      mine: true,
-      body: null,
-      voiceUrl: local,
-      voiceSeconds: seconds,
-      createdAt: new Date().toISOString(),
-    };
-    setOptimistic((o) => [...o, temp]);
-    start(async () => {
+    const item: OutboxItem = { clientId: newClientId(), body: null, voiceUrl: URL.createObjectURL(blob), voiceSeconds: seconds, createdAt: new Date().toISOString(), status: "sending" };
+    setOutbox((o) => [...o, item]);
+    void (async () => {
       const up = await uploadVoice(connectionId, blob);
-      const res = up.path ? await sendVoice(connectionId, up.path, seconds).catch(() => ({ error: "That didn't send. Try again." })) : { error: up.error };
-      if (res.error) {
-        setError(res.error);
-        setOptimistic((o) => o.filter((m) => m.id !== temp.id));
-        return;
-      }
-      router.refresh();
-    });
+      const res: SendResult = up.path
+        ? await sendVoice(connectionId, up.path, seconds, item.clientId).catch(() => ({ error: "That didn't send. Try again." }) as SendResult)
+        : { error: up.error ?? "That didn't send. Try again." };
+      setOutbox((o) => settle(o, item.clientId, res.error ? { error: res.error } : { storedId: res.message!.id }));
+      if (!res.error) router.refresh();
+    })();
+  }
+
+  async function loadOlder() {
+    const oldest = stored[0];
+    if (!oldest || loadingOlder) return;
+    setLoadingOlder(true);
+    const page = await olderMessages(person.username, { id: oldest.id, createdAt: oldest.createdAt }).catch(() => null);
+    setLoadingOlder(false);
+    if (!page) return setError("Couldn't load earlier messages. Try again.");
+    setOlder((o) => mergeById(page.messages, o));
+    setHasOlder(page.more);
   }
 
   return (
@@ -125,6 +156,16 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
 
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
         <div className="mt-auto" />
+        {hasOlder && (
+          <button
+            type="button"
+            onClick={loadOlder}
+            disabled={loadingOlder}
+            className="self-center h-8 px-3.5 rounded-full border border-paper/20 text-footnote text-smoke hover:bg-paper/10 transition disabled:opacity-50"
+          >
+            {loadingOlder ? "Loading…" : "Load earlier messages"}
+          </button>
+        )}
         {timeline.length === 0 && (
           <p className="self-center max-w-[260px] text-center text-subhead leading-[1.5] text-smoke py-6">
             You and {first} are connected.
@@ -155,7 +196,7 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
               {item.jam ? (
                 <JamCard jam={item.jam} first={first} onAnotherTime={(jam) => setPlanning({ replacing: jam })} />
               ) : !m ? null : m.voiceUrl !== null || m.voiceSeconds ? (
-                <VoiceBubble url={m.voiceUrl} seconds={m.voiceSeconds} mine={m.mine} sending={m.id < 0} />
+                <VoiceBubble url={m.voiceUrl} seconds={m.voiceSeconds} mine={m.mine} sending={m.pending?.status === "sending"} />
               ) : (
                 <div
                   className={
@@ -163,10 +204,18 @@ export function LiveChat({ person, connectionId, messages, jams }: { person: Mus
                       ? "self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-callout leading-[1.4] whitespace-pre-wrap break-words"
                       : "self-start max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout leading-[1.4] whitespace-pre-wrap break-words"
                   }
-                  style={m.id < 0 ? { opacity: 0.6 } : undefined}
+                  style={m.pending ? { opacity: m.pending.status === "failed" ? 0.45 : 0.6 } : undefined}
                 >
                   {m.body ?? "Voice note"}
                 </div>
+              )}
+              {m?.pending?.status === "failed" && (
+                <p role="alert" className="self-end -mt-1 flex items-center gap-2 text-caption text-danger">
+                  {m.pending.error ?? "Not sent."}
+                  <button type="button" onClick={() => retry(m.pending!)} className="font-semibold underline underline-offset-2">
+                    {m.pending.voiceUrl ? "Dismiss" : "Retry"}
+                  </button>
+                </p>
               )}
             </div>
           );
@@ -303,4 +352,11 @@ function starters(person: Musician) {
     "Down to jam this week?",
     "Send me a clip of what you've been playing?",
   ].filter((x): x is string => Boolean(x));
+}
+
+/** A fresh id for one send, kept across its retries. */
+function newClientId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (Number(c) ^ (Math.random() * 16) >> (Number(c) / 4)).toString(16));
 }
