@@ -5,11 +5,11 @@ slug: band-name-ideas
 date: 2026-11-25
 description: "Generate band name ideas by genre and vibe, then learn where Led Zeppelin, Pink Floyd, Radiohead, AC/DC and 15 more famous bands got their names, and how to pick yours."
 excerpt: "A free band name generator, plus where 19 famous bands found their names: jokes, songs, books, gym teachers and a sewing machine."
-cover: "/site/v1/blog/band-name-ideas/cover-666cafab"
-cover_alt: "A four-piece band posing together in an old industrial building"
-og: "/site/v1/blog/band-name-ideas/og-6066489a.jpg"
-cover_credit_url: "https://unsplash.com/@ezj"
-cover_credit: "Ethan Johnson"
+cover: "/site/v1/blog/band-name-ideas/cover-f8b15266"
+cover_alt: "A band playing to a packed crowd under smoky stage lights"
+og: "/site/v1/blog/band-name-ideas/og-77d29efb.jpg"
+cover_credit_url: "https://unsplash.com/@glennvandewiel"
+cover_credit: "Glenn van de Wiel"
 tags: [Bands]
 author: Taylor Greigh
 old_urls: []
