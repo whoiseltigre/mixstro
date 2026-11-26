@@ -51,8 +51,8 @@ export function BandHubView({ hub }: { hub: BandHub }) {
   };
 
   return (
-    <main className="relative pb-32 md:pb-16 md:max-w-[640px] md:mx-auto flex flex-col">
-      <header className="relative h-[300px] md:h-[260px] md:mt-4 md:rounded-hero overflow-hidden" style={{ background: nameWash(band.name) }}>
+    <main className="relative pb-32 md:pb-16 md:max-w-[640px] lg:max-w-[1080px] md:mx-auto flex flex-col">
+      <header className="relative h-[300px] md:h-[260px] lg:h-[340px] md:mt-4 md:rounded-hero overflow-hidden" style={{ background: nameWash(band.name) }}>
         {band.photo && <FadeImg src={band.photo} alt="" className="absolute inset-0 size-full object-cover" />}
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgb(15_13_11/0.35)_0%,transparent_30%,rgb(15_13_11/0.55)_62%,var(--color-ink)_100%)]" />
         <div className="absolute inset-x-0 top-0 pt-safe md:pt-4 px-5 flex items-center justify-between">
@@ -63,21 +63,22 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         </div>
         <div className="absolute inset-x-0 bottom-0 px-5 pb-1 flex flex-col gap-1.5">
           <span className="eyebrow text-paper/70">Your band</span>
-          <h1 className="headline text-display-md truncate">{band.name}</h1>
+          <h1 className="headline text-display-md lg:text-display-lg truncate">{band.name}</h1>
           <span className="text-subhead text-paper/70 truncate">{facts}</span>
         </div>
       </header>
 
-      <div className="px-5 md:px-0 pt-4 flex flex-col gap-4">
+      {/* Wide screens: the cards flow into two columns under the cover instead of one phone-width stack. */}
+      <div className="px-5 md:px-0 pt-4 flex flex-col gap-4 lg:block lg:columns-2 lg:gap-6 lg:pt-6 lg:[&>*]:break-inside-avoid lg:[&>*]:mb-5 lg:[&>*]:w-full">
         <nav aria-label="Band actions" className="grid grid-cols-4 gap-2">
-          <Action href={`/messages/b/${band.id}`} hue="#FFB245" solid badge={hub.chat?.unread} label="Chat" icon={<path d="M4 5.5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-4.5 3.5v-3.5H4a1 1 0 01-1-1v-10a1 1 0 011-1z" />} />
+          <Action href={`/messages/b/${band.id}`} hue="#C9B6FF" solid badge={hub.chat?.unread} label="Chat" icon={<path d="M4 5.5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-4.5 3.5v-3.5H4a1 1 0 01-1-1v-10a1 1 0 011-1z" />} />
           {hub.rehearsals ? (
             <Action onClick={() => setPanel("rehearsal")} hue="#67E2DA" label="Rehearse" icon={<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>} />
           ) : (
             <Action onClick={() => setPanel("show")} hue="#F7BF77" label="Add a show" icon={<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>} />
           )}
           <Action onClick={() => setPanel("invite")} hue="#FFACBA" label="Invite" icon={<><circle cx="10" cy="8" r="3.5" /><path d="M3.5 19c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5M18 8v6M15 11h6" /></>} />
-          <Action onClick={() => setPanel("add")} hue="#C9B6FF" label="More" icon={<path d="M12 5v14M5 12h14" />} />
+          <Action onClick={() => setPanel("add")} hue="#B5C5FF" label="More" icon={<path d="M12 5v14M5 12h14" />} />
         </nav>
 
         {done < list.length && (
