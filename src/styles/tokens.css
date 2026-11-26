@@ -110,27 +110,15 @@
   --toggle-on: var(--color-success); /* the one switch color: iOS green (Sundy, 2026-11-26) */
   --headline-weight: 620;
   --gel-strength: 1; /* multiplies each area's top glow */
-  --bubble-own-bg: color-mix(in oklab, var(--color-gel-teal) 26%, var(--color-stage));
-  --bubble-own-fg: var(--color-paper);
-  --bubble-own-line: color-mix(in oklab, var(--color-gel-teal) 38%, transparent);
+  --bubble-own-bg: var(--color-paper); /* your own messages: Paper (Sundy, 2026-11-26) */
+  --bubble-own-fg: var(--color-ink);
+  --bubble-own-line: transparent;
 
   /* Hairlines and fills on Ink, from faintest to strongest. */
   --line-faint: rgb(245 241 236 / 0.08);
   --line: rgb(245 241 236 / 0.12);
   --line-strong: rgb(245 241 236 / 0.2);
   color-scheme: dark;
-}
-
-/* Alternatives you can try on /design. Whatever is picked there becomes the default by editing the values above. */
-:root[data-fields="pill"] { --field-radius: 26px; }
-:root[data-titles="lighter"] { --headline-weight: 560; }
-:root[data-titles="bolder"] { --headline-weight: 680; }
-:root[data-gels="soft"] { --gel-strength: 0.55; }
-:root[data-gels="strong"] { --gel-strength: 1.5; }
-:root[data-bubbles="paper"] {
-  --bubble-own-bg: var(--color-paper);
-  --bubble-own-fg: var(--color-ink);
-  --bubble-own-line: transparent;
 }
 
 @supports (transition-timing-function: linear(0, 1)) {

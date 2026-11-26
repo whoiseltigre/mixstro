@@ -102,6 +102,15 @@ body {
   color: var(--bubble-own-fg);
   border: 1px solid var(--bubble-own-line);
 }
+/* A play button inside your own (Paper) bubble: solid Ink so it reads on the light surface. */
+.bubble-own button.glass {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 
 /*
  * Stage spill: each area's gel as a glow at the top of the screen, on phones and desktop alike.

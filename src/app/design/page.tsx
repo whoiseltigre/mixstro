@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Button, Chip, Field, PlayButton, SectionLabel, TextArea, Wordmark } from "@/components/ui";
 import { PostCard } from "@/components/post-card";
 import type { BoardPost } from "@/lib/board";
-import { DesignChoices } from "./choices";
 import { ToggleDemo } from "./motion-lab";
 import { MotionLab, HapticRow } from "./motion-lab";
 
@@ -137,10 +136,6 @@ export default function DesignSystem() {
           The interface is the dark room; the musicians are the light. Warm neutrals do most of the work, one tungsten spotlight per screen, and each part of the app gets its own colored gel.
         </p>
       </header>
-
-      <Section id="decide" title="Try a look" intro="Small decisions you can flip and then walk through the real app with. Each one changes a single token, so every screen follows.">
-        <DesignChoices />
-      </Section>
 
       <Section id="color" title="Color" intro="Neutrals for the room. Tungsten means three things only: Create (the + button), something playing right now, and an opening meant for you. Links, ticks and selected states are Paper.">
         <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">

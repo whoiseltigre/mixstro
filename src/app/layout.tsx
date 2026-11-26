@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { PlayerProvider } from "@/components/player";
-import { CHOICE_BOOT } from "@/lib/design-choices";
 
 // Fonts are self-hosted (src/app/fonts, latin subset, SIL Open Font License via Fontsource) so
 // builds never depend on reaching Google Fonts.
@@ -38,10 +37,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
-        {/* Applies any look being tried out on /design before the first paint. */}
-        <script dangerouslySetInnerHTML={{ __html: CHOICE_BOOT }} />
         <PlayerProvider>{children}</PlayerProvider>
       </body>
     </html>
