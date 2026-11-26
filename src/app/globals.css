@@ -117,28 +117,6 @@ body {
   }
 }
 
-/* Board post covers: three looks in the markup, one shown. Default A; data-covers picks B or C. */
-.post-cover .cover-b,
-.post-cover .cover-c {
-  display: none;
-}
-:root[data-covers="record"] .post-cover .cover-a,
-:root[data-covers="flyer"] .post-cover .cover-a {
-  display: none;
-}
-:root[data-covers="record"] .post-cover .cover-b,
-:root[data-covers="flyer"] .post-cover .cover-c {
-  display: block;
-}
-/* On the flyer the kind is printed on the paper itself; on the record the chip turns dark to read. */
-:root[data-covers="flyer"] .post-cover-chip {
-  display: none;
-}
-:root[data-covers="record"] .post-cover-chip {
-  background: var(--color-ink) !important;
-  color: var(--color-paper);
-}
-
 @utility hscroll {
   overflow-x: auto;
   scrollbar-width: none;

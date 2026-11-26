@@ -60,17 +60,6 @@ export const CHOICES: Choice[] = [
       { value: "pill", label: "Pill" },
     ],
   },
-  {
-    id: "covers",
-    attr: "data-covers",
-    label: "Board post covers",
-    why: "What a post on the Board looks like when it has no photo of its own.",
-    options: [
-      { value: "", label: "A · Spotlight" },
-      { value: "record", label: "B · Record" },
-      { value: "flyer", label: "C · Flyer" },
-    ],
-  },
 ];
 
 export const CHOICE_KEY = "mixstro:design-choices";

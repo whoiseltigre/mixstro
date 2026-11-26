@@ -56,14 +56,14 @@ There is one of each. Use them from `src/components/ui.tsx` instead of writing c
 | `Toggle`, `ToggleRow` | The one switch. Its "on" color is `--toggle-on`. |
 | `PlayButton` | Glass at rest, Tungsten while playing. |
 | `Chip` | 44px, Paper when selected. |
-| `PostCard` | Board posts. The cover has three designs (`data-covers`): Spotlight, Record, Flyer. |
+| `PostCard` | Board posts. The cover is the Spotlight: the wanted instrument in a beam of the post's gel color, never a photo of the poster. |
 | `ProjectList` | A profile's projects as a record shelf: big covers, the picked record's songs underneath. |
 
 Small labels are 12px (`text-caption`) at the smallest. 11px (`text-caption2`) is for badge counts only.
 
 ## Trying a look
 
-`/design` opens with "Try a look": switches for the handful of choices that are still open (switch color, own chat bubbles, glow strength, title weight, field shape, Board cover). Each one flips a single token through a `data-*` attribute on `<html>` (`src/lib/design-choices.ts`, read by `src/styles/tokens.css`), is remembered in that browser only, and changes the whole app at once. To make a choice permanent, change the token's default in `tokens.css` and remove the choice from the list.
+`/design` opens with "Try a look": switches for the handful of choices that are still open (switch color, own chat bubbles, glow strength, title weight, field shape). Each one flips a single token through a `data-*` attribute on `<html>` (`src/lib/design-choices.ts`, read by `src/styles/tokens.css`), is remembered in that browser only, and changes the whole app at once. To make a choice permanent, change the token's default in `tokens.css` and remove the choice from the list.
 
 ## Screen patterns
 

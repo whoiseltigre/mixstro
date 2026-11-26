@@ -258,7 +258,7 @@ export default function DesignSystem() {
           </div>
         </div>
         <div className="flex flex-col gap-3 pt-4">
-          <SectionLabel>Board post card: pick the cover under &ldquo;Try a look&rdquo; above</SectionLabel>
+          <SectionLabel>Board post card</SectionLabel>
           <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-3.5">
             {SAMPLE_POSTS.map((p) => (
               <li key={p.id}>
