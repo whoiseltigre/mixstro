@@ -100,11 +100,11 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
                 type="button"
                 disabled={pending}
                 onClick={() => run(() => answerJam(jam.id, "accepted"))}
-                className="flex-1 h-9 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-50"
+                className="flex-1 h-11 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-50"
               >
                 I&apos;m in
               </button>
-              <button type="button" disabled={pending} onClick={() => onAnotherTime(jam)} className="flex-1 h-9 rounded-full border border-paper/20 text-subhead disabled:opacity-50">
+              <button type="button" disabled={pending} onClick={() => onAnotherTime(jam)} className="flex-1 h-11 rounded-full border border-paper/20 text-subhead disabled:opacity-50">
                 Another time
               </button>
             </div>
@@ -115,7 +115,7 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
         ))}
 
       {jam.status === "accepted" && !checkinOpen && (
-        <button type="button" onClick={() => downloadIcs(jam, first)} className="h-9 rounded-full border border-paper/20 text-subhead font-medium">
+        <button type="button" onClick={() => downloadIcs(jam, first)} className="h-11 rounded-full border border-paper/20 text-subhead font-medium">
           Add to calendar
         </button>
       )}
@@ -129,7 +129,7 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
               disabled={pending}
               onClick={() => run(() => checkInJam(jam.id, true))}
               aria-label="Yes, we played"
-              className="flex-1 h-9 rounded-full bg-paper text-ink text-body disabled:opacity-50"
+              className="flex-1 h-11 rounded-full bg-paper text-ink text-body disabled:opacity-50"
             >
               👍
             </button>
@@ -138,7 +138,7 @@ export function JamCard({ jam, first, onAnotherTime }: { jam: Jam; first: string
               disabled={pending}
               onClick={() => run(() => checkInJam(jam.id, false))}
               aria-label="No, it didn't happen"
-              className="flex-1 h-9 rounded-full border border-paper/20 text-body disabled:opacity-50"
+              className="flex-1 h-11 rounded-full border border-paper/20 text-body disabled:opacity-50"
             >
               👎
             </button>

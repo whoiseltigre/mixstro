@@ -258,7 +258,7 @@ function ProjectSheet({
                 placeholder="Paste a link to a track"
                 className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85"
               />
-              <button type="button" onClick={() => addTrack(link)} disabled={!link.trim()} className="h-[38px] px-3.5 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-40">
+              <button type="button" onClick={() => addTrack(link)} disabled={!link.trim()} className="hit-slop relative h-[38px] px-3.5 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-40">
                 Add
               </button>
             </div>
@@ -389,7 +389,7 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
                   <span className="text-subhead font-semibold truncate">{c.name}</span>
                   <span className="text-caption text-smoke truncate">@{c.username} · {c.instrument}</span>
                 </span>
-                <button type="button" disabled={done} onClick={() => tag(c)} className="h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold disabled:bg-paper/14 disabled:text-paper">
+                <button type="button" disabled={done} onClick={() => tag(c)} className="hit-slop relative h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold disabled:bg-paper/14 disabled:text-paper">
                   {done ? "Invited" : "Tag"}
                 </button>
               </li>

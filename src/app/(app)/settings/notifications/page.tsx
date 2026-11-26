@@ -89,7 +89,7 @@ function TestPush() {
           setBusy(false);
           setNote(r.ok ? "Sent. It should pop up in a few seconds." : r.error);
         }}
-        className="h-9 px-3.5 rounded-full border border-paper/20 text-subhead font-semibold disabled:opacity-50"
+        className="h-11 px-3.5 rounded-full border border-paper/20 text-subhead font-semibold disabled:opacity-50"
       >
         {busy ? "Sending…" : "Send me a test"}
       </button>

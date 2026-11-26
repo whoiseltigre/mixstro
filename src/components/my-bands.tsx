@@ -60,7 +60,7 @@ export function MyBands({ projects }: { projects: Project[] }) {
                         router.push(`/bands/${res.id}`);
                       })
                     }
-                    className="h-8 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0 disabled:opacity-50"
+                    className="hit-slop relative h-8 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0 disabled:opacity-50"
                   >
                     Make a band page
                   </button>

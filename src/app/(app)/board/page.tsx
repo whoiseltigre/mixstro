@@ -33,7 +33,7 @@ export default async function Board() {
         </div>
         <Link
           href="/board/new"
-          className="h-9 md:h-11 px-3.5 md:px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center gap-1.5 hover:bg-paper/90 transition"
+          className="h-11 md:h-11 px-3.5 md:px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center gap-1.5 hover:bg-paper/90 transition"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           Post

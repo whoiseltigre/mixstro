@@ -163,7 +163,7 @@ export default function Influences() {
                   type="button"
                   onClick={() => flip(a)}
                   aria-label={`Remove ${a.name}`}
-                  className="press rise-in h-10 pl-1 pr-3 rounded-full inline-flex items-center gap-2 text-subhead border-[1.5px]"
+                  className="press rise-in h-11 pl-1 pr-3 rounded-full inline-flex items-center gap-2 text-subhead border-[1.5px]"
                   style={{ borderColor: GLOW, background: `color-mix(in srgb, ${GLOW} 14%, var(--color-stage))` }}
                 >
                   <ArtistAvatar artist={a} size={30} />

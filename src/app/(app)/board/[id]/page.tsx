@@ -73,7 +73,7 @@ function PostHeader({ post }: { post: BoardPost }) {
         </div>
       )}
       <div className="p-5 md:p-6 flex flex-col gap-3" style={{ background: `radial-gradient(120% 120% at 0% 0%, ${color}24, transparent 60%)` }}>
-        <span className="self-start h-6 px-2.5 rounded-full text-caption2 font-bold tracking-[0.08em] uppercase text-ink flex items-center" style={{ background: color }}>
+        <span className="self-start h-6 px-2.5 rounded-full text-caption font-bold tracking-[0.08em] uppercase text-ink flex items-center" style={{ background: color }}>
           {post.kind}
         </span>
         <h1 className="headline text-title-lg md:text-display leading-[1.1]">{post.title}</h1>

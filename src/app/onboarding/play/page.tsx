@@ -116,7 +116,7 @@ export default function Play() {
                     }}
                     style={{ "--hue": hue } as React.CSSProperties}
                     className={cx(
-                      "press h-9 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border",
+                      "press h-11 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border",
                       on ? "bg-[var(--hue)] text-ink border-[var(--hue)] font-medium" : "border-paper/16 text-paper",
                     )}
                   >
@@ -268,7 +268,7 @@ function FamilySheet({
                 aria-label={`Another ${f.label.toLowerCase()} instrument`}
                 className="w-32 bg-transparent text-callout outline-none placeholder:text-smoke"
               />
-              <button type="submit" className="h-8 px-3 rounded-full bg-[var(--hue)] text-ink text-footnote font-medium">
+              <button type="submit" className="hit-slop relative h-8 px-3 rounded-full bg-[var(--hue)] text-ink text-footnote font-medium">
                 Add
               </button>
             </form>

@@ -82,7 +82,7 @@ export function TabBar() {
         aria-current={i === current ? "page" : undefined}
         className={cx(
           "press relative z-10 h-16 rounded-hero flex flex-col items-center justify-center gap-1 text-caption font-semibold",
-          active ? "text-paper" : "text-smoke",
+          active ? "text-paper" : "text-paper/70",
         )}
       >
         {t.href === "/messages" && UNREAD > 0 && (
@@ -103,7 +103,7 @@ export function TabBar() {
       {/* Phones: one full-width glass bar, big targets, and a bright + in the middle so there's always a next move. */}
       <nav
         aria-label="Main"
-        className="md:hidden fixed z-20 left-3 right-3 bottom-[max(env(safe-area-inset-bottom),14px)] mx-auto max-w-[536px] h-[76px] rounded-[38px] glass grid grid-cols-5 items-center px-1.5 shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]"
+        className="md:hidden fixed z-20 left-3 right-3 bottom-[max(env(safe-area-inset-bottom),14px)] mx-auto max-w-[536px] h-[76px] rounded-[38px] glass-thick grid grid-cols-5 items-center px-1.5 shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]"
       >
         {/* One glass pill that slides to the lit tab on the snappy spring. */}
         <span

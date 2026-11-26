@@ -65,7 +65,7 @@ export default function HighlightsEditor() {
                   role="radio"
                   aria-checked={on}
                   onClick={() => setForm({ ...form, kind: k.id as HighlightKind })}
-                  className={cx("h-9 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border transition", on ? "font-semibold" : "border-paper/16 text-paper")}
+                  className={cx("h-11 px-3.5 rounded-full text-subhead inline-flex items-center gap-1.5 border transition", on ? "font-semibold" : "border-paper/16 text-paper")}
                   style={on ? { borderColor: k.color, background: `color-mix(in srgb, ${k.color} 18%, transparent)`, color: k.color } : undefined}
                 >
                   <KindIcon kind={k.id} />

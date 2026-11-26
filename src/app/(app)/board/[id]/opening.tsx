@@ -44,22 +44,22 @@ export function OpeningPanel({
         <span className="text-callout font-semibold">{statusLine(opening.status, opening.expiresAt)}</span>
         <div className="flex gap-2">
           {opening.status === "open" && (
-            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "paused"))} className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
+            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "paused"))} className="h-11 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
               Pause
             </button>
           )}
           {opening.status === "paused" && (
-            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "open"))} className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
+            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "open"))} className="h-11 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
               Reopen
             </button>
           )}
           {(opening.status === "expired" || (opening.status === "open" && opening.expiresAt && new Date(opening.expiresAt).getTime() - Date.now() < 4 * 86_400_000)) && (
-            <button type="button" disabled={pending} onClick={() => run(() => renewOpening(postId))} className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
+            <button type="button" disabled={pending} onClick={() => run(() => renewOpening(postId))} className="h-11 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
               Renew 2 weeks
             </button>
           )}
           {opening.status !== "filled" && (
-            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "filled"))} className="h-9 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold">
+            <button type="button" disabled={pending} onClick={() => run(() => setOpeningStatus(postId, "filled"))} className="h-11 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold">
               Filled
             </button>
           )}
@@ -87,7 +87,7 @@ export function OpeningPanel({
                 type="button"
                 disabled={alerted || pending}
                 onClick={() => run(async () => { const r = await alertMeFor(opening.neededRole); if (!r.error) setAlerted(true); return r; })}
-                className="self-start h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition disabled:opacity-60"
+                className="self-start h-11 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition disabled:opacity-60"
               >
                 {alerted ? `We'll tell you when a ${who} joins` : `Tell me when a ${who} joins`}
               </button>
@@ -206,7 +206,7 @@ function ShareLink({ postId, opening, clips, title, area, justPosted }: { postId
       )}
       <p className="text-caption text-smoke">Shows: what you need, your area (not your address), rehearsal days, your first name and photo, and the clip you pick. Never your messages or contact details.</p>
       {!on && featured && (
-        <button type="button" disabled={pending} onClick={() => save(true)} className="self-start h-10 px-4 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-60">
+        <button type="button" disabled={pending} onClick={() => save(true)} className="self-start h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-60">
           {pending ? "Turning on…" : "Turn on the link and share"}
         </button>
       )}
@@ -214,15 +214,15 @@ function ShareLink({ postId, opening, clips, title, area, justPosted }: { postId
         <div className="flex flex-col gap-2.5">
           <div className="rounded-xl bg-riser p-3 text-footnote text-paper/85 whitespace-pre-line">{post.text}</div>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => copy("post")} className="h-9 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold">
+            <button type="button" onClick={() => copy("post")} className="h-11 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold">
               {copied === "post" ? "Post copied" : "Copy post"}
             </button>
             {targets.map((t) => (
-              <a key={t.label} href={t.href} target="_blank" rel="noopener noreferrer" className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote flex items-center hover:bg-paper/10 transition">
+              <a key={t.label} href={t.href} target="_blank" rel="noopener noreferrer" className="h-11 px-3.5 rounded-full border border-paper/20 text-footnote flex items-center hover:bg-paper/10 transition">
                 {t.label}
               </a>
             ))}
-            <button type="button" onClick={more} className="h-9 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
+            <button type="button" onClick={more} className="h-11 px-3.5 rounded-full border border-paper/20 text-footnote hover:bg-paper/10 transition">
               {copied === "link" ? "Link copied" : "More"}
             </button>
           </div>

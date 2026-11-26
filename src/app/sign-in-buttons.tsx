@@ -44,7 +44,8 @@ export function SignInButtons() {
     if (error) setError(error.message);
   }
 
-  const dim = cx("transition-opacity", !adult && "opacity-50");
+  // Full strength always: a faded button reads as broken. Tapping one before the box is ticked points at the box.
+  const dim = "";
 
   return (
     <div className="flex flex-col gap-2.5">

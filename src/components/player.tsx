@@ -266,7 +266,7 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
     <div className={`flex items-center gap-1.5 flex-wrap text-caption text-smoke ${className}`}>
       <span className="mr-0.5">Listen in full on</span>
       {keys.map((k) => (
-        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
+        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="hit-slop relative h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
           {PLATFORM_LABEL[k]}
         </a>
       ))}

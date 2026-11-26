@@ -42,7 +42,7 @@ export function TopBar() {
                   href={t.href}
                   aria-current={active ? "page" : undefined}
                   className={cx(
-                    "h-10 px-5 rounded-full flex items-center gap-2 text-subhead transition",
+                    "h-11 px-5 rounded-full flex items-center gap-2 text-subhead transition",
                     active ? "bg-paper text-ink font-semibold" : "text-smoke hover:text-paper",
                   )}
                 >

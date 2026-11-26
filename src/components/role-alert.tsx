@@ -36,7 +36,7 @@ export function RoleAlertCard({ alert }: { alert: RoleAlert }) {
           {m.name} · {m.distanceMi} mi away
         </span>
       </Link>
-      <Link href={`/m/${m.username}`} className="h-9 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold flex items-center shrink-0">
+      <Link href={`/m/${m.username}`} className="h-11 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold flex items-center shrink-0">
         See {m.name.split(" ")[0]}
       </Link>
       <button

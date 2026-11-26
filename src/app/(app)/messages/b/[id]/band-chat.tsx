@@ -114,7 +114,7 @@ export function BandChatView({ chat }: { chat: BandChat }) {
           <span className="text-body font-semibold truncate">{band.name}</span>
           <span className="text-caption text-smoke truncate">{who}</span>
         </Link>
-        <Link href={`/b/${band.id}`} className="glass h-[34px] px-3 rounded-full text-footnote font-semibold flex items-center shrink-0">
+        <Link href={`/b/${band.id}`} className="hit-slop relative glass h-[34px] px-3 rounded-full text-footnote font-semibold flex items-center shrink-0">
           Band page
         </Link>
       </header>
@@ -152,7 +152,7 @@ export function BandChatView({ chat }: { chat: BandChat }) {
       >
         {voice.recording ? (
           <>
-            <button type="button" onClick={voice.cancel} aria-label="Cancel voice note" className="size-10 -ml-[9px] rounded-full bg-riser flex items-center justify-center shrink-0">
+            <button type="button" onClick={voice.cancel} aria-label="Cancel voice note" className="size-11 -ml-[9px] rounded-full bg-riser flex items-center justify-center shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
@@ -219,7 +219,7 @@ function PinnedShow({ show }: { show: NonNullable<BandChat["nextShow"]> }) {
   const d = showDate(show.date);
   return (
     <div className="mx-3.5 mt-3 rounded-tile border border-gel-violet/30 bg-stage/80 px-3.5 py-2.5 flex items-center gap-3">
-      <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-smoke">Next show</span>
+      <span className="text-caption font-bold uppercase tracking-[0.1em] text-smoke">Next show</span>
       <span className="text-subhead font-semibold truncate">
         {show.venue} · {d.weekday} {d.month} {d.day}
         {show.time ? ` · ${show.time}` : ""}
@@ -249,7 +249,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
     const time = Number.isNaN(d.getTime()) ? "" : `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · ${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
     return (
       <Link href={`/bands/${bandId}`} className="self-center max-w-[300px] w-full rounded-tile bg-stage px-4 py-3 flex flex-col gap-0.5 my-1">
-        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-teal">{Number(weeks) > 1 ? `Rehearsals, every week ×${weeks}` : "Rehearsal planned"}</span>
+        <span className="text-caption font-bold uppercase tracking-[0.1em] text-gel-teal">{Number(weeks) > 1 ? `Rehearsals, every week ×${weeks}` : "Rehearsal planned"}</span>
         <span className="text-callout font-semibold">{time}</span>
         <span className="text-caption text-smoke">
           {place} · {m.mine ? "You planned it" : `${s?.name ?? "Someone"} planned it`}. Say if you&apos;re in
@@ -260,7 +260,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
   if (m.kind === "show") {
     return (
       <Link href={`/b/${bandId}`} className="self-center max-w-[300px] w-full rounded-tile bg-stage px-4 py-3 flex flex-col gap-0.5 my-1">
-        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-violet">New show</span>
+        <span className="text-caption font-bold uppercase tracking-[0.1em] text-gel-violet">New show</span>
         <span className="text-callout font-semibold">{m.body}</span>
         <span className="text-caption text-smoke">It&apos;s on the band page now</span>
       </Link>
@@ -270,7 +270,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
     const href = demo ? "/board" : m.kind === "spot_reply" && m.refId ? `/board/${m.refId}` : s ? `/m/${s.username}` : "#";
     return (
       <div className="self-center max-w-[320px] w-full rounded-card bg-stage border border-paper/8 p-3.5 flex flex-col gap-2.5 my-1">
-        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-violet">{m.kind === "spot_reply" ? "Open spot" : "Note for the band"}</span>
+        <span className="text-caption font-bold uppercase tracking-[0.1em] text-gel-violet">{m.kind === "spot_reply" ? "Open spot" : "Note for the band"}</span>
         <span className="flex items-center gap-3">
           {s && (
             <span className="relative size-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold" style={{ background: artistTint(s.username) }}>
@@ -283,7 +283,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
           </span>
         </span>
         {m.kind === "note" && m.body && <p className="text-callout leading-[1.45] bg-riser rounded-field px-3 py-2">{m.body}</p>}
-        <Link href={href} className="self-start h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center">
+        <Link href={href} className="self-start h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center">
           {m.kind === "spot_reply" ? "See everyone who asked" : `See ${s?.name ?? "their"} profile`}
         </Link>
       </div>

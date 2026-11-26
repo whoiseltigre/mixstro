@@ -51,7 +51,7 @@ export function ClipBubble({ clip, body, mine, first, faded }: { clip: ChatClip;
           <span className="min-w-0 flex flex-col gap-0.5">
             <span className="text-subhead font-semibold truncate">{owner}</span>
             <span className="text-caption text-smoke truncate">{PROVIDER_LABEL[provider]}</span>
-            {clip.at != null && <span className="self-start mt-0.5 text-caption2 font-semibold px-2 py-0.5 rounded-full bg-gel-teal/15 text-gel-teal tabular-nums">at {clipTime(clip.at)}</span>}
+            {clip.at != null && <span className="self-start mt-0.5 text-caption font-semibold px-2 py-0.5 rounded-full bg-gel-teal/15 text-gel-teal tabular-nums">at {clipTime(clip.at)}</span>}
           </span>
         </button>
       ) : (

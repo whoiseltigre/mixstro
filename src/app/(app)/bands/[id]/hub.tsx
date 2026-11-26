@@ -57,7 +57,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgb(15_13_11/0.35)_0%,transparent_30%,rgb(15_13_11/0.55)_62%,var(--color-ink)_100%)]" />
         <div className="absolute inset-x-0 top-0 pt-safe md:pt-4 px-5 flex items-center justify-between">
           <BackButton href="/me" />
-          <Link href={`/b/${band.id}`} className="glass h-10 px-4 rounded-full text-subhead font-semibold flex items-center">
+          <Link href={`/b/${band.id}`} className="glass h-11 px-4 rounded-full text-subhead font-semibold flex items-center">
             View page
           </Link>
         </div>
@@ -105,10 +105,10 @@ export function BandHubView({ hub }: { hub: BandHub }) {
               </span>
               <span className="text-footnote text-smoke -mt-1">Confirm and both bands show it under &ldquo;Shared the stage with&rdquo;.</span>
               <span className="flex gap-2 pt-1">
-                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
+                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
                   We played it
                 </button>
-                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-9 px-4 rounded-full border border-paper/20 text-subhead font-semibold">
+                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-11 px-4 rounded-full border border-paper/20 text-subhead font-semibold">
                   Not us
                 </button>
               </span>
@@ -139,11 +139,11 @@ export function BandHubView({ hub }: { hub: BandHub }) {
                   </span>
                 </span>
                 {r.mine === "in" ? (
-                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "out"), "Got it")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
+                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "out"), "Got it")} className="hit-slop relative h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
                     Can&apos;t
                   </button>
                 ) : (
-                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "in"), "You're in")} className="h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0">
+                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "in"), "You're in")} className="hit-slop relative h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0">
                     I&apos;m in
                   </button>
                 )}
@@ -159,7 +159,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
             return (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="w-10 flex flex-col items-center shrink-0">
-                  <span className="text-caption2 font-semibold uppercase tracking-[0.08em] text-gel-violet">{d.month}</span>
+                  <span className="text-caption font-semibold uppercase tracking-[0.08em] text-gel-violet">{d.month}</span>
                   <span className="text-title3 font-semibold leading-none mt-0.5">{d.day}</span>
                 </span>
                 <span className="flex-1 min-w-0 flex flex-col">
@@ -179,7 +179,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
                 <span className="text-callout font-semibold truncate">{s.role ?? s.title}</span>
                 <span className="text-footnote text-smoke">{s.asked ? `${s.asked} ${s.asked === 1 ? "musician" : "musicians"} asked · see them` : "No one yet"}</span>
               </Link>
-              <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
+              <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="hit-slop relative h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
                 Filled
               </button>
             </li>
@@ -273,7 +273,7 @@ function Section({ title, onAdd, addLabel, empty, children }: { title: string; o
 
 function RemoveButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
+    <button type="button" onClick={onClick} aria-label={label} className="hit-slop relative size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
         <path d="M6 6l12 12M18 6L6 18" />
       </svg>
@@ -411,7 +411,7 @@ function EditForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Right now</legend>
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
-            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", status === s ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
+            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-11 px-3.5 rounded-full text-subhead border transition", status === s ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {STATUS_LABEL[s]}
             </button>
           ))}
@@ -518,7 +518,7 @@ function ShowForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         {tagged.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tagged.map((t) => (
-              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="h-8 px-3 rounded-full bg-gel-violet/16 text-gel-violet text-footnote font-semibold">
+              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="hit-slop relative h-8 px-3 rounded-full bg-gel-violet/16 text-gel-violet text-footnote font-semibold">
                 {t.name} ✕
               </button>
             ))}
@@ -562,7 +562,7 @@ function SpotForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
         <div className="flex flex-wrap gap-2">
           {ROLE_IDS.map((r) => (
-            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-11 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {r}
             </button>
           ))}
@@ -644,7 +644,7 @@ function InviteForm({ hub }: { hub: BandHub }) {
                 <span className="text-callout font-semibold">{c.name}</span>
                 <span className="text-footnote text-smoke">{c.instrument}</span>
               </span>
-              <button type="button" onClick={() => invite(c.id, c.name)} disabled={pending} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
+              <button type="button" onClick={() => invite(c.id, c.name)} disabled={pending} className="h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
                 Invite
               </button>
             </li>
@@ -676,10 +676,10 @@ function NextRehearsal({ r, onAnswer }: { r: Rehearsal; onAnswer: (a: "in" | "ou
         {r.outCount ? ` · ${r.outCount} can't make it` : ""}
       </span>
       <span className="flex gap-2 pt-1">
-        <button type="button" aria-pressed={r.mine === "in"} onClick={() => onAnswer("in")} className={cx("h-9 px-4 rounded-full text-subhead font-semibold", r.mine === "in" ? "bg-gel-teal text-ink" : "bg-paper text-ink")}>
+        <button type="button" aria-pressed={r.mine === "in"} onClick={() => onAnswer("in")} className={cx("h-11 px-4 rounded-full text-subhead font-semibold", r.mine === "in" ? "bg-gel-teal text-ink" : "bg-paper text-ink")}>
           {r.mine === "in" ? "You're in" : "I'm in"}
         </button>
-        <button type="button" aria-pressed={r.mine === "out"} onClick={() => onAnswer("out")} className={cx("h-9 px-4 rounded-full text-subhead font-semibold border", r.mine === "out" ? "border-danger text-danger" : "border-paper/20")}>
+        <button type="button" aria-pressed={r.mine === "out"} onClick={() => onAnswer("out")} className={cx("h-11 px-4 rounded-full text-subhead font-semibold border", r.mine === "out" ? "border-danger text-danger" : "border-paper/20")}>
           {r.mine === "out" ? "You can't make it" : "Can't make it"}
         </button>
       </span>
@@ -842,7 +842,7 @@ function FillInForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
         <div className="flex flex-wrap gap-2">
           {ROLE_IDS.map((r) => (
-            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-11 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {r}
             </button>
           ))}

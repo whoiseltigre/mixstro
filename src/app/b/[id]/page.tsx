@@ -149,7 +149,7 @@ export default async function BandPageView({ params }: Params) {
                   return (
                     <li key={s.id} className="flex items-center gap-3.5 px-4 py-3">
                       <span className="w-11 flex flex-col items-center shrink-0">
-                        <span className="text-caption2 font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                        <span className="text-caption font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
                         <span className="text-title2 font-bold leading-none mt-0.5">{d.day}</span>
                       </span>
                       <span className="flex-1 min-w-0 flex flex-col">
@@ -159,7 +159,7 @@ export default async function BandPageView({ params }: Params) {
                         </span>
                       </span>
                       {s.ticketUrl && (
-                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="h-8 px-3.5 rounded-full border border-paper/20 text-footnote font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
+                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="hit-slop relative h-8 px-3.5 rounded-full border border-paper/20 text-footnote font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
                           Tickets
                         </a>
                       )}
@@ -292,13 +292,13 @@ function SpotCard({ spot, band, signedIn }: { spot: BandSpot; band: BandPage; si
       )}
       <div className="flex items-center gap-3 pt-2.5">
         {band.isMember ? (
-          <Link href={`/bands/${band.id}`} className="h-10 px-4 rounded-full glass text-subhead font-semibold flex items-center">
+          <Link href={`/bands/${band.id}`} className="h-11 px-4 rounded-full glass text-subhead font-semibold flex items-center">
             Manage
           </Link>
         ) : spot.answered ? (
           <span className="h-10 px-4 rounded-full bg-riser text-subhead font-semibold flex items-center text-smoke">You asked</span>
         ) : (
-          <Link href={spotHref(spot, signedIn, band.sample)} className="h-10 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center hover:bg-white transition">
+          <Link href={spotHref(spot, signedIn, band.sample)} className="h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center hover:bg-white transition">
             {spotAnswer(spot.role)}
           </Link>
         )}

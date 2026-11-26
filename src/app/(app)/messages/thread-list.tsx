@@ -54,7 +54,7 @@ export function ThreadList({ threads, bands = [] }: { threads: Thread[]; bands?:
                       <div className="flex justify-between gap-2">
                         <span className="text-body font-semibold">
                           {t.person.name}
-                          {t.person.sample && <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption2 font-semibold text-smoke">Sample</span>}
+                          {t.person.sample && <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption font-semibold text-smoke">Example</span>}
                         </span>
                         <TimeAgo iso={t.at} className="text-footnote text-smoke" />
                       </div>
