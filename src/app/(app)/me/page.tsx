@@ -252,7 +252,7 @@ function PhotoPicker({ url, name, onSaved }: { url?: string; name: string; onSav
         // eslint-disable-next-line @next/next/no-img-element
         <img src={url} alt="" referrerPolicy="no-referrer" className={`absolute inset-0 size-full object-cover object-[50%_28%] transition ${busy ? "opacity-40" : ""}`} />
       ) : (
-        <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center headline text-[140px] text-paper/15" style={{ background: "radial-gradient(90% 70% at 50% 0%, rgb(255 172 186 / 0.35), transparent 75%)" }}>
+        <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center headline text-paper/15" style={{ fontSize: 140, background: "radial-gradient(90% 70% at 50% 0%, rgb(255 172 186 / 0.35), transparent 75%)" }}>
           {name[0]?.toUpperCase()}
         </span>
       )}

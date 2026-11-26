@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdultCheck } from "@/components/adult-check";
-import { AppleIcon, Button, ButtonLink, GoogleButton, cx } from "@/components/ui";
+import { AppleIcon, Button, ButtonLink, GoogleButton } from "@/components/ui";
 import { adultConfirmed, confirmAdult } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/client";
 

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { InstrumentIcon } from "@/components/instrument-icon";
 import { BackButton, Button, Chip, Field, TextArea, ToggleRow } from "@/components/ui";
-import { KIND_LABEL, KINDS, type BoardKind } from "@/lib/board-kinds";
+import { KINDS, type BoardKind } from "@/lib/board-kinds";
 import { FAMILIES } from "@/lib/instruments";
 import { createPost } from "../actions";
 
