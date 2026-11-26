@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 const KIND_COLOR = POST_KIND_GEL;
 
-export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
-  const view = await getPost((await params).id);
+export default async function PostPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ posted?: string }> }) {
+  const [view, { posted }] = await Promise.all([getPost((await params).id), searchParams]);
   if (!view) notFound();
   const { post } = view;
 
@@ -33,7 +33,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
       <PostHeader post={post} />
 
-      {view.kind === "mine" && post.opening && <OpeningPanel postId={Number(post.id)} opening={post.opening} candidates={view.candidates} clips={view.clips} />}
+      {view.kind === "mine" && post.opening && <OpeningPanel postId={Number(post.id)} opening={post.opening} candidates={view.candidates} clips={view.clips} title={post.title} area={post.neighborhood} justPosted={posted === "1"} />}
 
       {view.kind === "mine" && (
         <section className="flex flex-col gap-3">

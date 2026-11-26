@@ -7,7 +7,7 @@ import { BackButton, Button, ChevronRight, GoogleIcon, VerifiedMark } from "@/co
 import { deleteAccount, signOut } from "@/lib/safety";
 import { createClient } from "@/lib/supabase/client";
 import { useVerification } from "@/lib/verification";
-import { PublicPageToggle } from "./public-page";
+import { PublicPageToggle, VerifiedOnlyToggle } from "./public-page";
 
 export default function Settings() {
   const router = useRouter();
@@ -74,6 +74,7 @@ export default function Settings() {
       </section>
 
       <PublicPageToggle />
+      <VerifiedOnlyToggle />
 
       <ul className="flex flex-col rounded-card bg-stage divide-y divide-paper/8">
         <Row href="/settings/notifications" title="Notifications" sub="Push and email, per type" />

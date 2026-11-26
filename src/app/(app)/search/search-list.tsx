@@ -23,8 +23,9 @@ const instrumentsOf = (m: Musician) => m.instruments?.length ? m.instruments : [
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const genresOf = (m: Musician) => (m.genreList?.length ? m.genreList : m.genres.split(", ")).map(cap);
 
-type Filters = { plays: string[]; genres: string[]; within: number | null; looking: string | null };
-const NONE: Filters = { plays: [], genres: [], within: null, looking: null };
+/** `remote`: only people open to remote collabs, at any distance (instead of a mile limit). */
+type Filters = { plays: string[]; genres: string[]; within: number | null; remote: boolean; looking: string | null };
+const NONE: Filters = { plays: [], genres: [], within: null, remote: false, looking: null };
 const STORE = "mixstro:search-filters";
 
 /** Search by name, instrument, genre, neighborhood or influence, narrowed by filters. */
@@ -57,16 +58,17 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
     if (s && ![m.name, m.instrument, m.genres, m.neighborhood, ...m.influences.map((a) => a.name)].some((v) => v.toLowerCase().includes(s))) return false;
     if (f.plays.length && !instrumentsOf(m).some((i) => f.plays.includes(i))) return false;
     if (f.genres.length && !genresOf(m).some((g) => f.genres.includes(g))) return false;
-    if (f.within !== null && (m.distanceMi === undefined || m.distanceMi > f.within)) return false;
+    if (f.remote && !m.remote) return false;
+    if (!f.remote && f.within !== null && (m.distanceMi === undefined || m.distanceMi > f.within)) return false;
     if (f.looking) {
       const l = LOOKING.find((x) => x.id === f.looking)!;
       if (!(m.goals?.length ? m.goals.some((g) => l.goals.includes(g)) : l.hint.test(m.lookingFor))) return false;
     }
     return true;
   });
-  if (f.within !== null) results.sort((a, b) => (a.distanceMi ?? 1e9) - (b.distanceMi ?? 1e9));
+  if (f.within !== null && !f.remote) results.sort((a, b) => (a.distanceMi ?? 1e9) - (b.distanceMi ?? 1e9));
 
-  const active = f.plays.length + f.genres.length + (f.within !== null ? 1 : 0) + (f.looking ? 1 : 0);
+  const active = f.plays.length + f.genres.length + (f.within !== null || f.remote ? 1 : 0) + (f.looking ? 1 : 0);
   const toggle = (key: "plays" | "genres", v: string) => set({ ...f, [key]: f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v] });
 
   return (
@@ -122,11 +124,10 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
           <Group label="Genre">
             {options.genres.map((v) => <Chip key={v} on={f.genres.includes(v)} onClick={() => toggle("genres", v)}>{v}</Chip>)}
           </Group>
-          {hasDistances && (
-            <Group label="Within">
-              {WITHIN.map((v) => <Chip key={v} on={f.within === v} onClick={() => set({ ...f, within: f.within === v ? null : v })}>{v} mi</Chip>)}
-            </Group>
-          )}
+          <Group label="Within">
+            {hasDistances && WITHIN.map((v) => <Chip key={v} on={!f.remote && f.within === v} onClick={() => set({ ...f, remote: false, within: f.within === v && !f.remote ? null : v })}>{v} mi</Chip>)}
+            <Chip on={f.remote} onClick={() => set({ ...f, remote: !f.remote, within: null })}>Anywhere, open to remote</Chip>
+          </Group>
           <Group label="Looking for">
             {LOOKING.map((l) => <Chip key={l.id} on={f.looking === l.id} onClick={() => set({ ...f, looking: f.looking === l.id ? null : l.id })}>{l.label}</Chip>)}
           </Group>
@@ -150,8 +151,9 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
                   {m.sample && <SampleTag />}
                 </span>
                 <span className="text-footnote text-smoke truncate">
-                  {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi !== undefined ? ` · ${m.distanceMi} mi` : ""}
+                  {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi !== undefined ? ` · ${m.distanceMi} mi` : ""}{m.remote ? " · Open to remote" : ""}
                 </span>
+                {m.replyLabel && <span className="text-caption text-gel-teal">{m.replyLabel}</span>}
               </div>
             </HeroLink>
           </li>

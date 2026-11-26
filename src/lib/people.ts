@@ -9,6 +9,7 @@ import { createClient } from "./supabase/server";
 import { isSupabaseConfigured } from "./supabase/config";
 import { messagePreview } from "./clip-reply";
 import type { ClipProvider } from "./clips";
+import { replyHabit, type ReplyStats } from "./reply-habits";
 
 /**
  * Server-side reads for Today, profiles, search and Messages. With Supabase configured
@@ -169,11 +170,46 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
 async function hydrate(viewer: Viewer, rows: ProfileRow[]): Promise<Musician[]> {
   if (!rows.length) return [];
   const ids = rows.map((r) => r.id);
-  const [{ data }, miles] = await Promise.all([
+  const [{ data }, miles, remote, habits] = await Promise.all([
     viewer.supabase.from("influences").select("profile_id, artist_id, artist_name, image_url, rank").in("profile_id", ids),
     distancesFromMe(viewer.supabase, ids),
+    openToRemote(viewer.supabase, ids),
+    replyHabits(viewer.supabase, ids),
   ]);
-  return rows.map((r) => ({ ...toMusician(r, (data ?? []) as InfluenceRow[], viewer), distanceMi: miles.get(r.id) }));
+  return rows.map((r) => {
+    const habit = habits.get(r.id) ?? { slow: false };
+    return {
+      ...toMusician(r, (data ?? []) as InfluenceRow[], viewer),
+      distanceMi: miles.get(r.id),
+      remote: remote.has(r.id),
+      replyLabel: habit.label,
+      slowToReply: habit.slow,
+    };
+  });
+}
+
+/** Who has "Remote collabs" in their Open to. Read on its own so a database without open_to still works. */
+async function openToRemote(supabase: Viewer["supabase"], ids: string[]): Promise<Set<string>> {
+  const { data, error } = await supabase.from("profiles").select("id").in("id", ids).contains("open_to", ["remote"]);
+  return error ? new Set() : new Set(((data ?? []) as { id: string }[]).map((r) => r.id));
+}
+
+/** Reply habits by profile id (public.reply_stats). Empty before that function exists. */
+async function replyHabits(supabase: Viewer["supabase"], ids: string[]) {
+  const { data, error } = await supabase.rpc("reply_stats", { p_ids: ids.slice(0, 200) });
+  const out = new Map<string, ReturnType<typeof replyHabit>>();
+  if (error) return out;
+  for (const r of (data ?? []) as { profile_id: string; asked: number; answered: number; median_hours: number | string | null }[]) {
+    const stats: ReplyStats = { asked: r.asked, answered: r.answered, medianHours: r.median_hours === null ? null : Number(r.median_hours) };
+    out.set(r.profile_id, replyHabit(stats));
+  }
+  return out;
+}
+
+/** Is the viewer open to remote collabs themselves? null when the database doesn't have Open to yet. */
+async function viewerIsRemote(viewer: Viewer): Promise<boolean | null> {
+  const { data, error } = await viewer.supabase.from("profiles").select("open_to").eq("id", viewer.id).maybeSingle<{ open_to: string[] | null }>();
+  return error ? null : Boolean(data?.open_to?.includes("remote"));
 }
 
 /** Musicians by profile id, in the order given, with shared influences and distance. */
@@ -260,6 +296,10 @@ export type Today = {
   demo: boolean;
   /** How busy your area is, for the "you're one of the first here" card. Signed-in only. */
   area?: Area;
+  /** Musicians open to remote collabs, at any distance (not already in the deck). */
+  remote?: Musician[];
+  /** Whether you're open to remote collabs yourself (offers the switch when not); null before the database has Open to. */
+  youRemote?: boolean | null;
 };
 
 /**
@@ -306,7 +346,7 @@ async function todayCandidates(viewer: Viewer, exclude: Set<string>, incoming: s
       organic = [...organic, ...((recent ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id))];
     }
   } else {
-    // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
+    // discoverable_profiles: onboarded and active in the last 30 days; RLS hides blocked pairs.
     const { data } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).order("last_active_at", { ascending: false }).limit(200);
     organic = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
   }
@@ -330,6 +370,8 @@ export async function getToday(): Promise<Today> {
   // Only needs the connections, so it runs alongside the rest instead of after it.
   const yourTurn = yourTurnCount(viewer, connections);
   const alertRoles = getAlertRoles(viewer).catch(() => ({ roles: [] as string[], picked: false }));
+  const youRemote = viewerIsRemote(viewer).catch(() => null);
+  const remoteRows = remoteCandidates(viewer, exclude);
   const candidates = await todayCandidates(viewer, exclude, incoming);
   const [nearby, music] = await Promise.all([
     hydrate(viewer, candidates),
@@ -345,6 +387,8 @@ export async function getToday(): Promise<Today> {
     (a, b) =>
       Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) ||
       profileTier(a, music) - profileTier(b, music) ||
+      // People who leave most Connects unanswered go after everyone who replies.
+      Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)) ||
       score(b) - score(a) ||
       near(a) - near(b),
   );
@@ -360,7 +404,22 @@ export async function getToday(): Promise<Today> {
       .slice(0, 8),
     alertRoles: (await alertRoles).roles,
   };
-  return { people: withSamples(people, TODAY_SIZE, viewer), incoming, notes, demo: false, yourTurn: await yourTurn, area };
+  const deck = withSamples(people, TODAY_SIZE, viewer);
+  const inDeck = new Set(deck.map((m) => m.id));
+  const remote = await hydrate(viewer, (await remoteRows).filter((r) => !inDeck.has(r.id)));
+  const remoteMusic = await withMusic(viewer.supabase, remote.map((m) => m.id));
+  remote.sort((a, b) => profileTier(a, remoteMusic) - profileTier(b, remoteMusic) || Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)) || score(b) - score(a));
+  return { people: deck, incoming, notes, demo: false, yourTurn: await yourTurn, area, remote: remote.slice(0, 6), youRemote: await youRemote };
+}
+
+/** People open to remote collabs, anywhere (public.remote_candidates). Empty before it exists. */
+async function remoteCandidates(viewer: Viewer, exclude: Set<string>): Promise<ProfileRow[]> {
+  const { data, error } = await viewer.supabase.rpc("remote_candidates", { p_limit: 30 });
+  if (error) return [];
+  const ids = ((data ?? []) as { profile_id: string }[]).map((r) => r.profile_id).filter((id) => !exclude.has(id));
+  if (!ids.length) return [];
+  const { data: rows } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", ids);
+  return (rows ?? []) as ProfileRow[];
 }
 
 /** Everyone you can search: photo and music first, then most recently active. */
@@ -374,8 +433,8 @@ export async function getSearchable(): Promise<Musician[]> {
   ]);
   const rows = (data ?? []) as ProfileRow[];
   const [real, music] = await Promise.all([hydrate(viewer, rows), withMusic(viewer.supabase, rows.map((r) => r.id))]);
-  // Stable sort keeps "most recently active" within each tier.
-  real.sort((a, b) => profileTier(a, music) - profileTier(b, music));
+  // Stable sort keeps "most recently active" within each tier; people who rarely reply go last in theirs.
+  real.sort((a, b) => profileTier(a, music) - profileTier(b, music) || Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)));
   return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES(viewer)];
 }
 

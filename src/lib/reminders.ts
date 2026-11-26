@@ -1,6 +1,6 @@
 import { resumeDeletions } from "./account-deletion";
 import { drainNotificationIntents } from "./notification-intents";
-import { adminClient, notifyJamSoon, notifyRoleAlert, notifyYourTurn } from "./notify";
+import { adminClient, notifyJamSoon, notifyRoleAlert, notifyStillLooking, notifyYourTurn } from "./notify";
 import { familyOf, fillsRole } from "./instruments";
 
 /**
@@ -9,20 +9,42 @@ import { familyOf, fillsRole } from "./instruments";
  */
 
 const HOUR = 3600_000;
+const DAY = 24 * HOUR;
 /** Same suggestion the app makes when you haven't picked roles but are starting a band (src/lib/people.ts). */
 const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
 
 export async function runReminders() {
   const db = adminClient();
   if (!db) return { skipped: "no service role key" };
-  const [yourTurn, jams, alerts, deletions, notifications] = await Promise.all([
+  const [yourTurn, jams, alerts, deletions, notifications, stillLooking] = await Promise.all([
     yourTurnNudges().catch((e) => (console.error("reminders: your turn", e), -1)),
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
     resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
     openingUpkeep().then(() => drainNotificationIntents()).catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
+    stillLookingCheckins().catch((e) => (console.error("reminders: still looking", e), -1)),
   ]);
-  return { yourTurn, jams, alerts, deletions, notifications };
+  return { yourTurn, jams, alerts, deletions, notifications, stillLooking };
+}
+
+/**
+ * Away 21 days: one "still looking?" email before your profile drops out of Today and search
+ * at 30 days (discoverable_profiles). Opening Mixstro once keeps you in. Once per stretch away:
+ * the ref is the day you were last active, so a later absence gets its own check-in.
+ */
+async function stillLookingCheckins() {
+  const db = adminClient()!;
+  const now = Date.now();
+  const { data } = await db
+    .from("profiles")
+    .select("id, last_active_at")
+    .not("onboarded_at", "is", null)
+    .lte("last_active_at", new Date(now - 21 * DAY).toISOString())
+    .gte("last_active_at", new Date(now - 23 * DAY).toISOString())
+    .limit(200);
+  const rows = (data ?? []) as { id: string; last_active_at: string }[];
+  for (const r of rows) await notifyStillLooking(r.id, r.last_active_at.slice(0, 10));
+  return rows.length;
 }
 
 /** Last message in an accepted chat, from the other person, sent 48 to 72 hours ago and still unanswered. */

@@ -83,6 +83,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           ) : (
             m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
           )}
+          {m.replyLabel && <span className="px-3 py-1.5 rounded-full border border-gel-teal/40 text-gel-teal">{m.replyLabel}</span>}
         </div>
         <OpenToChips ids={extras.openTo} />
         <MutualsRow mutuals={mutuals} first={first} />

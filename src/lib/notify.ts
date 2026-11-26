@@ -19,7 +19,7 @@ import { sendPush } from "./push";
 const APP_URL = (process.env.APP_URL || "https://app.mixstro.com").replace(/\/$/, "");
 const FROM = process.env.NOTIFY_FROM || "Mixstro <no-reply@mail.mixstro.com>";
 
-export type NotifyType = "connect" | "message" | "jam" | "board" | "alerts";
+export type NotifyType = "connect" | "message" | "jam" | "board" | "alerts" | "digest";
 
 /** The pieces an email is built from, top to bottom inside the card (see the "Mixstro emails" design). */
 export type Block =
@@ -549,6 +549,31 @@ export async function notifyOpening(recipientId: string, postId: number, authorI
     blocks: [{ kind: "badge", text: "Opening near you" }, who(from), { kind: "headline", text: head }],
     cta: { label: "See the opening", path: `/board/${postId}` },
     alt: { label: "Change these alerts", path: "/settings/notifications" },
+  });
+}
+
+/**
+ * Three weeks away: you drop out of Today and search at 30 days. One tap back keeps you in.
+ * Email only by default (the "Weekly digest" setting governs it); once per stretch away.
+ */
+export async function notifyStillLooking(recipientId: string, awaySince: string) {
+  const me = (await people([recipientId])).get(recipientId);
+  if (!me) return;
+  await notify(recipientId, {
+    type: "digest",
+    ref: `still:${awaySince}`,
+    throttleMinutes: 60 * 24 * 60,
+    subject: `Still looking for musicians, ${me.first_name}?`,
+    preheader: "Open Mixstro once this week to stay in search.",
+    blocks: [
+      { kind: "badge", text: "Quick check-in" },
+      { kind: "headline", text: "Still looking?" },
+      { kind: "text", text: "It's been three weeks. To keep search full of people who answer, profiles drop out of Today and search after 30 days away. Your public page and your chats stay." },
+      { kind: "text", text: "Open Mixstro once and you're back in. If you found your people, nice. Nothing to do." },
+    ],
+    cta: { label: "I'm still looking", path: "/discover" },
+    alt: { label: "Email settings", path: "/settings/notifications" },
+    push: { title: "Still looking for musicians?", body: "Open Mixstro once this week to stay in search." },
   });
 }
 
