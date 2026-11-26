@@ -107,7 +107,7 @@
    */
   --line-field: rgb(245 241 236 / 0.34); /* text field outline: 3:1 against Ink */
   --field-radius: 14px;
-  --toggle-on: var(--color-success); /* the one switch color */
+  --toggle-on: var(--color-success); /* the one switch color: iOS green (Sundy, 2026-11-26) */
   --headline-weight: 620;
   --gel-strength: 1; /* multiplies each area's top glow */
   --bubble-own-bg: color-mix(in oklab, var(--color-gel-teal) 26%, var(--color-stage));
@@ -122,8 +122,6 @@
 }
 
 /* Alternatives you can try on /design. Whatever is picked there becomes the default by editing the values above. */
-:root[data-toggle="teal"] { --toggle-on: var(--color-gel-teal); }
-:root[data-toggle="paper"] { --toggle-on: var(--color-paper); }
 :root[data-fields="pill"] { --field-radius: 26px; }
 :root[data-titles="lighter"] { --headline-weight: 560; }
 :root[data-titles="bolder"] { --headline-weight: 680; }

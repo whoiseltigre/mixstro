@@ -63,7 +63,7 @@ Small labels are 12px (`text-caption`) at the smallest. 11px (`text-caption2`) i
 
 ## Trying a look
 
-`/design` opens with "Try a look": switches for the handful of choices that are still open (switch color, own chat bubbles, glow strength, title weight, field shape). Each one flips a single token through a `data-*` attribute on `<html>` (`src/lib/design-choices.ts`, read by `src/styles/tokens.css`), is remembered in that browser only, and changes the whole app at once. To make a choice permanent, change the token's default in `tokens.css` and remove the choice from the list.
+`/design` opens with "Try a look": switches for the handful of choices that are still open (own chat bubbles, glow strength, title weight, field shape). Each one flips a single token through a `data-*` attribute on `<html>` (`src/lib/design-choices.ts`, read by `src/styles/tokens.css`), is remembered in that browser only, and changes the whole app at once. To make a choice permanent, change the token's default in `tokens.css` and remove the choice from the list.
 
 ## Screen patterns
 

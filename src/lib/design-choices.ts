@@ -8,17 +8,6 @@ export type Choice = { id: string; attr: string; label: string; why: string; opt
 
 export const CHOICES: Choice[] = [
   {
-    id: "toggle",
-    attr: "data-toggle",
-    label: "Switch color",
-    why: "Every switch in the app uses this one color.",
-    options: [
-      { value: "", label: "Green (iOS)" },
-      { value: "teal", label: "Teal gel" },
-      { value: "paper", label: "Paper" },
-    ],
-  },
-  {
     id: "bubbles",
     attr: "data-bubbles",
     label: "Your chat bubbles",
