@@ -7,6 +7,7 @@ import type { Musician } from "@/lib/mock";
 import type { Jam } from "@/lib/jams";
 import type { ChatMessage, ClipOption } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
+import { useStickToBottom } from "@/lib/use-stick-to-bottom";
 import { olderMessages, sendClipReply, sendMessage, sendVoice, type SendResult } from "../../actions";
 import { mergeById, pendingNotIn, settle, type OutboxItem } from "@/lib/outbox";
 import { ChatHeader } from "./chat-header";
@@ -45,7 +46,6 @@ export function LiveChat({
   const [older, setOlder] = useState<ChatMessage[]>([]);
   const [hasOlder, setHasOlder] = useState(more);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
   const [planning, setPlanning] = useState<{ replacing: Jam | null } | null>(null);
   const [picking, setPicking] = useState(false);
@@ -104,9 +104,8 @@ export function LiveChat({
     };
   }, [connectionId, router]);
 
-  useEffect(() => {
-    end.current?.scrollIntoView({ block: "end" });
-  }, [messages.length, outbox.length]);
+  const scroller = useRef<HTMLDivElement>(null);
+  useStickToBottom(scroller, messages.length + outbox.length);
 
   /** Sends one queued text or clip reply (first try or Retry) and settles just that send. */
   async function deliver(item: OutboxItem) {
@@ -166,7 +165,7 @@ export function LiveChat({
     <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={person} onPlanJam={() => setPlanning({ replacing: null })} />
 
-      <div className={`flex-1 overflow-y-auto px-3.5 pt-4 flex flex-col gap-2 ${attached ? "pb-[136px]" : "pb-[90px]"}`}>
+      <div ref={scroller} className={`flex-1 overflow-y-auto px-3.5 pt-4 flex flex-col gap-2 ${attached ? "pb-[136px]" : "pb-[90px]"}`}>
         <div className="mt-auto" />
         {hasOlder && (
           <button
@@ -248,7 +247,6 @@ export function LiveChat({
             {error ?? voice.error}
           </p>
         )}
-        <div ref={end} />
       </div>
 
       <form

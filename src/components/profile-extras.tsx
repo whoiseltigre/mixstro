@@ -7,14 +7,10 @@ export function OpenToChips({ ids, className = "" }: { ids: string[]; className?
   const items = openToLabels(ids);
   if (!items.length) return null;
   return (
-    <div className={`flex flex-wrap items-center gap-1.5 ${className}`}>
-      <span className="text-caption font-semibold tracking-[0.12em] uppercase text-smoke mr-1">Open to</span>
+    <div className={`flex flex-wrap items-center gap-x-3.5 gap-y-1 text-subhead ${className}`}>
+      <span className="text-smoke">Open to</span>
       {items.map((o) => (
-        <span
-          key={o.id}
-          className="h-8 px-3 rounded-full text-footnote font-semibold inline-flex items-center gap-1.5"
-          style={{ background: `color-mix(in srgb, ${o.color} 16%, transparent)`, color: o.color }}
-        >
+        <span key={o.id} className="inline-flex items-center gap-1.5" style={{ color: o.color }}>
           <span className="size-1.5 rounded-full" style={{ background: o.color }} aria-hidden="true" />
           {o.label}
         </span>

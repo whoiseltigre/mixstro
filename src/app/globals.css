@@ -45,8 +45,8 @@ body {
 
 @utility headline {
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-weight: 620;
+  letter-spacing: -0.028em;
   line-height: 1.02;
   text-wrap: balance;
 }
@@ -54,7 +54,7 @@ body {
 /* Small caps-style label above a section ("YOUR STAGE", "OPEN TO"). */
 @utility eyebrow {
   font-size: var(--text-caption);
-  font-weight: 600;
+  font-weight: 560;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }

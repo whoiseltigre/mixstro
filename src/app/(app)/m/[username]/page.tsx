@@ -1,3 +1,4 @@
+import { activityLabel } from "@/lib/presence";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityBadge } from "@/components/activity";
@@ -68,7 +69,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
 
       <div className="relative -mt-20 px-5 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5 [view-transition-name:hero-title]">
-          <span className="text-caption font-semibold tracking-[0.16em] uppercase text-smoke">
+          <span className="eyebrow text-smoke">
             {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
           </span>
           <h1 className="headline text-display-lg leading-[0.98] flex items-center gap-2">
@@ -76,15 +77,20 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             {m.verified && <VerifiedMark size={26} className="text-paper" />}
           </h1>
         </div>
-        <div className="flex gap-2 flex-wrap text-footnote">
-          <span className="px-3 py-1.5 rounded-full border border-paper/16">{m.lookingFor}</span>
-          {m.sample ? (
-            <span className="px-3 py-1.5 rounded-full border border-paper/16">Active this week</span>
-          ) : (
-            m.lastActiveAt && <ActivityBadge lastActiveAt={m.lastActiveAt} className="px-3 py-1.5 rounded-full border border-paper/16" />
-          )}
-          {m.replyLabel && <span className="px-3 py-1.5 rounded-full border border-gel-teal/40 text-gel-teal">{m.replyLabel}</span>}
-        </div>
+        {/* One quiet line of facts instead of a row of pills. */}
+        <p className="text-subhead text-paper/80 flex flex-wrap items-center gap-x-2 gap-y-1">
+          {[
+            <span key="l">{m.lookingFor}</span>,
+            (m.sample || (m.lastActiveAt && activityLabel(m.lastActiveAt))) && <ActivityBadge key="a" lastActiveAt={m.sample ? new Date() : m.lastActiveAt!} />,
+            m.replyLabel && (
+              <span key="r" className="text-gel-teal">
+                {m.replyLabel}
+              </span>
+            ),
+          ]
+            .filter(Boolean)
+            .flatMap((el, i) => (i ? [<span key={`d${i}`} aria-hidden="true" className="text-smoke">·</span>, el] : [el]))}
+        </p>
         <OpenToChips ids={extras.openTo} />
         <MutualsRow mutuals={mutuals} first={first} />
         {status === "asked" && <QuickReplies otherId={m.id} username={m.username} first={first} note={connection?.note} />}

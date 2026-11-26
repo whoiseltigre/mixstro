@@ -7,17 +7,22 @@ export const metadata = { title: "The Board · Mixstro" };
 export const dynamic = "force-dynamic";
 
 // Shelves, like Apple Music's Browse: one row per kind of post, each with its own gel color.
+// Each post sits on exactly one shelf (the first that fits), so the same card never repeats.
+// Newness is shown by the "New" tag on the card, not by a shelf of its own.
 const SHELVES: { title: string; sub: string; color: string; match: (p: BoardPost) => boolean }[] = [
   { title: "Your posts", sub: "See who answered", color: "#F5F1EC", match: (p) => p.mine },
-  { title: "New near you", sub: "Posted this week", color: COLOR.tungsten, match: (p) => !p.mine && p.isNew },
-  { title: "Bands looking for members", sub: "Open spots in bands and projects", color: GEL.blue, match: (p) => !p.mine && p.kind === "Band seeking" },
-  { title: "Sessions and paid work", sub: "Studio days, subs and shows", color: GEL.teal, match: (p) => !p.mine && (p.kind === "Session" || p.paid) },
-  { title: "Collabs and co-writes", sub: "Writing, remote projects, just for fun", color: GEL.pink, match: (p) => !p.mine && p.kind === "Collab" },
+  { title: "Bands looking for members", sub: "Open spots in bands and projects", color: GEL.blue, match: (p) => p.kind === "Band seeking" && !p.paid },
+  { title: "Sessions and paid work", sub: "Studio days, subs and shows", color: GEL.teal, match: (p) => p.kind === "Session" || p.paid },
+  { title: "Collabs and co-writes", sub: "Writing, remote projects, just for fun", color: GEL.pink, match: (p) => p.kind === "Collab" },
+  { title: "More near you", sub: "Everything else posted nearby", color: COLOR.tungsten, match: () => true },
 ];
 
 export default async function Board() {
   const { posts, area } = await getBoard();
-  const shelves = SHELVES.map((s) => ({ ...s, posts: posts.filter(s.match) })).filter((s) => s.posts.length);
+  const shelfOf = (p: BoardPost) => SHELVES.findIndex((s) => s.match(p));
+  // Newest first inside each shelf.
+  const sorted = [...posts].sort((a, b) => Number(b.isNew) - Number(a.isNew));
+  const shelves = SHELVES.map((s, i) => ({ ...s, posts: sorted.filter((p) => shelfOf(p) === i) })).filter((s) => s.posts.length);
 
   return (
     <main className="pt-safe md:pt-6 pb-32 md:pb-16 flex flex-col gap-7 md:gap-9">
