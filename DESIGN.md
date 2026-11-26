@@ -38,7 +38,7 @@ Hairlines on Ink: `border-paper/8` faint, `/12` standard, `/20` strong (also `--
 
 ## Type
 
-SF Pro on Apple devices (Geist / Inter Tight elsewhere), Outfit only for the wordmark. Weight carries hierarchy gently: 400 to read, 500-600 for labels, **700 only for titles**, never heavier. Titles use the `headline` utility (display face, tight tracking, balanced lines). Small all-caps labels use `eyebrow`.
+SF Pro on Apple devices (Geist / Inter Tight elsewhere), Outfit only for the wordmark. Weight carries hierarchy gently: 400 to read, 500-560 for labels (`font-semibold` is 560), **640 only for titles** (`font-bold`; the `headline` utility is 620), never heavier. Most text on a screen should be regular weight: semibold is for names, row titles and buttons, not for details. Titles use the `headline` utility (display face, tight tracking, balanced lines). Small all-caps labels use `eyebrow`.
 
 | Class | px | Use |
 |---|---|---|

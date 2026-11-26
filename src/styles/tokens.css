@@ -29,7 +29,13 @@
   --font-display: -apple-system, "SF Pro Display", var(--font-inter-tight), system-ui, sans-serif;
   --font-wordmark: var(--font-outfit), system-ui, sans-serif;
 
-  /* Type scale (px, after Apple's text styles). Weight carries hierarchy: 400 body, 500-600 labels, 700 titles only. */
+  /* Weights. Lighter than Tailwind's defaults so screens feel calm, not shouty:
+     semibold (labels, names, buttons) is 560 and bold (titles) is 640. All our faces are variable. */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 560;
+  --font-weight-bold: 640;
+
+  /* Type scale (px, after Apple's text styles). Weight carries hierarchy: 400 body, 500-560 labels, 640 titles only. */
   --text-caption2: 11px;
   --text-caption: 12px;
   --text-footnote: 13px;

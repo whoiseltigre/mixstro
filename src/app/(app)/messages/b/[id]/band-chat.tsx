@@ -11,6 +11,7 @@ import type { BandChat, BandChatMessage } from "@/lib/band-hub";
 import { showDate } from "@/lib/band-shared";
 import { nameWash } from "@/lib/projects";
 import { createClient } from "@/lib/supabase/client";
+import { useStickToBottom } from "@/lib/use-stick-to-bottom";
 import { markBandRead, sendBandMessage, sendBandVoice } from "../../../bands/actions";
 import { VoiceBubble, clock, uploadVoice, useVoiceRecorder, type Recording } from "../../[id]/voice";
 
@@ -22,7 +23,6 @@ export function BandChatView({ chat }: { chat: BandChat }) {
   const [error, setError] = useState<string>();
   const [optimistic, setOptimistic] = useState<BandChatMessage[]>([]);
   const [pending, start] = useTransition();
-  const end = useRef<HTMLDivElement>(null);
   const voice = useVoiceRecorder(sendRecording);
   /** The send id of a text that seemed to fail, so sending the same text again can't double it. */
   const failed = useRef<{ body: string; clientId: string } | null>(null);
@@ -58,9 +58,9 @@ export function BandChatView({ chat }: { chat: BandChat }) {
     };
   }, [band.id, chat.demo, router]);
 
-  useEffect(() => {
-    end.current?.scrollIntoView({ block: "end" });
-  }, [shown.length]);
+  // Open on the newest message and stay there while cards and photos load.
+  const scroller = useRef<HTMLDivElement>(null);
+  useStickToBottom(scroller, shown.length);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -121,7 +121,7 @@ export function BandChatView({ chat }: { chat: BandChat }) {
 
       {chat.nextShow && <PinnedShow show={chat.nextShow} />}
 
-      <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
+      <div ref={scroller} className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col gap-2">
         <div className="mt-auto" />
         {shown.length === 0 && (
           <p className="self-center max-w-[280px] text-center text-subhead leading-[1.5] text-smoke py-6">
@@ -144,7 +144,6 @@ export function BandChatView({ chat }: { chat: BandChat }) {
             {error ?? voice.error}
           </p>
         )}
-        <div ref={end} />
       </div>
 
       <form

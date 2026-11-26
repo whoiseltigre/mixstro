@@ -11,17 +11,17 @@ import { STATUS_LABEL, pageChecklist, showDate, type BandStatus } from "@/lib/ba
 import type { BandHub, Rehearsal, Setlist } from "@/lib/band-hub";
 import { ROLE_IDS, nounFor } from "@/lib/instruments";
 import { shrinkPhoto } from "@/lib/photo";
-import { BAND_GLOW, nameWash } from "@/lib/projects";
+import { nameWash } from "@/lib/projects";
 import { createClient, sessionUser } from "@/lib/supabase/client";
 import { findBandmates, inviteBandmate, type Candidate } from "../../me/projects/band-actions";
 import { addShow, answerBill, answerRehearsal, closeSpot, findBands, planRehearsal, postFillIn, postSpot, removeRehearsal, removeSetlist, removeShow, saveBandDetails, saveSetlist } from "../actions";
 
-type Panel = "edit" | "show" | "spot" | "invite" | "rehearsal" | "setlist" | "fillin" | null;
+type Panel = "add" | "edit" | "show" | "spot" | "invite" | "rehearsal" | "setlist" | "fillin" | null;
 
 const SHEET =
   "md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-hero md:rounded-hero bg-stage border border-paper/10 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4";
 
-/** Your band: the chat, invites, open spots, shows and the page's details, in one list. */
+/** Your band: the photo up top, four shortcuts, what's next, then each list with its own + button. */
 export function BandHubView({ hub }: { hub: BandHub }) {
   const { band } = hub;
   const router = useRouter();
@@ -43,100 +43,93 @@ export function BandHubView({ hub }: { hub: BandHub }) {
       router.refresh();
     });
 
+  const now = band.members.filter((m) => m.endYear === undefined);
+  const facts = [STATUS_LABEL[band.status], band.city, now.length ? `${now.length} ${now.length === 1 ? "member" : "members"}` : null].filter(Boolean).join(" · ");
+  const openSetlist = (l: Setlist | null) => {
+    setEditing(l);
+    setPanel("setlist");
+  };
+
   return (
-    <main className="relative pt-safe md:pt-4 px-5 md:px-0 pb-32 md:pb-16 md:max-w-[640px] md:mx-auto flex flex-col gap-4">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-4 h-[320px] -z-10 md:hidden" style={{ background: BAND_GLOW }} />
-      <div className="mt-2 flex items-center justify-between">
-        <BackButton href="/me" />
-        <Link href={`/b/${band.id}`} className="glass h-10 px-4 rounded-full text-subhead font-semibold flex items-center">
-          View page
-        </Link>
-      </div>
-
-      <div className="flex items-center gap-4 pt-3">
-        <span className="relative size-[72px] rounded-card-lg overflow-hidden shrink-0" style={{ background: nameWash(band.name) }}>
-          {band.photo && <FadeImg src={band.photo} alt="" className="absolute inset-0 size-full object-cover" />}
-        </span>
-        <div className="flex flex-col min-w-0">
-          <span className="text-caption font-semibold tracking-[0.16em] uppercase text-smoke">Your band</span>
-          <h1 className="headline text-display leading-none truncate">{band.name}</h1>
+    <main className="relative pb-32 md:pb-16 md:max-w-[640px] md:mx-auto flex flex-col">
+      <header className="relative h-[300px] md:h-[260px] md:mt-4 md:rounded-hero overflow-hidden" style={{ background: nameWash(band.name) }}>
+        {band.photo && <FadeImg src={band.photo} alt="" className="absolute inset-0 size-full object-cover" />}
+        <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgb(15_13_11/0.35)_0%,transparent_30%,rgb(15_13_11/0.55)_62%,var(--color-ink)_100%)]" />
+        <div className="absolute inset-x-0 top-0 pt-safe md:pt-4 px-5 flex items-center justify-between">
+          <BackButton href="/me" />
+          <Link href={`/b/${band.id}`} className="glass h-10 px-4 rounded-full text-subhead font-semibold flex items-center">
+            View page
+          </Link>
         </div>
-      </div>
+        <div className="absolute inset-x-0 bottom-0 px-5 pb-1 flex flex-col gap-1.5">
+          <span className="eyebrow text-paper/70">Your band</span>
+          <h1 className="headline text-display-md truncate">{band.name}</h1>
+          <span className="text-subhead text-paper/70 truncate">{facts}</span>
+        </div>
+      </header>
 
-      {done < list.length && (
-        <button type="button" onClick={() => setPanel(band.photo && band.bio && band.genres.length ? "show" : "edit")} className="text-left rounded-card-lg bg-stage p-4 flex flex-col gap-2.5">
-          <span className="flex justify-between items-center">
-            <span className="text-body font-semibold">
-              Your page is {done} of {list.length} done
+      <div className="px-5 md:px-0 pt-4 flex flex-col gap-4">
+        <nav aria-label="Band actions" className="grid grid-cols-4 gap-2">
+          <Action href={`/messages/b/${band.id}`} hue="#FFB245" solid badge={hub.chat?.unread} label="Chat" icon={<path d="M4 5.5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-4.5 3.5v-3.5H4a1 1 0 01-1-1v-10a1 1 0 011-1z" />} />
+          {hub.rehearsals ? (
+            <Action onClick={() => setPanel("rehearsal")} hue="#67E2DA" label="Rehearse" icon={<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>} />
+          ) : (
+            <Action onClick={() => setPanel("show")} hue="#F7BF77" label="Add a show" icon={<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>} />
+          )}
+          <Action onClick={() => setPanel("invite")} hue="#FFACBA" label="Invite" icon={<><circle cx="10" cy="8" r="3.5" /><path d="M3.5 19c.8-3.2 3.4-5 6.5-5s5.7 1.8 6.5 5M18 8v6M15 11h6" /></>} />
+          <Action onClick={() => setPanel("add")} hue="#C9B6FF" label="More" icon={<path d="M12 5v14M5 12h14" />} />
+        </nav>
+
+        {done < list.length && (
+          <button type="button" onClick={() => setPanel(band.photo && band.bio && band.genres.length ? "show" : "edit")} className="text-left rounded-card-lg bg-stage p-4 flex flex-col gap-2.5">
+            <span className="flex justify-between items-center">
+              <span className="text-body font-semibold">
+                Your page is {done} of {list.length} done
+              </span>
+              <span className="text-subhead font-semibold text-tungsten">Finish</span>
             </span>
-            <span className="text-subhead font-semibold text-tungsten">Finish</span>
-          </span>
-          <span className="h-1.5 rounded-full bg-riser overflow-hidden">
-            <span className="block h-full rounded-full" style={{ width: `${(done / list.length) * 100}%`, background: "var(--gel-linear)" }} />
-          </span>
-          <span className="text-footnote text-smoke">Add {todo.length > 1 ? `${todo.slice(0, -1).join(", ")} and ${todo[todo.length - 1]}` : todo[0]}</span>
-        </button>
-      )}
-
-      {hub.bills.map((b) => {
-        const d = showDate(b.date);
-        return (
-          <div key={b.showId} className="rounded-card-lg p-4 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
-            <span className="text-caption font-semibold tracking-[0.16em] uppercase text-tungsten">Shared bill</span>
-            <span className="text-callout font-semibold">
-              {b.fromName} says you played {b.venue} together on {d.month} {d.day}
+            <span className="h-1.5 rounded-full bg-riser overflow-hidden">
+              <span className="block h-full rounded-full" style={{ width: `${(done / list.length) * 100}%`, background: "var(--gel-linear)" }} />
             </span>
-            <span className="text-footnote text-smoke -mt-1">Confirm and both bands show it under &ldquo;Shared the stage with&rdquo;.</span>
-            <span className="flex gap-2 pt-1">
-              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
-                We played it
-              </button>
-              <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-9 px-4 rounded-full border border-paper/20 text-subhead font-semibold">
-                Not us
-              </button>
-            </span>
-          </div>
-        );
-      })}
-
-      {hub.rehearsals?.[0] && <NextRehearsal r={hub.rehearsals[0]} onAnswer={(a) => run(() => answerRehearsal(band.id, hub.rehearsals![0].id, a), a === "in" ? "You're in" : "Got it. The band will see you can't make it.")} />}
-
-      <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">
-        <Row
-          href={`/messages/b/${band.id}`}
-          hue="#FFB245"
-          solid
-          icon={<path d="M4 5.5h16a1 1 0 011 1v10a1 1 0 01-1 1h-9l-4.5 3.5v-3.5H4a1 1 0 01-1-1v-10a1 1 0 011-1z" />}
-          title="Band chat"
-          sub={hub.chat?.preview ?? "Everyone who plays in it now"}
-          badge={hub.chat?.unread}
-        />
-        {hub.rehearsals && (
-          <Row onClick={() => setPanel("rehearsal")} hue="#67E2DA" icon={<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>} title="Plan a rehearsal" sub="Once or every week. Everyone says if they're in" />
+            <span className="text-footnote text-smoke">Add {todo.length > 1 ? `${todo.slice(0, -1).join(", ")} and ${todo[todo.length - 1]}` : todo[0]}</span>
+          </button>
         )}
-        {hub.setlists && (
-          <Row
-            onClick={() => {
-              setEditing(null);
-              setPanel("setlist");
-            }}
-            hue="#B5C5FF"
-            icon={<path d="M5 6h14M5 12h14M5 18h9" />}
-            title="New setlist"
-            sub="One song per line, shared with the band"
-          />
-        )}
-        <Row onClick={() => setPanel("fillin")} hue="#FFB245" icon={<path d="M12 4v16M4 12h16" />} title="Need a fill-in" sub="A sub for one date. Players nearby get an alert" />
-        <Row onClick={() => setPanel("invite")} hue="#FFACBA" icon={<path d="M12 5v14M5 12h14" />} title="Invite a bandmate" sub="They confirm their spot, then they're in" />
-        <Row onClick={() => setPanel("spot")} hue="#C9B6FF" icon={<><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /></>} title="Post an open spot" sub="Shows on your page, the Board and Search" />
-        <Row onClick={() => setPanel("show")} hue="#F7BF77" icon={<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>} title="Add a show" sub="Date, venue, ticket link" />
-        <Row onClick={() => setPanel("edit")} hue="#A8A49E" icon={<path d="M4 20h4L19 9l-4-4L4 16z" />} title="Edit band details" sub="Photo, bio, city, genres, status" />
-      </ul>
 
-      {hub.rehearsals && hub.rehearsals.length > 1 && (
-        <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-title4 font-bold tracking-[-0.02em]">Coming up</h2>
-          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
+        {hub.bills.map((b) => {
+          const d = showDate(b.date);
+          return (
+            <div key={b.showId} className="rounded-card-lg p-4 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
+              <span className="eyebrow text-tungsten">Shared bill</span>
+              <span className="text-callout font-semibold">
+                {b.fromName} says you played {b.venue} together on {d.month} {d.day}
+              </span>
+              <span className="text-footnote text-smoke -mt-1">Confirm and both bands show it under &ldquo;Shared the stage with&rdquo;.</span>
+              <span className="flex gap-2 pt-1">
+                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, true), `Confirmed. ${b.fromName} is on your page.`)} className="h-9 px-4 rounded-full bg-paper text-ink text-subhead font-semibold">
+                  We played it
+                </button>
+                <button type="button" onClick={() => run(() => answerBill(band.id, b.showId, false), "Taken off")} className="h-9 px-4 rounded-full border border-paper/20 text-subhead font-semibold">
+                  Not us
+                </button>
+              </span>
+            </div>
+          );
+        })}
+
+        {hub.rehearsals?.[0] && <NextRehearsal r={hub.rehearsals[0]} onAnswer={(a) => run(() => answerRehearsal(band.id, hub.rehearsals![0].id, a), a === "in" ? "You're in" : "Got it. The band will see you can't make it.")} />}
+
+        {hub.chat?.preview && (
+          <Link href={`/messages/b/${band.id}`} className="press-card rounded-card-lg bg-stage px-4 py-3.5 flex items-center gap-3">
+            <span className="flex-1 min-w-0 flex flex-col">
+              <span className="text-footnote text-smoke">Latest in the band chat</span>
+              <span className="text-callout truncate">{hub.chat.preview}</span>
+            </span>
+            {hub.chat.unread ? <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-caption font-semibold flex items-center justify-center">{hub.chat.unread}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
+          </Link>
+        )}
+
+        {hub.rehearsals && hub.rehearsals.length > 1 && (
+          <Section title="Coming up" onAdd={() => setPanel("rehearsal")} addLabel="Plan a rehearsal">
             {hub.rehearsals.slice(1).map((r) => (
               <li key={r.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="flex-1 min-w-0 flex flex-col">
@@ -154,31 +147,50 @@ export function BandHubView({ hub }: { hub: BandHub }) {
                     I&apos;m in
                   </button>
                 )}
-                <button type="button" onClick={() => run(() => removeRehearsal(band.id, r.id), "Rehearsal removed")} aria-label={`Remove rehearsal ${when(r.startsAt)}`} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-                    <path d="M6 6l12 12M18 6L6 18" />
-                  </svg>
-                </button>
+                <RemoveButton label={`Remove rehearsal ${when(r.startsAt)}`} onClick={() => run(() => removeRehearsal(band.id, r.id), "Rehearsal removed")} />
               </li>
             ))}
-          </ul>
-        </section>
-      )}
+          </Section>
+        )}
 
-      {hub.setlists && hub.setlists.length > 0 && (
-        <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-title4 font-bold tracking-[-0.02em]">Setlists</h2>
-          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
+        <Section title="Next shows" onAdd={() => setPanel("show")} addLabel="Add a show" empty="No shows yet. Add one and it goes on your page.">
+          {band.shows.map((s) => {
+            const d = showDate(s.date);
+            return (
+              <li key={s.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="w-10 flex flex-col items-center shrink-0">
+                  <span className="text-caption2 font-semibold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                  <span className="text-title3 font-semibold leading-none mt-0.5">{d.day}</span>
+                </span>
+                <span className="flex-1 min-w-0 flex flex-col">
+                  <span className="text-callout font-semibold truncate">{s.venue}</span>
+                  <span className="text-footnote text-smoke truncate">{[d.weekday + (s.time ? ` ${s.time}` : ""), s.city].filter(Boolean).join(" · ")}</span>
+                </span>
+                <RemoveButton label={`Remove ${s.venue}`} onClick={() => run(() => removeShow(band.id, s.id), "Show removed")} />
+              </li>
+            );
+          })}
+        </Section>
+
+        <Section title="Open spots" onAdd={() => setPanel("spot")} addLabel="Post an open spot" empty="Need someone? Post a spot and it shows on the Board and in Search.">
+          {band.spots.map((s) => (
+            <li key={s.id} className="flex items-center gap-3 px-4 py-3">
+              <Link href={hub.demo ? "/board" : `/board/${s.id}`} className="flex-1 min-w-0 flex flex-col">
+                <span className="text-callout font-semibold truncate">{s.role ?? s.title}</span>
+                <span className="text-footnote text-smoke">{s.asked ? `${s.asked} ${s.asked === 1 ? "musician" : "musicians"} asked · see them` : "No one yet"}</span>
+              </Link>
+              <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
+                Filled
+              </button>
+            </li>
+          ))}
+        </Section>
+
+        {hub.setlists && (
+          <Section title="Setlists" onAdd={() => openSetlist(null)} addLabel="New setlist" empty="Keep the band's setlists here. Everyone can edit them.">
             {hub.setlists.map((l) => (
               <li key={l.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditing(l);
-                    setPanel("setlist");
-                  }}
-                  className="w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-paper/5"
-                >
+                <button type="button" onClick={() => openSetlist(l)} className="w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-paper/5">
                   <span className="text-callout font-semibold truncate">{l.name}</span>
                   <span className="text-footnote text-smoke truncate">
                     {l.songs.length} {l.songs.length === 1 ? "song" : "songs"}
@@ -187,61 +199,15 @@ export function BandHubView({ hub }: { hub: BandHub }) {
                 </button>
               </li>
             ))}
-          </ul>
-        </section>
-      )}
+          </Section>
+        )}
 
-      {band.spots.length > 0 && (
-        <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-title4 font-bold tracking-[-0.02em]">Open spots</h2>
-          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
-            {band.spots.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 px-4 py-3">
-                <Link href={hub.demo ? "/board" : `/board/${s.id}`} className="flex-1 min-w-0 flex flex-col">
-                  <span className="text-callout font-semibold truncate">{s.role ?? s.title}</span>
-                  <span className="text-footnote text-smoke">{s.asked ? `${s.asked} ${s.asked === 1 ? "musician" : "musicians"} asked · see them` : "No one yet"}</span>
-                </Link>
-                <button type="button" onClick={() => run(() => closeSpot(band.id, s.id), "Spot closed")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
-                  Filled
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {band.shows.length > 0 && (
-        <section className="flex flex-col gap-2 pt-2">
-          <h2 className="text-title4 font-bold tracking-[-0.02em]">Next shows</h2>
-          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
-            {band.shows.map((s) => {
-              const d = showDate(s.date);
-              return (
-                <li key={s.id} className="flex items-center gap-3 px-4 py-3">
-                  <span className="w-10 flex flex-col items-center shrink-0">
-                    <span className="text-caption2 font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
-                    <span className="text-title3 font-bold leading-none mt-0.5">{d.day}</span>
-                  </span>
-                  <span className="flex-1 min-w-0 flex flex-col">
-                    <span className="text-callout font-semibold truncate">{s.venue}</span>
-                    <span className="text-footnote text-smoke truncate">{[d.weekday + (s.time ? ` ${s.time}` : ""), s.city].filter(Boolean).join(" · ")}</span>
-                  </span>
-                  <button type="button" onClick={() => run(() => removeShow(band.id, s.id), "Show removed")} aria-label={`Remove ${s.venue}`} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-                      <path d="M6 6l12 12M18 6L6 18" />
-                    </svg>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
-      <p className="text-footnote text-smoke leading-[1.5] pt-1">Everyone who plays in {band.name} now can edit it. There&apos;s no owner and no admin. Past members stay on the page.</p>
+        <p className="text-footnote text-smoke leading-[1.5] pt-1">Everyone who plays in {band.name} now can edit it. There&apos;s no owner and no admin. Past members stay on the page.</p>
+      </div>
 
       {panel && (
         <Sheet onClose={() => setPanel(null)} label={panel} scrimClassName="bg-ink/70 backdrop-blur-sm" className={SHEET}>
+          {panel === "add" && <AddMenu hub={hub} pick={(p) => (p === "setlist" ? openSetlist(null) : setPanel(p))} />}
           {panel === "edit" && <EditForm hub={hub} onDone={() => router.refresh()} />}
           {panel === "show" && <ShowForm hub={hub} onDone={() => router.refresh()} />}
           {panel === "spot" && <SpotForm hub={hub} onDone={() => router.refresh()} />}
@@ -255,23 +221,97 @@ export function BandHubView({ hub }: { hub: BandHub }) {
   );
 }
 
-function Row({ href, onClick, hue, solid, icon, title, sub, badge }: { href?: string; onClick?: () => void; hue: string; solid?: boolean; icon: React.ReactNode; title: string; sub: string; badge?: number }) {
+/** One of the four round shortcuts under the band photo. */
+function Action({ href, onClick, hue, solid, icon, label, badge }: { href?: string; onClick?: () => void; hue: string; solid?: boolean; icon: React.ReactNode; label: string; badge?: number }) {
   const body = (
     <>
-      <span className="size-[34px] rounded-xs flex items-center justify-center shrink-0" style={solid ? { background: hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${hue} 18%, transparent)`, color: hue }}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <span className="relative size-14 rounded-full flex items-center justify-center" style={solid ? { background: hue, color: "var(--color-ink)" } : { background: `color-mix(in srgb, ${hue} 16%, var(--color-stage))`, color: hue }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           {icon}
         </svg>
+        {badge ? <span className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1.5 rounded-full bg-paper text-ink text-caption2 font-semibold flex items-center justify-center">{badge}</span> : null}
       </span>
-      <span className="flex-1 min-w-0 flex flex-col">
-        <span className="text-body font-semibold">{title}</span>
-        <span className="text-footnote text-smoke truncate">{sub}</span>
-      </span>
-      {badge ? <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-caption font-bold flex items-center justify-center">{badge}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
+      <span className="text-footnote text-paper/80">{label}</span>
     </>
   );
-  const cls = "w-full flex items-center gap-3.5 px-4 py-3.5 text-left transition hover:bg-paper/4";
-  return <li>{href ? <Link href={href} className={cls}>{body}</Link> : <button type="button" onClick={onClick} className={cls}>{body}</button>}</li>;
+  const cls = "press flex flex-col items-center gap-1.5";
+  return href ? (
+    <Link href={href} className={cls} data-haptic>
+      {body}
+    </Link>
+  ) : (
+    <button type="button" onClick={onClick} className={cls} data-haptic>
+      {body}
+    </button>
+  );
+}
+
+/** A titled list with its own + button, so each kind of thing is added where it lives. */
+function Section({ title, onAdd, addLabel, empty, children }: { title: string; onAdd: () => void; addLabel: string; empty?: string; children: React.ReactNode[] }) {
+  const has = children.length > 0;
+  if (!has && !empty) return null;
+  return (
+    <section className="flex flex-col gap-2 pt-2">
+      <div className="flex items-center justify-between">
+        <h2 className="text-title4 font-semibold tracking-[-0.01em]">{title}</h2>
+        <button type="button" onClick={onAdd} aria-label={addLabel} className="hit-slop size-8 rounded-full bg-paper/8 text-paper flex items-center justify-center hover:bg-paper/14">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      </div>
+      {has ? (
+        <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">{children}</ul>
+      ) : (
+        <button type="button" onClick={onAdd} className="rounded-card-lg border border-dashed border-paper/14 px-4 py-3.5 text-left text-footnote text-smoke hover:bg-paper/4">
+          {empty}
+        </button>
+      )}
+    </section>
+  );
+}
+
+function RemoveButton({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} aria-label={label} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+  );
+}
+
+/** "More": everything else you can add, as one sheet instead of a wall of rows on the page. */
+function AddMenu({ hub, pick }: { hub: BandHub; pick: (p: Exclude<Panel, "add" | null>) => void }) {
+  const items: { p: Exclude<Panel, "add" | null>; hue: string; title: string; sub: string; icon: React.ReactNode }[] = [
+    { p: "fillin", hue: "#FFB245", title: "Need a fill-in", sub: "A sub for one date. Players nearby get an alert", icon: <path d="M12 4v16M4 12h16" /> },
+    { p: "spot", hue: "#C9B6FF", title: "Post an open spot", sub: "Shows on your page, the Board and Search", icon: <><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /></> },
+    { p: "show", hue: "#F7BF77", title: "Add a show", sub: "Date, venue, ticket link", icon: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></> },
+    ...(hub.setlists ? [{ p: "setlist" as const, hue: "#B5C5FF", title: "New setlist", sub: "One song per line, shared with the band", icon: <path d="M5 6h14M5 12h14M5 18h9" /> }] : []),
+    { p: "edit", hue: "#A8A49E", title: "Edit band details", sub: "Photo, bio, city, genres, status", icon: <path d="M4 20h4L19 9l-4-4L4 16z" /> },
+  ];
+  return (
+    <div className="flex flex-col gap-3">
+      <Heading>Add to {hub.band.name}</Heading>
+      <ul className="flex flex-col">
+        {items.map((it) => (
+          <li key={it.p}>
+            <button type="button" onClick={() => pick(it.p)} className="w-full flex items-center gap-3.5 py-3 text-left">
+              <span className="size-[38px] rounded-field flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${it.hue} 18%, transparent)`, color: it.hue }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {it.icon}
+                </svg>
+              </span>
+              <span className="flex-1 min-w-0 flex flex-col">
+                <span className="text-body font-semibold">{it.title}</span>
+                <span className="text-footnote text-smoke truncate">{it.sub}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 const input = "h-[50px] w-full rounded-2xl bg-ink/60 border border-paper/12 px-4 text-body text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50";
@@ -280,7 +320,7 @@ const labelCls = "text-footnote font-semibold text-smoke";
 function Heading({ children, sub }: { children: React.ReactNode; sub?: string }) {
   return (
     <div className="flex flex-col gap-1">
-      <h2 className="font-display text-title1 font-bold tracking-[-0.02em]">{children}</h2>
+      <h2 className="headline text-title1">{children}</h2>
       {sub && <p className="text-subhead text-smoke">{sub}</p>}
     </div>
   );
@@ -627,7 +667,7 @@ function NextRehearsal({ r, onAnswer }: { r: Rehearsal; onAnswer: (a: "in" | "ou
   const names = r.inNames.length ? (r.inNames.length > 3 ? `${r.inNames.slice(0, 3).join(", ")} and ${r.inNames.length - 3} more` : r.inNames.join(", ")) : "No one yet";
   return (
     <section aria-label="Next rehearsal" className="rounded-card-lg p-4 border border-gel-teal/35 bg-[linear-gradient(160deg,rgb(103_226_218/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
-      <span className="text-caption font-semibold tracking-[0.16em] uppercase text-gel-teal">Next rehearsal</span>
+      <span className="eyebrow text-gel-teal">Next rehearsal</span>
       <span className="text-title3 font-semibold leading-tight">{when(r.startsAt)}</span>
       <span className="text-subhead text-smoke -mt-1">{r.place}</span>
       {r.note && <span className="text-footnote text-paper/80">{r.note}</span>}
