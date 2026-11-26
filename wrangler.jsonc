@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Production: app.mixstro.com + mixstro.com (git branch `production`).
+  // Staging: `wrangler deploy --env staging` -> staging.mixstro.com (git branch `main`).
+  "name": "mixstro",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "mixstro" }],
+  "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "mixstro-next-cache" }],
+  "durable_objects": {
+    "bindings": [{ "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "env": {
+    "staging": {
+      "name": "mixstro-staging",
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "mixstro-staging" }],
+      "r2_buckets": [{ "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "mixstro-next-cache-staging" }],
+      "durable_objects": {
+        "bindings": [{ "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }]
+      }
+    }
+  }
+}
