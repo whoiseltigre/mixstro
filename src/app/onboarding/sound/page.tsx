@@ -126,7 +126,7 @@ export default function Sound() {
               autoCorrect="off"
               placeholder={full ? "That's the max for now" : "youtube.com/watch?v=…"}
               disabled={full}
-              className="flex-1 min-w-0 h-full bg-transparent text-body placeholder:text-smoke/50 outline-none"
+              className="flex-1 min-w-0 h-full bg-transparent text-body placeholder:text-smoke/85 outline-none"
             />
             <button
               type="submit"

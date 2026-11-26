@@ -255,7 +255,7 @@ export default async function BandPageView({ params }: Params) {
           </p>
 
           {!signedIn && (
-            <section className="gel-rim rounded-sheet">
+            <section className="p-px bg-paper/20 rounded-sheet">
               <div className="rounded-[24.5px] bg-stage p-6 flex flex-col gap-3">
                 <h2 className="headline text-title-lg">Put your band on Mixstro</h2>
                 <p className="text-callout text-smoke leading-relaxed max-w-[460px]">

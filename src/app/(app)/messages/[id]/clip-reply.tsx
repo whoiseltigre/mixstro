@@ -41,7 +41,7 @@ export function ClipBubble({ clip, body, mine, first, faded }: { clip: ChatClip;
           className="press w-[240px] rounded-tile overflow-hidden bg-riser border border-paper/10 text-left flex items-center gap-3 p-2 pr-3"
         >
           <span className="relative size-14 rounded-xl overflow-hidden shrink-0 bg-stage flex items-center justify-center">
-            {parsed?.thumb ? <FadeImg src={parsed.thumb} alt="" className="absolute inset-0 size-full object-cover" /> : <span className="text-tungsten">{NOTE}</span>}
+            {parsed?.thumb ? <FadeImg src={parsed.thumb} alt="" className="absolute inset-0 size-full object-cover" /> : <span className="text-gel-teal">{NOTE}</span>}
             <span className="relative glass size-8 rounded-full flex items-center justify-center">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M7 4l13 8-13 8z" />
@@ -51,7 +51,7 @@ export function ClipBubble({ clip, body, mine, first, faded }: { clip: ChatClip;
           <span className="min-w-0 flex flex-col gap-0.5">
             <span className="text-subhead font-semibold truncate">{owner}</span>
             <span className="text-caption text-smoke truncate">{PROVIDER_LABEL[provider]}</span>
-            {clip.at != null && <span className="self-start mt-0.5 text-caption2 font-semibold px-2 py-0.5 rounded-full bg-tungsten/15 text-tungsten tabular-nums">at {clipTime(clip.at)}</span>}
+            {clip.at != null && <span className="self-start mt-0.5 text-caption2 font-semibold px-2 py-0.5 rounded-full bg-gel-teal/15 text-gel-teal tabular-nums">at {clipTime(clip.at)}</span>}
           </span>
         </button>
       ) : (
@@ -64,7 +64,7 @@ export function ClipBubble({ clip, body, mine, first, faded }: { clip: ChatClip;
         <div
           className={
             mine
-              ? "px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-callout leading-[1.4] whitespace-pre-wrap break-words"
+              ? "px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bubble-own text-callout leading-[1.4] whitespace-pre-wrap break-words"
               : "px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout leading-[1.4] whitespace-pre-wrap break-words"
           }
         >
@@ -79,7 +79,7 @@ export function ClipBubble({ clip, body, mine, first, faded }: { clip: ChatClip;
 export function AttachmentChip({ option, at, first, onRemove }: { option: ClipOption; at: number | null; first: string; onRemove: () => void }) {
   return (
     <div className="glass fixed md:absolute z-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-4 bottom-[calc(max(env(safe-area-inset-bottom),16px)+62px)] md:bottom-[78px] h-9 rounded-full flex items-center gap-2 pl-3 pr-1 text-footnote whitespace-nowrap">
-      <span className="text-tungsten">{NOTE}</span>
+      <span className="text-gel-teal">{NOTE}</span>
       <span className="font-semibold">{option.mine ? "Your clip" : `${first}'s clip`}</span>
       {at != null && <span className="text-smoke tabular-nums">at {clipTime(at)}</span>}
       <button type="button" onClick={onRemove} aria-label="Remove clip" className="hit-slop relative size-7 rounded-full bg-paper/12 flex items-center justify-center">
@@ -131,14 +131,14 @@ function ClipPicker({ options, first, onPick }: { options: ClipOption[]; first: 
     return (
       <label key={o.id} className="flex items-center gap-3 p-2 rounded-2xl has-[:checked]:bg-paper/10 cursor-pointer">
         <input type="radio" name="clip" value={o.id} checked={chosen === o.id} onChange={() => setChosen(o.id)} className="sr-only" />
-        <span className="relative size-12 rounded-xl overflow-hidden shrink-0 bg-riser flex items-center justify-center text-tungsten">
+        <span className="relative size-12 rounded-xl overflow-hidden shrink-0 bg-riser flex items-center justify-center text-gel-teal">
           {p?.thumb ? <FadeImg src={p.thumb} alt="" className="absolute inset-0 size-full object-cover" /> : NOTE}
         </span>
         <span className="flex-1 min-w-0 flex flex-col">
           <span className="text-subhead font-semibold truncate">{provider ? PROVIDER_LABEL[provider] : "Clip"}</span>
           <span className="text-caption text-smoke truncate">{o.duration ? clipTime(o.duration) : new URL(o.url, "https://mixstro.com").hostname.replace(/^www\./, "")}</span>
         </span>
-        <span aria-hidden="true" className={`size-5 rounded-full border-2 ${chosen === o.id ? "border-tungsten bg-tungsten" : "border-paper/30"}`} />
+        <span aria-hidden="true" className={`size-5 rounded-full border-2 ${chosen === o.id ? "border-paper bg-paper" : "border-paper/30"}`} />
       </label>
     );
   };

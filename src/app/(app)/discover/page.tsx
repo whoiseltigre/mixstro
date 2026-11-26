@@ -68,7 +68,7 @@ export default async function Home() {
           <h2 id="near-you" className="text-title3 md:text-title2 font-semibold tracking-[-0.01em]">
             {asked.length ? "Want to play with you" : onlySamples ? "Sample musicians" : "Musicians near you"}
           </h2>
-          <Link href="/discover/today" className="text-subhead font-semibold text-tungsten">
+          <Link href="/discover/today" className="text-subhead font-semibold text-paper">
             See all
           </Link>
         </div>
@@ -85,7 +85,7 @@ export default async function Home() {
                     </span>
                   )}
                   <span className="absolute inset-x-3 bottom-3 flex flex-col gap-0.5">
-                    <span className="text-caption2 font-semibold tracking-[0.12em] uppercase text-tungsten truncate">
+                    <span className="text-caption2 font-semibold tracking-[0.12em] uppercase text-gel-peach truncate">
                       {m.instrument} · {m.distanceMi ? `${m.distanceMi} mi` : m.neighborhood}
                     </span>
                     <span className="text-body-lg font-semibold truncate">{m.name}</span>
@@ -106,7 +106,7 @@ export default async function Home() {
       <section aria-labelledby="on-board" className="relative flex flex-col gap-3">
         <div className="px-5 md:px-0 flex items-baseline justify-between gap-3">
           <h2 id="on-board" className="text-title3 md:text-title2 font-semibold tracking-[-0.01em]">On the Board</h2>
-          <Link href="/board" className="text-subhead font-semibold text-tungsten">
+          <Link href="/board" className="text-subhead font-semibold text-paper">
             Open
           </Link>
         </div>

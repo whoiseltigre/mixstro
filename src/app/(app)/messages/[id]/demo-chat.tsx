@@ -1,5 +1,6 @@
 import { ChatHeader } from "./chat-header";
 import type { Musician } from "@/lib/mock";
+import { PlayButton } from "@/components/ui";
 
 const BARS = [6, 12, 18, 10, 20, 16, 8, 14, 20, 12, 8, 17, 19, 11, 7, 15, 18, 10, 13, 20, 11, 16, 9, 14];
 
@@ -13,12 +14,10 @@ export function DemoChat({ person: m }: { person: Musician }) {
 
       <div className="flex-1 overflow-y-auto px-3.5 pt-4 pb-[90px] flex flex-col justify-end gap-2">
         <div className="self-center text-caption text-smoke py-1">Connected today · 7:42 PM</div>
-        <div className="self-end w-[236px] flex items-center gap-2.5 px-3 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink">
-          <button aria-label="Play your voice note" className="size-8 rounded-full bg-ink text-paper flex items-center justify-center">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg>
-          </button>
+        <div className="self-end w-[236px] flex items-center gap-2.5 px-3 py-2.5 rounded-[20px_20px_6px_20px] bubble-own">
+          <PlayButton size={34} label="Play your voice note" />
           <div aria-hidden="true" className="flex-1 flex items-center gap-0.5 h-[22px]">
-            {BARS.map((h, i) => <span key={i} className="w-[3px] rounded-sm bg-ink" style={{ height: h }} />)}
+            {BARS.map((h, i) => <span key={i} className="w-[3px] rounded-sm bg-current" style={{ height: h }} />)}
           </div>
           <span className="text-caption font-medium">0:31</span>
         </div>

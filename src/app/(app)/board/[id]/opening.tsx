@@ -8,6 +8,7 @@ import { statusLine } from "@/lib/opening-reasons";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import type { CandidateView, MyClip, Opening } from "@/lib/openings";
 import { alertMeFor, renewOpening, setOpeningStatus, shareOpening } from "../actions";
+import { Toggle } from "@/components/ui";
 
 /** Your opening's status with Pause / Filled / Renew, and who nearby fits, with reasons. */
 export function OpeningPanel({
@@ -164,10 +165,10 @@ function ShareLink({ postId, opening, clips, title, area, justPosted }: { postId
   const featured = justPosted && opening.status !== "filled";
 
   return (
-    <div className={`rounded-card p-4 flex flex-col gap-3 ${featured ? "bg-stage border border-tungsten/40" : "bg-stage"}`}>
+    <div className={`rounded-card p-4 flex flex-col gap-3 ${featured ? "bg-stage border border-gel-blue/40" : "bg-stage"}`}>
       {featured && (
         <div className="flex flex-col gap-1">
-          <span className="text-caption font-semibold tracking-[0.14em] uppercase text-tungsten">Posted. Now share it</span>
+          <span className="text-caption font-semibold tracking-[0.14em] uppercase text-gel-blue">Posted. Now share it</span>
           <p className="text-subhead text-smoke text-pretty">
             The {who} you need might not be on Mixstro yet. Post your link in your city&apos;s &ldquo;musicians wanted&rdquo; Facebook group or on r/Bandmates, and they can listen and answer in one tap.
           </p>
@@ -178,17 +179,7 @@ function ShareLink({ postId, opening, clips, title, area, justPosted }: { postId
           <span className="text-callout font-semibold">Share link</span>
           <span className="text-footnote text-smoke">{on ? "Anyone with the link can see it, listen and answer." : "Off. Turn it on to post it anywhere."}</span>
         </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={on}
-          disabled={pending || opening.status === "filled"}
-          onClick={() => save(!on)}
-          className={`relative h-8 w-14 shrink-0 rounded-full transition ${on ? "bg-tungsten" : "bg-riser"} disabled:opacity-50`}
-        >
-          <span className={`absolute top-1 size-6 rounded-full bg-paper transition-all ${on ? "left-7" : "left-1"}`} />
-          <span className="sr-only">Share link</span>
-        </button>
+        <Toggle on={on} onChange={(v) => save(v)} label="Share link" disabled={pending || opening.status === "filled"} />
       </div>
       {clips.length > 0 ? (
         <label className="flex flex-col gap-1.5">

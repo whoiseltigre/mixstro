@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ProjectList } from "@/components/project-list";
 import { Sheet, SheetCloser } from "@/components/sheet";
 import { toast, undoable } from "@/components/toast";
-import { BackButton, Button, Field } from "@/components/ui";
+import { BackButton, Button, Field, Toggle } from "@/components/ui";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Bandmate, type Project, type Track } from "@/lib/projects";
 import { findBandmates, inviteBandmate, type Candidate } from "./band-actions";
@@ -27,7 +27,7 @@ const fromProject = (p: Project): Form => ({
   bandmates: p.bandmates ?? [],
 });
 
-const selectCls = "h-[50px] w-full rounded-2xl bg-ink border border-paper/12 px-3.5 text-body text-paper outline-none focus:border-paper/50";
+const selectCls = "field field-inset h-[52px] w-full px-3.5 text-body";
 
 export default function ProjectsEditor() {
   const { projects, ready, save, remove } = useMyProjects();
@@ -44,7 +44,7 @@ export default function ProjectsEditor() {
           <p className="text-callout text-smoke leading-snug">Every band and project, old or new. Add the name, your role and the years, then link a track or two.</p>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          <Link href="/me/projects/import" className="press h-12 rounded-full bg-tungsten text-ink text-body font-semibold flex items-center justify-center">
+          <Link href="/me/projects/import" className="press h-12 rounded-full bg-paper text-ink text-body font-semibold flex items-center justify-center">
             Find my releases
           </Link>
           <Button variant="glass" onClick={() => setForm(blank())} className="h-12 text-body">
@@ -193,18 +193,10 @@ function ProjectSheet({
             )}
           </div>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={form.current}
-          onClick={() => set({ current: !form.current, endYear: Math.max(form.endYear, form.startYear) })}
-          className="flex justify-between items-center text-callout"
-        >
-          I still play with them
-          <span className={`relative w-[50px] h-[30px] rounded-full transition-colors ${form.current ? "bg-gel-teal" : "bg-paper/20"}`}>
-            <span className={`absolute top-[3px] size-6 rounded-full bg-paper transition-[left] duration-150 ${form.current ? "left-[23px]" : "left-[3px]"}`} />
-          </span>
-        </button>
+        <div className="flex justify-between items-center text-callout">
+          <span>I still play with them</span>
+          <Toggle on={form.current} onChange={() => set({ current: !form.current, endYear: Math.max(form.endYear, form.startYear) })} label="I still play with them" />
+        </div>
 
         <div className="flex flex-col gap-2">
           <span className="text-footnote font-semibold text-smoke">Tracks</span>
@@ -223,7 +215,7 @@ function ProjectSheet({
                   maxLength={120}
                   onChange={(e) => update((f) => ({ ...f, tracks: f.tracks.map((x) => (x.id === t.id ? { ...x, title: e.target.value } : x)) }))}
                   placeholder="Track title"
-                  className="bg-transparent text-subhead font-semibold outline-none placeholder:text-smoke/60"
+                  className="bg-transparent text-subhead font-semibold outline-none placeholder:text-smoke/85"
                 />
                 <span className="text-caption text-smoke">{PROVIDER_LABEL[t.provider]}</span>
               </span>
@@ -264,7 +256,7 @@ function ProjectSheet({
                 autoCapitalize="none"
                 autoCorrect="off"
                 placeholder="Paste a link to a track"
-                className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/60"
+                className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85"
               />
               <button type="button" onClick={() => addTrack(link)} disabled={!link.trim()} className="h-[38px] px-3.5 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-40">
                 Add
@@ -378,7 +370,7 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
           onChange={(e) => setQ(e.target.value)}
           autoComplete="off"
           placeholder="Find a bandmate on Mixstro"
-          className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/60"
+          className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85"
         />
       </div>
       {found.length > 0 && (
@@ -438,7 +430,7 @@ function SongSearch({ onPick }: { onPick: (hit: SongHit) => void }) {
       <div className="h-12 rounded-full bg-ink border border-paper/12 flex items-center gap-2 px-4 focus-within:border-paper/50">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="text-smoke shrink-0" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4-4" /></svg>
         <label htmlFor="song-q" className="sr-only">Search by song or album name</label>
-        <input id="song-q" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" placeholder="Or search: artist and song name" className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/60" />
+        <input id="song-q" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" placeholder="Or search: artist and song name" className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85" />
       </div>
       {hits.length > 0 && (
         <ul className="flex flex-col rounded-2xl bg-ink border border-paper/8 divide-y divide-paper/8">
@@ -457,7 +449,7 @@ function SongSearch({ onPick }: { onPick: (hit: SongHit) => void }) {
                   <span className="text-subhead font-semibold truncate">{h.title}</span>
                   <span className="text-caption text-smoke truncate">{[h.artist, h.kind, h.year].filter(Boolean).join(" · ")}</span>
                 </span>
-                <span className="text-footnote font-semibold text-tungsten shrink-0">Add</span>
+                <span className="text-footnote font-semibold text-paper shrink-0">Add</span>
               </button>
             </li>
           ))}

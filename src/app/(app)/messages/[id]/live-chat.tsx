@@ -214,7 +214,7 @@ export function LiveChat({
                 <div
                   className={
                     m.mine
-                      ? "self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-callout leading-[1.4] whitespace-pre-wrap break-words"
+                      ? "self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bubble-own text-callout leading-[1.4] whitespace-pre-wrap break-words"
                       : "self-start max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout leading-[1.4] whitespace-pre-wrap break-words"
                   }
                   style={m.pending ? { opacity: m.pending.status === "failed" ? 0.45 : 0.6 } : undefined}
@@ -237,7 +237,7 @@ export function LiveChat({
           <button
             type="button"
             onClick={() => setPlanning({ replacing: null })}
-            className="self-center mt-2 h-9 px-4 rounded-full border border-tungsten/50 text-footnote font-semibold text-tungsten hover:bg-tungsten/10 transition"
+            className="self-center mt-2 h-9 px-4 rounded-full border border-paper/30 text-footnote font-semibold text-paper hover:bg-paper/10 transition"
           >
             Sounds like a fit. Plan a jam with {first}?
           </button>

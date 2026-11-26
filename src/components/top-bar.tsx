@@ -18,14 +18,15 @@ export function TopBar() {
   const { draft } = useDraft();
   const [creating, setCreating] = useState(false);
   const tab = TABS.find((t) => path === t.href || path.startsWith(t.href + "/"));
-  const glow = GLOW[tab?.href ?? ""] ?? COLOR.tungsten;
+  const area = Object.keys(GLOW).find((k) => path === k || path.startsWith(k + "/"));
+  const glow = (area && GLOW[area]) ?? COLOR.tungsten;
 
   return (
     <>
       <div
         aria-hidden="true"
-        className="hidden md:block pointer-events-none fixed inset-x-0 top-0 h-[520px] -z-10 transition-[background] duration-500"
-        style={{ background: `radial-gradient(45% 60% at 50% 0%, ${glow}40, transparent)` }}
+        className="area-glow pointer-events-none fixed inset-x-0 top-0 h-[380px] md:h-[520px] -z-10"
+        style={{ "--glow": glow } as React.CSSProperties}
       />
       <header className="hidden md:flex fixed inset-x-0 top-0 z-30 pt-safe">
         <div className="w-full max-w-[1440px] mx-auto h-[88px] px-10 flex items-center justify-between gap-6">

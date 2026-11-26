@@ -89,7 +89,7 @@ export function SafetyMenu({ username, name }: { username: string; name: string 
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder="Anything else we should know? (optional)"
                   rows={2}
-                  className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-body placeholder:text-smoke/60 outline-none focus:border-paper/50"
+                  className="field px-4 py-3 text-body"
                 />
                 <Button onClick={report} disabled={!reason || busy}>Send report</Button>
               </>

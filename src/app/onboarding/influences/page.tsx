@@ -113,7 +113,7 @@ export default function Influences() {
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search any artist or band"
             autoComplete="off"
-            className="h-[52px] w-full rounded-2xl bg-stage pl-11 pr-3 text-body placeholder:text-smoke outline-none border border-paper/10 focus:border-[var(--glow)] transition"
+            className="field h-[52px] w-full pl-11 pr-3 text-body focus:border-[var(--glow)]"
             style={{ "--glow": GLOW } as React.CSSProperties}
           />
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="absolute left-4 top-[17px] text-smoke" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>

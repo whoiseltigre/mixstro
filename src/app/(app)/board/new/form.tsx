@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { BackButton, Button, Chip, Field } from "@/components/ui";
+import { BackButton, Button, Chip, Field, ToggleRow } from "@/components/ui";
 import { KIND_LABEL, KINDS, type BoardKind } from "@/lib/board-kinds";
 import { FAMILIES } from "@/lib/instruments";
 import { createPost } from "../actions";
@@ -139,17 +139,14 @@ export function NewPostForm({ neighborhood, signedIn, myRole }: { neighborhood: 
             rows={4}
             onChange={(e) => setDetails(e.target.value)}
             placeholder={hint.details}
-            className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-body-lg leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+            className="field px-4 py-3 text-body-lg leading-[1.45] resize-none"
           />
         </div>
 
         <Field id="where" label="Where" placeholder="Echo Park, Los Angeles" value={where} maxLength={80} onChange={(e) => setWhere(e.target.value)} />
 
         <div className="flex flex-col gap-3">
-          <label className="flex items-center justify-between gap-3 h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 cursor-pointer">
-            <span className="text-body-lg">It&rsquo;s paid</span>
-            <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
-          </label>
+          <ToggleRow on={paid} onChange={setPaid}>It&rsquo;s paid</ToggleRow>
           {paid && <Field id="pay" label="Pay (optional)" placeholder="$300/day" value={pay} maxLength={40} onChange={(e) => setPay(e.target.value)} />}
         </div>
 

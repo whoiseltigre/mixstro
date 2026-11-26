@@ -218,7 +218,7 @@ function Arrow() {
 function PinnedShow({ show }: { show: NonNullable<BandChat["nextShow"]> }) {
   const d = showDate(show.date);
   return (
-    <div className="mx-3.5 mt-3 rounded-tile border border-tungsten/30 bg-stage/80 px-3.5 py-2.5 flex items-center gap-3">
+    <div className="mx-3.5 mt-3 rounded-tile border border-gel-violet/30 bg-stage/80 px-3.5 py-2.5 flex items-center gap-3">
       <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-smoke">Next show</span>
       <span className="text-subhead font-semibold truncate">
         {show.venue} · {d.weekday} {d.month} {d.day}
@@ -260,7 +260,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
   if (m.kind === "show") {
     return (
       <Link href={`/b/${bandId}`} className="self-center max-w-[300px] w-full rounded-tile bg-stage px-4 py-3 flex flex-col gap-0.5 my-1">
-        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-tungsten">New show</span>
+        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-violet">New show</span>
         <span className="text-callout font-semibold">{m.body}</span>
         <span className="text-caption text-smoke">It&apos;s on the band page now</span>
       </Link>
@@ -270,7 +270,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
     const href = demo ? "/board" : m.kind === "spot_reply" && m.refId ? `/board/${m.refId}` : s ? `/m/${s.username}` : "#";
     return (
       <div className="self-center max-w-[320px] w-full rounded-card bg-stage border border-paper/8 p-3.5 flex flex-col gap-2.5 my-1">
-        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-tungsten">{m.kind === "spot_reply" ? "Open spot" : "Note for the band"}</span>
+        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-violet">{m.kind === "spot_reply" ? "Open spot" : "Note for the band"}</span>
         <span className="flex items-center gap-3">
           {s && (
             <span className="relative size-11 rounded-full overflow-hidden shrink-0 flex items-center justify-center font-bold" style={{ background: artistTint(s.username) }}>
@@ -295,7 +295,7 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
     <div
       className={
         m.mine
-          ? "max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bg-paper text-ink text-callout leading-[1.4] whitespace-pre-wrap break-words"
+          ? "max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bubble-own text-callout leading-[1.4] whitespace-pre-wrap break-words"
           : "max-w-[100%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout leading-[1.4] whitespace-pre-wrap break-words"
       }
       style={m.id < 0 ? { opacity: 0.6 } : undefined}

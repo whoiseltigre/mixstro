@@ -67,12 +67,12 @@ export function AnswerForm({
               rows={3}
               onChange={(e) => setNote(e.target.value)}
               placeholder="I'm free most Thursdays and have my own kit."
-              className="rounded-2xl bg-ink/50 border border-paper/12 px-4 py-3 text-body leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+              className="field field-inset px-4 py-3 text-body leading-[1.45] resize-none"
             />
           </div>
           {error && <p className="text-subhead text-danger-soft">{error}</p>}
           <Button
-            variant="gel"
+            variant="primary"
             disabled={pending}
             onClick={() =>
               {

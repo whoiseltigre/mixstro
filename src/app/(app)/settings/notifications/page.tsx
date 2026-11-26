@@ -1,6 +1,6 @@
 "use client";
 
-import { BackButton } from "@/components/ui";
+import { BackButton, Toggle } from "@/components/ui";
 import { type Channel, NOTIFICATION_TYPES, useNotificationPrefs, wants } from "@/lib/notifications";
 import { useState } from "react";
 import { usePush } from "@/lib/push-client";
@@ -98,18 +98,3 @@ function TestPush() {
   );
 }
 
-function Toggle({ on, label, disabled, onChange }: { on: boolean; label: string; disabled?: boolean; onChange: (on: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      disabled={disabled}
-      onClick={() => onChange(!on)}
-      className={`relative w-[51px] h-[31px] rounded-full transition-colors disabled:opacity-40 ${on ? "bg-success" : "bg-paper/16"}`}
-    >
-      <span className={`absolute top-[2px] left-[2px] size-[27px] rounded-full bg-paper shadow transition-transform ${on ? "translate-x-[20px]" : ""}`} />
-    </button>
-  );
-}

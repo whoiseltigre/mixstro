@@ -246,7 +246,7 @@ function SignatureTrack({ track, project }: { track: Track; project: Project }) 
   return (
     <div className="glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 mb-2 flex flex-col gap-3 relative overflow-hidden">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFB245, transparent)" }} />
-      <span className="relative text-caption2 font-semibold uppercase tracking-[0.14em] text-tungsten">Signature track</span>
+      <span className="relative text-caption2 font-semibold uppercase tracking-[0.14em] text-smoke">Signature track</span>
       <div className="relative flex items-center gap-3.5">
         <span className="relative size-[60px] shrink-0 rounded-field overflow-hidden" style={{ background: nameWash(project.name) }}>
           {(details?.artwork ?? track.thumb) && <FadeImg src={(details?.artwork ?? track.thumb)!} alt="" className="absolute inset-0 size-full object-cover" />}

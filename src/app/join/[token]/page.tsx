@@ -57,7 +57,7 @@ export default async function Join({ params }: Params) {
         </Link>
       </header>
       <div className="w-full max-w-[440px] my-auto py-10 flex flex-col gap-6">
-        <div className="gel-rim rounded-sheet">
+        <div className="p-px bg-gel-violet/50 rounded-sheet">
           <div className="rounded-[26.5px] bg-stage p-6 flex flex-col items-center text-center gap-4">
             <span className="relative size-20 rounded-full overflow-hidden bg-riser">
               {invite.from.avatar_url && (

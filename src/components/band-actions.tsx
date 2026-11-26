@@ -124,7 +124,7 @@ function NoteForm({ id, name }: { id: string; name: string }) {
         maxLength={500}
         rows={4}
         placeholder="Loved the set at the Echo. I play drums, any chance you need a fill-in?"
-        className="rounded-2xl bg-ink/60 border border-paper/12 p-4 text-body leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+        className="field field-inset p-4 text-body leading-[1.45] resize-none"
       />
       {error && (
         <p role="alert" className="text-footnote text-danger">

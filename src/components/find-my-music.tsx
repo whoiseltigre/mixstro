@@ -54,18 +54,18 @@ export function FindMyMusic({ onAdd, disabled }: { onAdd: (urls: string[]) => vo
         autoComplete="off"
         enterKeyHint="search"
         placeholder="The name on Apple Music or Spotify"
-        className="h-[56px] px-4 rounded-full bg-stage border border-paper/12 text-body placeholder:text-smoke/50 outline-none focus:border-paper/50 transition"
+        className="field-search h-[52px] px-4 text-body"
       />
 
       {added ? (
-        <p className="text-footnote text-tungsten px-1">Added {added}&apos;s songs. They play right on your profile.</p>
+        <p className="text-footnote text-gel-teal px-1">Added {added}&apos;s songs. They play right on your profile.</p>
       ) : match ? (
         <div key={match.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 flex flex-col gap-3.5 relative overflow-hidden">
           <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 opacity-30" style={{ background: "radial-gradient(70% 100% at 50% 0%, #FFB245, transparent)" }} />
           <div className="relative flex items-center gap-3">
             <Cover src={match.image ?? match.tracks[0]?.thumb} size={56} round />
             <span className="flex-1 flex flex-col min-w-0">
-              <span className="text-caption font-semibold uppercase tracking-[0.12em] text-tungsten">Is this you?</span>
+              <span className="text-caption font-semibold uppercase tracking-[0.12em] text-gel-pink">Is this you?</span>
               <span className="text-title4 font-medium leading-tight truncate">{match.name}</span>
               {match.genre && <span className="text-footnote text-smoke">{match.genre}</span>}
             </span>
@@ -90,7 +90,7 @@ export function FindMyMusic({ onAdd, disabled }: { onAdd: (urls: string[]) => vo
                 setAdded(match.name);
                 setName("");
               }}
-              className="press h-11 rounded-full bg-tungsten text-ink text-callout font-semibold"
+              className="press h-11 rounded-full bg-paper text-ink text-callout font-semibold"
             >
               Yes, add my songs
             </button>

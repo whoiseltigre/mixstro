@@ -249,7 +249,7 @@ function FinishProfile({
           className="flex items-center gap-3 p-4 rounded-tile bg-stage border border-paper/8 transition hover:border-paper/40"
         >
           <span
-            className="size-2 rounded-full bg-tungsten shrink-0"
+            className="size-2 rounded-full bg-gel-peach shrink-0"
             aria-hidden="true"
           />
           <span className="flex-1 flex flex-col gap-0.5">

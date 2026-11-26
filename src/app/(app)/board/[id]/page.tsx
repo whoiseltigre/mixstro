@@ -115,7 +115,7 @@ function PersonRow({ person: m, note, at }: { person: Musician; note: string | n
           {m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
         </span>
         {m.shared.length > 0 && (
-          <span className="text-footnote text-tungsten">
+          <span className="text-footnote text-gel-blue">
             Also into {m.shared.slice(0, 3).map((a) => a.name).join(", ")}
           </span>
         )}

@@ -26,10 +26,13 @@ export const GEL = {
 
 /** Which gel lights which area (the "stage spill" glow at the top of each screen). */
 export const AREA_GEL: Record<string, string> = {
-  "/discover": COLOR.tungsten,
+  "/discover": GEL.peach,
   "/board": GEL.blue,
   "/messages": GEL.teal,
-  "/me": GEL.peach,
+  "/me": GEL.pink,
+  "/bands": GEL.violet,
+  "/search": GEL.blue,
+  "/settings": GEL.peach,
 };
 
 /** Board post kinds and their gel. */

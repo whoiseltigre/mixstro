@@ -92,10 +92,10 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
                     type="button"
                     disabled={pending}
                     onClick={() => send(o)}
-                    className="w-full text-left p-3.5 rounded-tile bg-ink/60 border border-paper/10 text-callout leading-[1.4] transition hover:border-tungsten/70 disabled:opacity-50 flex items-center gap-3"
+                    className="w-full text-left p-3.5 rounded-tile bg-ink/60 border border-paper/10 text-callout leading-[1.4] transition hover:border-paper/50 disabled:opacity-50 flex items-center gap-3"
                   >
                     <span className="flex-1">{o}</span>
-                    <span className="shrink-0 text-footnote font-semibold text-tungsten">Send</span>
+                    <span className="shrink-0 text-footnote font-semibold text-paper">Send</span>
                   </button>
                 </li>
               ))}
@@ -109,7 +109,7 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
                 maxLength={MAX}
                 rows={3}
                 placeholder={`What would you like to play with ${first}?`}
-                className="rounded-tile bg-ink border border-paper/12 p-3.5 text-body leading-[1.45] placeholder:text-smoke/70 outline-none focus:border-paper/45 resize-none"
+                className="field field-inset p-3.5 text-body leading-[1.45] resize-none"
               />
               <button
                 type="button"

@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { Button, Chip, SectionLabel, Wordmark } from "@/components/ui";
+import { Button, Chip, Field, PlayButton, SectionLabel, TextArea, Wordmark } from "@/components/ui";
+import { PostCard } from "@/components/post-card";
+import type { BoardPost } from "@/lib/board";
+import { DesignChoices } from "./choices";
+import { ToggleDemo } from "./motion-lab";
 import { MotionLab, HapticRow } from "./motion-lab";
 
 export const metadata: Metadata = {
@@ -18,7 +22,7 @@ const NEUTRALS = [
   ["riser", "#292624", "Raised controls"],
   ["smoke", "#A8A49E", "Secondary text"],
   ["paper", "#F5F1EC", "Text, primary button"],
-  ["tungsten", "#FFB245", "One spotlight per screen"],
+  ["tungsten", "#FFB245", "Create, playing now, an opening for you"],
 ] as const;
 
 const GELS = [
@@ -87,6 +91,13 @@ const TEXT_CLASS: Record<string, string> = {
   caption2: "text-caption2",
 };
 
+const author = { id: "maya", username: "maya", name: "Maya Torres", instrument: "Bass", photo: "/photos/bass-blue.jpg" };
+const SAMPLE_POSTS = [
+  { id: "s-1", sample: true, kind: "Band seeking", title: "Drummer for neo-soul trio", role: "Drums", paid: true, isNew: true, author, distanceMi: 4, mine: false, meta: "Echo Park · Gigs monthly · Paid", foot: "6 musicians interested" },
+  { id: "s-2", sample: true, kind: "Session", title: "Rhythm guitar for an EP", role: "Guitar", paid: true, isNew: false, author, distanceMi: 3, mine: false, meta: "Studio City · 3 days · $300/day", foot: "Closes Friday" },
+  { id: "s-3", sample: true, kind: "Collab", title: "Co-writer, folk and ambient", role: "Songwriter", paid: false, isNew: false, author, distanceMi: 6, mine: false, meta: "Remote or LA · Just for fun", foot: "2 musicians interested" },
+] as unknown as BoardPost[];
+
 function Section({ id, title, intro, children }: { id: string; title: string; intro: string; children: React.ReactNode }) {
   return (
     <section aria-labelledby={id} className="flex flex-col gap-5 pt-12 first:pt-0">
@@ -127,7 +138,11 @@ export default function DesignSystem() {
         </p>
       </header>
 
-      <Section id="color" title="Color" intro="Neutrals for the room. Tungsten for the one thing that matters most on a screen, at most once.">
+      <Section id="decide" title="Try a look" intro="Small decisions you can flip and then walk through the real app with. Each one changes a single token, so every screen follows.">
+        <DesignChoices />
+      </Section>
+
+      <Section id="color" title="Color" intro="Neutrals for the room. Tungsten means three things only: Create (the + button), something playing right now, and an opening meant for you. Links, ticks and selected states are Paper.">
         <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
           {NEUTRALS.map(([n, h, u]) => (
             <Swatch key={n} name={n} hex={h} use={u} />
@@ -146,7 +161,7 @@ export default function DesignSystem() {
         </div>
       </Section>
 
-      <Section id="type" title="Type" intro="SF Pro on Apple devices. Weight carries hierarchy gently: 400 for reading, 500 to 600 for labels, 700 only for titles. Never heavier.">
+      <Section id="type" title="Type" intro="SF Pro on Apple devices. Weight carries hierarchy gently: 400 for reading, 500 to 560 for labels, 620 for titles. Never heavier.">
         <ul className="flex flex-col divide-y divide-paper/8 border-y border-paper/8">
           {TYPE.map(([n, px, u]) => (
             <li key={n} className="py-3 grid grid-cols-[120px_1fr] md:grid-cols-[160px_1fr_200px] items-baseline gap-4">
@@ -187,14 +202,42 @@ export default function DesignSystem() {
         </div>
       </Section>
 
-      <Section id="components" title="Components" intro="Every button dips the instant a finger lands and springs back. Each one carries a haptic, so taps feel answered before anything loads.">
-        <div className="grid md:grid-cols-2 gap-6">
+      <Section id="components" title="Components" intro="One of each. If a screen needs something that looks like one of these, it uses this one. Every button dips the instant a finger lands and carries a haptic.">
+        <div className="grid md:grid-cols-2 gap-x-8 gap-y-8">
           <div className="flex flex-col gap-3">
+            <SectionLabel>Button: Paper is the main action, glass the second, danger for destructive ones</SectionLabel>
             <Button>Primary</Button>
-            <Button variant="glass">Glass</Button>
-            <Button variant="gel">Connect (gel)</Button>
+            <Button variant="glass">Secondary (glass)</Button>
+            <Button variant="danger">Delete account</Button>
+            <div className="flex flex-wrap gap-2.5 items-center">
+              <Button size="md">Medium, in cards</Button>
+              <Button size="sm">Small, inline</Button>
+              <Button size="sm" variant="glass">Small glass</Button>
+            </div>
+            <p className="text-footnote text-smoke">Three heights: 56, 48 and 44. Nothing tappable is shorter than 44.</p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>Gel rim: Connect and a new connection, nowhere else</SectionLabel>
+            <Button variant="gel">Connect</Button>
+            <p className="text-footnote text-smoke">The design check fails if the rim shows up on any other screen.</p>
+            <SectionLabel>Switch: one color everywhere</SectionLabel>
+            <ToggleDemo />
+            <SectionLabel>Play: Paper on glass, Tungsten only while playing</SectionLabel>
+            <div className="flex items-center gap-3">
+              <PlayButton />
+              <PlayButton playing />
+              <PlayButton size={34} />
+              <span className="text-footnote text-smoke">Resting, playing, compact</span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <SectionLabel>Text field: one outline, readable placeholder</SectionLabel>
+            <Field id="ds-field" label="Title" placeholder="Drummer for a neo-soul trio" />
+            <TextArea id="ds-area" label="Details" rows={3} placeholder="We gig about once a month and rehearse Thursdays." />
+            <input aria-label="Search" placeholder="Name, instrument or band" className="field-search h-[52px] px-5 text-body" />
           </div>
           <div className="flex flex-col gap-4">
+            <SectionLabel>Chips and tags</SectionLabel>
             <div className="flex flex-wrap gap-2">
               <Chip selected>Guitar</Chip>
               <Chip>Bass</Chip>
@@ -203,11 +246,26 @@ export default function DesignSystem() {
             </div>
             <div className="flex flex-wrap gap-2 text-footnote">
               <span className="px-3 py-1.5 rounded-full bg-gel-blue/15 text-gel-blue font-medium">Joining a band</span>
-              <span className="px-3 py-1.5 rounded-full bg-tungsten/15 text-tungsten font-medium">Co-writing</span>
+              <span className="px-3 py-1.5 rounded-full bg-gel-pink/15 text-gel-pink font-medium">Co-writing</span>
               <span className="px-3 py-1.5 rounded-full bg-gel-teal/15 text-gel-teal font-semibold eyebrow">Now</span>
+              <span className="px-3 py-1.5 rounded-full bg-tungsten/15 text-tungsten font-medium">Open spot</span>
             </div>
-            <span className="eyebrow text-smoke">eyebrow label</span>
+            <SectionLabel>Chat bubbles</SectionLabel>
+            <div className="flex flex-col gap-2">
+              <div className="self-start max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_20px_6px] bg-stage text-callout">Want to come play Thursday?</div>
+              <div className="self-end max-w-[78%] px-3.5 py-2.5 rounded-[20px_20px_6px_20px] bubble-own text-callout">I&apos;m in. Sending you a demo first.</div>
+            </div>
           </div>
+        </div>
+        <div className="flex flex-col gap-3 pt-4">
+          <SectionLabel>Board post card: pick the cover under &ldquo;Try a look&rdquo; above</SectionLabel>
+          <ul className="grid sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+            {SAMPLE_POSTS.map((p) => (
+              <li key={p.id}>
+                <PostCard post={p} />
+              </li>
+            ))}
+          </ul>
         </div>
       </Section>
 

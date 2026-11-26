@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { FadeImg } from "@/components/fade-image";
 import { Sheet, useSheetClose } from "@/components/sheet";
 import { toast } from "@/components/toast";
-import { BackButton, Button, cx } from "@/components/ui";
+import { BackButton, Button, Toggle, cx } from "@/components/ui";
 import { STATUS_LABEL, pageChecklist, showDate, type BandStatus } from "@/lib/band-shared";
 import type { BandHub, Rehearsal, Setlist } from "@/lib/band-hub";
 import { ROLE_IDS, nounFor } from "@/lib/instruments";
@@ -86,7 +86,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
               <span className="text-body font-semibold">
                 Your page is {done} of {list.length} done
               </span>
-              <span className="text-subhead font-semibold text-tungsten">Finish</span>
+              <span className="text-subhead font-semibold text-paper">Finish</span>
             </span>
             <span className="h-1.5 rounded-full bg-riser overflow-hidden">
               <span className="block h-full rounded-full" style={{ width: `${(done / list.length) * 100}%`, background: "var(--gel-linear)" }} />
@@ -98,8 +98,8 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         {hub.bills.map((b) => {
           const d = showDate(b.date);
           return (
-            <div key={b.showId} className="rounded-card-lg p-4 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
-              <span className="eyebrow text-tungsten">Shared bill</span>
+            <div key={b.showId} className="rounded-card-lg p-4 border border-gel-violet/35 bg-[linear-gradient(160deg,rgb(201_182_255/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
+              <span className="eyebrow text-gel-violet">Shared bill</span>
               <span className="text-callout font-semibold">
                 {b.fromName} says you played {b.venue} together on {d.month} {d.day}
               </span>
@@ -124,7 +124,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
               <span className="text-footnote text-smoke">Latest in the band chat</span>
               <span className="text-callout truncate">{hub.chat.preview}</span>
             </span>
-            {hub.chat.unread ? <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-caption font-semibold flex items-center justify-center">{hub.chat.unread}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
+            {hub.chat.unread ? <span className="min-w-6 h-6 px-2 rounded-full bg-paper text-ink text-caption font-semibold flex items-center justify-center">{hub.chat.unread}</span> : <span aria-hidden="true" className="text-smoke">›</span>}
           </Link>
         )}
 
@@ -159,7 +159,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
             return (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3">
                 <span className="w-10 flex flex-col items-center shrink-0">
-                  <span className="text-caption2 font-semibold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                  <span className="text-caption2 font-semibold uppercase tracking-[0.08em] text-gel-violet">{d.month}</span>
                   <span className="text-title3 font-semibold leading-none mt-0.5">{d.day}</span>
                 </span>
                 <span className="flex-1 min-w-0 flex flex-col">
@@ -314,7 +314,7 @@ function AddMenu({ hub, pick }: { hub: BandHub; pick: (p: Exclude<Panel, "add" |
   );
 }
 
-const input = "h-[50px] w-full rounded-2xl bg-ink/60 border border-paper/12 px-4 text-body text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50";
+const input = "field field-inset h-[52px] w-full px-4 text-body";
 const labelCls = "text-footnote font-semibold text-smoke";
 
 function Heading({ children, sub }: { children: React.ReactNode; sub?: string }) {
@@ -411,7 +411,7 @@ function EditForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Right now</legend>
         <div className="flex flex-wrap gap-2">
           {STATUSES.map((s) => (
-            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", status === s ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+            <button key={s} type="button" aria-pressed={status === s} onClick={() => setStatus(s)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", status === s ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {STATUS_LABEL[s]}
             </button>
           ))}
@@ -518,7 +518,7 @@ function ShowForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         {tagged.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {tagged.map((t) => (
-              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="h-8 px-3 rounded-full bg-tungsten/16 text-tungsten text-footnote font-semibold">
+              <button key={t.id} type="button" onClick={() => setTagged(tagged.filter((x) => x.id !== t.id))} className="h-8 px-3 rounded-full bg-gel-violet/16 text-gel-violet text-footnote font-semibold">
                 {t.name} ✕
               </button>
             ))}
@@ -562,7 +562,7 @@ function SpotForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
         <div className="flex flex-wrap gap-2">
           {ROLE_IDS.map((r) => (
-            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {r}
             </button>
           ))}
@@ -575,10 +575,10 @@ function SpotForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         </label>
         <textarea id="spot-details" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} rows={3} placeholder="How often you rehearse, where, what you sound like." className={cx(input, "h-auto py-3 leading-[1.45] resize-none")} />
       </div>
-      <label className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <span className="text-callout font-semibold">It&apos;s paid</span>
-        <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
-      </label>
+        <Toggle on={paid} onChange={setPaid} label="It's paid" />
+      </div>
       {paid && <input aria-label="Pay" placeholder="$150 a show" maxLength={40} value={pay} onChange={(e) => setPay(e.target.value)} className={input} />}
       <ErrorLine text={error} />
       <Button type="submit" disabled={pending || !role.trim()} className="h-12">
@@ -737,13 +737,13 @@ function RehearsalForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         </label>
         <input id="reh-note" placeholder="Optional: what to work on" maxLength={200} className={input} {...field("note")} />
       </div>
-      <label className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <span className="flex flex-col">
           <span className="text-callout font-semibold">Every week</span>
           <span className="text-footnote text-smoke">Same day and time for the next 4 weeks</span>
         </span>
-        <input type="checkbox" checked={weekly} onChange={(e) => setWeekly(e.target.checked)} className="size-5 accent-tungsten" />
-      </label>
+        <Toggle on={weekly} onChange={setWeekly} label="Every week" />
+      </div>
       <ErrorLine text={error} />
       <Button type="submit" disabled={pending} className="h-12">
         {pending ? "Planning…" : "Plan it"}
@@ -842,7 +842,7 @@ function FillInForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
         <div className="flex flex-wrap gap-2">
           {ROLE_IDS.map((r) => (
-            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16")}>
               {r}
             </button>
           ))}
@@ -860,10 +860,10 @@ function FillInForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
         </label>
         <textarea id="fill-details" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} rows={3} placeholder="The gig, how many songs, whether there's a rehearsal first." className={cx(input, "h-auto py-3 leading-[1.45] resize-none")} />
       </div>
-      <label className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <span className="text-callout font-semibold">It&apos;s paid</span>
-        <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
-      </label>
+        <Toggle on={paid} onChange={setPaid} label="It's paid" />
+      </div>
       {paid && <input aria-label="Pay" placeholder="$100 for the night" maxLength={40} value={pay} onChange={(e) => setPay(e.target.value)} className={input} />}
       <ErrorLine text={error} />
       <Button type="submit" disabled={pending || !role || !date} className="h-12">

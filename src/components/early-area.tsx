@@ -26,7 +26,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
   return (
     <section
       aria-labelledby="early-area"
-      className="relative mx-5 md:mx-0 rounded-sheet overflow-hidden border border-tungsten/30"
+      className="relative mx-5 md:mx-0 rounded-sheet overflow-hidden border border-gel-peach/30"
       style={{ background: "linear-gradient(150deg, rgb(255 178 69 / 0.16), rgb(255 172 186 / 0.08) 55%, rgb(26 24 22 / 0.6))" }}
     >
       <div
@@ -36,7 +36,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
       />
       <div className="relative p-5 md:p-6 flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <span className="text-caption font-semibold tracking-[0.14em] uppercase text-tungsten">You&apos;re early</span>
+          <span className="text-caption font-semibold tracking-[0.14em] uppercase text-gel-peach">You&apos;re early</span>
           <h2 id="early-area" className="font-display text-title1 md:text-title-lg font-bold leading-[1.1] tracking-[-0.03em] text-pretty">
             {title}
           </h2>
@@ -49,7 +49,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
 
         <div className="flex flex-wrap gap-2.5">
           {username && (
-            <button type="button" onClick={() => setInviting(true)} className="h-11 px-5 rounded-full bg-tungsten text-ink text-callout font-semibold">
+            <button type="button" onClick={() => setInviting(true)} className="h-11 px-5 rounded-full bg-paper text-ink text-callout font-semibold">
               Invite musicians
             </button>
           )}
@@ -62,7 +62,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
           href="/settings/notifications"
           className="flex items-center gap-3 p-3 rounded-tile bg-ink/40 border border-paper/8 transition hover:border-paper/25"
         >
-          <span className="size-10 rounded-control bg-tungsten/15 text-tungsten flex items-center justify-center shrink-0" aria-hidden="true">
+          <span className="size-10 rounded-control bg-gel-peach/15 text-gel-peach flex items-center justify-center shrink-0" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
               <path d="M10 20a2.2 2.2 0 0 0 4 0" />
@@ -74,7 +74,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
             </span>
             <span className="text-footnote text-smoke">{players ? "Change who you're looking for" : "Pick the instruments you're looking for"}</span>
           </span>
-          <span className="text-footnote font-semibold text-tungsten shrink-0">{players ? "Change" : "Pick"}</span>
+          <span className="text-footnote font-semibold text-paper shrink-0">{players ? "Change" : "Pick"}</span>
         </Link>
 
         {area.further.length > 0 && (
@@ -84,7 +84,7 @@ export function EarlyArea({ area, username, firstName }: { area: Area; username?
               {area.further.map((m) => (
                 <li key={m.id} className="shrink-0 w-[76px]">
                   <Link href={`/m/${m.username}`} className="group flex flex-col items-center gap-1.5 text-center">
-                    <span className="relative size-[64px] rounded-full overflow-hidden ring-2 ring-paper/10 group-hover:ring-tungsten/60 transition">
+                    <span className="relative size-[64px] rounded-full overflow-hidden ring-2 ring-paper/10 group-hover:ring-paper/60 transition">
                       <PersonPhoto person={m} sizes="64px" initialsSize={22} />
                     </span>
                     <span className="w-full text-footnote font-semibold truncate">{m.name.split(" ")[0]}</span>

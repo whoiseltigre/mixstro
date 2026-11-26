@@ -82,7 +82,7 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={tab === "bands" ? "Band, genre or city" : "Name, instrument or influence"}
-          className="flex-1 min-w-0 h-11 rounded-full bg-stage border border-paper/12 px-4 text-body placeholder:text-smoke outline-none focus:border-paper/40"
+          className="field-search flex-1 min-w-0 h-11 px-4 text-body"
         />
         {tab === "people" && <button
           type="button"
@@ -273,7 +273,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`h-9 rounded-full px-3.5 text-subhead border transition ${on ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/15 hover:border-paper/40"}`}
+      className={`h-9 rounded-full px-3.5 text-subhead border transition ${on ? "bg-paper text-ink border-paper font-semibold" : "border-paper/15 hover:border-paper/40"}`}
     >
       {children}
     </button>

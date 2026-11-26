@@ -103,7 +103,7 @@ export default function HighlightsEditor() {
       ) : (
         ready &&
         highlights.length < HIGHLIGHTS_MAX && (
-          <Button variant="gel" onClick={() => setForm(blank())} className="h-12 text-body">
+          <Button variant="primary" onClick={() => setForm(blank())} className="h-12 text-body">
             Add a highlight
           </Button>
         )

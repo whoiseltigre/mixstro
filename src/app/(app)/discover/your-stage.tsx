@@ -160,7 +160,7 @@ export function YourStage({ stage }: { stage: Stage }) {
   return (
     <section aria-labelledby="your-stage" className="relative mx-5 md:mx-0 flex flex-col gap-3.5 md:max-w-[720px]">
       <div className="flex items-center justify-between">
-        <span id="your-stage" className="text-footnote font-semibold tracking-[0.14em] uppercase text-tungsten">
+        <span id="your-stage" className="text-footnote font-semibold tracking-[0.14em] uppercase text-gel-peach">
           Your stage
         </span>
         <span className="text-footnote text-smoke">
@@ -176,7 +176,7 @@ export function YourStage({ stage }: { stage: Stage }) {
         <span className="flex-1 flex flex-col gap-0.5 min-w-0">
           <span className="text-body-lg font-semibold truncate">{stage.firstName}</span>
           {stage.headline && <span className="text-footnote text-smoke truncate">{stage.headline}</span>}
-          <span className="text-footnote text-tungsten truncate">app.mixstro.com/@{stage.username}</span>
+          <span className="text-footnote text-smoke truncate">app.mixstro.com/@{stage.username}</span>
         </span>
         <span className="h-9 px-3.5 rounded-full bg-paper/10 text-footnote font-semibold flex items-center shrink-0">View</span>
       </Link>
@@ -230,7 +230,7 @@ export function YourStage({ stage }: { stage: Stage }) {
           .concat({ id: "signup", done: true, title: "Instruments, sound and influences", sub: "", hue: "", icon: null })
           .map((s) => (
             <li key={s.id} className="flex items-center gap-3 px-3.5 py-1.5 text-subhead text-smoke">
-              <span className="size-[22px] rounded-full bg-tungsten text-ink flex items-center justify-center shrink-0">
+              <span className="size-[22px] rounded-full bg-paper text-ink flex items-center justify-center shrink-0">
                 <CheckIcon size={12} />
               </span>
               <span className="line-through decoration-paper/30">{s.title}</span>
