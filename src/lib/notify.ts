@@ -593,6 +593,20 @@ export async function notifyJamSoon(jamId: number, recipientId: string, otherId:
   });
 }
 
+/** A band rehearsal starts in about two hours. Sent to members who are in or haven't answered. */
+export async function notifyRehearsalSoon(rehearsalId: number, recipientId: string, bandId: number, bandName: string, startsAt: string, place: string) {
+  await notify(recipientId, {
+    type: "jam",
+    ref: `reh:${rehearsalId}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: `${bandName} rehearsal at ${clock(startsAt)}`,
+    preheader: `${place}. Can't make it? Say so in Your band.`,
+    blocks: [{ kind: "badge", text: "Rehearsal today" }, { kind: "band", name: bandName, line: place }, { kind: "jam", startsAt, place }],
+    cta: { label: "Open Your band", path: `/bands/${bandId}` },
+    push: { title: `${bandName} rehearsal at ${clock(startsAt)}`, body: place },
+  });
+}
+
 /* ---------- Bands ---------- */
 
 /** The band's name and its current members other than `exceptId`. */

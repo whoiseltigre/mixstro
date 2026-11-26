@@ -8,15 +8,15 @@ import { Sheet, useSheetClose } from "@/components/sheet";
 import { toast } from "@/components/toast";
 import { BackButton, Button, cx } from "@/components/ui";
 import { STATUS_LABEL, pageChecklist, showDate, type BandStatus } from "@/lib/band-shared";
-import type { BandHub } from "@/lib/band-hub";
-import { ROLE_IDS } from "@/lib/instruments";
+import type { BandHub, Rehearsal, Setlist } from "@/lib/band-hub";
+import { ROLE_IDS, nounFor } from "@/lib/instruments";
 import { shrinkPhoto } from "@/lib/photo";
 import { BAND_GLOW, nameWash } from "@/lib/projects";
 import { createClient, sessionUser } from "@/lib/supabase/client";
 import { findBandmates, inviteBandmate, type Candidate } from "../../me/projects/band-actions";
-import { addShow, answerBill, closeSpot, findBands, postSpot, removeShow, saveBandDetails } from "../actions";
+import { addShow, answerBill, answerRehearsal, closeSpot, findBands, planRehearsal, postFillIn, postSpot, removeRehearsal, removeSetlist, removeShow, saveBandDetails, saveSetlist } from "../actions";
 
-type Panel = "edit" | "show" | "spot" | "invite" | null;
+type Panel = "edit" | "show" | "spot" | "invite" | "rehearsal" | "setlist" | "fillin" | null;
 
 const SHEET =
   "md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-hero md:rounded-hero bg-stage border border-paper/10 px-5 pt-3 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4";
@@ -26,6 +26,7 @@ export function BandHubView({ hub }: { hub: BandHub }) {
   const { band } = hub;
   const router = useRouter();
   const [panel, setPanel] = useState<Panel>(null);
+  const [editing, setEditing] = useState<Setlist | null>(null);
   const [, start] = useTransition();
   const list = pageChecklist(band);
   const done = list.filter((x) => x.done).length;
@@ -98,6 +99,8 @@ export function BandHubView({ hub }: { hub: BandHub }) {
         );
       })}
 
+      {hub.rehearsals?.[0] && <NextRehearsal r={hub.rehearsals[0]} onAnswer={(a) => run(() => answerRehearsal(band.id, hub.rehearsals![0].id, a), a === "in" ? "You're in" : "Got it. The band will see you can't make it.")} />}
+
       <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">
         <Row
           href={`/messages/b/${band.id}`}
@@ -108,11 +111,85 @@ export function BandHubView({ hub }: { hub: BandHub }) {
           sub={hub.chat?.preview ?? "Everyone who plays in it now"}
           badge={hub.chat?.unread}
         />
+        {hub.rehearsals && (
+          <Row onClick={() => setPanel("rehearsal")} hue="#67E2DA" icon={<><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></>} title="Plan a rehearsal" sub="Once or every week. Everyone says if they're in" />
+        )}
+        {hub.setlists && (
+          <Row
+            onClick={() => {
+              setEditing(null);
+              setPanel("setlist");
+            }}
+            hue="#B5C5FF"
+            icon={<path d="M5 6h14M5 12h14M5 18h9" />}
+            title="New setlist"
+            sub="One song per line, shared with the band"
+          />
+        )}
+        <Row onClick={() => setPanel("fillin")} hue="#FFB245" icon={<path d="M12 4v16M4 12h16" />} title="Need a fill-in" sub="A sub for one date. Players nearby get an alert" />
         <Row onClick={() => setPanel("invite")} hue="#FFACBA" icon={<path d="M12 5v14M5 12h14" />} title="Invite a bandmate" sub="They confirm their spot, then they're in" />
         <Row onClick={() => setPanel("spot")} hue="#C9B6FF" icon={<><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="3" /></>} title="Post an open spot" sub="Shows on your page, the Board and Search" />
         <Row onClick={() => setPanel("show")} hue="#F7BF77" icon={<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>} title="Add a show" sub="Date, venue, ticket link" />
         <Row onClick={() => setPanel("edit")} hue="#A8A49E" icon={<path d="M4 20h4L19 9l-4-4L4 16z" />} title="Edit band details" sub="Photo, bio, city, genres, status" />
       </ul>
+
+      {hub.rehearsals && hub.rehearsals.length > 1 && (
+        <section className="flex flex-col gap-2 pt-2">
+          <h2 className="text-title4 font-bold tracking-[-0.02em]">Coming up</h2>
+          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
+            {hub.rehearsals.slice(1).map((r) => (
+              <li key={r.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="flex-1 min-w-0 flex flex-col">
+                  <span className="text-callout font-semibold truncate">{when(r.startsAt)}</span>
+                  <span className="text-footnote text-smoke truncate">
+                    {r.mine === "in" ? "You're in" : r.mine === "out" ? "You can't make it" : `${r.inNames.length} in · you haven't said`} · {r.place}
+                  </span>
+                </span>
+                {r.mine === "in" ? (
+                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "out"), "Got it")} className="h-8 px-3 rounded-full border border-paper/20 text-footnote font-semibold shrink-0">
+                    Can&apos;t
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => run(() => answerRehearsal(band.id, r.id, "in"), "You're in")} className="h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0">
+                    I&apos;m in
+                  </button>
+                )}
+                <button type="button" onClick={() => run(() => removeRehearsal(band.id, r.id), "Rehearsal removed")} aria-label={`Remove rehearsal ${when(r.startsAt)}`} className="size-8 rounded-full flex items-center justify-center text-smoke hover:text-paper hover:bg-paper/8">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                    <path d="M6 6l12 12M18 6L6 18" />
+                  </svg>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {hub.setlists && hub.setlists.length > 0 && (
+        <section className="flex flex-col gap-2 pt-2">
+          <h2 className="text-title4 font-bold tracking-[-0.02em]">Setlists</h2>
+          <ul className="rounded-card-lg bg-stage divide-y divide-paper/8">
+            {hub.setlists.map((l) => (
+              <li key={l.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditing(l);
+                    setPanel("setlist");
+                  }}
+                  className="w-full text-left px-4 py-3 flex flex-col gap-0.5 hover:bg-paper/5"
+                >
+                  <span className="text-callout font-semibold truncate">{l.name}</span>
+                  <span className="text-footnote text-smoke truncate">
+                    {l.songs.length} {l.songs.length === 1 ? "song" : "songs"}
+                    {l.songs.length ? ` · ${l.songs.slice(0, 3).join(", ")}${l.songs.length > 3 ? "…" : ""}` : ""}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {band.spots.length > 0 && (
         <section className="flex flex-col gap-2 pt-2">
@@ -169,6 +246,9 @@ export function BandHubView({ hub }: { hub: BandHub }) {
           {panel === "show" && <ShowForm hub={hub} onDone={() => router.refresh()} />}
           {panel === "spot" && <SpotForm hub={hub} onDone={() => router.refresh()} />}
           {panel === "invite" && <InviteForm hub={hub} />}
+          {panel === "rehearsal" && <RehearsalForm hub={hub} onDone={() => router.refresh()} />}
+          {panel === "setlist" && <SetlistForm hub={hub} setlist={editing} onDone={() => router.refresh()} />}
+          {panel === "fillin" && <FillInForm hub={hub} onDone={() => router.refresh()} />}
         </Sheet>
       )}
     </main>
@@ -533,5 +613,222 @@ function InviteForm({ hub }: { hub: BandHub }) {
       </div>
       <ErrorLine text={error} />
     </div>
+  );
+}
+
+/** "Thu, Dec 3 · 7:00 PM", in the phone's own time zone. */
+function when(iso: string) {
+  const d = new Date(iso);
+  return `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · ${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+}
+
+/** The next rehearsal, big: when, where, who's in, and your answer in one tap. */
+function NextRehearsal({ r, onAnswer }: { r: Rehearsal; onAnswer: (a: "in" | "out") => void }) {
+  const names = r.inNames.length ? (r.inNames.length > 3 ? `${r.inNames.slice(0, 3).join(", ")} and ${r.inNames.length - 3} more` : r.inNames.join(", ")) : "No one yet";
+  return (
+    <section aria-label="Next rehearsal" className="rounded-card-lg p-4 border border-gel-teal/35 bg-[linear-gradient(160deg,rgb(103_226_218/0.12),var(--color-stage)_60%)] flex flex-col gap-2">
+      <span className="text-caption font-semibold tracking-[0.16em] uppercase text-gel-teal">Next rehearsal</span>
+      <span className="text-title3 font-semibold leading-tight">{when(r.startsAt)}</span>
+      <span className="text-subhead text-smoke -mt-1">{r.place}</span>
+      {r.note && <span className="text-footnote text-paper/80">{r.note}</span>}
+      <span className="text-footnote text-smoke">
+        In: {names}
+        {r.outCount ? ` · ${r.outCount} can't make it` : ""}
+      </span>
+      <span className="flex gap-2 pt-1">
+        <button type="button" aria-pressed={r.mine === "in"} onClick={() => onAnswer("in")} className={cx("h-9 px-4 rounded-full text-subhead font-semibold", r.mine === "in" ? "bg-gel-teal text-ink" : "bg-paper text-ink")}>
+          {r.mine === "in" ? "You're in" : "I'm in"}
+        </button>
+        <button type="button" aria-pressed={r.mine === "out"} onClick={() => onAnswer("out")} className={cx("h-9 px-4 rounded-full text-subhead font-semibold border", r.mine === "out" ? "border-danger text-danger" : "border-paper/20")}>
+          {r.mine === "out" ? "You can't make it" : "Can't make it"}
+        </button>
+      </span>
+    </section>
+  );
+}
+
+function RehearsalForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
+  const close = useSheetClose();
+  const last = hub.rehearsals?.at(-1);
+  const [s, set] = useState({ date: "", time: "19:00", place: last?.place ?? "", note: "" });
+  const [weekly, setWeekly] = useState(false);
+  const [error, setError] = useState<string>();
+  const [pending, start] = useTransition();
+  const field = (k: keyof typeof s) => ({ value: s[k], onChange: (e: React.ChangeEvent<HTMLInputElement>) => set({ ...s, [k]: e.target.value }) });
+  return (
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!s.date || !s.time) return setError("Pick a day and time.");
+        start(async () => {
+          const res = await planRehearsal(hub.band.id, { startsAt: new Date(`${s.date}T${s.time}`).toISOString(), place: s.place, note: s.note, weeks: weekly ? 4 : 1 });
+          if (res.error) return setError(res.error);
+          toast(weekly ? "Planned for the next 4 weeks. The band chat got it." : "Planned. The band chat got it.");
+          onDone();
+          close();
+        });
+      }}
+    >
+      <Heading sub="Everyone in the band gets it in the chat and can say if they're in.">Plan a rehearsal</Heading>
+      <div className="grid grid-cols-[1fr_130px] gap-3">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="reh-date" className={labelCls}>
+            Day
+          </label>
+          <input id="reh-date" type="date" required min={new Date().toISOString().slice(0, 10)} className={input} {...field("date")} />
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="reh-time" className={labelCls}>
+            Time
+          </label>
+          <input id="reh-time" type="time" required className={input} {...field("time")} />
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="reh-place" className={labelCls}>
+          Where
+        </label>
+        <input id="reh-place" required placeholder="Lucky Lou's, Room B" maxLength={80} className={input} {...field("place")} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="reh-note" className={labelCls}>
+          Note
+        </label>
+        <input id="reh-note" placeholder="Optional: what to work on" maxLength={200} className={input} {...field("note")} />
+      </div>
+      <label className="flex items-center justify-between gap-3">
+        <span className="flex flex-col">
+          <span className="text-callout font-semibold">Every week</span>
+          <span className="text-footnote text-smoke">Same day and time for the next 4 weeks</span>
+        </span>
+        <input type="checkbox" checked={weekly} onChange={(e) => setWeekly(e.target.checked)} className="size-5 accent-tungsten" />
+      </label>
+      <ErrorLine text={error} />
+      <Button type="submit" disabled={pending} className="h-12">
+        {pending ? "Planning…" : "Plan it"}
+      </Button>
+    </form>
+  );
+}
+
+function SetlistForm({ hub, setlist, onDone }: { hub: BandHub; setlist: Setlist | null; onDone: () => void }) {
+  const close = useSheetClose();
+  const [name, setName] = useState(setlist?.name ?? (hub.band.shows[0] ? `${hub.band.shows[0].venue}` : ""));
+  const [songs, setSongs] = useState(setlist?.songs.join("\n") ?? "");
+  const [error, setError] = useState<string>();
+  const [pending, start] = useTransition();
+  const count = songs.split("\n").filter((l) => l.trim()).length;
+  return (
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        start(async () => {
+          const res = await saveSetlist(hub.band.id, setlist?.id ?? null, name, songs);
+          if (res.error) return setError(res.error);
+          toast("Setlist saved for the whole band");
+          onDone();
+          close();
+        });
+      }}
+    >
+      <Heading sub="Anyone in the band can edit it. Paste a list or type one song per line.">{setlist ? "Edit setlist" : "New setlist"}</Heading>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="set-name" className={labelCls}>
+          Name
+        </label>
+        <input id="set-name" required placeholder="Friday at the Echo" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} className={input} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="set-songs" className={labelCls}>
+          Songs{count ? ` (${count})` : ""}
+        </label>
+        <textarea id="set-songs" value={songs} onChange={(e) => setSongs(e.target.value)} rows={9} placeholder={"Opener\nThe new one\nCover we always play\nCloser"} className={cx(input, "h-auto py-3 leading-[1.5] resize-none")} />
+      </div>
+      <ErrorLine text={error} />
+      <Button type="submit" disabled={pending || !name.trim()} className="h-12">
+        {pending ? "Saving…" : "Save setlist"}
+      </Button>
+      {setlist && (
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() =>
+            start(async () => {
+              const res = await removeSetlist(hub.band.id, setlist.id);
+              if (res.error) return setError(res.error);
+              toast("Setlist removed");
+              onDone();
+              close();
+            })
+          }
+          className="h-11 text-subhead font-semibold text-danger"
+        >
+          Remove this setlist
+        </button>
+      )}
+    </form>
+  );
+}
+
+function FillInForm({ hub, onDone }: { hub: BandHub; onDone: () => void }) {
+  const close = useSheetClose();
+  const router = useRouter();
+  const [role, setRole] = useState("");
+  const [date, setDate] = useState(hub.band.shows[0]?.date ?? "");
+  const [details, setDetails] = useState("");
+  const [paid, setPaid] = useState(true);
+  const [pay, setPay] = useState("");
+  const [error, setError] = useState<string>();
+  const [pending, start] = useTransition();
+  return (
+    <form
+      className="flex flex-col gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        start(async () => {
+          const res = await postFillIn(hub.band.id, { role, date, details, paid, pay });
+          if (res.error) return setError(res.error);
+          toast("Posted. Players nearby who play it get an alert.");
+          onDone();
+          close();
+          if (res.postId) router.push(`/board/${res.postId}?posted=1`);
+        });
+      }}
+    >
+      <Heading sub="Someone out sick or away? Post it for one date. It closes the day after.">Need a fill-in</Heading>
+      <fieldset className="flex flex-col gap-2">
+        <legend className={cx(labelCls, "mb-2")}>Who you need</legend>
+        <div className="flex flex-wrap gap-2">
+          {ROLE_IDS.map((r) => (
+            <button key={r} type="button" aria-pressed={role === r} onClick={() => setRole(r)} className={cx("h-9 px-3.5 rounded-full text-subhead border transition", role === r ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/16")}>
+              {r}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="fill-date" className={labelCls}>
+          Date
+        </label>
+        <input id="fill-date" type="date" required min={new Date().toISOString().slice(0, 10)} value={date} onChange={(e) => setDate(e.target.value)} className={input} />
+      </div>
+      <div className="flex flex-col gap-2">
+        <label htmlFor="fill-details" className={labelCls}>
+          Details
+        </label>
+        <textarea id="fill-details" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={1000} rows={3} placeholder="The gig, how many songs, whether there's a rehearsal first." className={cx(input, "h-auto py-3 leading-[1.45] resize-none")} />
+      </div>
+      <label className="flex items-center justify-between gap-3">
+        <span className="text-callout font-semibold">It&apos;s paid</span>
+        <input type="checkbox" checked={paid} onChange={(e) => setPaid(e.target.checked)} className="size-5 accent-tungsten" />
+      </label>
+      {paid && <input aria-label="Pay" placeholder="$100 for the night" maxLength={40} value={pay} onChange={(e) => setPay(e.target.value)} className={input} />}
+      <ErrorLine text={error} />
+      <Button type="submit" disabled={pending || !role || !date} className="h-12">
+        {pending ? "Posting…" : role ? `Find a ${nounFor(role)}` : "Post it"}
+      </Button>
+    </form>
   );
 }

@@ -1,6 +1,6 @@
 import { resumeDeletions } from "./account-deletion";
 import { drainNotificationIntents } from "./notification-intents";
-import { adminClient, notifyJamSoon, notifyRoleAlert, notifyStillLooking, notifyYourTurn } from "./notify";
+import { adminClient, notifyJamSoon, notifyRehearsalSoon, notifyRoleAlert, notifyStillLooking, notifyYourTurn } from "./notify";
 import { familyOf, fillsRole } from "./instruments";
 
 /**
@@ -16,15 +16,44 @@ const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
 export async function runReminders() {
   const db = adminClient();
   if (!db) return { skipped: "no service role key" };
-  const [yourTurn, jams, alerts, deletions, notifications, stillLooking] = await Promise.all([
+  const [yourTurn, jams, alerts, deletions, notifications, stillLooking, rehearsals] = await Promise.all([
     yourTurnNudges().catch((e) => (console.error("reminders: your turn", e), -1)),
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
     resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
     openingUpkeep().then(() => drainNotificationIntents()).catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
     stillLookingCheckins().catch((e) => (console.error("reminders: still looking", e), -1)),
+    rehearsalReminders().catch((e) => (console.error("reminders: rehearsals", e), -1)),
   ]);
-  return { yourTurn, jams, alerts, deletions, notifications, stillLooking };
+  return { yourTurn, jams, alerts, deletions, notifications, stillLooking, rehearsals };
+}
+
+/** Band rehearsals starting in 1h45m to 3h: remind current members who are in or haven't answered. */
+async function rehearsalReminders() {
+  const db = adminClient()!;
+  const now = Date.now();
+  const { data, error } = await db
+    .from("band_rehearsals")
+    .select("id, band_id, starts_at, place, bands(name)")
+    .gte("starts_at", new Date(now + 1.75 * HOUR).toISOString())
+    .lte("starts_at", new Date(now + 3 * HOUR).toISOString())
+    .limit(200);
+  if (error) return 0; // before the band habit tables exist
+  const rows = (data ?? []) as unknown as { id: number; band_id: number; starts_at: string; place: string; bands: { name: string } | null }[];
+  let sent = 0;
+  for (const r of rows) {
+    const [{ data: members }, { data: outs }] = await Promise.all([
+      db.from("band_members").select("profile_id, projects!inner(end_year)").eq("band_id", r.band_id).is("projects.end_year", null),
+      db.from("band_rehearsal_rsvps").select("profile_id").eq("rehearsal_id", r.id).eq("answer", "out"),
+    ]);
+    const out = new Set(((outs ?? []) as { profile_id: string }[]).map((o) => o.profile_id));
+    for (const m of (members ?? []) as { profile_id: string }[]) {
+      if (out.has(m.profile_id)) continue;
+      await notifyRehearsalSoon(r.id, m.profile_id, r.band_id, r.bands?.name ?? "Band", r.starts_at, r.place);
+      sent++;
+    }
+  }
+  return sent;
 }
 
 /**
