@@ -111,7 +111,7 @@ function ToastRow({ t }: { t: Toast }) {
             t.action!.run();
             dismiss(t.id);
           }}
-          className="h-9 px-4 rounded-full bg-paper/12 hover:bg-paper/20 text-callout font-semibold text-tungsten shrink-0"
+          className="h-11 px-4 rounded-full bg-paper/12 hover:bg-paper/20 text-callout font-semibold text-paper shrink-0"
         >
           {t.action.label}
         </button>

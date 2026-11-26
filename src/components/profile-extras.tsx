@@ -24,7 +24,7 @@ export function HighlightList({ items, title = "Highlights" }: { items: Highligh
   if (!items.length) return null;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-title3 font-bold tracking-[-0.02em]">{title}</h2>
+      <h2 className="text-title3 font-semibold tracking-[-0.01em]">{title}</h2>
       <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8">
         {items.map((h) => {
           const kind = HIGHLIGHT_KINDS.find((k) => k.id === h.kind) ?? HIGHLIGHT_KINDS[4];

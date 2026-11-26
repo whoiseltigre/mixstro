@@ -48,7 +48,7 @@ export default function Feedback() {
             maxLength={2000}
             rows={7}
             placeholder="What's on your mind?"
-            className="rounded-card bg-stage border border-paper/12 p-4 text-body leading-[1.5] placeholder:text-smoke outline-none focus:border-paper/40 resize-none"
+            className="field p-4 text-body leading-[1.5] resize-none"
           />
           {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
           <Button onClick={send} disabled={busy || body.trim().length < 2} className="h-12 text-body">

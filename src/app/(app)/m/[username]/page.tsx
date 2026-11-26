@@ -55,8 +55,10 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             : "asked";
 
   return (
-    <main className="pb-16 md:pt-6 md:max-w-[760px] md:mx-auto">
-      <div className="relative h-[330px] md:h-[420px] md:rounded-sheet md:overflow-hidden">
+    <main className="pb-16 md:pt-6 md:max-w-[760px] md:mx-auto lg:max-w-none lg:mx-0 lg:grid lg:grid-cols-[minmax(340px,440px)_minmax(0,1fr)] lg:gap-x-12 lg:items-start">
+      {/* Wide screens: the photo, who they are and Connect stay pinned on the left; their music scrolls on the right. */}
+      <div className="lg:sticky lg:top-[96px]">
+      <div className="relative h-[330px] md:h-[420px] lg:h-[460px] md:rounded-sheet md:overflow-hidden">
         <div data-hero={m.username} className="absolute inset-0 overflow-hidden md:rounded-sheet">
           <PersonPhoto person={m} priority sizes="(min-width: 768px) 760px, 100vw" initialsSize={88} className="object-[50%_40%]" under={<HeroUnderlay heroKey={m.username} />} />
         </div>
@@ -72,7 +74,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
           <span className="eyebrow text-smoke">
             {m.instrument} · {m.genres} · {m.neighborhood}{m.distanceMi ? ` · ${m.distanceMi} mi` : ""}
           </span>
-          <h1 className="headline text-display-lg leading-[0.98] flex items-center gap-2">
+          <h1 className="headline text-display-lg lg:text-display leading-[0.98] flex items-center gap-2">
             {m.name}
             {m.verified && <VerifiedMark size={26} className="text-paper" />}
           </h1>
@@ -111,9 +113,12 @@ export default async function Profile({ params }: { params: Promise<{ username: 
             <SharePage username={m.username} firstName={first} mine={m.id === viewerId} url={`${await requestOrigin()}/@${m.username}`} label={m.id === viewerId ? "Share your page" : undefined} className="h-12 shrink-0" />
           )}
         </div>
+      </div>
+      </div>
 
+      <div className="px-5 lg:px-0 pt-4 lg:pt-0 flex flex-col gap-4 lg:gap-6 min-w-0">
         {projects.length > 0 && (
-          <div className="pt-3">
+          <div className="pt-3 lg:pt-0">
             <ProjectList projects={projects} />
           </div>
         )}
@@ -126,10 +131,10 @@ export default async function Profile({ params }: { params: Promise<{ username: 
 
         <section className="flex flex-col gap-2.5 pt-2">
           <div className="flex justify-between items-baseline">
-            <h2 className="text-body-lg font-semibold">Influences</h2>
+            <h2 className="text-title3 font-semibold tracking-[-0.01em]">Influences</h2>
             <span className="text-footnote text-smoke">{m.shared.length} shared</span>
           </div>
-          <div className="hscroll flex gap-4 -mx-5 px-5">
+          <div className="hscroll flex gap-4 -mx-5 px-5 lg:mx-0 lg:px-0 lg:flex-wrap">
             {m.influences.map((a) => {
               const shared = sharedIds.has(a.id);
               return (
@@ -151,7 +156,7 @@ export default async function Profile({ params }: { params: Promise<{ username: 
 
         {m.sample && (
           <p className="pt-2 text-footnote text-smoke">
-            Sample profile. <Link href="/discover" className="underline">Back to Today</Link>
+            This is an example profile. <Link href="/discover" className="underline">Back to Home</Link>
           </p>
         )}
       </div>

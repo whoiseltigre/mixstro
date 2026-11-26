@@ -30,7 +30,7 @@ export function ThreadList({ threads, bands = [] }: { threads: Thread[]; bands?:
       ) : (
         <>
           {threads.some((t) => t.yourTurn) && (
-            <p className="md:px-2 -mb-2 text-footnote font-semibold text-tungsten">Your turn · {threads.filter((t) => t.yourTurn).length} waiting on you</p>
+            <p className="md:px-2 -mb-2 text-footnote font-semibold text-gel-teal">Your turn · {threads.filter((t) => t.yourTurn).length} waiting on you</p>
           )}
           <ul className="stagger flex flex-col md:gap-1">
             {[...threads.filter((t) => t.yourTurn), ...threads.filter((t) => !t.yourTurn)].map((t, i, all) => {
@@ -54,13 +54,13 @@ export function ThreadList({ threads, bands = [] }: { threads: Thread[]; bands?:
                       <div className="flex justify-between gap-2">
                         <span className="text-body font-semibold">
                           {t.person.name}
-                          {t.person.sample && <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption2 font-semibold text-smoke">Sample</span>}
+                          {t.person.sample && <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption font-semibold text-smoke">Example</span>}
                         </span>
                         <TimeAgo iso={t.at} className="text-footnote text-smoke" />
                       </div>
                       <span className={`text-subhead truncate ${waiting ? "text-paper" : "text-smoke"}`}>{t.mine ? `You: ${t.preview}` : t.preview}</span>
                     </div>
-                    {waiting && <span className="size-2.5 rounded-full bg-tungsten shrink-0" aria-label="Your turn" />}
+                    {waiting && <span className="size-2.5 rounded-full bg-gel-teal shrink-0" aria-label="Your turn" />}
                   </Link>
                 </li>
               );
@@ -102,7 +102,7 @@ function BandThreads({ bands, path }: { bands: MyBand[]; path: string }) {
                   <span className={`text-subhead truncate ${b.unread ? "text-paper" : "text-smoke"}`}>{b.preview}</span>
                 </span>
                 {b.unread > 0 && (
-                  <span className="min-w-6 h-6 px-2 rounded-full bg-tungsten text-ink text-caption font-bold flex items-center justify-center shrink-0" aria-label={`${b.unread} unread`}>
+                  <span className="min-w-6 h-6 px-2 rounded-full bg-paper text-ink text-caption font-bold flex items-center justify-center shrink-0" aria-label={`${b.unread} unread`}>
                     {b.unread}
                   </span>
                 )}

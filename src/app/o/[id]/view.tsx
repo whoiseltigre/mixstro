@@ -42,7 +42,7 @@ export function OpeningView({ o, signedIn, own, answered }: { o: PublicOpening; 
         </Link>
 
         <section className="rounded-sheet bg-stage p-5 flex flex-col gap-3" style={{ background: "radial-gradient(120% 120% at 0% 0%, rgb(255 178 69 / 0.14), transparent 60%), var(--color-stage)" }}>
-          <span className="self-start h-6 px-2.5 rounded-full bg-paper text-ink text-caption2 font-bold tracking-[0.08em] uppercase flex items-center">
+          <span className="self-start h-6 px-2.5 rounded-full bg-paper text-ink text-caption font-bold tracking-[0.08em] uppercase flex items-center">
             {open ? "Open spot" : statusLine(o.status, o.expires_at)}
           </span>
           <h1 className="headline text-title-lg leading-[1.1]">{headline(o)}</h1>

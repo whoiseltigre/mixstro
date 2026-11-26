@@ -101,6 +101,19 @@
   --gel: conic-gradient(from 200deg, #f7bf77, #ffacba, #b5c5ff, #67e2da, #f7bf77);
   --gel-linear: linear-gradient(90deg, #f7bf77, #ffacba, #b5c5ff, #67e2da);
 
+  /*
+   * Component decisions. One value each, so a look can change in one place (and be tried
+   * out on /design, which flips the data-* attributes below on <html>).
+   */
+  --line-field: rgb(245 241 236 / 0.34); /* text field outline: 3:1 against Ink */
+  --field-radius: 14px;
+  --toggle-on: var(--color-success); /* the one switch color: iOS green (Sundy, 2026-11-26) */
+  --headline-weight: 620;
+  --gel-strength: 1; /* multiplies each area's top glow */
+  --bubble-own-bg: var(--color-paper); /* your own messages: Paper (Sundy, 2026-11-26) */
+  --bubble-own-fg: var(--color-ink);
+  --bubble-own-line: transparent;
+
   /* Hairlines and fills on Ink, from faintest to strongest. */
   --line-faint: rgb(245 241 236 / 0.08);
   --line: rgb(245 241 236 / 0.12);

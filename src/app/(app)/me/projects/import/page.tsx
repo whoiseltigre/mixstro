@@ -198,7 +198,7 @@ export default function ImportJourney() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me/projects" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-display font-bold tracking-[-0.03em] leading-tight">{acts.length ? "We found your journey" : "Find your releases"}</h1>
+          <h1 className="headline text-display">{acts.length ? "We found your journey" : "Find your releases"}</h1>
           <p className="text-callout text-smoke leading-snug">
             {acts.length
               ? "Your releases by year, and the bands you were in. Untick anything that isn't yours."
@@ -217,7 +217,7 @@ export default function ImportJourney() {
             autoComplete="off"
             enterKeyHint="search"
             placeholder="Your artist or band name"
-            className="h-[56px] px-5 rounded-full bg-stage border border-paper/12 text-body placeholder:text-smoke/50 outline-none focus:border-paper/50 transition"
+            className="field-search h-[52px] px-5 text-body"
           />
           {candidate ? (
             <div key={candidate.id} className="rise-in glass !bg-[rgb(26_24_22/0.7)] rounded-panel p-4 flex flex-col gap-3.5 relative overflow-hidden">
@@ -225,7 +225,7 @@ export default function ImportJourney() {
               <div className="relative flex items-center gap-3">
                 <Cover src={candidate.image} size={56} round />
                 <span className="flex-1 flex flex-col min-w-0">
-                  <span className="text-caption font-semibold uppercase tracking-[0.12em] text-tungsten">Is this you?</span>
+                  <span className="text-caption font-semibold uppercase tracking-[0.12em] text-gel-pink">Is this you?</span>
                   <span className="text-title4 font-medium leading-tight truncate">{candidate.name}</span>
                   <span className="text-footnote text-smoke truncate">
                     {[candidate.kind === "group" ? "Band" : "Artist", candidate.hint, candidate.since && `since ${candidate.since}`].filter(Boolean).join(" · ")}
@@ -236,7 +236,7 @@ export default function ImportJourney() {
                 <button type="button" onClick={() => setSkipped((s) => [...s, candidate.id])} className="h-11 rounded-full border border-paper/20 text-callout hover:border-paper/40 transition">
                   Not me
                 </button>
-                <button type="button" onClick={() => confirm(candidate)} className="press h-11 rounded-full bg-tungsten text-ink text-callout font-semibold">
+                <button type="button" onClick={() => confirm(candidate)} className="press h-11 rounded-full bg-paper text-ink text-callout font-semibold">
                   {candidate.kind === "group" ? "I play in it" : "Yes, that's me"}
                 </button>
               </div>
@@ -285,7 +285,7 @@ export default function ImportJourney() {
             type="button"
             onClick={addAll}
             disabled={busy || !ready || chosenCount === 0}
-            className="press w-full h-[53px] rounded-full bg-tungsten text-ink text-body font-semibold shadow-float disabled:opacity-50"
+            className="press w-full h-[53px] rounded-full bg-paper text-ink text-body font-semibold shadow-float disabled:opacity-50"
           >
             {busy ? "Adding…" : `Add ${chosenCount} to my journey`}
           </button>
@@ -329,7 +329,7 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
 
       {on && playable.length > 0 && (
         <div className="relative pl-5 flex flex-col">
-          <span aria-hidden="true" className="absolute left-[5px] top-2 bottom-2 w-[1.5px] bg-gradient-to-b from-tungsten to-tungsten/10" />
+          <span aria-hidden="true" className="absolute left-[5px] top-2 bottom-2 w-[1.5px] bg-gradient-to-b from-gel-pink to-gel-pink/10" />
           {byYear.map(([year, list]) => (
             <div key={year} className="flex flex-col">
               <span className="relative text-caption font-bold tracking-[0.04em] text-smoke mt-2 mb-1">
@@ -368,7 +368,7 @@ function ActBlock({ act, picked, toggle }: { act: JourneyAct; picked: Set<string
 
 function Check({ on }: { on: boolean }) {
   return (
-    <span aria-hidden="true" className={`size-[24px] rounded-full flex items-center justify-center shrink-0 transition ${on ? "bg-tungsten text-ink" : "border-[1.5px] border-paper/30"}`}>
+    <span aria-hidden="true" className={`size-[24px] rounded-full flex items-center justify-center shrink-0 transition ${on ? "bg-paper text-ink" : "border-[1.5px] border-paper/30"}`}>
       {on && (
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 6.5l2.5 2.5L10 3" /></svg>
       )}

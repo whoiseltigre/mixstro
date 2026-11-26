@@ -22,7 +22,7 @@ export function ChatHeader({ person: m, action = true, onPlanJam }: { person: Mu
         </span>
       </Link>
       {action && (
-        <button type="button" onClick={onPlanJam} className="glass h-[34px] px-3 rounded-full text-footnote font-semibold">
+        <button type="button" onClick={onPlanJam} className="hit-slop relative glass h-[34px] px-3 rounded-full text-footnote font-semibold">
           Plan a jam
         </button>
       )}

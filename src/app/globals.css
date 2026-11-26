@@ -45,7 +45,7 @@ body {
 
 @utility headline {
   font-family: var(--font-display);
-  font-weight: 620;
+  font-weight: var(--headline-weight);
   letter-spacing: -0.028em;
   line-height: 1.02;
   text-wrap: balance;
@@ -57,6 +57,73 @@ body {
   font-weight: 560;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+/*
+ * Text fields. One look for every input, textarea and select: `field` on a card or the page,
+ * plus `field-inset` when it sits inside a Stage sheet. `field-search` is the pill for search bars.
+ * The outline is 3:1 against Ink and the placeholder 5:1, so both pass WCAG.
+ */
+@utility field {
+  background: var(--color-stage);
+  border: 1px solid var(--line-field);
+  border-radius: var(--field-radius);
+  color: var(--color-paper);
+  outline: none;
+  transition: border-color var(--duration-quick) ease-out;
+  &::placeholder {
+    color: rgb(168 164 158 / 0.85);
+  }
+  &:focus {
+    border-color: rgb(245 241 236 / 0.75);
+  }
+}
+@utility field-inset {
+  background: var(--color-ink);
+}
+@utility field-search {
+  background: var(--color-stage);
+  border: 1px solid var(--line-field);
+  border-radius: 9999px;
+  color: var(--color-paper);
+  outline: none;
+  transition: border-color var(--duration-quick) ease-out;
+  &::placeholder {
+    color: rgb(168 164 158 / 0.85);
+  }
+  &:focus {
+    border-color: rgb(245 241 236 / 0.75);
+  }
+}
+
+/* Own messages in a chat (color comes from --bubble-own-*, see tokens.css). */
+@utility bubble-own {
+  background: var(--bubble-own-bg);
+  color: var(--bubble-own-fg);
+  border: 1px solid var(--bubble-own-line);
+}
+/* A play button inside your own (Paper) bubble: solid Ink so it reads on the light surface. */
+.bubble-own button.glass {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  border-color: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/*
+ * Stage spill: each area's gel as a glow at the top of the screen, on phones and desktop alike.
+ * --glow is set per area (components/top-bar.tsx); --gel-strength turns every glow up or down at once.
+ */
+.area-glow {
+  background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--glow) calc(34% * var(--gel-strength)), transparent), transparent 72%);
+  transition: background var(--duration-slow) ease-out;
+}
+@media (min-width: 768px) {
+  .area-glow {
+    background: radial-gradient(45% 60% at 50% 0%, color-mix(in srgb, var(--glow) calc(26% * var(--gel-strength)), transparent), transparent);
+  }
 }
 
 @utility hscroll {

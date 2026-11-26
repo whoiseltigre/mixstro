@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sheet, SheetCloser } from "@/components/sheet";
-import { Button } from "@/components/ui";
+import { Button, Toggle } from "@/components/ui";
 import { haptic, type Haptic } from "@/lib/haptics";
 
 const CURVES = [
@@ -119,5 +119,19 @@ export function HapticRow({ kind, use }: { kind: Haptic; use: string }) {
         <span className="text-caption text-smoke">{use}</span>
       </button>
     </li>
+  );
+}
+
+
+/** A live switch for the component reference. */
+export function ToggleDemo() {
+  const [a, setA] = useState(true);
+  const [b, setB] = useState(false);
+  return (
+    <div className="flex items-center gap-4">
+      <Toggle on={a} onChange={setA} label="Example switch, on" />
+      <Toggle on={b} onChange={setB} label="Example switch, off" />
+      <span className="text-footnote text-smoke">Tap to flip</span>
+    </div>
   );
 }

@@ -93,7 +93,7 @@ export default function Done() {
       <div className="mt-10 flex flex-col items-center gap-7 text-center">
         <div className="relative">
         {state === "saved" && <Confetti />}
-        <div className="rise-in gel-rim rounded-sheet w-[300px] shadow-[0_30px_80px_-30px_var(--color-tungsten)]">
+        <div className="rise-in p-px bg-gel-peach/60 rounded-sheet w-[300px] shadow-[0_30px_80px_-30px_var(--color-tungsten)]">
           <div className="rounded-[26.5px] bg-stage overflow-hidden text-left">
             <div className="h-[220px] bg-riser">
               {draft.avatarUrl && (
@@ -123,7 +123,7 @@ export default function Done() {
               : "Saving your profile."}
           </p>
           {state === "saved" && username && (
-            <a href={pageLink} target="_blank" rel="noreferrer" className="self-center text-subhead font-semibold text-tungsten">
+            <a href={pageLink} target="_blank" rel="noreferrer" className="self-center text-subhead font-semibold text-paper underline underline-offset-4 decoration-paper/40">
               {pageLink.replace(/^https?:\/\//, "")}
             </a>
           )}
@@ -159,7 +159,7 @@ export default function Done() {
           </div>
         )}
         {state === "error" ? (
-          <Button variant="gel" onClick={save}>
+          <Button onClick={save}>
             Try again
           </Button>
         ) : (

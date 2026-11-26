@@ -62,7 +62,7 @@ export function PushPrompt() {
   return (
     <Sheet onClose={() => setAsk(null)} labelledBy="push-title" scrimClassName="bg-ink/60 backdrop-blur-sm" className="glass md:max-w-[420px] rounded-t-sheet md:rounded-sheet p-6 pb-safe md:pb-6 flex flex-col gap-4">
       <SheetCloser>{(close) => (<>
-        <span className="size-12 rounded-2xl bg-tungsten/20 text-tungsten flex items-center justify-center" aria-hidden="true">
+        <span className="size-12 rounded-2xl bg-gel-teal/20 text-gel-teal flex items-center justify-center" aria-hidden="true">
           <BellIcon />
         </span>
         <div className="flex flex-col gap-1.5">
@@ -84,7 +84,7 @@ export function PushPrompt() {
         ) : (
           <>
             <Button
-              variant="gel"
+              variant="primary"
               disabled={busy}
               onClick={async () => {
                 setBusy(true);

@@ -33,7 +33,7 @@ export default async function Board() {
         </div>
         <Link
           href="/board/new"
-          className="h-9 md:h-11 px-3.5 md:px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center gap-1.5 hover:bg-paper/90 transition"
+          className="h-11 md:h-11 px-3.5 md:px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center gap-1.5 hover:bg-paper/90 transition"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
           Post
@@ -59,9 +59,9 @@ export default async function Board() {
             <h2 id={`shelf-${s.color}`} className="text-title4 md:text-title3 font-semibold tracking-[-0.01em]">{s.title}</h2>
             <span className="hidden md:inline text-subhead text-smoke">{s.sub}</span>
           </div>
-          <ul className="stagger hscroll flex gap-3 md:gap-3.5 px-5 md:px-0 snap-x snap-mandatory scroll-px-5 md:scroll-px-0">
+          <ul className="stagger hscroll flex gap-3 px-5 snap-x snap-mandatory scroll-px-5 md:grid md:grid-cols-3 xl:grid-cols-4 md:gap-5 md:px-0 md:overflow-visible">
             {s.posts.map((p) => (
-              <li key={p.id} className="snap-start shrink-0 w-[250px] md:w-[300px]">
+              <li key={p.id} className="snap-start shrink-0 w-[250px] md:w-auto min-w-0">
                 <PostCard post={p} />
               </li>
             ))}

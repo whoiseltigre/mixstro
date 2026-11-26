@@ -138,12 +138,12 @@ export function SharePage({ username, firstName, mine, url, className = "", labe
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {hasNative && (
-                    <button type="button" onClick={nativeShare} className="h-10 rounded-full px-4 bg-paper text-ink text-subhead font-semibold inline-flex items-center gap-2">
+                    <button type="button" onClick={nativeShare} className="h-11 rounded-full px-4 bg-paper text-ink text-subhead font-semibold inline-flex items-center gap-2">
                       <Mark id="instagram" size={15} />
                       {canShareFiles ? "Share to a story" : "Share"}
                     </button>
                   )}
-                  <a href={story} download={`${username}-mixstro.png`} onClick={() => counted("card")} className="h-10 rounded-full px-4 border border-paper/16 text-subhead font-semibold inline-flex items-center hover:border-paper/40">
+                  <a href={story} download={`${username}-mixstro.png`} onClick={() => counted("card")} className="h-11 rounded-full px-4 border border-paper/16 text-subhead font-semibold inline-flex items-center hover:border-paper/40">
                     Save card
                   </a>
                 </div>

@@ -106,7 +106,7 @@ export default function Settings() {
               onChange={(e) => setTyped(e.target.value)}
               autoCapitalize="none"
               autoCorrect="off"
-              className="h-12 rounded-2xl bg-ink border border-paper/12 px-4 text-body outline-none focus:border-paper/50"
+              className="field field-inset h-[52px] px-4 text-body"
             />
             <Button onClick={remove} disabled={typed.trim().toLowerCase() !== "delete" || busy} variant="danger" className="h-12 text-body">
               {busy ? "Deleting…" : "Delete forever"}

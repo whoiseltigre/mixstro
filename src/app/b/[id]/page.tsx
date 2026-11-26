@@ -141,7 +141,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.shows.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Next shows</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Next shows</h2>
               <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.shows.map((s) => {
                   const d = showDate(s.date);
@@ -149,7 +149,7 @@ export default async function BandPageView({ params }: Params) {
                   return (
                     <li key={s.id} className="flex items-center gap-3.5 px-4 py-3">
                       <span className="w-11 flex flex-col items-center shrink-0">
-                        <span className="text-caption2 font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
+                        <span className="text-caption font-bold uppercase tracking-[0.08em] text-tungsten">{d.month}</span>
                         <span className="text-title2 font-bold leading-none mt-0.5">{d.day}</span>
                       </span>
                       <span className="flex-1 min-w-0 flex flex-col">
@@ -159,7 +159,7 @@ export default async function BandPageView({ params }: Params) {
                         </span>
                       </span>
                       {s.ticketUrl && (
-                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="h-8 px-3.5 rounded-full border border-paper/20 text-footnote font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
+                        <a href={s.ticketUrl} target="_blank" rel="noopener noreferrer" className="hit-slop relative h-8 px-3.5 rounded-full border border-paper/20 text-footnote font-semibold flex items-center hover:bg-paper/8 transition shrink-0">
                           Tickets
                         </a>
                       )}
@@ -171,7 +171,7 @@ export default async function BandPageView({ params }: Params) {
           )}
 
           <section className="flex flex-col gap-3">
-            <h2 className="text-title3 font-bold tracking-[-0.02em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
+            <h2 className="text-title3 font-semibold tracking-[-0.01em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
             <MemberGrid members={lineup} spots={now.length ? band.spots : []} signedIn={signedIn} sample={band.sample} />
           </section>
 
@@ -204,7 +204,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.tracks.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Music</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Music</h2>
               <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.tracks.map((t) => (
                   <li key={t.id}>
@@ -229,7 +229,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.sharedStage.length > 0 && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Shared the stage with</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Shared the stage with</h2>
               <ul className="hscroll flex gap-2.5 -mx-5 px-5 md:mx-0 md:px-0">
                 {band.sharedStage.map((b) => (
                   <li key={b.id} className="shrink-0">
@@ -255,7 +255,7 @@ export default async function BandPageView({ params }: Params) {
           </p>
 
           {!signedIn && (
-            <section className="gel-rim rounded-sheet">
+            <section className="p-px bg-paper/20 rounded-sheet">
               <div className="rounded-[24.5px] bg-stage p-6 flex flex-col gap-3">
                 <h2 className="headline text-title-lg">Put your band on Mixstro</h2>
                 <p className="text-callout text-smoke leading-relaxed max-w-[460px]">
@@ -286,19 +286,19 @@ function SpotCard({ spot, band, signedIn }: { spot: BandSpot; band: BandPage; si
   return (
     <section className="rounded-panel p-5 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.14),var(--color-stage)_60%)] flex flex-col gap-1.5 max-w-[620px]" aria-label="Open spot">
       <span className="text-caption font-semibold tracking-[0.16em] uppercase text-tungsten">Open spot</span>
-      <h2 className="text-title2 font-bold tracking-[-0.02em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
+      <h2 className="text-title2 font-semibold tracking-[-0.01em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
       {(spot.details || spot.pay) && (
         <p className="text-subhead text-smoke leading-[1.45]">{[spot.details, spot.paid ? spot.pay || "Paid" : null].filter(Boolean).join(" · ")}</p>
       )}
       <div className="flex items-center gap-3 pt-2.5">
         {band.isMember ? (
-          <Link href={`/bands/${band.id}`} className="h-10 px-4 rounded-full glass text-subhead font-semibold flex items-center">
+          <Link href={`/bands/${band.id}`} className="h-11 px-4 rounded-full glass text-subhead font-semibold flex items-center">
             Manage
           </Link>
         ) : spot.answered ? (
           <span className="h-10 px-4 rounded-full bg-riser text-subhead font-semibold flex items-center text-smoke">You asked</span>
         ) : (
-          <Link href={spotHref(spot, signedIn, band.sample)} className="h-10 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center hover:bg-white transition">
+          <Link href={spotHref(spot, signedIn, band.sample)} className="h-11 px-4 rounded-full bg-paper text-ink text-subhead font-semibold flex items-center hover:bg-white transition">
             {spotAnswer(spot.role)}
           </Link>
         )}
