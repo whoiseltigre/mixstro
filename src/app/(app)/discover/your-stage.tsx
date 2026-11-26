@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SharePage, hasSharedPage } from "@/components/share-page";
-import { ChevronRight, CheckIcon } from "@/components/ui";
+import { ChevronRight, buttonClass } from "@/components/ui";
 import type { Stage } from "@/lib/people";
 import { useDraft } from "@/lib/onboarding";
 
@@ -40,13 +40,15 @@ const HIDE_KEY = "mx_stage_hidden";
 type Step = { id: string; done: boolean; title: string; sub: string; hue: string; href?: string; icon: React.ReactNode };
 
 /**
- * Right after signup: what makes your page worth sharing, in order, ending with sharing it.
- * Once it's all done (or hidden) it shrinks to a one-line nudge to share.
+ * What makes your page worth sharing, as one slim row on Home: a progress ring, the next step,
+ * and the rest a tap away. Home leads with people; this never pushes them down the screen.
+ * Once it's all done (or hidden) it becomes a one-line nudge to share.
  */
 export function YourStage({ stage }: { stage: Stage }) {
   const [shared, setShared] = useState(false);
   const [hidden, setHidden] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [origin, setOrigin] = useState("");
   useEffect(() => {
     setShared(hasSharedPage());
@@ -121,8 +123,6 @@ export function YourStage({ stage }: { stage: Stage }) {
   const done = steps.filter((s) => s.done).length + 1; // + the signup itself
   const total = steps.length + 1;
   const complete = done === total;
-  // The first open step is the one to do now: it gets the color.
-  const nextId = steps.find((s) => !s.done)?.id;
 
   const share = () => setSharing(true);
   const sheet = sharing && origin && (
@@ -142,13 +142,13 @@ export function YourStage({ stage }: { stage: Stage }) {
   if (complete || hidden) {
     return (
       <>
-        <div className="relative mx-5 md:mx-0 p-4 rounded-card-lg border border-gel-teal/35 flex items-center gap-3.5" style={{ background: "linear-gradient(135deg, rgb(103 226 218 / 0.16), rgb(181 197 255 / 0.1))" }}>
-          <Avatar stage={stage} size={52} />
-          <span className="flex-1 flex flex-col gap-0.5 min-w-0">
+        <div className="relative mx-5 md:mx-0 p-3 rounded-card-lg bg-stage border border-paper/8 flex items-center gap-3.5">
+          <Avatar stage={stage} size={44} />
+          <span className="flex-1 flex flex-col min-w-0">
             <span className="text-callout font-semibold">Your page is ready to share</span>
-            <span className="text-footnote text-paper/75 text-pretty">Post it in your band&apos;s group chat or a local musicians group.</span>
+            <span className="text-footnote text-smoke truncate">Drop it in your band&apos;s group chat.</span>
           </span>
-          <button type="button" onClick={share} className="h-10 px-4 rounded-full bg-gel-teal text-ink text-subhead font-semibold shrink-0">
+          <button type="button" onClick={share} className={buttonClass("glass", "sm", "shrink-0")}>
             Share
           </button>
         </div>
@@ -157,110 +157,107 @@ export function YourStage({ stage }: { stage: Stage }) {
     );
   }
 
+  const next = steps.find((s) => !s.done)!;
+  const open = steps.filter((s) => !s.done);
+
   return (
-    <section aria-labelledby="your-stage" className="relative mx-5 md:mx-0 flex flex-col gap-3.5 md:max-w-[720px]">
-      <div className="flex items-center justify-between">
-        <span id="your-stage" className="text-footnote font-semibold tracking-[0.14em] uppercase text-gel-peach">
-          Your stage
+    <section aria-labelledby="your-stage" className="relative mx-5 md:mx-0 rounded-card-lg bg-stage border border-paper/8 overflow-hidden">
+      <button type="button" onClick={() => setExpanded((e) => !e)} aria-expanded={expanded} aria-controls="your-stage-steps" className="w-full min-h-[68px] p-3 flex items-center gap-3.5 text-left">
+        <Ring done={done} total={total}>
+          <Avatar stage={stage} size={40} round />
+        </Ring>
+        <span className="flex-1 flex flex-col min-w-0">
+          <span id="your-stage" className="text-callout font-semibold truncate">
+            Your page: {done} of {total} done
+          </span>
+          <span className="text-footnote text-smoke truncate">Next: {next.title.toLowerCase()}</span>
         </span>
-        <span className="text-footnote text-smoke">
-          {done} of {total} done
+        <span className={`size-11 flex items-center justify-center text-smoke transition-transform duration-300 ${expanded ? "rotate-90" : ""}`} aria-hidden="true">
+          <ChevronRight />
         </span>
-      </div>
-      <h2 className="font-display text-title-lg md:text-display-sm font-bold leading-[1.08] tracking-[-0.03em] text-pretty">
-        Your page is live. Make it worth sharing.
-      </h2>
+      </button>
 
-      <Link href={`/@${stage.username}`} className="flex items-center gap-3.5 p-3 rounded-card-lg bg-stage border border-paper/8 transition hover:border-paper/30">
-        <Avatar stage={stage} size={64} />
-        <span className="flex-1 flex flex-col gap-0.5 min-w-0">
-          <span className="text-body-lg font-semibold truncate">{stage.firstName}</span>
-          {stage.headline && <span className="text-footnote text-smoke truncate">{stage.headline}</span>}
-          <span className="text-footnote text-smoke truncate">app.mixstro.com/@{stage.username}</span>
-        </span>
-        <span className="h-9 px-3.5 rounded-full bg-paper/10 text-footnote font-semibold flex items-center shrink-0">View</span>
-      </Link>
-
-      <div className="h-1.5 rounded-full bg-paper/10 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} aria-label="Your stage progress">
-        <div className="h-full rounded-full bg-[linear-gradient(90deg,var(--color-gel-peach),var(--color-gel-pink))] transition-[width] duration-500" style={{ width: `${(done / total) * 100}%` }} />
-      </div>
-
-      <ul className="flex flex-col gap-2">
-        {steps
-          .filter((s) => !s.done)
-          .map((s) => {
-            const now = s.id === nextId;
+      {expanded && (
+        <ul id="your-stage-steps" className="border-t border-paper/8 flex flex-col">
+          {open.map((s) => {
             const inner = (
               <>
-                <span
-                  className="size-11 rounded-field flex items-center justify-center shrink-0"
-                  style={now ? { background: s.hue, color: "#0F0D0B" } : { background: `color-mix(in srgb, ${s.hue} 16%, transparent)`, color: s.hue }}
-                >
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <span className="size-10 rounded-field flex items-center justify-center shrink-0" style={{ background: `color-mix(in srgb, ${s.hue} 16%, transparent)`, color: s.hue }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     {s.icon}
                   </svg>
                 </span>
-                <span className="flex-1 flex flex-col gap-0.5 text-left">
+                <span className="flex-1 flex flex-col gap-0.5 text-left min-w-0">
                   <span className="text-callout font-semibold">{s.title}</span>
-                  <span className={now ? "text-footnote leading-snug text-paper/75" : "text-footnote leading-snug text-smoke"}>{s.sub}</span>
+                  <span className="text-footnote leading-snug text-smoke text-pretty">{s.sub}</span>
                 </span>
                 <ChevronRight />
               </>
             );
-            const cls = "w-full flex items-center gap-3 p-3.5 rounded-card transition";
-            const style = now
-              ? { background: `linear-gradient(135deg, color-mix(in srgb, ${s.hue} 20%, transparent), rgb(255 172 186 / 0.1))`, border: `1.5px solid color-mix(in srgb, ${s.hue} 55%, transparent)` }
-              : { background: "var(--color-stage)", border: "1px solid rgb(245 241 236 / 0.08)" };
+            const cls = "w-full flex items-center gap-3 px-3 py-3 transition hover:bg-paper/5";
             return (
-              <li key={s.id}>
+              <li key={s.id} className="border-b border-paper/8 last:border-b-0">
                 {s.href ? (
-                  <Link href={s.href} className={cls} style={style}>
+                  <Link href={s.href} className={cls}>
                     {inner}
                   </Link>
                 ) : (
-                  <button type="button" onClick={share} className={cls} style={style}>
+                  <button type="button" onClick={share} className={cls}>
                     {inner}
                   </button>
                 )}
               </li>
             );
           })}
-        {steps
-          .filter((s) => s.done)
-          .concat({ id: "signup", done: true, title: "Instruments, sound and influences", sub: "", hue: "", icon: null })
-          .map((s) => (
-            <li key={s.id} className="flex items-center gap-3 px-3.5 py-1.5 text-subhead text-smoke">
-              <span className="size-[22px] rounded-full bg-paper text-ink flex items-center justify-center shrink-0">
-                <CheckIcon size={12} />
-              </span>
-              <span className="line-through decoration-paper/30">{s.title}</span>
-            </li>
-          ))}
-      </ul>
-
-      <button
-        type="button"
-        onClick={() => {
-          setHidden(true);
-          try {
-            localStorage.setItem(HIDE_KEY, "1");
-          } catch {}
-        }}
-        className="self-center h-11 px-4 text-subhead font-medium text-smoke hover:text-paper"
-      >
-        Hide for now
-      </button>
+          <li className="flex items-center justify-between gap-3 pl-3 pr-1">
+            <Link href={`/@${stage.username}`} className="h-11 flex items-center text-subhead font-semibold text-paper">
+              See your page
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setHidden(true);
+                try {
+                  localStorage.setItem(HIDE_KEY, "1");
+                } catch {}
+              }}
+              className="h-11 px-3 text-subhead font-medium text-smoke hover:text-paper"
+            >
+              Hide this
+            </button>
+          </li>
+        </ul>
+      )}
       {sheet}
     </section>
   );
 }
 
-function Avatar({ stage, size }: { stage: Stage; size: number }) {
+/** Progress as a ring around your photo: quiet, and it fills as the page does. */
+function Ring({ done, total, children }: { done: number; total: number; children: React.ReactNode }) {
+  const pct = Math.round((done / total) * 100);
+  return (
+    <span
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={done}
+      aria-label="Your page progress"
+      className="size-12 rounded-full flex items-center justify-center shrink-0"
+      style={{ background: `conic-gradient(var(--color-gel-peach) ${pct}%, rgb(245 241 236 / 0.12) 0)` }}
+    >
+      <span className="size-[44px] rounded-full bg-stage flex items-center justify-center">{children}</span>
+    </span>
+  );
+}
+
+function Avatar({ stage, size, round }: { stage: Stage; size: number; round?: boolean }) {
+  const shape = round ? "rounded-full" : "rounded-tile";
   return stage.photo ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={stage.photo} alt="" width={size} height={size} referrerPolicy="no-referrer" className="rounded-tile object-cover shrink-0" style={{ width: size, height: size }} />
+    <img src={stage.photo} alt="" width={size} height={size} referrerPolicy="no-referrer" className={`${shape} object-cover shrink-0`} style={{ width: size, height: size }} />
   ) : (
-    <span className="rounded-tile bg-riser flex items-center justify-center font-display font-bold text-title2 shrink-0" style={{ width: size, height: size }}>
+    <span className={`${shape} bg-riser flex items-center justify-center font-display font-semibold text-body-lg shrink-0`} style={{ width: size, height: size }}>
       {stage.firstName[0]?.toUpperCase()}
     </span>
   );

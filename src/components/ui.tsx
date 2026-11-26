@@ -65,12 +65,13 @@ export function Button({
   variant = "primary",
   size = "lg",
   className,
+  wide,
   children,
   ...props
-}: ComponentProps<"button"> & { variant?: Variant; size?: Size }) {
+}: ComponentProps<"button"> & { variant?: Variant; size?: Size; /** Fill the row it sits in (lg always does). */ wide?: boolean }) {
   if (variant === "gel") {
     return (
-      <div className={cx("gel-rim rounded-full", size === "lg" && "w-full")}>
+      <div className={cx("gel-rim rounded-full", size === "lg" ? "w-full" : wide && "flex-1")}>
         <button data-haptic="tap" {...props} className={cx(core, sizes[size], variants.primary, size === "lg" && "h-[53px]", "w-full", className)}>
           {children}
         </button>
@@ -78,7 +79,7 @@ export function Button({
     );
   }
   return (
-    <button data-haptic="tap" {...props} className={cx(core, sizes[size], variants[variant], className)}>
+    <button data-haptic="tap" {...props} className={cx(core, sizes[size], variants[variant], wide && "flex-1", className)}>
       {children}
     </button>
   );
