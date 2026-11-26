@@ -27,6 +27,12 @@ export type Musician = {
   lastActiveAt?: string;
   /** Tied to a Google account (profiles.verified_at). */
   verified?: boolean;
+  /** "Remote collabs" is on in their Open to: they show at any distance. */
+  remote?: boolean;
+  /** "Usually replies within a day", from how they answer Connects. Missing until there's enough to say. */
+  replyLabel?: string;
+  /** They've left most Connects unanswered lately: ranked lower, never labelled. */
+  slowToReply?: boolean;
   lookingFor: string;
   /** For search filters. Samples fall back to `instrument` and `genres`. */
   instruments?: string[];

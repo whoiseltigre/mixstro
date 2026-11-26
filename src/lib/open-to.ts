@@ -6,6 +6,7 @@ export const OPEN_TO = [
   { id: "fill_in", label: "Filling in", color: "#FFACBA" },
   { id: "teaching", label: "Teaching", color: "#C9B6FF" },
   { id: "cowrite", label: "Co-writing", color: "#F7BF77" },
+  { id: "remote", label: "Remote collabs", color: "#8FD1F0" },
 ] as const;
 
 export type OpenToId = (typeof OPEN_TO)[number]["id"];

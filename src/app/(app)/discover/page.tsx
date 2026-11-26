@@ -5,6 +5,7 @@ import { artistTint } from "@/lib/artists";
 import { PostCard } from "@/components/post-card";
 import { EarlyArea } from "@/components/early-area";
 import { RoleAlertCard } from "@/components/role-alert";
+import { RemoteLane } from "@/components/remote-lane";
 import { getBoard } from "@/lib/board";
 import { EARLY_AREA, getRoleAlert, getStage, getToday } from "@/lib/people";
 import { HomeHeader, YourStage } from "./your-stage";
@@ -17,7 +18,7 @@ export const dynamic = "force-dynamic";
  * and what's on the Board. Never a dead end: every section has somewhere to go.
  */
 export default async function Home() {
-  const [{ people, incoming, yourTurn, area }, board, alert, stage] = await Promise.all([
+  const [{ people, incoming, yourTurn, area, remote, youRemote, demo }, board, alert, stage] = await Promise.all([
     getToday(),
     getBoard(),
     getRoleAlert().catch(() => null),
@@ -99,6 +100,8 @@ export default async function Home() {
         )}
       </section>
       </div>
+
+      {!demo && youRemote !== null && youRemote !== undefined && <RemoteLane people={remote ?? []} youRemote={youRemote} />}
 
       <section aria-labelledby="on-board" className="relative flex flex-col gap-3">
         <div className="px-5 md:px-0 flex items-baseline justify-between gap-3">

@@ -243,6 +243,21 @@ function Item({ m, bandId, showName, demo }: { m: BandChatMessage; bandId: strin
   if (m.kind === "joined") {
     return <p className="self-center text-footnote text-smoke py-1">{m.mine ? "You confirmed your spot" : `${s?.name ?? "Someone"} confirmed their spot`} 🎉</p>;
   }
+  if (m.kind === "rehearsal") {
+    // body: "<first start ISO>|<place>|<weeks>", shown in this phone's time zone.
+    const [iso, place, weeks] = (m.body ?? "").split("|");
+    const d = new Date(iso);
+    const time = Number.isNaN(d.getTime()) ? "" : `${d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · ${d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+    return (
+      <Link href={`/bands/${bandId}`} className="self-center max-w-[300px] w-full rounded-tile bg-stage px-4 py-3 flex flex-col gap-0.5 my-1">
+        <span className="text-caption2 font-bold uppercase tracking-[0.14em] text-gel-teal">{Number(weeks) > 1 ? `Rehearsals, every week ×${weeks}` : "Rehearsal planned"}</span>
+        <span className="text-callout font-semibold">{time}</span>
+        <span className="text-caption text-smoke">
+          {place} · {m.mine ? "You planned it" : `${s?.name ?? "Someone"} planned it`}. Say if you&apos;re in
+        </span>
+      </Link>
+    );
+  }
   if (m.kind === "show") {
     return (
       <Link href={`/b/${bandId}`} className="self-center max-w-[300px] w-full rounded-tile bg-stage px-4 py-3 flex flex-col gap-0.5 my-1">

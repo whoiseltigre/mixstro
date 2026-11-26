@@ -14,6 +14,12 @@ import { tmpdir } from "node:os";
 
 /** The newest migration that has been applied to production. Move it forward after each release. */
 export const PROD_BASELINE = "20261120010000";
+/**
+ * Older than the baseline but never run on production (checked 2026-11-26 against the live API).
+ * The legacy replay leaves them out of the baseline and applies them with the newer ones, the way
+ * the SQL editor will.
+ */
+export const PROD_MISSING = ["20261111000000", "20261111010000", "20261111020000"];
 
 const root = new URL("..", import.meta.url).pathname;
 const url = new URL(process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/postgres");
@@ -85,8 +91,9 @@ function runTests(db) {
 }
 
 let failed = 0;
-const baseline = migrations.filter((m) => m.slice(0, 14) <= PROD_BASELINE);
-const newer = migrations.filter((m) => m.slice(0, 14) > PROD_BASELINE);
+const missing = (m) => PROD_MISSING.includes(m.slice(0, 14));
+const baseline = migrations.filter((m) => m.slice(0, 14) <= PROD_BASELINE && !missing(m));
+const newer = migrations.filter((m) => m.slice(0, 14) > PROD_BASELINE || missing(m));
 
 console.log(`fresh: ${migrations.length} migrations`);
 createDb("mixstro_fresh");

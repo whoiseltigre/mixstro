@@ -32,6 +32,9 @@ function connectError(message: string | undefined): { error: string } | { needSo
   if (message?.includes("add a note")) return { error: "Add a short note first." };
   if (message?.includes("sign in")) return { error: "You're signed out. Sign in and try again." };
   if (message?.includes("not available")) return { error: "You can't connect with them right now." };
+  if (message?.includes("too many waiting")) return { error: "You have 5 Connects waiting for an answer. Once one is answered or closes (after a week), you can send more." };
+  if (message?.includes("daily limit")) return { error: "That's the most Connects for today. Try again tomorrow." };
+  if (message?.includes("verified only")) return { error: "They only take Connects from verified musicians. Link Google in Settings to get verified." };
   return { error: "That didn't send. Try again." };
 }
 

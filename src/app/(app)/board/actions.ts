@@ -71,7 +71,8 @@ export async function createPost(input: PostInput): Promise<{ error?: string }> 
   if (error && needed && (error.code === "PGRST204" || error.code === "42703")) ({ data, error } = await viewer.supabase.from("board_posts").insert(base).select("id").single());
   if (error || !data) return { error: "That didn't post. Try again." };
   revalidatePath("/board");
-  redirect(`/board/${data.id}`);
+  // An opening lands on its share step: the musician you need is usually in a Facebook group or on Reddit, not here yet.
+  redirect(needed ? `/board/${data.id}?posted=1` : `/board/${data.id}`);
 }
 
 /**
