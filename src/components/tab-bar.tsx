@@ -62,8 +62,8 @@ export function TabBar() {
   const [tapped, setTapped] = useState<{ index: number; from: string } | null>(null);
   const path = usePathname();
   const [creating, setCreating] = useState(false);
-  // Full-screen moments (profiles, a conversation, a new connection, search) hide the tab bar.
-  if (/^\/(m|connected)\/|^\/messages\/.+|^\/search/.test(path)) return null;
+  // Full-screen moments (profiles, a conversation, a new connection, search, making something) hide the tab bar.
+  if (/^\/(m|connected)\/|^\/messages\/.+|^\/search|^\/board\/new|^\/me\/(projects|highlights)/.test(path)) return null;
 
   // The pill moves the moment a tab is tapped, not when the next screen has loaded.
   const current = TABS.findIndex((t) => path === t.href || path.startsWith(t.href + "/"));

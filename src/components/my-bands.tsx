@@ -21,7 +21,7 @@ export function MyBands({ projects }: { projects: Project[] }) {
 
   return (
     <section className="flex flex-col gap-2" aria-label="Your bands">
-      <h2 className="text-title3 font-bold tracking-[-0.02em]">{current.length === 1 ? "Your band" : "Your bands"}</h2>
+      <h2 className="text-title3 font-semibold tracking-[-0.01em]">{current.length === 1 ? "Your band" : "Your bands"}</h2>
       <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">
         {current.map((p) => {
           const art = artworkOf(p);

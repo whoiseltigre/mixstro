@@ -109,7 +109,7 @@ function NoteForm({ id, name }: { id: string; name: string }) {
         });
       }}
     >
-      <h2 id="note-title" className="font-display text-title1 font-bold tracking-[-0.02em]">
+      <h2 id="note-title" className="headline text-title1">
         Write to {name}
       </h2>
       <p className="text-subhead text-smoke -mt-1.5">Everyone in the band sees it in their band chat, with your profile and music.</p>

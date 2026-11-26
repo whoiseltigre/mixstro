@@ -198,7 +198,7 @@ export default function ImportJourney() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me/projects" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-display font-bold tracking-[-0.03em] leading-tight">{acts.length ? "We found your journey" : "Find your releases"}</h1>
+          <h1 className="headline text-display">{acts.length ? "We found your journey" : "Find your releases"}</h1>
           <p className="text-callout text-smoke leading-snug">
             {acts.length
               ? "Your releases by year, and the bands you were in. Untick anything that isn't yours."

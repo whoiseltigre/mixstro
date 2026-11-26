@@ -141,7 +141,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.shows.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Next shows</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Next shows</h2>
               <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.shows.map((s) => {
                   const d = showDate(s.date);
@@ -171,7 +171,7 @@ export default async function BandPageView({ params }: Params) {
           )}
 
           <section className="flex flex-col gap-3">
-            <h2 className="text-title3 font-bold tracking-[-0.02em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
+            <h2 className="text-title3 font-semibold tracking-[-0.01em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
             <MemberGrid members={lineup} spots={now.length ? band.spots : []} signedIn={signedIn} sample={band.sample} />
           </section>
 
@@ -204,7 +204,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.tracks.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Music</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Music</h2>
               <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8 max-w-[620px]">
                 {band.tracks.map((t) => (
                   <li key={t.id}>
@@ -229,7 +229,7 @@ export default async function BandPageView({ params }: Params) {
 
           {band.sharedStage.length > 0 && (
             <section className="flex flex-col gap-3">
-              <h2 className="text-title3 font-bold tracking-[-0.02em]">Shared the stage with</h2>
+              <h2 className="text-title3 font-semibold tracking-[-0.01em]">Shared the stage with</h2>
               <ul className="hscroll flex gap-2.5 -mx-5 px-5 md:mx-0 md:px-0">
                 {band.sharedStage.map((b) => (
                   <li key={b.id} className="shrink-0">
@@ -286,7 +286,7 @@ function SpotCard({ spot, band, signedIn }: { spot: BandSpot; band: BandPage; si
   return (
     <section className="rounded-panel p-5 border border-tungsten/35 bg-[linear-gradient(160deg,rgb(255_178_69/0.14),var(--color-stage)_60%)] flex flex-col gap-1.5 max-w-[620px]" aria-label="Open spot">
       <span className="text-caption font-semibold tracking-[0.16em] uppercase text-tungsten">Open spot</span>
-      <h2 className="text-title2 font-bold tracking-[-0.02em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
+      <h2 className="text-title2 font-semibold tracking-[-0.01em]">{spot.title.replace(`${band.name}: `, "").replace(/^looking/, "Looking")}</h2>
       {(spot.details || spot.pay) && (
         <p className="text-subhead text-smoke leading-[1.45]">{[spot.details, spot.paid ? spot.pay || "Paid" : null].filter(Boolean).join(" · ")}</p>
       )}

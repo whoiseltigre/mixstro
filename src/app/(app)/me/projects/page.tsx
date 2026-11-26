@@ -40,7 +40,7 @@ export default function ProjectsEditor() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-display font-bold tracking-[-0.03em] leading-tight">Your projects</h1>
+          <h1 className="headline text-display">Your projects</h1>
           <p className="text-callout text-smoke leading-snug">Every band and project, old or new. Add the name, your role and the years, then link a track or two.</p>
         </div>
         <div className="grid grid-cols-2 gap-2.5">

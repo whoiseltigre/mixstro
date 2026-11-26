@@ -200,7 +200,7 @@ function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; 
       {forYou.length > 0 && (
         <section className="flex flex-col gap-3">
           <div className="flex flex-col">
-            <h2 className="text-title3 font-bold tracking-[-0.02em]">{noun ? `Bands looking for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}` : "Bands with an open spot"}</h2>
+            <h2 className="text-title3 font-semibold tracking-[-0.01em]">{noun ? `Bands looking for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}` : "Bands with an open spot"}</h2>
             {noun && <span className="text-footnote text-smoke">Because you play {main!.toLowerCase()}</span>}
           </div>
           <ul className="hscroll flex gap-3 -mx-5 px-5 md:mx-0 md:px-0">
@@ -225,7 +225,7 @@ function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; 
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-title3 font-bold tracking-[-0.02em]">{near.some((b) => b.miles !== undefined) ? "Bands near you" : "Bands on Mixstro"}</h2>
+        <h2 className="text-title3 font-semibold tracking-[-0.01em]">{near.some((b) => b.miles !== undefined) ? "Bands near you" : "Bands on Mixstro"}</h2>
         {near.length ? (
           <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8">
             {near.map((b) => (
