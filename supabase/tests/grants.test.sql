@@ -4,7 +4,7 @@ do $$
 declare
   f record;
   allowed text[] := array['public_profile', 'public_band', 'band_invite', 'played_with', 'sitemap_entries',
-    'push_endpoint_ok', 'name_ballot_options_ok', 'public_opening'];
+    'push_endpoint_ok', 'name_ballot_options_ok', 'public_opening', 'unclaimed_band', 'request_band_removal'];
   extra text[] := '{}';
 begin
   for f in
