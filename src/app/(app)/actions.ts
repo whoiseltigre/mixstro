@@ -251,7 +251,16 @@ export async function quickReply(otherId: string, username: string, kind: "jam" 
     revalidatePath("/", "layout");
     return { closed: true };
   }
-  await viewer.supabase.from("messages").insert({ connection_id: id, sender_id: viewer.id, body: QUICK[kind] });
+  // You're connected either way. The opening line gets a second try with the same send id (so
+  // it can never land twice); if both fail, the chat opens empty rather than pretending it sent.
+  const client_id = crypto.randomUUID();
+  const line = { connection_id: id, sender_id: viewer.id, body: QUICK[kind] };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let { error: sendErr } = await viewer.supabase.from("messages").insert({ ...line, client_id });
+    if (isMissingColumn(sendErr)) ({ error: sendErr } = await viewer.supabase.from("messages").insert(line));
+    if (!sendErr || sendErr.code === "23505") break;
+    if (attempt === 1) console.error("quick reply: opening line didn't send", sendErr.message);
+  }
   after(() => notifyConnectBack(viewer.id, otherId));
   revalidatePath("/", "layout");
   redirect(`/messages/${username}`);

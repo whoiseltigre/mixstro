@@ -55,7 +55,7 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Durable notification intents | Verified working (DB) / unverified (delivery) | Intent written by trigger with the message; `claim_notification_intents` (SKIP LOCKED), backoff, 6-attempt cap, `notification_intent_health`; sent right after the send and drained by the 15-minute job. Provider idempotency for email/push not added yet (change required) |
 | Signed-out or expired session never acknowledged | Verified working (DB) | `messages.test.sql` |
 | Production/demo separation | Implemented but unverified | `/api/health` (PR 1). Sample people stay on by decision |
-| Pass / Connect / quick replies typed outcomes | Change required | Connect and Pass already return outcomes; quick reply should check its message insert |
+| Pass / Connect / quick replies typed outcomes | Implemented but unverified | Connect and Pass return outcomes; quick reply retries its opening line once with the same send id and logs a failure instead of ignoring it |
 
 ## 3. Release 1: openings and local discovery
 
@@ -99,5 +99,5 @@ Statuses: **verified working**, **implemented but unverified**, **change require
 | Attachment in send idempotency and retry | Verified working (DB + unit) | Same send id refuses a second clip reply; outbox keeps the clip across a failed send and Retry (`outbox.test.ts`) |
 | Reuse the persistent player and seek to the moment | Implemented but unverified | `PlayRequest.at`: in-app recordings jump to the moment, YouTube starts there; song previews (30-second excerpts) start at the top |
 | Older messages and older clients | Verified working (DB) | Plain text/voice inserts unchanged; inbox and notifications say "Sent a clip at 1:23" instead of "Voice note" |
-| Note: editing music in signup replaces clips with new ids | Change required | Replies to those clips then show as unavailable; keep ids stable when clips are unchanged |
+| Editing music in signup keeps clip ids | Verified working (DB) | Migration `20261126020000`: `finish_onboarding` keeps unchanged clips (same kind and link), removes dropped ones, adds new ones once; `messages.test.sql` |
 | Two-time rehearsal proposals | Not started (by design) | Build only if replied conversations stall during coordination |
