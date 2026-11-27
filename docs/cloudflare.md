@@ -25,6 +25,13 @@ Workers Builds settings: build command `npm run cf:build`, deploy command
 `npx opennextjs-cloudflare deploy` (staging: add `--env staging`). Needs the Workers Paid plan:
 the gzipped worker is about 3.1 MB, over the free plan's 3 MB limit.
 
+Current setup (Mixstro Cloudflare account): worker `mixstro` is connected to this repo with the
+commands above. Builds for non-production branches are off, so other branches don't get failing
+checks. Until this PR merges, its production branch points at the PR branch for a private
+workers.dev test; after the merge, switch it to `production`. Build variables set so far:
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Amplify only ever had four variables
+(those two plus the `RESEND_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` secrets); the rest below are optional.
+
 Bindings (in `wrangler.jsonc`): R2 bucket `mixstro-next-cache` (`-staging` for staging) holds
 prerendered pages; a Durable Object queue refreshes pages that set `revalidate`.
 
