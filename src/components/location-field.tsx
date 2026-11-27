@@ -45,7 +45,7 @@ export function LocationField({ draft, update }: { draft: Draft; update: (patch:
         type="button"
         onClick={useMyLocation}
         disabled={locating}
-        className="press self-start h-10 px-4 rounded-full font-semibold text-subhead border-[1.5px] inline-flex items-center gap-2 disabled:opacity-60"
+        className="press self-start h-11 px-4 rounded-full font-semibold text-subhead border-[1.5px] inline-flex items-center gap-2 disabled:opacity-60"
         style={{ borderColor: GLOW, background: `color-mix(in srgb, ${GLOW} 18%, var(--color-stage))` }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>

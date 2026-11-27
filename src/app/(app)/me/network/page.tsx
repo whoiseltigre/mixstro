@@ -35,7 +35,7 @@ export default async function NetworkPage() {
                     <span className="text-body-lg font-semibold">{p.name.split(" ")[0]}</span>
                     <span className="text-footnote text-smoke">{p.instrument} · {p.neighborhood}</span>
                   </Link>
-                  <p className="text-footnote leading-snug text-tungsten flex-1">{reason}</p>
+                  <p className="text-footnote leading-snug text-gel-pink flex-1">{reason}</p>
                   {p.sample ? (
                     <ButtonLink href={`/m/${p.username}`} variant="glass" className="h-10 text-subhead">View profile</ButtonLink>
                   ) : (

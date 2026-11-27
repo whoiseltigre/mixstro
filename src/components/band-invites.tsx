@@ -22,7 +22,7 @@ export function BandInvites() {
   return (
     <section className="flex flex-col gap-2" aria-label="Bands waiting on you">
       {invites.map((i) => (
-        <Link key={i.token} href={`/join/${i.token}`} className="gel-rim rounded-card block">
+        <Link key={i.token} href={`/join/${i.token}`} className="p-px bg-gel-violet/50 rounded-card block">
           <span className="rounded-[18.5px] bg-stage flex items-center gap-3 p-3.5">
             <span className="relative size-11 rounded-full overflow-hidden bg-riser shrink-0">
               {i.from.avatar_url && (

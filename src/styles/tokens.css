@@ -29,7 +29,13 @@
   --font-display: -apple-system, "SF Pro Display", var(--font-inter-tight), system-ui, sans-serif;
   --font-wordmark: var(--font-outfit), system-ui, sans-serif;
 
-  /* Type scale (px, after Apple's text styles). Weight carries hierarchy: 400 body, 500-600 labels, 700 titles only. */
+  /* Weights. Lighter than Tailwind's defaults so screens feel calm, not shouty:
+     semibold (labels, names, buttons) is 560 and bold (titles) is 640. All our faces are variable. */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 560;
+  --font-weight-bold: 640;
+
+  /* Type scale (px, after Apple's text styles). Weight carries hierarchy: 400 body, 500-560 labels, 640 titles only. */
   --text-caption2: 11px;
   --text-caption: 12px;
   --text-footnote: 13px;
@@ -94,6 +100,19 @@
   /* The gels as one rim, for peak moments only (Connect, a new connection). */
   --gel: conic-gradient(from 200deg, #f7bf77, #ffacba, #b5c5ff, #67e2da, #f7bf77);
   --gel-linear: linear-gradient(90deg, #f7bf77, #ffacba, #b5c5ff, #67e2da);
+
+  /*
+   * Component decisions. One value each, so a look can change in one place (and be tried
+   * out on /design, which flips the data-* attributes below on <html>).
+   */
+  --line-field: rgb(245 241 236 / 0.34); /* text field outline: 3:1 against Ink */
+  --field-radius: 14px;
+  --toggle-on: var(--color-success); /* the one switch color: iOS green (Sundy, 2026-11-26) */
+  --headline-weight: 620;
+  --gel-strength: 1; /* multiplies each area's top glow */
+  --bubble-own-bg: var(--color-paper); /* your own messages: Paper (Sundy, 2026-11-26) */
+  --bubble-own-fg: var(--color-ink);
+  --bubble-own-line: transparent;
 
   /* Hairlines and fills on Ink, from faintest to strongest. */
   --line-faint: rgb(245 241 236 / 0.08);

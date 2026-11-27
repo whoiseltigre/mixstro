@@ -68,7 +68,7 @@ export function PmfSurvey() {
         ) : (
           <>
             <div className="relative flex flex-col gap-1.5">
-              <span className="text-caption font-semibold tracking-[0.14em] uppercase text-tungsten">Quick question</span>
+              <span className="text-caption font-semibold tracking-[0.14em] uppercase text-gel-peach">Quick question</span>
               <h2 id="survey-title" className="text-title2 font-semibold leading-tight text-balance">
                 How would you feel if you could no longer use Mixstro?
               </h2>
@@ -82,7 +82,7 @@ export function PmfSurvey() {
                   aria-checked={answer === a.id}
                   onClick={() => setAnswer(a.id)}
                   className={`h-12 rounded-2xl px-4 text-left text-body border transition ${
-                    answer === a.id ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/15 hover:border-paper/40"
+                    answer === a.id ? "bg-paper text-ink border-paper font-semibold" : "border-paper/15 hover:border-paper/40"
                   }`}
                 >
                   {a.label}
@@ -97,7 +97,7 @@ export function PmfSurvey() {
                   onChange={(e) => setInstead(e.target.value)}
                   maxLength={280}
                   placeholder="Facebook groups, Craigslist, friends…"
-                  className="h-12 rounded-2xl bg-ink border border-paper/12 px-4 text-body placeholder:text-smoke/70 outline-none focus:border-paper/50"
+                  className="field field-inset h-[52px] px-4 text-body"
                 />
               </label>
             )}

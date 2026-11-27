@@ -18,7 +18,7 @@ New UI uses token names, never raw values. If a value you need isn't a token, ad
 | `riser` | #292624 | Raised controls on a card |
 | `smoke` | #A8A49E | Secondary text |
 | `paper` | #F5F1EC | Primary text, primary button |
-| `tungsten` | #FFB245 | The one spotlight per screen (Create, the main call to action). At most once. |
+| `tungsten` | #FFB245 | Create, "playing now", and an opening for you. Nothing else (see "What each color means"). |
 | `danger` / `danger-soft` | #FF453A / #FF8A80 | Destructive buttons / error text on Ink |
 | `success` | #30D158 | Confirmations |
 
@@ -36,9 +36,55 @@ The **gel rim** (`gel-rim`, all gels in one ring) is for peak moments only: Conn
 
 Hairlines on Ink: `border-paper/8` faint, `/12` standard, `/20` strong (also `--line-faint`, `--line`, `--line-strong`).
 
+## What each color means
+
+Color carries meaning, so each one has a short list of jobs. `npm run lint:design` enforces the first two.
+
+- **Tungsten** means exactly three things: Create (the + in the tab bar and the desktop Create button), "playing now" (the play button while a song plays), and "an opening for you" (an open spot in a band). It is never a link color, a tick, a selected state or a section label.
+- **The gel rim** (`gel-rim`, `variant="gel"`) is for two moments only: Connect, and a new connection.
+- **Paper** is every primary button, text link, tick and selected state.
+- **Each area has a gel** that tints its top glow and its eyebrows: Home peach, Board blue, Messages teal, Profile pink, Bands violet (`AREA_GEL` in `src/lib/tokens.ts`). The glow shows on phones as well as desktop.
+
+## Components
+
+There is one of each. Use them from `src/components/ui.tsx` instead of writing classes by hand.
+
+| Component | Notes |
+| --- | --- |
+| `Button`, `ButtonLink` | Sizes `lg` 56px (the main action on a screen), `md` 48px (cards and sheets), `sm` 44px (inline). Nothing tappable is under 44px. Variants: `primary` (Paper), `glass`, `danger`, and `gel` for Connect only. |
+| `Field`, `TextArea`, class `field` | One input shape, 52px tall, border `--line-field` (3:1 against the background). `field-inset` for inputs inside a card, `field-search` for search bars. |
+| `Toggle`, `ToggleRow` | The one switch. Its "on" color is `--toggle-on`. |
+| `PlayButton` | Glass at rest, Tungsten while playing. |
+| `Chip` | 44px, Paper when selected. |
+| `PostCard` | Board posts. The cover is the Spotlight: the wanted instrument in a beam of the post's gel color, never a photo of the poster. |
+| `ProjectList` | A profile's projects as a record shelf: big covers, the picked record's songs underneath. |
+
+Small labels are 12px (`text-caption`) at the smallest. 11px (`text-caption2`) is for badge counts only.
+
+## Settled looks
+
+Sundy picked these on 2026-11-26 from side-by-side options. Each is one token in `src/styles/tokens.css`, so changing one later is a one-line edit.
+
+| Decision | Pick | Token |
+| --- | --- | --- |
+| Switch color | iOS green | `--toggle-on` |
+| Your own chat bubbles | Paper with Ink text | `--bubble-own-bg`, `--bubble-own-fg` |
+| Area glow strength | Standard | `--gel-strength: 1` |
+| Title weight | 620 | `--headline-weight` |
+| Text field shape | Rounded, 14px (search bars stay pills) | `--field-radius` |
+| Board post cover | Spotlight | `PostCover` in `post-card.tsx` |
+
+## Screen patterns
+
+- **Today is a lineup, not a deck.** Everyone picked for you today is on one screen with why you two might click and one action, Connect. There is no Pass and no X; tomorrow brings new people.
+- **Home leads with people.** Who is waiting on you, musicians near you, then one slim "Your page" row and the Board. There is one checklist in the app and it is that row.
+- **Your Profile tab is your profile.** It looks the way others see it. Every part you can change has a pencil at its top right, Settings is the gear, and anything still empty is a dashed "add" slot where it will live.
+- **Making something is full screen.** New post is three steps with a progress bar and no tab bar.
+- **Wide screens get their own layout**: profiles and the band hub use two columns, the Board is a grid.
+
 ## Type
 
-SF Pro on Apple devices (Geist / Inter Tight elsewhere), Outfit only for the wordmark. Weight carries hierarchy gently: 400 to read, 500-600 for labels, **700 only for titles**, never heavier. Titles use the `headline` utility (display face, tight tracking, balanced lines). Small all-caps labels use `eyebrow`.
+SF Pro on Apple devices (Geist / Inter Tight elsewhere), Outfit only for the wordmark. Weight carries hierarchy gently: 400 to read, 500-560 for labels (`font-semibold` is 560), **640 only for titles** (`font-bold`; the `headline` utility is 620), never heavier. Most text on a screen should be regular weight: semibold is for names, row titles and buttons, not for details. Titles use the `headline` utility (display face, tight tracking, balanced lines). Small all-caps labels use `eyebrow`.
 
 | Class | px | Use |
 |---|---|---|

@@ -39,9 +39,9 @@ export function RemoteLane({ people, youRemote }: { people: Musician[]; youRemot
               <HeroLink href={`/m/${m.username}`} heroKey={m.username} tint={artistTint(m.id)} className="press-card group relative block h-[214px] md:h-[280px] rounded-card-lg overflow-hidden">
                 <PersonPhoto person={m} sizes="210px" initialsSize={48} className="object-[50%_30%] transition duration-500 group-hover:scale-[1.04]" />
                 <span className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgb(15_13_11/0.95))]" />
-                <span className="absolute left-2.5 top-2.5 glass h-6 px-2.5 rounded-full text-caption2 font-semibold flex items-center">Remote</span>
+                <span className="absolute left-2.5 top-2.5 glass h-6 px-2.5 rounded-full text-caption font-semibold flex items-center">Remote</span>
                 <span className="absolute inset-x-3 bottom-3 flex flex-col gap-0.5">
-                  <span className="text-caption2 font-semibold tracking-[0.12em] uppercase text-gel-teal truncate">
+                  <span className="text-caption font-semibold tracking-[0.12em] uppercase text-gel-teal truncate">
                     {m.instrument} · {m.neighborhood}
                   </span>
                   <span className="text-body-lg font-semibold truncate">{m.name}</span>
@@ -58,7 +58,7 @@ export function RemoteLane({ people, youRemote }: { people: Musician[]; youRemot
             {people.length ? "Turn on Remote collabs and these musicians can find you too." : "Up for working with people anywhere? Turn on Remote collabs and you'll show here for musicians in other cities."}
             {error && <span role="alert" className="block text-danger-soft">{error}</span>}
           </span>
-          <button type="button" onClick={turnOn} disabled={pending} className="h-9 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0 disabled:opacity-60">
+          <button type="button" onClick={turnOn} disabled={pending} className="h-11 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0 disabled:opacity-60">
             {pending ? "Turning on…" : "Turn on"}
           </button>
         </div>

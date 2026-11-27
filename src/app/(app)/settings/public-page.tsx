@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient, sessionUser } from "@/lib/supabase/client";
+import { Toggle } from "@/components/ui";
 
 /** On by default: your music page opens for anyone with the link, signed in or not. */
 export function PublicPageToggle() {
@@ -40,17 +41,7 @@ export function PublicPageToggle() {
           {error ? "That didn't save. Try again." : "Anyone with your link can see your bands and play your tracks, even without an account. Turn off to show your profile to members only."}
         </span>
       </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={Boolean(on)}
-        aria-label="Public music page"
-        disabled={on === null}
-        onClick={flip}
-        className={`relative w-[51px] h-[31px] rounded-full shrink-0 transition ${on ? "bg-success" : "bg-paper/16"} disabled:opacity-40`}
-      >
-        <span className={`absolute top-[2px] size-[27px] rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-[2px]"}`} />
-      </button>
+      <Toggle on={Boolean(on)} onChange={flip} label="Public music page" disabled={on === null} />
     </section>
   );
 }
@@ -98,17 +89,7 @@ export function VerifiedOnlyToggle() {
           {error ? "That didn't save. Try again." : "Turn on to only get Connects from people with a verified account. Bandmates and people you already know can still reach you."}
         </span>
       </span>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={Boolean(on)}
-        aria-label="Only verified musicians can Connect"
-        disabled={on === null}
-        onClick={flip}
-        className={`relative w-[51px] h-[31px] rounded-full shrink-0 transition ${on ? "bg-success" : "bg-paper/16"} disabled:opacity-40`}
-      >
-        <span className={`absolute top-[2px] size-[27px] rounded-full bg-white shadow transition-all ${on ? "left-[22px]" : "left-[2px]"}`} />
-      </button>
+      <Toggle on={Boolean(on)} onChange={flip} label="Only verified musicians can Connect" disabled={on === null} />
     </section>
   );
 }

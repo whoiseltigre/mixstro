@@ -63,6 +63,17 @@ begin
   perform tests.ok((select onboarded_at is not null from public.profiles where username = 'nia_drums'), 'signup marks onboarded only after it all saves');
   perform tests.ok(tests.rows('select 1 from public.influences where profile_id = auth.uid()') = 2, 'influences saved with the profile');
 
+  -- Editing music again keeps the ids of clips you kept, removes the dropped ones, adds new ones.
+  n := (select id from public.clips where profile_id = auth.uid() and url = 'https://youtu.be/x');
+  perform public.finish_onboarding('{"first_name":"Nia","username":"nia_drums","adult_confirmed_at":"2026-11-25T00:00:00Z","instruments":["Drums"]}',
+    '[{"artist_id":"a","artist_name":"A"}]',
+    '[{"kind":"clip","provider":"youtube","url":"https://youtu.be/x"},{"kind":"clip","provider":"youtube","url":"https://youtu.be/y"},{"kind":"clip","provider":"youtube","url":"https://youtu.be/y"}]');
+  perform tests.ok((select id from public.clips where profile_id = auth.uid() and url = 'https://youtu.be/x') = n, 'a kept clip keeps its id');
+  perform tests.ok(tests.rows('select 1 from public.clips where profile_id = auth.uid()') = 2, 'new clip added once');
+  perform public.finish_onboarding('{"first_name":"Nia","username":"nia_drums","adult_confirmed_at":"2026-11-25T00:00:00Z","instruments":["Drums"]}',
+    '[{"artist_id":"a","artist_name":"A"}]', '[{"kind":"clip","provider":"youtube","url":"https://youtu.be/y"}]');
+  perform tests.ok(tests.rows('select 1 from public.clips where profile_id = auth.uid() and url = ''https://youtu.be/x''') = 0, 'a removed clip goes');
+
   -- Signed out (expired session): no sends, no connects, no signup.
   perform tests.anon();
   perform tests.denied(format('insert into public.messages (connection_id, sender_id, body) values (%s, %L, %L)', busy, a, 'x'), 'signed out cannot send');

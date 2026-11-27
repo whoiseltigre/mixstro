@@ -73,6 +73,7 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
 
   return (
     <main className="pt-safe md:pt-6 px-5 md:px-0 pb-16 flex flex-col gap-4 md:max-w-[680px] md:mx-auto">
+      <h1 className="sr-only">Search</h1>
       <div className="mt-2 flex items-center gap-2.5">
         <BackButton href="/discover" />
         <label htmlFor="q" className="sr-only">Search musicians</label>
@@ -82,7 +83,7 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={tab === "bands" ? "Band, genre or city" : "Name, instrument or influence"}
-          className="flex-1 min-w-0 h-11 rounded-full bg-stage border border-paper/12 px-4 text-body placeholder:text-smoke outline-none focus:border-paper/40"
+          className="field-search flex-1 min-w-0 h-11 px-4 text-body"
         />
         {tab === "people" && <button
           type="button"
@@ -107,7 +108,7 @@ export function SearchList({ people, bands = [], plays = [], initialTab = "peopl
               setTab(t);
               history.replaceState(null, "", t === "bands" ? "?tab=bands" : location.pathname);
             }}
-            className={`flex-1 h-9 rounded-xs text-subhead font-semibold transition ${tab === t ? "bg-riser text-paper shadow-[0_1px_4px_rgb(0_0_0/0.3)]" : "text-smoke"}`}
+            className={`flex-1 h-11 rounded-xs text-subhead font-semibold transition ${tab === t ? "bg-riser text-paper shadow-[0_1px_4px_rgb(0_0_0/0.3)]" : "text-smoke"}`}
           >
             {t === "people" ? "Musicians" : "Bands"}
           </button>
@@ -199,7 +200,7 @@ function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; 
       {forYou.length > 0 && (
         <section className="flex flex-col gap-3">
           <div className="flex flex-col">
-            <h2 className="text-title3 font-bold tracking-[-0.02em]">{noun ? `Bands looking for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}` : "Bands with an open spot"}</h2>
+            <h2 className="text-title3 font-semibold tracking-[-0.01em]">{noun ? `Bands looking for ${/^[aeiou]/i.test(noun) ? "an" : "a"} ${noun}` : "Bands with an open spot"}</h2>
             {noun && <span className="text-footnote text-smoke">Because you play {main!.toLowerCase()}</span>}
           </div>
           <ul className="hscroll flex gap-3 -mx-5 px-5 md:mx-0 md:px-0">
@@ -224,7 +225,7 @@ function BandResults({ bands, plays, q }: { bands: BandCard[]; plays: string[]; 
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-title3 font-bold tracking-[-0.02em]">{near.some((b) => b.miles !== undefined) ? "Bands near you" : "Bands on Mixstro"}</h2>
+        <h2 className="text-title3 font-semibold tracking-[-0.01em]">{near.some((b) => b.miles !== undefined) ? "Bands near you" : "Bands on Mixstro"}</h2>
         {near.length ? (
           <ul className="flex flex-col rounded-card-lg bg-stage divide-y divide-paper/8">
             {near.map((b) => (
@@ -273,7 +274,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`h-9 rounded-full px-3.5 text-subhead border transition ${on ? "bg-tungsten text-ink border-tungsten font-semibold" : "border-paper/15 hover:border-paper/40"}`}
+      className={`h-11 rounded-full px-3.5 text-subhead border transition ${on ? "bg-paper text-ink border-paper font-semibold" : "border-paper/15 hover:border-paper/40"}`}
     >
       {children}
     </button>
@@ -282,5 +283,5 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 
 /** Sample people fill the app while it's small; the tag keeps anyone from waiting on a reply. */
 function SampleTag() {
-  return <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption2 font-semibold text-smoke">Sample</span>;
+  return <span className="ml-2 align-middle inline-flex h-5 px-2 rounded-full bg-paper/10 text-caption font-semibold text-smoke">Example</span>;
 }

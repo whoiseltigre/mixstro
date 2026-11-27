@@ -110,7 +110,7 @@ export function ReplyBox({ id, cta, first, signedIn, open, answered }: { id: num
         <button
           type="button"
           onClick={() => setWriting(true)}
-          className="press h-14 rounded-full bg-tungsten text-ink text-body-lg font-semibold shadow-spotlight"
+          className="press h-14 rounded-full bg-paper text-ink text-body-lg font-semibold"
         >
           {cta}: answer {first}
         </button>
@@ -129,15 +129,15 @@ export function ReplyBox({ id, cta, first, signedIn, open, answered }: { id: num
               writeDraft(id, e.target.value);
             }}
             placeholder="I can do Thursdays. Here's what I've been playing…"
-            className="rounded-2xl bg-stage border border-paper/12 px-4 py-3 text-body-lg leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+            className="field px-4 py-3 text-body-lg leading-[1.45] resize-none"
           />
           {signedIn ? (
-            <button type="button" disabled={pending} onClick={send} className="press h-14 rounded-full bg-tungsten text-ink text-body-lg font-semibold disabled:opacity-60">
+            <button type="button" disabled={pending} onClick={send} className="press h-14 rounded-full bg-paper text-ink text-body-lg font-semibold disabled:opacity-60">
               {pending ? "Sending…" : `Send to ${first}`}
             </button>
           ) : (
             <>
-              <button type="button" onClick={signInFirst} className="press h-14 rounded-full bg-tungsten text-ink text-body-lg font-semibold">
+              <button type="button" onClick={signInFirst} className="press h-14 rounded-full bg-paper text-ink text-body-lg font-semibold">
                 Sign in to send
               </button>
               <p className="text-footnote text-smoke">Free. Your note stays on this phone, and you&rsquo;ll come straight back here to send it.</p>

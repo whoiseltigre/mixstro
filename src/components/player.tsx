@@ -6,6 +6,7 @@ import { PROVIDER_LABEL, parseClip, type ClipProvider, type ParsedClip } from "@
 import { PLATFORM_LABEL, PLATFORM_ORDER, type TrackDetails } from "@/lib/music-track";
 import { trackPlayer } from "@/lib/projects";
 import { FadeImg } from "@/components/fade-image";
+import { PlayButton } from "@/components/ui";
 
 /**
  * The Mixstro player: one look for every song on Mixstro, whatever service it lives on.
@@ -226,13 +227,7 @@ function MiniPlayer() {
           </span>
         </button>
         {now.mode === "audio" && (
-          <button type="button" onClick={p.toggle} aria-label={p.playing ? "Pause" : "Play"} className="press size-10 rounded-full bg-paper text-ink flex items-center justify-center shrink-0">
-            {p.playing ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg>
-            )}
-          </button>
+          <PlayButton playing={p.playing} size={40} onClick={p.toggle} />
         )}
         {now.mode === "loading" && <span aria-hidden="true" className="size-10 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin shrink-0" />}
         <button type="button" onClick={p.close} aria-label="Close player" className="hit-slop relative size-9 rounded-full bg-paper/12 flex items-center justify-center shrink-0">
@@ -271,7 +266,7 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
     <div className={`flex items-center gap-1.5 flex-wrap text-caption text-smoke ${className}`}>
       <span className="mr-0.5">Listen in full on</span>
       {keys.map((k) => (
-        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
+        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="hit-slop relative h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
           {PLATFORM_LABEL[k]}
         </a>
       ))}

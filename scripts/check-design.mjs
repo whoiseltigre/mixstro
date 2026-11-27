@@ -31,12 +31,32 @@ function* files(dir) {
   }
 }
 
+/**
+ * Rules about meaning, not values. The gel rim is for two peak moments only (Connect and a new
+ * connection), and Tungsten is for Create, "playing now" and an opening meant for you. Only the
+ * files listed may use them; add a file here on purpose, with a reason, not to quiet the check.
+ */
+const GEL_RIM_OK = [/^components\/ui\.tsx$/, /^app\/\(app\)\/discover\/today\//, /^app\/\(app\)\/connected\//, /^components\/connect-sheet\.tsx$/, /^app\/design\//];
+const TOGGLE_OK = [/^components\/ui\.tsx$/];
+const MEANING = [
+  { name: "gel rim outside Connect / a new connection (use a plain Button)", re: /\bgel-rim\b|variant="gel"/g, ok: GEL_RIM_OK },
+  { name: "hand-built switch (use Toggle from components/ui)", re: /role="switch"/g, ok: TOGGLE_OK },
+  { name: "faint placeholder (use the `field` class; it sets a readable one)", re: /placeholder:text-smoke\/(?:[1-7]\d)\b/g, ok: [] },
+];
+
 const found = {};
 for (const f of files(SRC)) {
   const rel = relative(SRC, f);
   if (SKIP.some((r) => r.test(rel))) continue;
   const text = readFileSync(f, "utf8");
   for (const rule of RULES) {
+    for (const m of text.matchAll(rule.re)) {
+      const key = `${rel} ${m[0]}`;
+      found[key] = { rule: rule.name, count: (found[key]?.count ?? 0) + 1 };
+    }
+  }
+  for (const rule of MEANING) {
+    if (rule.ok.some((r) => r.test(rel))) continue;
     for (const m of text.matchAll(rule.re)) {
       const key = `${rel} ${m[0]}`;
       found[key] = { rule: rule.name, count: (found[key]?.count ?? 0) + 1 };

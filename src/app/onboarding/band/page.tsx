@@ -49,7 +49,7 @@ export default function Band() {
               id="band-since"
               value={band.since}
               onChange={(e) => set({ since: Number(e.target.value) })}
-              className="h-[52px] w-full rounded-2xl bg-stage border border-paper/12 px-3 text-body-lg text-paper outline-none focus:border-paper/50"
+              className="field h-[52px] w-full px-3 text-body-lg"
             >
               {Array.from({ length: now - 1969 }, (_, i) => now - i).map((y) => (
                 <option key={y} value={y}>

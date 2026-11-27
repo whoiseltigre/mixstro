@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdultCheck } from "@/components/adult-check";
-import { AppleIcon, Button, ButtonLink, GoogleButton, cx } from "@/components/ui";
+import { AppleIcon, Button, ButtonLink, GoogleButton } from "@/components/ui";
 import { adultConfirmed, confirmAdult } from "@/lib/onboarding";
 import { createClient } from "@/lib/supabase/client";
 
@@ -44,7 +44,8 @@ export function SignInButtons() {
     if (error) setError(error.message);
   }
 
-  const dim = cx("transition-opacity", !adult && "opacity-50");
+  // Full strength always: a faded button reads as broken. Tapping one before the box is ticked points at the box.
+  const dim = "";
 
   return (
     <div className="flex flex-col gap-2.5">

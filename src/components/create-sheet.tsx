@@ -97,7 +97,7 @@ export function CreateSheet({ open, onClose }: { open: boolean; onClose: () => v
           className="md:max-w-[460px] rounded-t-hero md:rounded-hero bg-stage border border-paper/10 px-4 pt-2.5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-1.5"
         >
             <span aria-hidden="true" className="md:hidden self-center w-10 h-[5px] rounded-full bg-paper/25 mb-2" />
-            <h2 id="create-title" className="px-1 pb-2 font-display text-title1 font-bold tracking-[-0.02em]">
+            <h2 id="create-title" className="px-1 pb-2 headline text-title1">
               What are you up to?
             </h2>
             {ACTIONS.map((a, i) => {
