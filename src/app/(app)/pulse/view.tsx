@@ -1,4 +1,5 @@
 import { BackButton } from "@/components/ui";
+import { ClaimQueue, type ClaimQueueData } from "./claim-queue";
 
 type Cohort = {
   week: string;
@@ -166,7 +167,7 @@ function Openings({ o }: { o: OpeningPulse }) {
   );
 }
 
-export function PulseView({ p, tool, openings }: { p: Pulse; tool?: ToolPulse; openings?: OpeningPulse }) {
+export function PulseView({ p, tool, openings, claims }: { p: Pulse; tool?: ToolPulse; openings?: OpeningPulse; claims?: ClaimQueueData }) {
   const replies = new Map(p.replies.map((r) => [r.week, r]));
 
   return (
@@ -181,6 +182,8 @@ export function PulseView({ p, tool, openings }: { p: Pulse; tool?: ToolPulse; o
           </span>
         </div>
       </header>
+
+      {claims && (claims.claims.length > 0 || claims.removals.length > 0 || claims.unclaimed > 0) && <ClaimQueue q={claims} />}
 
       <section aria-labelledby="signals" className="flex flex-col gap-3">
         <h2 id="signals" className="text-body-lg font-semibold">The seven signals</h2>

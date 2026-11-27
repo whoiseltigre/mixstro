@@ -12,6 +12,9 @@ import { createClient } from "@/lib/supabase/server";
 import { FadeImg } from "@/components/fade-image";
 import { BandActions } from "@/components/band-actions";
 import { Toaster } from "@/components/toast";
+import { getOpenSeats, getUnclaimedBand } from "@/lib/band-claim";
+import { SeatList } from "@/components/band-claim";
+import { UnclaimedBandView } from "./unclaimed";
 
 /**
  * A band's page: its photo, bio, genres and status, everyone who confirmed they played in
@@ -26,7 +29,11 @@ type Params = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const band = await getBandPage(id);
-  if (!band) return { title: "Mixstro" };
+  if (!band) {
+    // Unclaimed pilot pages stay out of Google until someone in the band claims them.
+    const unclaimed = await getUnclaimedBand(id);
+    return unclaimed ? { title: `${unclaimed.name} on Mixstro`, robots: { index: false, follow: false } } : { title: "Mixstro" };
+  }
   const names = band.members.map((m) => m.name);
   const title = `${band.name} on Mixstro`;
   const who = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
@@ -46,9 +53,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function BandPageView({ params }: Params) {
   const { id } = await params;
   const band = await getBandPage(id);
-  if (!band) notFound();
   const supabase = await createClient();
   const signedIn = Boolean(supabase && (await supabase.auth.getClaims()).data?.claims?.sub);
+  if (!band) {
+    const unclaimed = await getUnclaimedBand(id);
+    if (!unclaimed) notFound();
+    return <UnclaimedBandView band={unclaimed} signedIn={signedIn} />;
+  }
+  // Lineup names from the claim pilot that nobody has claimed yet (signed in, non-members).
+  const open = signedIn && !band.isMember && !band.sample ? await getOpenSeats(band.id) : { seats: [] };
   const now = band.members.filter((m) => m.endYear === undefined);
   const before = band.members.filter((m) => m.endYear !== undefined);
   const lineup = now.length ? now : band.members;
@@ -174,6 +187,16 @@ export default async function BandPageView({ params }: Params) {
             <h2 className="text-title3 font-semibold tracking-[-0.01em]">{before.length && now.length ? "Lineup now" : "Lineup"}</h2>
             <MemberGrid members={lineup} spots={now.length ? band.spots : []} signedIn={signedIn} sample={band.sample} />
           </section>
+
+          {open.seats.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-col gap-0.5">
+                <h2 className="text-body font-bold text-smoke">Also in the band</h2>
+                <p className="text-footnote text-smoke">From MusicBrainz. Is one of these you? Claim your spot.</p>
+              </div>
+              <SeatList band={band.id} name={band.name} seats={open.seats} signedIn={signedIn} myClaim={open.myClaim} />
+            </section>
+          )}
 
           {before.length > 0 && now.length > 0 && (
             <section className="flex flex-col gap-2">

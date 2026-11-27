@@ -178,3 +178,6 @@ export function sampleBands(): BandPage[] {
   ];
 }
 
+
+/** "Pile's", "Pillow Queens'". */
+export const possessive = (name: string) => (/s$/i.test(name) ? `${name}'` : `${name}'s`);

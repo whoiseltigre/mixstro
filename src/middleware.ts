@@ -92,7 +92,7 @@ export async function middleware(request: NextRequest) {
   if (join) response.cookies.set("mx_join", join, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
   rememberBand(request, response);
 
-  // Back to the shared opening that sent you to sign in (only /o/<id>, set by that page).
+  // Back to the shared opening or band claim that sent you to sign in (only /o/<id> or /b/<id>, set by those pages).
   const back = request.cookies.get(RETURN_COOKIE)?.value;
   if (user && path === "/discover" && isReturnPath(back)) {
     const res = NextResponse.redirect(new URL(back, publicOrigin(request.headers, request.nextUrl.origin)));
