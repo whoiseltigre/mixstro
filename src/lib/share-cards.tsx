@@ -15,7 +15,31 @@ const PAPER = "#F5F1EC";
 const SMOKE = "#A8A49E";
 const STRIPE = "linear-gradient(90deg, #F7BF77, #FFB245 30%, #FFACBA 60%, #B5C5FF 80%, #67E2DA)";
 
-const asset = (f: string) => readFile(join(process.cwd(), "src/assets/og", f));
+/**
+ * Fonts and the logo live in src/assets/og. A Node server reads them from disk; on Cloudflare
+ * Workers there is no disk, so the build copies them into the static assets at /_og/ (see the
+ * cf:build script) and we read them through the ASSETS binding instead.
+ */
+async function asset(f: string): Promise<Buffer> {
+  try {
+    return await readFile(join(process.cwd(), "src/assets/og", f));
+  } catch (err) {
+    const res = await workerAsset(`/_og/${f}`);
+    if (!res?.ok) throw err;
+    return Buffer.from(await res.arrayBuffer());
+  }
+}
+
+/** A file from Cloudflare's static assets, or null when not running on Workers. */
+async function workerAsset(path: string): Promise<Response | null> {
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const assets = (getCloudflareContext().env as { ASSETS?: { fetch: (u: string) => Promise<Response> } }).ASSETS;
+    return assets ? await assets.fetch(new URL(path, "https://assets.local").toString()) : null;
+  } catch {
+    return null;
+  }
+}
 
 let fonts: Promise<{ name: string; data: Buffer; weight: 500 | 600 | 800; style: "normal" }[]> | undefined;
 function loadFonts() {
@@ -34,7 +58,11 @@ const loadLockup = () => (lockup ??= asset("mixstro-lockup.png").then((b) => `da
 async function photoData(src: string | null, origin: string) {
   if (!src) return null;
   try {
-    const res = await fetch(src.startsWith("http") ? src : `${origin}${src}`, { signal: AbortSignal.timeout(4000) });
+    // Sample photos are our own files: read them straight from Workers assets rather than
+    // making the worker fetch its own hostname.
+    const res =
+      (!src.startsWith("http") && (await workerAsset(src))) ||
+      (await fetch(src.startsWith("http") ? src : `${origin}${src}`, { signal: AbortSignal.timeout(4000) }));
     const type = res.headers.get("content-type") ?? "";
     if (!res.ok || !/image\/(jpeg|png)/.test(type)) return null;
     return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;

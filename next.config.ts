@@ -23,8 +23,8 @@ function blogRedirects() {
   return [...fromPosts, ...dropped].map((r) => ({ ...r, permanent: true }));
 }
 
-/** The commit being built: Amplify sets AWS_COMMIT_ID, GitHub Actions GITHUB_SHA. Served at /api/health. */
-const BUILD_SHA = process.env.AWS_COMMIT_ID || process.env.GITHUB_SHA || "";
+/** The commit being built: Cloudflare Workers Builds sets WORKERS_CI_COMMIT_SHA, Amplify AWS_COMMIT_ID, GitHub Actions GITHUB_SHA. Served at /api/health. */
+const BUILD_SHA = process.env.WORKERS_CI_COMMIT_SHA || process.env.AWS_COMMIT_ID || process.env.GITHUB_SHA || "";
 
 const nextConfig: NextConfig = {
   env: {
