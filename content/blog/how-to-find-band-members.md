@@ -67,7 +67,7 @@ That's what we built [Mixstro](/) for. Every musician has a profile with their i
 
 It's not a replacement for going to shows. It just means that by the time you meet someone in person, you already know you want to play the same kind of music.
 
-Local Facebook groups and city subreddits for your scene are also worth joining, especially in smaller towns.
+Local Facebook groups and city subreddits for your scene are also worth joining, especially in smaller towns. For a side-by-side look at what each app costs and who it suits, see our comparison of the [best apps to find band members](/blog/best-apps-to-find-band-members).
 
 ## 7. Write a "musician wanted" post that gets replies
 
