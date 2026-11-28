@@ -113,7 +113,7 @@ As soon as you have three songs you're proud of. A demo doesn't need to be polis
 
 ## How do you get your first gig?
 
-Start small and local. Open mics, house shows, friends' parties and the opening slot on a local bill are all good first gigs. Here's how to land one:
+Start small and local. Open mics, house shows, friends' parties and the opening slot on a local bill are all good first gigs. Here's the short version, and our full guide on [how to get gigs](/blog/how-to-get-gigs) has a booking email you can copy:
 
 ![A guitarist playing a small, candlelit bar gig](/site/v1/blog/how-to-start-a-band/photo-2-2bc1cfc2 "Photo: RDNE Stock project|https://www.pexels.com/@rdne")
 
