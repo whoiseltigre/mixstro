@@ -374,5 +374,36 @@
         "section": "How do you get booked again?"
       }
     ]
+  },
+  "best-apps-to-find-band-members": {
+    "cover": {
+      "file": "pexels/how-to-find-band-members/band-rehearsal-5648436.jpeg",
+      "alt": "A singer, guitarist and drummer rehearsing together in a dark studio",
+      "credit": "cottonbro studio",
+      "credit_url": "https://www.pexels.com/photo/a-woman-singing-wearing-all-black-outfit-5648436/"
+    },
+    "inline": [
+      {
+        "file": "unsplash/how-to-start-a-band/garage-band-SVfsQ97UJvA.jpg",
+        "alt": "A guitarist, bassist and drummer playing a small, sweaty club show",
+        "credit": "iam_os",
+        "credit_url": "https://unsplash.com/@iam_os",
+        "section": "Mixstro"
+      },
+      {
+        "file": "pexels/how-to-find-band-members/band-rehearsal-5650910.jpeg",
+        "alt": "A keyboard player, singer and acoustic guitarist rehearsing in a studio",
+        "credit": "cottonbro studio",
+        "credit_url": "https://www.pexels.com/photo/men-playing-in-a-band-5650910/",
+        "section": "What about Facebook groups, Reddit and Craigslist?"
+      },
+      {
+        "file": "unsplash/how-to-find-band-members/jam-session-Fx5rrxSaUtI.jpg",
+        "alt": "Musicians sitting on the floor of a rehearsal room, jamming with guitars and pedals",
+        "credit": "freestocks",
+        "credit_url": "https://unsplash.com/@freestocks",
+        "section": "How do you get replies on a band member app?"
+      }
+    ]
   }
 }
