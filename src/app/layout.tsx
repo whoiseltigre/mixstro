@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { NativeShell } from "@/components/native-shell";
 import "./globals.css";
 import { PlayerProvider } from "@/components/player";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${geist.variable} ${interTight.variable} ${outfit.variable} ${roboto.variable}`}>
         <PlayerProvider>{children}</PlayerProvider>
+        <NativeShell />
       </body>
     </html>
   );

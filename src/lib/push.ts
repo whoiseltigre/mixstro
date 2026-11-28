@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import webpush from "web-push";
+import { fcmConfigured, sendFcm } from "./fcm";
 
 /**
  * Sends web push to every device a person turned notifications on for.
@@ -72,6 +73,26 @@ export function pushEndpointOk(endpoint: string): boolean {
 
 /** Returns true if at least one device accepted it. */
 export async function sendPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
+  const [web, app] = await Promise.all([sendWebPush(db, recipientId, msg), sendAppPush(db, recipientId, msg)]);
+  return web || app;
+}
+
+/** The iPhone and Android apps' devices (Firebase). Off until Firebase is set up (see fcm.ts). */
+async function sendAppPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
+  if (!fcmConfigured()) return false;
+  const { data } = await db.from("native_push_tokens").select("id, token").eq("profile_id", recipientId).limit(10);
+  const tokens = (data ?? []) as { id: number; token: string }[];
+  const results = await Promise.all(
+    tokens.map(async (t) => {
+      const r = await sendFcm(t.token, msg);
+      if (r === "gone") await db.from("native_push_tokens").delete().eq("id", t.id);
+      return r === "ok";
+    }),
+  );
+  return results.some(Boolean);
+}
+
+async function sendWebPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
   const k = await vapidKeys(db);
   if (!k) return false;
   const { data } = await db

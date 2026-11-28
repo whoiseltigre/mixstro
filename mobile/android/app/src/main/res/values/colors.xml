@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- House Lights: Ink, the app's background. -->
+    <color name="ink">#0F0D0B</color>
+</resources>

@@ -30,7 +30,13 @@ export function VerifyForm() {
       router.push("/onboarding/who");
       return;
     }
-    const { data: auth, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    let { data: auth, error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
+    if (error || !auth.user) {
+      // The App Review account signs in with a fixed code (see /api/auth/review); 404 for anyone else.
+      const res = await fetch("/api/auth/review", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, code: token }) }).catch(() => null);
+      const hash = res?.ok ? ((await res.json()) as { token_hash?: string }).token_hash : undefined;
+      if (hash) ({ data: auth, error } = await supabase.auth.verifyOtp({ token_hash: hash, type: "email" }));
+    }
     if (error || !auth.user) {
       setError("That code didn't work. Check it and try again.");
       setBusy(false);

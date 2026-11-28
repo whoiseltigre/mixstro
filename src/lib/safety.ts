@@ -72,6 +72,7 @@ export async function reportUser(username: string, reason: ReportReason, details
 
 /** Clears everything Mixstro keeps in this browser. */
 function clearDevice() {
+  clearAppCache();
   try {
     Object.keys(localStorage)
       .filter((k) => k.startsWith("mixstro:"))
@@ -108,11 +109,21 @@ export async function deleteAccount(): Promise<{ error?: string }> {
   return {};
 }
 
+/** The iPhone app keeps copies of screens for fast launches (public/sw.js): drop them. */
+function clearAppCache() {
+  try {
+    navigator.serviceWorker?.controller?.postMessage({ type: "mixstro:clear-cache" });
+  } catch {
+    // No service worker here.
+  }
+}
+
 /**
  * Signs out on this device: stops push here (so the next person on this phone or computer
  * doesn't get your notifications), ends the session and clears what's kept in the browser.
  */
 export async function signOut(): Promise<{ error?: string }> {
+  clearAppCache();
   try {
     const { disablePush } = await import("@/lib/push-client");
     await disablePush();

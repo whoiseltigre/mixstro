@@ -8,6 +8,8 @@ import type { Jam } from "@/lib/jams";
 import type { ChatMessage, ClipOption } from "@/lib/people";
 import { createClient } from "@/lib/supabase/client";
 import { useStickToBottom } from "@/lib/use-stick-to-bottom";
+import { playSound } from "@/lib/sounds";
+import { tapHaptic } from "@/lib/native";
 import { olderMessages, sendClipReply, sendMessage, sendVoice, type SendResult } from "../../actions";
 import { mergeById, pendingNotIn, settle, type OutboxItem } from "@/lib/outbox";
 import { ChatHeader } from "./chat-header";
@@ -125,6 +127,8 @@ export function LiveChat({
     setError(undefined);
     const item: OutboxItem = { clientId: newClientId(), body: body || null, clip: attached, createdAt: new Date().toISOString(), status: "sending" };
     setOutbox((o) => [...o, item]);
+    playSound("sent");
+    tapHaptic();
     void deliver(item);
   }
 
@@ -140,6 +144,8 @@ export function LiveChat({
     setError(undefined);
     const item: OutboxItem = { clientId: newClientId(), body: null, voiceUrl: URL.createObjectURL(blob), voiceSeconds: seconds, createdAt: new Date().toISOString(), status: "sending" };
     setOutbox((o) => [...o, item]);
+    playSound("sent");
+    tapHaptic();
     void (async () => {
       const up = await uploadVoice(connectionId, blob);
       const res: SendResult = up.path

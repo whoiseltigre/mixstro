@@ -367,3 +367,40 @@ body {
 .screen-fade {
   animation: screen-fade 0.18s ease-out backwards;
 }
+
+/* iPhone app only: a frosted strip behind the clock and Dynamic Island, so content scrolling
+   up under the status bar doesn't collide with it (src/components/native-shell.tsx sets data-native). */
+html[data-native] body::after {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: rgba(15, 13, 11, 0.82);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  z-index: 60;
+  pointer-events: none;
+}
+
+/* iPhone app only: touch behaves like an app, not a web page. No gray flash on tap, no
+   "Copy / Look Up" or link preview on a long press of buttons and links, no accidental text
+   selection in the interface. Text people type or read in full (inputs, messages, bios)
+   stays selectable. */
+html[data-native] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+html[data-native] :is(a, button, [role="button"], nav, header, label, img, svg) {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html[data-native] :is(input, textarea, [contenteditable="true"]) {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* The native pull-to-refresh needs the page's top bounce, which the website turns off. */
+html[data-native] body {
+  overscroll-behavior-y: auto;
+}

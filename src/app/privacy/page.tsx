@@ -6,15 +6,15 @@ export const metadata: Metadata = { title: "Privacy Policy · Mixstro" };
 // Plain-language draft. Have it reviewed before public launch.
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy" updated="November 11, 2026">
+    <LegalPage title="Privacy Policy" updated="November 28, 2026">
       <p>Mixstro helps musicians find each other. This page explains what we collect, why, and the choices you have.</p>
       <section>
         <h2>What we collect</h2>
         <p>
-          Your email address, or your name, email and profile photo from Google if you sign in with Google. Your confirmation that
+          Your email address, or your name, email and profile photo from Google or Apple if you sign in with them (Apple lets you hide your email). Your confirmation that
           you are 18 or older, and when you gave it. The profile you build: first name, username, photo, instruments, genres, influences, goals, general area, and
           the links you add to your clips. Messages and connection requests you send, feedback and survey answers you give us, and
-          basic usage data such as which days you open the app and when you share your page.
+          basic usage data such as which days you open the app and when you share your page. If you turn on notifications, a push token for your device or browser, so we can send them.
         </p>
       </section>
       <section>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
       <section>
         <h2>Services we rely on</h2>
         <p>
-          We store data with Supabase, send email through Resend, and offer sign-in with Google. Clips you add are played through
+          We store data with Supabase, run the site on Cloudflare, send email through Resend, and offer sign-in with Google and Apple. Notifications in the iPhone and Android apps are delivered through Google Firebase Cloud Messaging and Apple Push Notification service, which receive the notification text and your device&apos;s push token. Clips you add are played through
           the platform they come from (for example YouTube, TikTok, Instagram, SoundCloud, Spotify, or Apple Music), which may set
           its own cookies under its own policy.
         </p>

@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { ConnectSheet, type ConnectPerson } from "@/components/connect-sheet";
 import { announceConnect } from "@/components/push-prompt";
 import { toast } from "@/components/toast";
+import { successHaptic } from "@/lib/native";
+import { playSound } from "@/lib/sounds";
 import { Button } from "@/components/ui";
 import { connect } from "../../actions";
 
@@ -30,6 +32,11 @@ export function ConnectButton({
   const accept = () => {
     // Shows as sent straight away; only a failure takes it back.
     setSent(true);
+    // They'd already asked you, so this tap connects you both.
+    if (asked) {
+      playSound("connected");
+      successHaptic();
+    }
     start(async () => {
       try {
         const res = await connect(person.id, person.username);
@@ -56,6 +63,7 @@ export function ConnectButton({
           person={person}
           onClose={() => setOpen(false)}
           onSent={() => {
+            successHaptic();
             setOpen(false);
             setSent(true);
             announceConnect(first);
