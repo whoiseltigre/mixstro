@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mixstro</string>
+    <string name="title_activity_main">Mixstro</string>
+    <string name="package_name">com.mixstro.app</string>
+    <string name="custom_url_scheme">com.mixstro.app</string>
+</resources>

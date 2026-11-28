@@ -1,4 +1,4 @@
-# Mixstro for iPhone
+# Mixstro for iPhone and Android
 
 A native iPhone app (Capacitor 8) that loads the live app at **app.mixstro.com** and adds the
 parts a website can't do on its own:
@@ -49,3 +49,30 @@ entitlements file already asks for Push Notifications, Sign in with Apple and As
    reviewer types that email and code on the normal email sign-in screen.
 
 Until steps 2 to 6 are done, everything here is dormant: the website behaves exactly as before.
+
+## Android
+
+The same shell runs on Android (`android/`, package `com.mixstro.app`). The web tab bar shows
+on Android (the native tab bar is iPhone only); Google and Apple sign-in both open in a Chrome
+Custom Tab and return through `com.mixstro.app://auth/callback`.
+
+Build it (Android Studio, JDK 21):
+
+```sh
+cd mobile
+npm ci
+npx cap sync android   # without MIXSTRO_APP_URL for store builds
+npx cap open android   # Build > Generate Signed App Bundle
+```
+
+One-time setup:
+
+1. Upload key: Android Studio makes it while generating the first signed bundle. Keep the
+   `.jks` file and its password out of git (ignored) and somewhere safe.
+2. Play Console: create the app, turn on Play App Signing, upload the bundle to Internal testing.
+3. App Links: copy the app signing key's SHA-256 (Test and release > App integrity) into the
+   site's `ANDROID_CERT_SHA256` env var, so `/.well-known/assetlinks.json` verifies.
+4. Push: add the Android app to the Firebase project and put `google-services.json` in
+   `android/app/`.
+5. Icons and splash come from `assets/` via `npx @capacitor/assets generate --android`; the
+   adaptive icon foreground is the Stage Light icon at 88% on Ink.

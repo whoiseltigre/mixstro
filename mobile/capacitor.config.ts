@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 /**
- * The iPhone app loads the live site (app.mixstro.com) inside a native shell, so every web
+ * The iPhone and Android apps load the live site (app.mixstro.com) inside a native shell, so every web
  * release reaches the app at once with no App Store update. Native parts (push through APNs,
  * Sign in with Apple, haptics, share sheet, Safari sheet for Google sign-in, splash and status
  * bar) come from the plugins in package.json; the site reaches them through src/lib/native.ts.
@@ -32,6 +32,10 @@ const config: CapacitorConfig = {
     // App-bound domains (WKAppBoundDomains in Info.plist) let the site's service worker run in
     // the app, which keeps screens and assets cached for fast and offline launches.
     limitsNavigationsToAppBoundDomains: true,
+  },
+  android: {
+    // Chrome's own debugging only in local test builds.
+    webContentsDebuggingEnabled: local,
   },
   plugins: {
     SplashScreen: { launchShowDuration: 1500, launchAutoHide: false, backgroundColor: "#0F0D0B", showSpinner: false },
