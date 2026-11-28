@@ -151,24 +151,28 @@ export async function nativeAppleSignIn(): Promise<{ token: string; nonce: strin
   return { token: response.identityToken, nonce, name };
 }
 
-// ---- Push notifications (APNs) -----------------------------------------------------------
+// ---- Push notifications (Firebase Cloud Messaging, iPhone and Android) --------------------
 
 type PermissionState = "prompt" | "prompt-with-rationale" | "granted" | "denied";
 type PushPlugin = {
   checkPermissions: () => Promise<{ receive: PermissionState }>;
   requestPermissions: () => Promise<{ receive: PermissionState }>;
-  register: () => Promise<void>;
-  unregister?: () => Promise<void>;
+  getToken: () => Promise<{ token: string }>;
+  deleteToken?: () => Promise<void>;
   addListener: (event: string, cb: (data: never) => void) => Promise<Listener>;
 };
 
+/**
+ * The shell's push plugin (@capacitor-firebase/messaging). Both apps get a Firebase token, so
+ * the server sends every app notification the same way (src/lib/fcm.ts).
+ */
 export function nativePush() {
-  return plugin<PushPlugin>("PushNotifications");
+  return plugin<PushPlugin>("FirebaseMessaging");
 }
 
 /**
- * Asks iOS for permission and returns this device's push token (APNs), or the permission
- * state if there is no token. Must run from a tap.
+ * Asks for permission and returns this device's push token, or the permission state if
+ * there is no token. Must run from a tap.
  */
 export async function registerNativePush(): Promise<{ token?: string; state: "granted" | "denied" | "prompt" }> {
   const push = nativePush();
@@ -176,17 +180,10 @@ export async function registerNativePush(): Promise<{ token?: string; state: "gr
   let { receive } = await push.checkPermissions();
   if (receive === "prompt" || receive === "prompt-with-rationale") receive = (await push.requestPermissions()).receive;
   if (receive !== "granted") return { state: receive === "denied" ? "denied" : "prompt" };
-  const token = await new Promise<string | undefined>((resolve) => {
-    const subs: Promise<Listener>[] = [];
-    const done = (t?: string) => {
-      subs.forEach((s) => s.then((l) => l.remove()).catch(() => {}));
-      resolve(t);
-    };
-    subs.push(push.addListener("registration", ((t: { value: string }) => done(t.value)) as (d: never) => void));
-    subs.push(push.addListener("registrationError", (() => done(undefined)) as (d: never) => void));
-    setTimeout(() => done(undefined), 15000);
-    push.register().catch(() => done(undefined));
-  });
+  const token = await Promise.race([
+    push.getToken().then((r) => r.token || undefined, () => undefined),
+    new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 15000)),
+  ]);
   return { token, state: "granted" };
 }
 

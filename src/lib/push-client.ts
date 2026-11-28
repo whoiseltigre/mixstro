@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/client";
  * so there the state is "install" until it's opened from the Home Screen.
  *
  * Inside the Mixstro iPhone app, push goes through Apple's own service (APNs) instead: the
- * device token is saved to native_push_tokens and src/lib/apns.ts sends to it.
+ * device token is saved to native_push_tokens and src/lib/fcm.ts sends to it.
  */
 
 const NATIVE_TOKEN_KEY = "mixstro:native-push-token";

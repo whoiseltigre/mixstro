@@ -70,7 +70,7 @@ export function NativeShell() {
     const push = nativePush();
     if (push) {
       subs.push(
-        push.addListener("pushNotificationActionPerformed", ((e: { notification?: { data?: { url?: string } } }) => {
+        push.addListener("notificationActionPerformed", ((e: { notification?: { data?: { url?: string } } }) => {
           const path = safePath(e.notification?.data?.url);
           if (path) router.push(path);
         }) as (d: never) => void),

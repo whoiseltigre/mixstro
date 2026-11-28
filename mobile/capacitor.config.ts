@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 /**
  * The iPhone and Android apps load the live site (app.mixstro.com) inside a native shell, so every web
- * release reaches the app at once with no App Store update. Native parts (push through APNs,
+ * release reaches the app at once with no App Store update. Native parts (push through Firebase,
  * Sign in with Apple, haptics, share sheet, Safari sheet for Google sign-in, splash and status
  * bar) come from the plugins in package.json; the site reaches them through src/lib/native.ts.
  *
@@ -40,7 +40,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: { launchShowDuration: 1500, launchAutoHide: false, backgroundColor: "#0F0D0B", showSpinner: false },
     StatusBar: { style: "DARK", overlaysWebView: true },
-    PushNotifications: { presentationOptions: ["badge", "sound", "alert"] },
+    FirebaseMessaging: { presentationOptions: ["badge", "sound", "alert"] },
     // The web view shrinks above the keyboard, so chat's message box rides up with it.
     Keyboard: { resize: "native", resizeOnFullScreen: true },
   },
