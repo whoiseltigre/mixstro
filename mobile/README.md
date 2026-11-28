@@ -43,8 +43,10 @@ entitlements file already asks for Push Notifications, Sign in with Apple and As
    secrets): `FIREBASE_SERVICE_ACCOUNT` = the service account JSON on one line.
 3. **Sign in with Apple for Supabase**: Supabase > Authentication > Providers > Apple: turn on,
    add `com.mixstro.app` to Client IDs (native sign-in needs no secret). For the website button
-   too, also make a Services ID and secret. Then set `NEXT_PUBLIC_APPLE_SIGN_IN=on` as a Cloudflare build variable.
-4. **Supabase redirect URL**: Authentication > URL Configuration > add
+   too, also make a Services ID and secret, then set `NEXT_PUBLIC_APPLE_SIGN_IN=on` as a Cloudflare
+   build variable (the iPhone app always shows Apple; the flag only adds it to the website and Android).
+   DONE 2026-11-28: provider on, Client IDs = com.mixstro.app (no web secret yet).
+4. **Supabase redirect URL** (DONE 2026-11-28): Authentication > URL Configuration > add
    `com.mixstro.app://auth/callback` (Google sign-in returns to the app through it).
 5. **Database**: run `supabase/migrations/20261118000000_native_push.sql` in the SQL editor.
 6. **App Review login**: make an account for review (e.g. appreview@mixstro.com), finish its

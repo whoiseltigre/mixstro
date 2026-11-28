@@ -81,8 +81,9 @@ export function SignInButtons() {
   }
 
   // App Store rule 4.8: an app that offers Google sign-in must offer Sign in with Apple too, so in
-  // the iPhone app Google only shows once Apple is switched on. Android has no such rule.
-  const showGoogle = native !== "ios" || APPLE_ENABLED;
+  // the iPhone app always shows Apple (native Face ID sheet, needs no web setup). On the website
+  // and Android, Apple goes through Supabase's web OAuth, so it waits for NEXT_PUBLIC_APPLE_SIGN_IN.
+  const showApple = native === "ios" || APPLE_ENABLED;
 
   // Full strength always: a faded button reads as broken. Tapping one before the box is ticked points at the box.
   const dim = "";
@@ -90,12 +91,12 @@ export function SignInButtons() {
   return (
     <div className="flex flex-col gap-2.5">
       <AdultCheck checked={adult} onChange={tick} nudge={nudge} />
-      {APPLE_ENABLED && (
+      {showApple && (
         <Button onClick={() => oauth("apple")} aria-disabled={!adult} className={dim}>
           <AppleIcon /> Continue with Apple
         </Button>
       )}
-      {showGoogle && <GoogleButton onClick={() => oauth("google")} aria-disabled={!adult} className={dim} />}
+      <GoogleButton onClick={() => oauth("google")} aria-disabled={!adult} className={dim} />
       <ButtonLink
         variant="glass"
         href="/auth/email"
