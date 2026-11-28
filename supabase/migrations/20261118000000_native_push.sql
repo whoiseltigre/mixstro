@@ -1,4 +1,4 @@
--- Push for the iPhone app (APNs). Safe to run more than once.
+-- Push for the iPhone and Android apps (sent through Firebase). Safe to run more than once.
 -- Web push keeps using push_subscriptions; the app's device tokens live here.
 
 create table if not exists public.native_push_tokens (
