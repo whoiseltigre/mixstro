@@ -15,109 +15,85 @@ cover_credit_url: "https://www.pexels.com/photo/a-woman-singing-wearing-all-blac
 cover_credit: "cottonbro studio"
 ---
 
-**The short answer:** for most musicians looking for local bandmates, start with a free app where you can message people without paying, see their music and see what bands they've played in. Mixstro, Vampr and BandFriend are the strongest all-rounders. Jammcard suits professional session and touring players, and BandMix works best on the web.
+**The short answer:** if you're after local bandmates, use a free app that lets you message people without paying and hear them play before you meet. Mixstro, Vampr and BandFriend are good starting points. Jammcard is really for working pros, and BandMix is easier on the website than in the app.
 
-Apps are one part of finding a lineup. Our guide on [how to find band members](/blog/how-to-find-band-members) covers the offline side too: shows, open mics, music shops and friends. This post is about the apps, so you can pick one or two and stop wasting evenings on dead profiles.
+Apps are only part of it, though. Our guide on [how to find band members](/blog/how-to-find-band-members) goes through the offline stuff (shows, open mics, the noticeboard at the music shop). Here I'm sticking to apps, because there are a lot of them and most people end up with five half-filled profiles and no drummer.
 
-Full disclosure: we make Mixstro, so it's on this list. We've tried to be fair to everyone else, and the prices and ratings below come from each app's US App Store listing in November 2026. They change often, so check before you pay for anything.
+Quick note before we start: we make Mixstro, so yes, it's on the list. I've tried to be straight about the others. Prices and ratings are from each app's US App Store page in November 2026. They move around, so double-check before you pay for anything.
 
 ## What should a band member app do?
 
-Before comparing apps, it helps to know what actually gets a band together. I've played guitar for more than 20 years in a lot of different lineups, and the same things matter every time.
+I've been playing guitar for over 20 years, in a lot of different lineups. The apps that work all get one thing right: you can tell what someone sounds like before you've hauled your amp across town.
 
-- You can hear people play. A profile with no music is a guess. Links to songs, videos or past bands save you a wasted rehearsal.
-- You can see their history. Someone who's played in three gigging bands is a different hire from someone who just bought a bass. Both are fine. You just want to know which one you're talking to.
-- Messaging is free. If you have to pay before you can say hello, most people won't, and the person you want never hears from you.
-- It's clear what people want. A weekly jam for fun and a touring band are very different commitments. Good apps make that obvious up front.
-- People are actually active. A thousand profiles from 2019 are worth less than fifty from this month.
+That means music on profiles. A rough phone video of someone playing tells you more than a list of 30 influences ever will. I also want to see what they've played in before. Someone who's gigged with three bands and someone who bought their first bass in March can both be the right fit, but you'd like to know which one is showing up.
+
+Messaging has to be free, too. Put a paywall in front of "hey, want to jam?" and most people just won't bother, which means the singer you wanted never hears from you. Beyond that, it helps a lot when people say what they're looking for. Someone who wants a fun Tuesday jam and someone who wants to tour by summer shouldn't waste each other's time. And check the profiles are alive. I'd take fifty people who logged in this month over a thousand who haven't since 2019.
 
 ## The best apps to find band members
 
 ### Mixstro
 
-Mixstro is built around the musician's whole history. Your profile shows what you play, your influences and every band or project you've been in, with the music attached. Bands get their own page with the spots they still need to fill, and anyone can post on the Board when they need a specific player, like a drummer for Thursdays or a fill-in guitarist for one show.
+Ours. The idea is that your profile is your whole history as a musician: what you play, the artists you love, and every band or project you've been in, with the music attached. Bands get their own page too, showing which spots they still need filled. If you need someone specific (a drummer for Thursdays, a guitarist to cover one show), you post it on the Board.
 
 ![A guitarist, bassist and drummer playing a small, sweaty club show](/site/v1/blog/best-apps-to-find-band-members/photo-1-d5b50973 "Photo: iam_os|https://unsplash.com/@iam_os")
 
-- Price: free, including messaging.
-- Where it works: in any phone or computer browser, and you can add it to your home screen like an app.
-- Good for: starting or completing a band, finding players with real experience, showing off what you've done.
-- Worth knowing: it's newer than most apps here, so there are fewer musicians in some cities. If you're early in your area, your profile gets noticed faster.
+It's free, messages included. It runs in the browser on your phone or computer, and if you add it to your home screen it acts like a normal app. The catch is that we're newer than everyone else here, so some cities are still thin. Flip side: if you're early where you live, people notice you.
 
 ### Vampr
 
-Vampr is one of the best known musician networking apps, with a 4.3 rating from about 3,600 ratings on the App Store. It's a social network for musicians: you browse profiles, connect, message and post collaboration requests, including paid ones.
+Vampr is probably the one you've heard of. It has a 4.3 rating from roughly 3,600 ratings on the App Store and works a lot like a social network for musicians. You browse, connect, message, and post collab requests, including paid ones.
 
-- Price: free to download, with a Vampr Pro subscription starting at $5.99 a month in the US. Profile verification is a separate $14.99 purchase.
-- Good for: networking widely, online collaborations, finding people outside your town.
-- Worth knowing: some reviews complain about useful features sitting behind the paywall. Try the free version for a week before subscribing.
+Downloading it is free. Vampr Pro starts at $5.99 a month in the US, and verifying your profile costs $14.99 on top. A fair number of reviews moan that the good stuff is behind the paywall, so I'd use the free version for a week before deciding. Where it shines is reach. If you're open to collaborating online, or you live somewhere small, it puts you in front of a lot of people.
 
 ### BandMix
 
-BandMix has been around for years and has a large archive of musician and band listings, organised by city and instrument. It works more like classifieds than a social app.
+BandMix has been around forever. It's basically classifieds: a big list of musicians and bands you can filter by city and instrument. I find it easier to use on the website.
 
-- Price: free to join, with a paid Premier membership for full contact features.
-- Good for: searching a big list of local musicians by instrument and genre.
-- Worth knowing: plenty of older profiles are no longer active, and app reviews mention paying and then hearing nothing back. Look at when someone was last active before you message them.
+You can join for free. Full contact features need a paid Premier membership. Before you hand over money, look at when people near you were last active, because plenty of those profiles went quiet years ago. Some reviewers say they paid and then heard nothing back from anyone.
 
 ### BandFriend
 
-BandFriend is a free app with musician and band profiles, posts and in-app messaging. It has a 4.5 rating from about 1,000 ratings on the App Store, and no in-app purchases are listed.
-
-- Price: free.
-- Good for: a simple, no-cost way to find local players and bands.
-- Worth knowing: profiles are lighter than on some apps, so ask for recordings early.
+BandFriend is free and simple. There are musician and band profiles, posts and messaging, and I couldn't find any in-app purchases. It's rated 4.5 from about 1,000 ratings. Profiles don't have much on them, so ask for a recording early.
 
 ### Jammcard
 
-Jammcard is a network for professional musicians, the kind who play sessions and tour with big artists. You join by application or invite, and bookers can hire players through the app. The App Store page says there's a 3% processing fee on bookings.
-
-- Price: free to use, with the fee on bookings.
-- Good for: experienced session and touring players looking for paid work.
-- Worth knowing: it isn't built for starting a garage band with your neighbours.
+Jammcard isn't really for starting a band. It's a network for professional players (session people, touring musicians) and you need to apply or get an invite. Bookers can hire players through the app, and its App Store page mentions a 3% processing fee on bookings. If that's your world, apply. If you want a garage band with your neighbour, look elsewhere.
 
 ### Bandmates
 
-Bandmates lets you build a profile, find musicians and bands, and get gig invites. According to its App Store description, private messaging needs a paid subscription.
-
-- Price: free to download, paid subscription for messaging.
-- Good for: musicians happy to pay to reach people.
-- Worth knowing: it had only a handful of App Store ratings when we checked, so it's hard to judge how active it is in your area.
+Bandmates gives you profiles, a search for musicians and bands, and gig invites. Its App Store description says you need a paid subscription for private messaging. When I checked it only had a handful of ratings, so I honestly can't tell you how busy it is.
 
 ### Newer apps to watch
 
-A few newer apps are trying the same thing. JamFan, for example, is free and includes group chats and voice notes, but it's too new to have App Store ratings yet. FUZZ is also free with messaging, but its App Store listing hadn't been updated since 2022 when we checked. New apps can be great if your local scene is using them, so ask around.
+There are always new ones. JamFan is free, with group chats and voice notes, but hasn't been out long enough to have App Store ratings. FUZZ is free and has messaging, though its listing hadn't been updated since 2022 when I looked. Small apps can be great if your scene happens to be on them. Ask around at shows.
 
 ## What about Facebook groups, Reddit and Craigslist?
 
-They still work, especially in smaller towns. Search Facebook for your city plus "musicians" or "bands", join your city's subreddit and check the musicians section of Craigslist if your city still uses it. In the UK, JoinMyBand is a free classifieds site for the same thing.
+Honestly, they still work, especially outside big cities. Search Facebook for your city plus "musicians" or "bands", join your city's subreddit, and have a look at Craigslist's musicians section if anyone near you still uses it. In the UK there's JoinMyBand, which is free classifieds for exactly this.
 
 ![A keyboard player, singer and acoustic guitarist rehearsing in a studio](/site/v1/blog/best-apps-to-find-band-members/photo-2-ecfdeb2c "Photo: cottonbro studio|https://www.pexels.com/photo/men-playing-in-a-band-5650910/")
 
-The downside is that a post disappears in a day or two, and you can't see someone's playing or history without asking. Use them to reach people, then point those people to something that shows your music, like your Mixstro profile or an [electronic press kit](/blog/electronic-press-kit).
+The problem is a post is buried in a day or two, and you can't hear anybody play until you ask. I use them to find people, then point those people at something with my music on it, like a Mixstro profile or an [electronic press kit](/blog/electronic-press-kit).
 
 ## Which app should you use?
 
-Use two at most. Spreading yourself across six apps means six half-finished profiles and messages you forget to answer.
+Two, max. Any more and you end up with a pile of unanswered messages across apps you forgot you installed.
 
-- Starting a band or filling one spot locally: Mixstro or BandFriend, plus a local Facebook group.
-- Networking widely and collaborating online: Vampr.
-- Searching a big list by instrument in your city: BandMix on the web.
-- Looking for paid session or touring work: Jammcard, and a strong [musician resume](/blog/musician-resume).
+Filling a spot in a local band? Mixstro or BandFriend, plus your city's Facebook group. Vampr if you want reach or online collabs. BandMix (on the web) if you like scrolling a long list of players near you. Going after paid session or touring work is a different game: apply to Jammcard and get your [musician resume](/blog/musician-resume) sorted.
 
 ## How do you get replies on a band member app?
 
-The app matters less than your profile and your first message. Most people scroll past profiles with no music and messages that just say "hey".
+Whichever app you pick, the profile and the first message do most of the work. People skip profiles with no music. Nobody replies to "hey".
 
 ![Musicians sitting on the floor of a rehearsal room, jamming with guitars and pedals](/site/v1/blog/best-apps-to-find-band-members/photo-3-a2e517f8 "Photo: freestocks|https://unsplash.com/@freestocks")
 
-1. Add music. Even a rough phone recording beats nothing.
-2. Fill in what you're looking for. Genre, a couple of bands you sound like, how often you want to rehearse and whether you want to gig.
-3. Use a real photo of you with your instrument.
-4. Message with something specific. "Saw you played bass in a garage rock band. We're a three-piece doing something like The Hives, rehearsing Tuesdays. Want to jam?" gets answers.
-5. Meet somewhere public for the first jam, like a rehearsal studio, and bring a short list of songs everyone knows.
+1. Put music on your profile. A rough phone recording is fine.
+2. Say what you want. Genre, a couple of bands you sound like, how often you'd rehearse, and whether you want to gig.
+3. Use a real photo of you holding your instrument.
+4. Make the first message specific. Something like "Saw you played bass in a garage rock band. We're a three-piece doing something like The Hives, rehearsing Tuesdays. Want to jam?" gets answers.
+5. Do the first jam somewhere public. A rehearsal studio is perfect, and bring a short list of songs everyone already knows.
 
-Once you've got a lineup, our guide on [how to start a band](/blog/how-to-start-a-band) covers the rest, from rehearsals to your first show.
+Got a lineup? Our guide on [how to start a band](/blog/how-to-start-a-band) picks it up from there, all the way to your first show.
 
 ## FAQ
 
