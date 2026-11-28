@@ -67,7 +67,7 @@ export default function Sound() {
       <div className="px-5 pt-7 flex flex-col gap-6">
         {clips.length > 0 && (
           <div className="flex flex-col gap-2.5">
-            <p className="text-[13px] font-semibold text-smoke flex items-center gap-1.5">
+            <p className="text-footnote font-semibold text-smoke flex items-center gap-1.5">
               <span className="size-4 rounded-full bg-tungsten text-ink flex items-center justify-center"><CheckIcon size={9} /></span>
               {clips.length === 1 ? "1 track on your profile" : `${clips.length} tracks on your profile`}
             </p>
@@ -84,7 +84,7 @@ export default function Sound() {
 
         <FindMyMusic onAdd={addFound} disabled={full} />
 
-        <div className="flex items-center gap-3 text-[12px] text-smoke/70" aria-hidden="true">
+        <div className="flex items-center gap-3 text-caption text-smoke/70" aria-hidden="true">
           <span className="flex-1 h-px bg-paper/10" />
           or
           <span className="flex-1 h-px bg-paper/10" />
@@ -97,13 +97,13 @@ export default function Sound() {
           }}
           className="flex flex-col gap-2.5"
         >
-          <label htmlFor="clip-link" className="text-[13px] font-semibold text-smoke">
+          <label htmlFor="clip-link" className="text-footnote font-semibold text-smoke">
             Paste a link to your music
           </label>
           <div
             className={cx(
               "flex items-center gap-2 h-[56px] pl-4 pr-1.5 rounded-full bg-stage border transition focus-within:border-paper/50",
-              error ? "border-[#FF453A]/70" : valid ? "border-tungsten" : "border-paper/12",
+              error ? "border-danger/70" : valid ? "border-tungsten" : "border-paper/12",
             )}
           >
             <input
@@ -126,13 +126,13 @@ export default function Sound() {
               autoCorrect="off"
               placeholder={full ? "That's the max for now" : "youtube.com/watch?v=…"}
               disabled={full}
-              className="flex-1 min-w-0 h-full bg-transparent text-[16px] placeholder:text-smoke/50 outline-none"
+              className="flex-1 min-w-0 h-full bg-transparent text-body placeholder:text-smoke/85 outline-none"
             />
             <button
               type="submit"
               disabled={!link.trim()}
               className={cx(
-                "h-11 px-5 rounded-full font-semibold text-[15px] transition active:scale-95 disabled:opacity-0",
+                "press h-11 px-5 rounded-full font-semibold text-callout disabled:opacity-0",
                 valid ? "bg-tungsten text-ink" : "bg-paper text-ink",
               )}
             >
@@ -140,17 +140,17 @@ export default function Sound() {
             </button>
           </div>
           {error ? (
-            <p role="alert" className="text-[13px] text-[#FF8A80] px-1">{error}</p>
+            <p role="alert" className="text-footnote text-danger-soft px-1">{error}</p>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {PLATFORMS.map((p) => (
-                <span key={p} className="text-[12px] text-smoke px-2.5 py-1 rounded-full bg-paper/6">{p}</span>
+                <span key={p} className="text-caption text-smoke px-2.5 py-1 rounded-full bg-paper/6">{p}</span>
               ))}
             </div>
           )}
         </form>
 
-        <div className="flex items-center gap-3 text-[12px] text-smoke/70" aria-hidden="true">
+        <div className="flex items-center gap-3 text-caption text-smoke/70" aria-hidden="true">
           <span className="flex-1 h-px bg-paper/10" />
           or
           <span className="flex-1 h-px bg-paper/10" />

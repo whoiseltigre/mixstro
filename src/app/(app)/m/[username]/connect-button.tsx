@@ -17,7 +17,7 @@ export function ConnectButton({
   person,
   label,
   asked,
-  className = "h-12 text-[16px]",
+  className = "h-12 text-body",
 }: {
   person: ConnectPerson;
   label: string;
@@ -41,6 +41,10 @@ export function ConnectButton({
       try {
         const res = await connect(person.id, person.username);
         if (res && "sent" in res && res.sent) announceConnect(first);
+        else if (res && "error" in res) {
+          setSent(false);
+          toast(res.error);
+        }
       } catch (e) {
         if (isRedirect(e)) throw e; // they'd already asked you: off to the new conversation
         setSent(false);

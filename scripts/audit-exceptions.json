@@ -1,0 +1,19 @@
+{
+  "_readme": "Advisories CI tolerates in production dependencies. Each needs an owner, a reason and a review date; CI fails once the date passes.",
+  "exceptions": [
+    {
+      "package": "postcss",
+      "via": "next (bundled copy)",
+      "owner": "whoiseltigre",
+      "reason": "Next bundles its own postcss and only runs it at build time on our own CSS; attacker-controlled CSS never reaches it. The fix needs Next 16 (a major upgrade). Revisit with the Next 16 upgrade.",
+      "review_by": "2027-01-31"
+    },
+    {
+      "package": "next",
+      "via": "postcss (bundled copy)",
+      "owner": "whoiseltigre",
+      "reason": "Flagged only because of the bundled postcss above.",
+      "review_by": "2027-01-31"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 const DAY = 24 * 60 * 60 * 1000;
 export const ACTIVE_DAYS = 7;
-export const DORMANT_DAYS = 60;
+export const DORMANT_DAYS = 30;
 
 export function daysSince(iso: string | Date, now = Date.now()) {
   return Math.floor((now - new Date(iso).getTime()) / DAY);

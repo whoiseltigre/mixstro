@@ -28,10 +28,10 @@ export function AnswerForm({
   const [pending, start] = useTransition();
 
   return (
-    <section className="rounded-[26px] bg-stage p-5 md:p-6 flex flex-col gap-4">
+    <section className="rounded-sheet bg-stage p-5 md:p-6 flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h2 className="text-[20px] font-semibold tracking-[-0.01em]">{done ? "You answered" : "Answer with your profile"}</h2>
-        <p className="text-[14px] text-smoke">
+        <h2 className="text-title3 font-semibold tracking-[-0.01em]">{done ? "You answered" : "Answer with your profile"}</h2>
+        <p className="text-subhead text-smoke">
           {done
             ? `${authorName} sees your profile and your music, and you're at the top of their Today. When they Connect back, you can message.`
             : `${authorName} sees your profile, your projects and your tracks. No cold DM needed.`}
@@ -39,13 +39,13 @@ export function AnswerForm({
       </div>
 
       {me && (
-        <div className="flex items-center gap-3.5 p-3 rounded-[18px] bg-ink/50 border border-paper/8">
+        <div className="flex items-center gap-3.5 p-3 rounded-tile bg-ink/50 border border-paper/8">
           <span className="relative size-12 rounded-full overflow-hidden shrink-0">
             <PersonPhoto person={me} sizes="48px" initialsSize={18} />
           </span>
           <span className="flex-1 min-w-0 flex flex-col">
-            <span className="text-[15px] font-semibold">{me.name}</span>
-            <span className="text-[13px] text-smoke truncate">
+            <span className="text-callout font-semibold">{me.name}</span>
+            <span className="text-footnote text-smoke truncate">
               {me.instrument} · {me.genres} · {me.neighborhood}
             </span>
           </span>
@@ -53,11 +53,11 @@ export function AnswerForm({
       )}
 
       {done ? (
-        (myNote || note) && <p className="text-[15px] leading-[1.45]">&ldquo;{myNote || note}&rdquo;</p>
+        (myNote || note) && <p className="text-callout leading-[1.45]">&ldquo;{myNote || note}&rdquo;</p>
       ) : (
         <>
           <div className="flex flex-col gap-2">
-            <label htmlFor="note" className="text-[13px] font-semibold text-smoke">
+            <label htmlFor="note" className="text-footnote font-semibold text-smoke">
               Add a line (optional)
             </label>
             <textarea
@@ -67,12 +67,12 @@ export function AnswerForm({
               rows={3}
               onChange={(e) => setNote(e.target.value)}
               placeholder="I'm free most Thursdays and have my own kit."
-              className="rounded-2xl bg-ink/50 border border-paper/12 px-4 py-3 text-[16px] leading-[1.45] placeholder:text-smoke/60 outline-none focus:border-paper/50 resize-none"
+              className="field field-inset px-4 py-3 text-body leading-[1.45] resize-none"
             />
           </div>
-          {error && <p className="text-[14px] text-[#FF8A80]">{error}</p>}
+          {error && <p className="text-subhead text-danger-soft">{error}</p>}
           <Button
-            variant="gel"
+            variant="primary"
             disabled={pending}
             onClick={() =>
               {
@@ -102,7 +102,7 @@ export function ClosePostButton({ postId }: { postId: number }) {
   return (
     <Button
       variant="glass"
-      className="h-12 text-[16px] mt-2"
+      className="h-12 text-body mt-2"
       disabled={pending}
       onClick={() => {
         if (confirm("Close this post? It comes off the Board and no one else can answer.")) start(() => closePost(postId));

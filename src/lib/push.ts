@@ -58,6 +58,19 @@ export function vapidKeys(db: SupabaseClient): Promise<Keys | null> {
   return keys;
 }
 
+/** The push services browsers use (Google, Mozilla, Apple, Microsoft). Matches the database check. */
+const PUSH_HOST = /^(fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+\.push\.services\.mozilla\.com|web\.push\.apple\.com|[a-z0-9-]+\.notify\.windows\.com)$/;
+
+/** Only ever send to a real push service over HTTPS: never a port, a login or any other host. */
+export function pushEndpointOk(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === "https:" && !u.port && !u.username && !u.password && PUSH_HOST.test(u.hostname) && endpoint.length <= 1024;
+  } catch {
+    return false;
+  }
+}
+
 /** Returns true if at least one device accepted it. */
 export async function sendPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
   const [web, app] = await Promise.all([sendWebPush(db, recipientId, msg), sendAppPush(db, recipientId, msg)]);
@@ -87,8 +100,17 @@ async function sendAppPush(db: SupabaseClient, recipientId: string, msg: PushMes
 async function sendWebPush(db: SupabaseClient, recipientId: string, msg: PushMessage): Promise<boolean> {
   const k = await vapidKeys(db);
   if (!k) return false;
-  const { data } = await db.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("profile_id", recipientId);
-  const subs = (data ?? []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
+  const { data } = await db
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth")
+    .eq("profile_id", recipientId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+  const all = (data ?? []) as { id: number; endpoint: string; p256dh: string; auth: string }[];
+  // Checked again here, so a bad row saved before the database check existed is never used.
+  const bad = all.filter((s) => !pushEndpointOk(s.endpoint));
+  if (bad.length) await db.from("push_subscriptions").delete().in("id", bad.map((s) => s.id));
+  const subs = all.filter((s) => pushEndpointOk(s.endpoint));
   if (!subs.length) return false;
   const payload = JSON.stringify({ ...msg, icon: msg.icon ?? undefined });
   const vapidDetails = { subject: process.env.VAPID_SUBJECT || "mailto:hello@mixstro.com", publicKey: k.publicKey, privateKey: k.privateKey };

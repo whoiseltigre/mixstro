@@ -1,6 +1,7 @@
 import { BOARD, findMusician } from "./mock";
 import { SHOW_SAMPLES, getMusicians, getViewer, locate, type Viewer } from "./people";
 import type { Musician } from "./mock";
+import { myClips, openingCandidates, toOpening, type CandidateView, type MyClip, type Opening, type OpeningRow } from "./openings";
 
 /**
  * The Board: bands, sessions and collabs post open spots, and musicians answer with their
@@ -40,9 +41,11 @@ export type BoardPost = {
   /** The one-line summary under the title, and the small line under that. */
   meta: string;
   foot: string;
+  /** Set when the post is a structured opening (needed role, days, expiry). */
+  opening?: Opening;
 };
 
-type PostRow = {
+type PostRow = OpeningRow & {
   id: number;
   author_id: string;
   kind: BoardKind;
@@ -57,7 +60,6 @@ type PostRow = {
   created_at: string;
 };
 
-const POST_COLUMNS = "id, author_id, kind, title, role, details, neighborhood, paid, pay, closes_on, closed_at, created_at";
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
 function samples(viewer?: Viewer | null): BoardPost[] {
@@ -94,7 +96,8 @@ function closesLabel(date: string) {
 function toPost(row: PostRow, author: Musician | undefined, viewer: Viewer, extra: { replies?: number; answered?: boolean }): BoardPost {
   const mine = row.author_id === viewer.id;
   const where = row.neighborhood ?? author?.neighborhood;
-  const meta = [where, row.role, row.paid ? row.pay || "Paid" : null].filter(Boolean).join(" · ");
+  const days = row.needed_role && row.rehearsal_days?.length ? row.rehearsal_days.join("/") : null;
+  const meta = [where, row.role, days, row.paid ? row.pay || "Paid" : null].filter(Boolean).join(" · ");
   const foot = mine
     ? extra.replies
       ? `${extra.replies} musician${extra.replies === 1 ? "" : "s"} answered`
@@ -126,6 +129,7 @@ function toPost(row: PostRow, author: Musician | undefined, viewer: Viewer, extr
     answered: extra.answered,
     meta,
     foot,
+    opening: toOpening(row),
   };
 }
 
@@ -174,7 +178,8 @@ export async function getBoard(): Promise<BoardView> {
   const [{ data }] = await Promise.all([
     viewer.supabase
       .from("board_posts")
-      .select(POST_COLUMNS)
+      // "*" so opening fields come along once that migration is in, without breaking before.
+      .select("*")
       .is("closed_at", null)
       .or(`closes_on.is.null,closes_on.gte.${today}`)
       .order("created_at", { ascending: false })
@@ -182,7 +187,11 @@ export async function getBoard(): Promise<BoardView> {
     locate(viewer),
   ]);
   const radius = viewer.profile?.radius_mi ?? 25;
-  const posts = (await decorate(viewer, (data ?? []) as PostRow[])).filter((p) => p.mine || p.distanceMi === undefined || p.distanceMi <= radius);
+  const now = new Date().toISOString();
+  const posts = (await decorate(viewer, (data ?? []) as PostRow[]))
+    // An opening past its expiry is gone even before the 15-minute job marks it expired.
+    .filter((p) => !p.opening?.expiresAt || p.opening.expiresAt > now)
+    .filter((p) => p.mine || p.distanceMi === undefined || p.distanceMi <= radius);
   const hood = viewer.profile?.neighborhood?.split(",")[0]?.trim();
   return { posts: [...posts, ...samples(viewer)], area: hood ? `${hood} · within ${radius} mi` : `Within ${radius} mi`, demo: false };
 }
@@ -192,7 +201,7 @@ export type Reply = { id: number; person: Musician; note: string | null; created
 export type PostView =
   | { kind: "sample"; post: BoardPost }
   | { kind: "theirs"; post: BoardPost; me: Musician | null; myNote: string | null }
-  | { kind: "mine"; post: BoardPost; replies: Reply[] };
+  | { kind: "mine"; post: BoardPost; replies: Reply[]; candidates?: CandidateView; clips?: MyClip[] };
 
 /** One post. The author also sees who answered; everyone else sees whether they already did. */
 export async function getPost(id: string): Promise<PostView | null> {
@@ -217,8 +226,11 @@ export async function getPost(id: string): Promise<PostView | null> {
       .order("created_at", { ascending: false });
     const list = (rows ?? []) as { id: number; from_id: string; note: string | null; created_at: string }[];
     const people = await getMusicians(viewer, list.map((r) => r.from_id));
+    const [candidates, clips] = post.opening ? await Promise.all([openingCandidates(viewer, data.id, post.opening), myClips(viewer)]) : [undefined, undefined];
     return {
       kind: "mine",
+      candidates,
+      clips,
       post: bandMember ? { ...post, mine: true, replies: list.length, foot: `${list.length} musician${list.length === 1 ? "" : "s"} answered` } : post,
       replies: list.flatMap((r) => {
         const person = people.find((p) => p.id === r.from_id);

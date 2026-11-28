@@ -7,7 +7,7 @@ import type { Musician } from "@/lib/mock";
 /** `onPlanJam` opens the jam invite sheet in a real chat; the demo chat shows the button without it. */
 export function ChatHeader({ person: m, action = true, onPlanJam }: { person: Musician; action?: boolean; onPlanJam?: () => void }) {
   return (
-    <header className="glass rounded-b-[26px] md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-x-0 md:border-b md:border-paper/8 border-t-0 pt-safe md:pt-3 px-3.5 md:px-5 pb-3 flex items-center gap-2.5 z-10">
+    <header className="glass rounded-b-sheet md:rounded-none md:bg-transparent md:backdrop-blur-none md:border-x-0 md:border-b md:border-paper/8 border-t-0 pt-safe md:pt-3 px-3.5 md:px-5 pb-3 flex items-center gap-2.5 z-10">
       <span className="md:hidden">
         <BackButton href="/messages" />
       </span>
@@ -15,14 +15,14 @@ export function ChatHeader({ person: m, action = true, onPlanJam }: { person: Mu
         <PersonPhoto person={m} sizes="40px" initialsSize={15} />
       </div>
       <Link href={`/m/${m.username}`} className="flex-1 flex flex-col">
-        <span className="text-[16px] font-semibold">{m.name}</span>
-        <span className="text-[12px] text-smoke">
+        <span className="text-body font-semibold">{m.name}</span>
+        <span className="text-caption text-smoke">
           {m.instrument}
           {m.shared.length ? ` · ${m.shared.length} shared influence${m.shared.length === 1 ? "" : "s"}` : ""}
         </span>
       </Link>
       {action && (
-        <button type="button" onClick={onPlanJam} className="glass h-[34px] px-3 rounded-full text-[13px] font-semibold">
+        <button type="button" onClick={onPlanJam} className="hit-slop relative glass h-[34px] px-3 rounded-full text-footnote font-semibold">
           Plan a jam
         </button>
       )}

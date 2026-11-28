@@ -1,0 +1,133 @@
+/*
+ * Mixstro design tokens. The one source of truth for color, type, shape, depth and motion.
+ * Docs: DESIGN.md. Live reference: /design. Tailwind turns each token into utilities
+ * (--color-gel-blue -> text-gel-blue, --text-footnote -> text-footnote, --radius-card -> rounded-card).
+ * New UI uses these names, not raw values: `npm run lint:design` flags hex colors and off-scale sizes.
+ */
+@theme static {
+  /* House Lights: the UI is the dark room, the musicians are the light. */
+  --color-ink: #0f0d0b; /* page */
+  --color-stage: #1a1816; /* cards, fields */
+  --color-riser: #292624; /* raised controls on a card */
+  --color-smoke: #a8a49e; /* secondary text */
+  --color-paper: #f5f1ec; /* primary text, primary button */
+  --color-tungsten: #ffb245; /* the one warm spotlight per screen */
+
+  /* Gels: the color splashes. Each area of the app owns one (DESIGN.md, "Gels"). */
+  --color-gel-peach: #f7bf77; /* Today, Settings */
+  --color-gel-pink: #ffacba; /* Activity, Connect moments */
+  --color-gel-blue: #b5c5ff; /* Board, Post */
+  --color-gel-teal: #67e2da; /* Messages, "Now" */
+  --color-gel-violet: #c9b6ff; /* Bands */
+
+  /* Status. */
+  --color-danger: #ff453a;
+  --color-danger-soft: #ff8a80; /* error text on Ink (danger is too dark to read there) */
+  --color-success: #30d158;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", var(--font-geist), system-ui, sans-serif;
+  --font-display: -apple-system, "SF Pro Display", var(--font-inter-tight), system-ui, sans-serif;
+  --font-wordmark: var(--font-outfit), system-ui, sans-serif;
+
+  /* Weights. Lighter than Tailwind's defaults so screens feel calm, not shouty:
+     semibold (labels, names, buttons) is 560 and bold (titles) is 640. All our faces are variable. */
+  --font-weight-medium: 500;
+  --font-weight-semibold: 560;
+  --font-weight-bold: 640;
+
+  /* Type scale (px, after Apple's text styles). Weight carries hierarchy: 400 body, 500-560 labels, 640 titles only. */
+  --text-caption2: 11px;
+  --text-caption: 12px;
+  --text-footnote: 13px;
+  --text-subhead: 14px;
+  --text-callout: 15px;
+  --text-body: 16px;
+  --text-body-lg: 17px;
+  --text-title4: 18px;
+  --text-title3: 20px;
+  --text-title2: 22px;
+  --text-title1: 24px;
+  --text-title-lg: 28px;
+  --text-display-sm: 32px;
+  --text-display: 34px;
+  --text-display-md: 40px;
+  --text-display-lg: 44px;
+  --text-hero: 52px;
+
+  /* Shape. Pills (rounded-full) for anything you tap; these for surfaces, smallest to largest. */
+  --radius-xs: 10px; /* badges, tiny thumbs */
+  --radius-control: 12px; /* small tiles, artwork in rows */
+  --radius-field: 14px; /* inputs, icon tiles */
+  --radius-tile: 18px; /* list tiles, compact cards */
+  --radius-card: 20px; /* standard card */
+  --radius-card-lg: 22px; /* photo cards */
+  --radius-panel: 24px; /* sections, sheets on desktop */
+  --radius-sheet: 28px; /* bottom sheets, hero photo */
+  --radius-hero: 32px; /* full-bleed showpieces */
+
+  /* Depth. Dark UI: shadows separate floating layers, glass separates chrome. */
+  --shadow-lift: 0 6px 20px rgb(0 0 0 / 0.35); /* hovered or pressed-up control */
+  --shadow-float: 0 12px 40px rgb(0 0 0 / 0.45); /* menus, popovers, toasts */
+  --shadow-sheet: 0 -10px 60px rgb(0 0 0 / 0.5); /* bottom sheets */
+  --shadow-spotlight: 0 8px 22px -8px var(--color-tungsten); /* the tungsten button glow */
+
+  /* Motion: curves. Springs are sampled from real spring physics (scripts in DESIGN.md). */
+  --ease-standard: cubic-bezier(0.2, 0.9, 0.25, 1); /* things arriving */
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1); /* things moving between two places */
+  --ease-exit: cubic-bezier(0.4, 0, 0.9, 0.6); /* things leaving: start slow, get out of the way */
+  --ease-spring: var(--spring-smooth);
+  --ease-spring-snappy: var(--spring-snappy);
+  --ease-spring-bouncy: var(--spring-bouncy);
+
+  /* Keyframes the utilities use (animate-rise-in, animate-pop). */
+  --animate-rise-in: rise-in var(--duration-base) var(--ease-standard) backwards;
+  --animate-pop: pick-pop 320ms var(--ease-spring-bouncy);
+}
+
+:root {
+  /* Durations. Instant for touch, quick for state, base for things moving, slow for scenery. */
+  --duration-instant: 90ms;
+  --duration-quick: 160ms;
+  --duration-base: 280ms;
+  --duration-slow: 450ms;
+  --duration-spring: 520ms; /* a spring's full settle */
+
+  /* Springs fall back to curves on browsers without linear() (Safari < 17.2). */
+  --spring-smooth: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --spring-snappy: cubic-bezier(0.25, 1.15, 0.4, 1);
+  --spring-bouncy: cubic-bezier(0.3, 1.4, 0.5, 1);
+
+  /* The gels as one rim, for peak moments only (Connect, a new connection). */
+  --gel: conic-gradient(from 200deg, #f7bf77, #ffacba, #b5c5ff, #67e2da, #f7bf77);
+  --gel-linear: linear-gradient(90deg, #f7bf77, #ffacba, #b5c5ff, #67e2da);
+
+  /*
+   * Component decisions. One value each, so a look can change in one place (and be tried
+   * out on /design, which flips the data-* attributes below on <html>).
+   */
+  --line-field: rgb(245 241 236 / 0.34); /* text field outline: 3:1 against Ink */
+  --field-radius: 14px;
+  --toggle-on: var(--color-success); /* the one switch color: iOS green (Sundy, 2026-11-26) */
+  --headline-weight: 620;
+  --gel-strength: 1; /* multiplies each area's top glow */
+  --bubble-own-bg: var(--color-paper); /* your own messages: Paper (Sundy, 2026-11-26) */
+  --bubble-own-fg: var(--color-ink);
+  --bubble-own-line: transparent;
+
+  /* Hairlines and fills on Ink, from faintest to strongest. */
+  --line-faint: rgb(245 241 236 / 0.08);
+  --line: rgb(245 241 236 / 0.12);
+  --line-strong: rgb(245 241 236 / 0.2);
+  color-scheme: dark;
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    /* stiffness 170, damping 26: no overshoot, iOS's default feel. */
+    --spring-smooth: linear(0, 0.024, 0.083, 0.161, 0.247, 0.334, 0.418, 0.497, 0.568, 0.632, 0.688, 0.737, 0.78, 0.816, 0.846, 0.873, 0.894, 0.913, 0.928, 0.941, 0.952, 0.96, 0.968, 0.973, 0.978, 0.982, 0.986, 0.988, 0.991, 0.992, 0.994, 0.995, 1);
+    /* stiffness 380, damping 30: 2% overshoot, for things you flick or press. */
+    --spring-snappy: linear(0, 0.024, 0.084, 0.167, 0.262, 0.362, 0.461, 0.554, 0.639, 0.715, 0.781, 0.837, 0.883, 0.921, 0.951, 0.974, 0.992, 1.004, 1.013, 1.019, 1.022, 1.023, 1.022, 1.021, 1.02, 1.017, 1.015, 1.013, 1.011, 1.009, 1.007, 1.005, 1);
+    /* stiffness 300, damping 21: 9% overshoot, celebrations and picks only. */
+    --spring-bouncy: linear(0, 0.037, 0.132, 0.26, 0.402, 0.544, 0.676, 0.792, 0.888, 0.964, 1.019, 1.057, 1.08, 1.09, 1.091, 1.085, 1.075, 1.062, 1.049, 1.037, 1.025, 1.015, 1.007, 1.001, 0.997, 0.994, 0.992, 0.992, 0.992, 0.993, 0.994, 0.995, 1);
+  }
+}

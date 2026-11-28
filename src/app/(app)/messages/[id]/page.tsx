@@ -17,7 +17,7 @@ export default async function Chat({ params }: { params: Promise<{ id: string }>
   const chat = await getChat(id);
   if (!chat) notFound();
   if (chat.kind === "demo") return <DemoChat person={chat.person} />;
-  if (chat.kind === "live") return <LiveChat person={chat.person} connectionId={chat.connectionId} messages={chat.messages} jams={chat.jams} />;
+  if (chat.kind === "live") return <LiveChat person={chat.person} connectionId={chat.connectionId} messages={chat.messages} jams={chat.jams} more={chat.more} clips={chat.clips} />;
 
   const first = chat.person.name.split(" ")[0];
   const c = chat.connection;
@@ -30,13 +30,13 @@ export default async function Chat({ params }: { params: Promise<{ id: string }>
       <main className="relative h-dvh md:h-full flex flex-col">
         <ChatHeader person={chat.person} action={false} />
         <div className="flex-1 flex flex-col items-center justify-center gap-2 px-8 text-center">
-          <h1 className="text-[20px] font-semibold">{declined ? "Not the right fit this time" : "This Connect closed"}</h1>
-          <p className="text-[15px] leading-[1.5] text-smoke">
+          <h1 className="text-title3 font-semibold">{declined ? "Not the right fit this time" : "This Connect closed"}</h1>
+          <p className="text-callout leading-[1.5] text-smoke">
             {declined
               ? `${first} passed, kindly. Plenty more musicians on Today and the Board.`
               : `${first} didn't answer within a week, so it closed for both of you. No hard feelings.`}
           </p>
-          <Link href="/discover" className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-[15px] font-semibold flex items-center">
+          <Link href="/discover" className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center">
             See Today
           </Link>
         </div>
@@ -47,14 +47,14 @@ export default async function Chat({ params }: { params: Promise<{ id: string }>
     <main className="relative h-dvh md:h-full flex flex-col">
       <ChatHeader person={chat.person} action={false} />
       <div className="flex-1 flex flex-col items-center justify-center gap-2 px-8 text-center">
-        <h1 className="text-[20px] font-semibold">{sent ? `Waiting on ${first}` : `Connect with ${first} first`}</h1>
-        <p className="text-[15px] leading-[1.5] text-smoke">
+        <h1 className="text-title3 font-semibold">{sent ? `Waiting on ${first}` : `Connect with ${first} first`}</h1>
+        <p className="text-callout leading-[1.5] text-smoke">
           {sent
             ? `Your chat opens as soon as ${first} connects back.`
             : `Chats open once you both Connect, so nobody gets messages they didn't ask for.`}
         </p>
         {!sent && (
-          <Link href={`/m/${chat.person.username}`} className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-[15px] font-semibold flex items-center">
+          <Link href={`/m/${chat.person.username}`} className="mt-3 h-11 px-5 rounded-full bg-paper text-ink text-callout font-semibold flex items-center">
             See {first}&apos;s profile
           </Link>
         )}

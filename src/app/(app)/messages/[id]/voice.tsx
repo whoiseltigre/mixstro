@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PlayButton } from "@/components/ui";
 
 export const MAX_VOICE_SECONDS = 60;
 
@@ -126,9 +127,9 @@ export function VoiceBubble({ url, seconds, mine, sending }: { url: string | nul
     } else a.pause();
   }
 
-  const fg = mine ? "bg-ink" : "bg-paper";
+  const fg = "bg-current";
   return (
-    <div style={sending ? { opacity: 0.6 } : undefined} className={`w-[236px] flex items-center gap-2.5 px-3 py-2.5 ${mine ? "self-end rounded-[20px_20px_6px_20px] bg-paper text-ink" : "self-start rounded-[20px_20px_20px_6px] bg-stage"}`}>
+    <div style={sending ? { opacity: 0.6 } : undefined} className={`w-[236px] flex items-center gap-2.5 px-3 py-2.5 ${mine ? "self-end rounded-[20px_20px_6px_20px] bubble-own" : "self-start rounded-[20px_20px_20px_6px] bg-stage"}`}>
       {url && (
         <audio
           ref={audio}
@@ -145,25 +146,13 @@ export function VoiceBubble({ url, seconds, mine, sending }: { url: string | nul
           }}
         />
       )}
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={!url}
-        aria-label={playing ? "Pause voice note" : "Play voice note"}
-        className={`size-8 shrink-0 rounded-full flex items-center justify-center disabled:opacity-40 ${mine ? "bg-ink text-paper" : "bg-paper text-ink"}`}
-      >
-        {playing ? (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
-        ) : (
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg>
-        )}
-      </button>
+      <PlayButton playing={playing} size={34} onClick={toggle} disabled={!url} label={playing ? "Pause voice note" : "Play voice note"} className="disabled:opacity-40" />
       <div aria-hidden="true" className="flex-1 flex items-center gap-0.5 h-[22px]">
         {BARS.map((h, i) => (
           <span key={i} className={`w-[3px] rounded-sm ${fg} transition-opacity`} style={{ height: h, opacity: i / BARS.length < progress ? 1 : 0.35 }} />
         ))}
       </div>
-      <span className="text-[12px] font-medium tabular-nums">{url ? clock(playing || at ? Math.max(0, length - at) : length) : "Unavailable"}</span>
+      <span className="text-caption font-medium tabular-nums">{url ? clock(playing || at ? Math.max(0, length - at) : length) : "Unavailable"}</span>
     </div>
   );
 }

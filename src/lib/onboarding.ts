@@ -126,6 +126,31 @@ function read(): Draft {
   }
 }
 
+export const FROM_GENERATOR = "mixstro-from-band-name-generator";
+
+/**
+ * Arrived from "Start <name> on Mixstro" in the band name generator (the mx_band cookie): sign up as a
+ * band with that name filled in, unless this draft already names a band. Only for a new signup.
+ */
+function seedBandFromGenerator(local: Draft): Draft | null {
+  const raw = document.cookie.split("; ").find((c) => c.startsWith("mx_band="))?.slice(8);
+  if (!raw) return null;
+  document.cookie = "mx_band=; Max-Age=0; path=/";
+  let name = "";
+  try {
+    name = decodeURIComponent(raw).trim().slice(0, 80);
+  } catch {
+    return null;
+  }
+  if (!name || local.band?.name.trim()) return null;
+  const next: Draft = { ...local, signupAs: "band", band: { name, since: new Date().getFullYear() } };
+  try {
+    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(FROM_GENERATOR, "1");
+  } catch {}
+  return next;
+}
+
 /** Onboarding answers, persisted to localStorage so a reload or a quit resumes where you left off. */
 export function useDraft() {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
@@ -145,6 +170,9 @@ export function useDraft() {
             localStorage.setItem(KEY, JSON.stringify(synced));
           } catch {}
           setDraft(synced);
+        } else {
+          const seeded = seedBandFromGenerator(local);
+          if (seeded) setDraft(seeded);
         }
         setReady(true);
       })
@@ -319,8 +347,7 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     if (!avatarUrl) return { error: "Your photo didn't upload. Try again, or pick a smaller one." };
   }
 
-  const { error } = await supabase.from("profiles").upsert({
-    id: user.id,
+  const profile = {
     first_name: draft.firstName.trim(),
     username: draft.username.replace(/^@/, "").trim().toLowerCase(),
     adult_confirmed_at: draft.adultConfirmedAt,
@@ -335,9 +362,21 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     neighborhood: draft.neighborhood.trim() || null,
     radius_mi: draft.radiusMi,
     play_days: draft.playDays,
-    onboarded_at: new Date().toISOString(),
-  });
-  if (error) return { error: error.code === "23505" ? "That username is taken." : error.message };
+  };
+  const influences = draft.influences.map((a) => ({ artist_id: a.id, artist_name: a.name, image_url: a.image ?? null, source: draft.musicSource ?? "manual" }));
+  const clips = draft.clips.length
+    ? draft.clips.map((c) => ({ kind: c.kind, provider: c.kind === "clip" ? (parseClip(c.value)?.provider ?? null) : null, url: c.value }))
+    : null;
+
+  // Profile, influences and clips commit together; only then is signup marked finished. If it
+  // fails, nothing changed (a newly uploaded photo is tidied up by the next successful save).
+  const { error } = await supabase.rpc("finish_onboarding", { p_profile: profile, p_influences: influences, p_clips: clips });
+  if (error?.code === "PGRST202" || error?.code === "42883") {
+    const legacy = await saveProfileLegacy(supabase, user.id, profile, draft);
+    if (legacy.error) return legacy;
+  } else if (error) {
+    return { error: error.code === "23505" ? "That username is taken." : "Your profile didn't save. Check your connection and try again." };
+  }
   if (newPhoto && avatarUrl) {
     rememberPhoto(avatarUrl);
     pruneOldPhotos(supabase, user.id, avatarUrl).catch(() => {});
@@ -347,21 +386,6 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
 
   // Distances are a nice-to-have: a failure here never fails the save.
   await saveMyLocation(draft.neighborhood, draft.point).catch(() => {});
-
-  await supabase.from("influences").delete().eq("profile_id", user.id);
-  if (draft.influences.length) {
-    const { error: infErr } = await supabase.from("influences").insert(
-      draft.influences.map((a, rank) => ({
-        profile_id: user.id,
-        artist_id: a.id,
-        artist_name: a.name,
-        image_url: a.image ?? null,
-        source: draft.musicSource ?? "manual",
-        rank,
-      })),
-    );
-    if (infErr) return { error: infErr.message };
-  }
 
   // Your band becomes a current project on your profile, which is also its band page (/b/<id>).
   if (draft.band?.name.trim()) {
@@ -391,10 +415,29 @@ export async function saveProfile(draft: Draft): Promise<{ error?: string }> {
     if (projectId) rememberBand(projectId);
   }
 
+  return {};
+}
+
+/** Before finish_onboarding exists in the database: the earlier step-by-step save. */
+async function saveProfileLegacy(
+  supabase: NonNullable<ReturnType<typeof createClient>>,
+  uid: string,
+  profile: Record<string, unknown>,
+  draft: Draft,
+): Promise<{ error?: string }> {
+  const { error } = await supabase.from("profiles").upsert({ id: uid, ...profile, onboarded_at: new Date().toISOString() });
+  if (error) return { error: error.code === "23505" ? "That username is taken." : error.message };
+  await supabase.from("influences").delete().eq("profile_id", uid);
+  if (draft.influences.length) {
+    const { error: infErr } = await supabase.from("influences").insert(
+      draft.influences.map((a, rank) => ({ profile_id: uid, artist_id: a.id, artist_name: a.name, image_url: a.image ?? null, source: draft.musicSource ?? "manual", rank })),
+    );
+    if (infErr) return { error: infErr.message };
+  }
   if (draft.clips.length) {
-    await supabase.from("clips").delete().eq("profile_id", user.id);
+    await supabase.from("clips").delete().eq("profile_id", uid);
     await supabase.from("clips").insert(
-      draft.clips.map((c) => ({ profile_id: user.id, kind: c.kind, provider: c.kind === "clip" ? parseClip(c.value)?.provider : null, url: c.value })),
+      draft.clips.map((c) => ({ profile_id: uid, kind: c.kind, provider: c.kind === "clip" ? parseClip(c.value)?.provider : null, url: c.value })),
     );
   }
   return {};

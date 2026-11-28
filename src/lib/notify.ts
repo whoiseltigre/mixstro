@@ -1,6 +1,5 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { adminClient } from "./supabase/admin";
 import { nounFor } from "./instruments";
-import { SUPABASE_URL } from "./supabase/config";
 import { wants, type Prefs } from "./notification-types";
 import { sendPush } from "./push";
 
@@ -20,7 +19,7 @@ import { sendPush } from "./push";
 const APP_URL = (process.env.APP_URL || "https://app.mixstro.com").replace(/\/$/, "");
 const FROM = process.env.NOTIFY_FROM || "Mixstro <no-reply@mail.mixstro.com>";
 
-export type NotifyType = "connect" | "message" | "jam" | "board" | "alerts";
+export type NotifyType = "connect" | "message" | "jam" | "board" | "alerts" | "digest";
 
 /** The pieces an email is built from, top to bottom inside the card (see the "Mixstro emails" design). */
 export type Block =
@@ -59,13 +58,7 @@ export type Email = {
   push?: { title?: string; body?: string };
 };
 
-let admin: SupabaseClient | null | undefined;
-export function adminClient() {
-  if (admin !== undefined) return admin;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  admin = key && SUPABASE_URL ? createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } }) : null;
-  return admin;
-}
+export { adminClient };
 
 /** Anything to send with: the service role key is the only must (push keys come from Supabase). */
 export const emailEnabled = () => Boolean(adminClient());
@@ -531,6 +524,59 @@ export async function notifyRoleAlert(recipientId: string, joinerId: string, rol
   });
 }
 
+/**
+ * Someone nearby opened (or renewed) an opening for what you play. One per opening and renewal
+ * (the intent key), at most three a week (opening_alert_targets), and only if alerts are on.
+ */
+export async function notifyOpening(recipientId: string, postId: number, authorId: string, miles: number) {
+  const db = adminClient();
+  if (!db) return;
+  const [{ data: post }, map] = await Promise.all([
+    db.from("board_posts").select("title, needed_role, offered_role, rehearsal_days, status").eq("id", postId).maybeSingle<{ title: string; needed_role: string; offered_role: string | null; rehearsal_days: string[]; status: string }>(),
+    people([authorId]),
+  ]);
+  const from = map.get(authorId);
+  if (!post || post.status !== "open" || !from) return;
+  const where = miles <= 1 ? "nearby" : `${Math.round(miles)} mi away`;
+  const asker = post.offered_role ? `${/^[aeiou]/i.test(nounFor(post.offered_role)) ? "An" : "A"} ${nounFor(post.offered_role)}` : from.first_name;
+  const head = `${asker} ${where} is looking for a ${nounFor(post.needed_role)}`;
+  await notify(recipientId, {
+    type: "alerts",
+    ref: `opening:${postId}`,
+    throttleMinutes: 60 * 24 * 7,
+    subject: head,
+    preheader: [post.title, post.rehearsal_days?.length ? `Rehearses ${post.rehearsal_days.join("/")}` : null].filter(Boolean).join(" · "),
+    blocks: [{ kind: "badge", text: "Opening near you" }, who(from), { kind: "headline", text: head }],
+    cta: { label: "See the opening", path: `/board/${postId}` },
+    alt: { label: "Change these alerts", path: "/settings/notifications" },
+  });
+}
+
+/**
+ * Three weeks away: you drop out of Today and search at 30 days. One tap back keeps you in.
+ * Email only by default (the "Weekly digest" setting governs it); once per stretch away.
+ */
+export async function notifyStillLooking(recipientId: string, awaySince: string) {
+  const me = (await people([recipientId])).get(recipientId);
+  if (!me) return;
+  await notify(recipientId, {
+    type: "digest",
+    ref: `still:${awaySince}`,
+    throttleMinutes: 60 * 24 * 60,
+    subject: `Still looking for musicians, ${me.first_name}?`,
+    preheader: "Open Mixstro once this week to stay in search.",
+    blocks: [
+      { kind: "badge", text: "Quick check-in" },
+      { kind: "headline", text: "Still looking?" },
+      { kind: "text", text: "It's been three weeks. To keep search full of people who answer, profiles drop out of Today and search after 30 days away. Your public page and your chats stay." },
+      { kind: "text", text: "Open Mixstro once and you're back in. If you found your people, nice. Nothing to do." },
+    ],
+    cta: { label: "I'm still looking", path: "/discover" },
+    alt: { label: "Email settings", path: "/settings/notifications" },
+    push: { title: "Still looking for musicians?", body: "Open Mixstro once this week to stay in search." },
+  });
+}
+
 /** An accepted jam starts in about two hours. Sent to both players. */
 export async function notifyJamSoon(jamId: number, recipientId: string, otherId: string, startsAt: string, place: string) {
   const other = (await people([otherId])).get(otherId);
@@ -544,6 +590,20 @@ export async function notifyJamSoon(jamId: number, recipientId: string, otherId:
     blocks: [who(other), { kind: "headline", text: `Jam with ${other.first_name} today` }, { kind: "jam", startsAt, place }],
     cta: { label: "Open the chat", path: `/messages/${other.username}` },
     push: { title: `Jam with ${other.first_name} at ${clock(startsAt)}`, body: place },
+  });
+}
+
+/** A band rehearsal starts in about two hours. Sent to members who are in or haven't answered. */
+export async function notifyRehearsalSoon(rehearsalId: number, recipientId: string, bandId: number, bandName: string, startsAt: string, place: string) {
+  await notify(recipientId, {
+    type: "jam",
+    ref: `reh:${rehearsalId}`,
+    throttleMinutes: 60 * 24 * 30,
+    subject: `${bandName} rehearsal at ${clock(startsAt)}`,
+    preheader: `${place}. Can't make it? Say so in Your band.`,
+    blocks: [{ kind: "badge", text: "Rehearsal today" }, { kind: "band", name: bandName, line: place }, { kind: "jam", startsAt, place }],
+    cta: { label: "Open Your band", path: `/bands/${bandId}` },
+    push: { title: `${bandName} rehearsal at ${clock(startsAt)}`, body: place },
   });
 }
 

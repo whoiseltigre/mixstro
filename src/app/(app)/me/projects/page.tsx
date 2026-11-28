@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ProjectList } from "@/components/project-list";
 import { Sheet, SheetCloser } from "@/components/sheet";
 import { toast, undoable } from "@/components/toast";
-import { BackButton, Button, Field } from "@/components/ui";
+import { BackButton, Button, Field, Toggle } from "@/components/ui";
 import { PROVIDER_LABEL, parseClip } from "@/lib/clips";
 import { NAME_MAX, ROLE_MAX, TRACKS_MAX, YEARS, thisYear, type Bandmate, type Project, type Track } from "@/lib/projects";
 import { findBandmates, inviteBandmate, type Candidate } from "./band-actions";
@@ -27,7 +27,6 @@ const fromProject = (p: Project): Form => ({
   bandmates: p.bandmates ?? [],
 });
 
-const selectCls = "h-[50px] w-full rounded-2xl bg-ink border border-paper/12 px-3.5 text-[16px] text-paper outline-none focus:border-paper/50";
 
 export default function ProjectsEditor() {
   const { projects, ready, save, remove } = useMyProjects();
@@ -40,14 +39,14 @@ export default function ProjectsEditor() {
       <div className="mt-2 flex flex-col gap-5">
         <BackButton href="/me" />
         <div className="flex flex-col gap-2">
-          <h1 className="text-[34px] font-bold tracking-[-0.03em] leading-tight">Your projects</h1>
-          <p className="text-[15px] text-smoke leading-snug">Every band and project, old or new. Add the name, your role and the years, then link a track or two.</p>
+          <h1 className="headline text-display">Your projects</h1>
+          <p className="text-callout text-smoke leading-snug">Every band and project, old or new. Add the name, your role and the years, then link a track or two.</p>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          <Link href="/me/projects/import" className="h-12 rounded-full bg-tungsten text-ink text-[16px] font-semibold flex items-center justify-center active:scale-[0.98] transition">
+          <Link href="/me/projects/import" className="press h-12 rounded-full bg-paper text-ink text-body font-semibold flex items-center justify-center">
             Find my releases
           </Link>
-          <Button variant="glass" onClick={() => setForm(blank())} className="h-12 text-[16px]">
+          <Button variant="glass" onClick={() => setForm(blank())} className="h-12 text-body">
             Add a project
           </Button>
         </div>
@@ -108,6 +107,12 @@ function ProjectSheet({
   const [link, setLink] = useState("");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
+  // A new project is three short steps (what, when, the music). Editing shows everything at once.
+  const stepped = !form.id;
+  const [step, setStep] = useState(0);
+  const show = (n: number) => !stepped || step === n;
+  const last = !stepped || step === 2;
+  const titles = ["What was it called?", "When did you play?", "Add the music"];
   const set = (patch: Partial<Form>) => update((f) => ({ ...f, ...patch }));
 
   async function addTrack(raw: string, known?: { title?: string; thumb?: string }) {
@@ -137,7 +142,7 @@ function ProjectSheet({
       handle={false}
       scrimClassName="bg-ink/60"
       label={form.id ? "Edit project" : "Add a project"}
-      className="max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-t-[32px] bg-stage border-t border-paper/12 shadow-[0_-20px_60px_rgb(0_0_0/0.5)]"
+      className="max-w-[440px] max-h-[92dvh] overflow-y-auto rounded-t-hero bg-stage border-t border-paper/12 shadow-[0_-20px_60px_rgb(0_0_0/0.5)]"
     >
       <SheetCloser>
         {(close) => {
@@ -152,65 +157,70 @@ function ProjectSheet({
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          if (!last) return setStep(step + 1);
           run(onSave);
         }}
         aria-label={form.id ? "Edit project" : "Add a project"}
-        className="px-5 pt-2.5 pb-safe flex flex-col gap-4"
+        className={`px-5 pt-2.5 pb-safe flex flex-col gap-4 ${stepped ? "min-h-[410px]" : ""}`}
       >
         <span aria-hidden="true" className="self-center w-[38px] h-[5px] rounded-full bg-paper/25" />
-        <div className="flex justify-between items-center">
-          <button type="button" onClick={close} className="text-[16px] text-smoke">
-            Cancel
+        <div className="flex justify-between items-center -mx-2">
+          <button type="button" onClick={stepped && step > 0 ? () => setStep(step - 1) : close} className="h-11 px-2 text-body text-smoke">
+            {stepped && step > 0 ? "Back" : "Cancel"}
           </button>
-          <h2 className="text-[17px] font-bold">{form.id ? "Edit project" : "Add a project"}</h2>
-          <button type="submit" disabled={busy || !form.name.trim()} className="text-[16px] font-semibold disabled:opacity-40">
-            Save
-          </button>
-        </div>
-
-        <Field id="project-name" label="Band or project" value={form.name} maxLength={NAME_MAX} onChange={(e) => set({ name: e.target.value })} placeholder="Night Shift" required className="text-[16px] bg-ink" />
-        <Field id="project-role" label="Your role" value={form.role} maxLength={ROLE_MAX} onChange={(e) => set({ role: e.target.value })} placeholder="Bass, vocals, producer" className="text-[16px] bg-ink" />
-
-        <div className="grid grid-cols-2 gap-2.5">
-          <div className="flex flex-col gap-2">
-            <label htmlFor="project-from" className="text-[13px] font-semibold text-smoke">From</label>
-            <select id="project-from" value={form.startYear} onChange={(e) => set({ startYear: Number(e.target.value) })} className={selectCls}>
-              {YEARS.map((y) => (
-                <option key={y} value={y}>{y}</option>
+          {stepped ? (
+            <span className="flex gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={3} aria-valuenow={step + 1} aria-label={`Step ${step + 1} of 3`}>
+              {titles.map((t, i) => (
+                <span key={t} className={`h-1 w-8 rounded-full transition-colors duration-300 ${i <= step ? "bg-gel-pink" : "bg-paper/12"}`} />
               ))}
-            </select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <label htmlFor="project-to" className="text-[13px] font-semibold text-smoke">To</label>
-            {form.current ? (
-              <span className={`${selectCls} flex items-center text-smoke`}>Now</span>
-            ) : (
-              <select id="project-to" value={form.endYear} onChange={(e) => set({ endYear: Number(e.target.value) })} className={selectCls}>
-                {YEARS.filter((y) => y >= form.startYear).map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            )}
-          </div>
+            </span>
+          ) : (
+            <h2 className="text-body-lg font-semibold">Edit project</h2>
+          )}
+          <button key={last ? "save" : "next"} type="submit" disabled={busy || !form.name.trim()} className="h-11 px-2 text-body font-semibold disabled:opacity-40">
+            {last ? "Save" : "Next"}
+          </button>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={form.current}
-          onClick={() => set({ current: !form.current, endYear: Math.max(form.endYear, form.startYear) })}
-          className="flex justify-between items-center text-[15px]"
-        >
-          I still play with them
-          <span className={`relative w-[50px] h-[30px] rounded-full transition-colors ${form.current ? "bg-[#67E2DA]" : "bg-paper/20"}`}>
-            <span className={`absolute top-[3px] size-6 rounded-full bg-paper transition-[left] duration-150 ${form.current ? "left-[23px]" : "left-[3px]"}`} />
-          </span>
-        </button>
 
+        {stepped && (
+          <h2 key={step} className="rise-in headline text-title-lg text-pretty">
+            {titles[step]}
+          </h2>
+        )}
+
+        {show(0) && (
+          <>
+            <Field id="project-name" label="Band or project" value={form.name} maxLength={NAME_MAX} onChange={(e) => set({ name: e.target.value })} placeholder="Night Shift" required autoFocus={stepped} className="text-body bg-ink" />
+            <Field id="project-role" label="Your role" value={form.role} maxLength={ROLE_MAX} onChange={(e) => set({ role: e.target.value })} placeholder="Bass, vocals, producer" className="text-body bg-ink" />
+          </>
+        )}
+
+        {show(1) && (
+          <>
+            <div className="grid grid-cols-2 gap-2.5">
+              <YearStepper id="project-from" label="From" value={form.startYear} min={YEARS[YEARS.length - 1]} max={thisYear()} onChange={(y) => set({ startYear: y, endYear: Math.max(form.endYear, y) })} />
+              {form.current ? (
+                <div className="flex flex-col gap-2">
+                  <span className="text-footnote font-semibold text-smoke">To</span>
+                  <span className="field field-inset h-[52px] flex items-center justify-center text-body text-smoke">Now</span>
+                </div>
+              ) : (
+                <YearStepper id="project-to" label="To" value={form.endYear} min={form.startYear} max={thisYear()} onChange={(y) => set({ endYear: y })} />
+              )}
+            </div>
+            <div className="min-h-11 flex justify-between items-center text-callout">
+              <span>I still play with them</span>
+              <Toggle on={form.current} onChange={() => set({ current: !form.current, endYear: Math.max(form.endYear, form.startYear) })} label="I still play with them" />
+            </div>
+          </>
+        )}
+
+        {show(2) && (
         <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-smoke">Tracks</span>
+          <span className="text-footnote font-semibold text-smoke">{stepped ? "Songs from this project (you can add them later too)" : "Songs"}</span>
           {form.tracks.map((t) => (
             <div key={t.id} className="flex items-center gap-3 p-2 rounded-2xl bg-ink border border-paper/8">
-              <span className="relative size-10 shrink-0 rounded-[10px] overflow-hidden bg-riser">
+              <span className="relative size-10 shrink-0 rounded-xs overflow-hidden bg-riser">
                 {t.thumb && (
                    
                   <FadeImg src={t.thumb} alt="" className="absolute inset-0 size-full object-cover" />
@@ -223,9 +233,9 @@ function ProjectSheet({
                   maxLength={120}
                   onChange={(e) => update((f) => ({ ...f, tracks: f.tracks.map((x) => (x.id === t.id ? { ...x, title: e.target.value } : x)) }))}
                   placeholder="Track title"
-                  className="bg-transparent text-[14px] font-semibold outline-none placeholder:text-smoke/60"
+                  className="bg-transparent text-subhead font-semibold outline-none placeholder:text-smoke/85"
                 />
-                <span className="text-[12px] text-smoke">{PROVIDER_LABEL[t.provider]}</span>
+                <span className="text-caption text-smoke">{PROVIDER_LABEL[t.provider]}</span>
               </span>
               <button
                 type="button"
@@ -264,26 +274,27 @@ function ProjectSheet({
                 autoCapitalize="none"
                 autoCorrect="off"
                 placeholder="Paste a link to a track"
-                className="flex-1 min-w-0 bg-transparent text-[15px] outline-none placeholder:text-smoke/60"
+                className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85"
               />
-              <button type="button" onClick={() => addTrack(link)} disabled={!link.trim()} className="h-[38px] px-3.5 rounded-full bg-paper text-ink text-[14px] font-semibold disabled:opacity-40">
+              <button type="button" onClick={() => addTrack(link)} disabled={!link.trim()} className="hit-slop relative h-[38px] px-3.5 rounded-full bg-paper text-ink text-subhead font-semibold disabled:opacity-40">
                 Add
               </button>
             </div>
           )}
-          <span className="text-[12px] text-smoke text-center">Spotify · Apple Music · YouTube · SoundCloud · Bandcamp · Deezer</span>
+          <span className="text-caption text-smoke text-center">Spotify · Apple Music · YouTube · SoundCloud · Bandcamp · Deezer</span>
           {form.tracks.length < TRACKS_MAX && <SongSearch onPick={(h) => addTrack(h.url, { title: h.title, thumb: h.thumb })} />}
         </div>
+        )}
 
         {form.id && <Bandmates projectId={form.id} projectName={form.name} mates={form.bandmates} />}
 
         {error && (
-          <p role="alert" className="text-[13px] text-[#FF453A]">
+          <p role="alert" className="text-footnote text-danger">
             {error}
           </p>
         )}
         {onRemove && (
-          <button type="button" onClick={() => run(onRemove)} disabled={busy} className="self-center text-[14px] font-semibold text-[#FF453A] disabled:opacity-40 pb-2">
+          <button type="button" onClick={() => run(onRemove)} disabled={busy} className="self-center text-subhead font-semibold text-danger disabled:opacity-40 pb-2">
             Remove project
           </button>
         )}
@@ -354,11 +365,11 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-[13px] font-semibold text-smoke">Bandmates</span>
+      <span className="text-footnote font-semibold text-smoke">Bandmates</span>
       {mates.length > 0 && (
         <ul className="flex flex-wrap gap-1.5">
           {mates.map((m) => (
-            <li key={m.username} className="h-8 pl-1 pr-3 rounded-full bg-ink border border-paper/10 flex items-center gap-2 text-[13px] font-semibold">
+            <li key={m.username} className="h-8 pl-1 pr-3 rounded-full bg-ink border border-paper/10 flex items-center gap-2 text-footnote font-semibold">
               <span className="relative size-6 rounded-full overflow-hidden bg-riser">
                 {m.photo && (
                    
@@ -378,7 +389,7 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
           onChange={(e) => setQ(e.target.value)}
           autoComplete="off"
           placeholder="Find a bandmate on Mixstro"
-          className="flex-1 min-w-0 bg-transparent text-[15px] outline-none placeholder:text-smoke/60"
+          className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85"
         />
       </div>
       {found.length > 0 && (
@@ -394,10 +405,10 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
                   )}
                 </span>
                 <span className="flex-1 min-w-0 flex flex-col">
-                  <span className="text-[14px] font-semibold truncate">{c.name}</span>
-                  <span className="text-[12px] text-smoke truncate">@{c.username} · {c.instrument}</span>
+                  <span className="text-subhead font-semibold truncate">{c.name}</span>
+                  <span className="text-caption text-smoke truncate">@{c.username} · {c.instrument}</span>
                 </span>
-                <button type="button" disabled={done} onClick={() => tag(c)} className="h-8 px-3 rounded-full bg-paper text-ink text-[13px] font-semibold disabled:bg-paper/14 disabled:text-paper">
+                <button type="button" disabled={done} onClick={() => tag(c)} className="hit-slop relative h-8 px-3 rounded-full bg-paper text-ink text-footnote font-semibold disabled:bg-paper/14 disabled:text-paper">
                   {done ? "Invited" : "Tag"}
                 </button>
               </li>
@@ -405,13 +416,13 @@ function Bandmates({ projectId, projectName, mates }: { projectId: string; proje
           })}
         </ul>
       )}
-      <button type="button" onClick={shareLink} disabled={busy} className="h-11 rounded-full border border-paper/16 text-[14px] font-semibold hover:border-paper/40 disabled:opacity-40">
+      <button type="button" onClick={shareLink} disabled={busy} className="h-11 rounded-full border border-paper/16 text-subhead font-semibold hover:border-paper/40 disabled:opacity-40">
         Not on Mixstro? Send them a link
       </button>
       {(note || invited.length > 0) && (
-        <p className="text-[12px] text-smoke text-center">{note ?? "They'll get an invite to confirm. The band shows on both profiles once they do."}</p>
+        <p className="text-caption text-smoke text-center">{note ?? "They'll get an invite to confirm. The band shows on both profiles once they do."}</p>
       )}
-      {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
+      {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
     </div>
   );
 }
@@ -438,7 +449,7 @@ function SongSearch({ onPick }: { onPick: (hit: SongHit) => void }) {
       <div className="h-12 rounded-full bg-ink border border-paper/12 flex items-center gap-2 px-4 focus-within:border-paper/50">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" className="text-smoke shrink-0" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4-4" /></svg>
         <label htmlFor="song-q" className="sr-only">Search by song or album name</label>
-        <input id="song-q" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" placeholder="Or search: artist and song name" className="flex-1 min-w-0 bg-transparent text-[15px] outline-none placeholder:text-smoke/60" />
+        <input id="song-q" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" placeholder="Or search: artist and song name" className="flex-1 min-w-0 bg-transparent text-callout outline-none placeholder:text-smoke/85" />
       </div>
       {hits.length > 0 && (
         <ul className="flex flex-col rounded-2xl bg-ink border border-paper/8 divide-y divide-paper/8">
@@ -452,17 +463,54 @@ function SongSearch({ onPick }: { onPick: (hit: SongHit) => void }) {
                 }}
                 className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-paper/5"
               >
-                <span className="relative size-10 shrink-0 rounded-[10px] overflow-hidden bg-riser">{h.thumb && <FadeImg src={h.thumb} alt="" className="absolute inset-0 size-full object-cover" />}</span>
+                <span className="relative size-10 shrink-0 rounded-xs overflow-hidden bg-riser">{h.thumb && <FadeImg src={h.thumb} alt="" className="absolute inset-0 size-full object-cover" />}</span>
                 <span className="flex-1 min-w-0 flex flex-col">
-                  <span className="text-[14px] font-semibold truncate">{h.title}</span>
-                  <span className="text-[12px] text-smoke truncate">{[h.artist, h.kind, h.year].filter(Boolean).join(" · ")}</span>
+                  <span className="text-subhead font-semibold truncate">{h.title}</span>
+                  <span className="text-caption text-smoke truncate">{[h.artist, h.kind, h.year].filter(Boolean).join(" · ")}</span>
                 </span>
-                <span className="text-[13px] font-semibold text-tungsten shrink-0">Add</span>
+                <span className="text-footnote font-semibold text-paper shrink-0">Add</span>
               </button>
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+
+/** A year you step or type: big minus and plus, the year in the middle. No native dropdown. */
+function YearStepper({ id, label, value, min, max, onChange }: { id: string; label: string; value: number; min: number; max: number; onChange: (year: number) => void }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+  const clamp = (y: number) => Math.min(max, Math.max(min, y));
+  const btn = "press size-11 shrink-0 rounded-full flex items-center justify-center text-paper disabled:opacity-30";
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={id} className="text-footnote font-semibold text-smoke">
+        {label}
+      </label>
+      <div className="field field-inset h-[52px] flex items-center px-1">
+        <button type="button" aria-label={`${label}: one year earlier`} disabled={value <= min} onClick={() => onChange(clamp(value - 1))} className={btn}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M5 12h14" /></svg>
+        </button>
+        <input
+          id={id}
+          value={text}
+          inputMode="numeric"
+          maxLength={4}
+          onChange={(e) => {
+            const v = e.target.value.replace(/\D/g, "");
+            setText(v);
+            if (v.length === 4 && Number(v) >= min && Number(v) <= max) onChange(Number(v));
+          }}
+          onBlur={() => setText(String(value))}
+          className="flex-1 min-w-0 bg-transparent text-center text-body-lg font-semibold tabular-nums outline-none"
+        />
+        <button type="button" aria-label={`${label}: one year later`} disabled={value >= max} onClick={() => onChange(clamp(value + 1))} className={btn}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </button>
+      </div>
     </div>
   );
 }

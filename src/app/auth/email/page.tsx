@@ -49,7 +49,7 @@ export default function EmailPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        {error && <p role="alert" className="mt-3 text-[13px] text-[#FF453A]">{error}</p>}
+        {error && <p role="alert" className="mt-3 text-footnote text-danger">{error}</p>}
       </div>
       <StepFooter>
         <Button type="submit" disabled={!valid || busy}>

@@ -21,18 +21,18 @@ export function MyBands({ projects }: { projects: Project[] }) {
 
   return (
     <section className="flex flex-col gap-2" aria-label="Your bands">
-      <h2 className="text-[20px] font-bold tracking-[-0.02em]">{current.length === 1 ? "Your band" : "Your bands"}</h2>
-      <ul className="rounded-[22px] bg-stage divide-y divide-paper/8 overflow-hidden">
+      <h2 className="text-title3 font-semibold tracking-[-0.01em]">{current.length === 1 ? "Your band" : "Your bands"}</h2>
+      <ul className="rounded-card-lg bg-stage divide-y divide-paper/8 overflow-hidden">
         {current.map((p) => {
           const art = artworkOf(p);
           const body = (
             <>
-              <span className="relative size-12 rounded-[14px] overflow-hidden shrink-0" style={{ background: nameWash(p.name) }}>
+              <span className="relative size-12 rounded-field overflow-hidden shrink-0" style={{ background: nameWash(p.name) }}>
                 {art && <FadeImg src={art} alt="" className="absolute inset-0 size-full object-cover" />}
               </span>
               <span className="flex-1 min-w-0 flex flex-col">
-                <span className="text-[16px] font-semibold truncate">{p.name}</span>
-                <span className="text-[13px] text-smoke truncate">{p.bandId ? "Chat, shows, open spots, page" : "Not a band page yet"}</span>
+                <span className="text-body font-semibold truncate">{p.name}</span>
+                <span className="text-footnote text-smoke truncate">{p.bandId ? "Chat, shows, open spots, page" : "Not a band page yet"}</span>
               </span>
             </>
           );
@@ -42,7 +42,7 @@ export function MyBands({ projects }: { projects: Project[] }) {
               {p.bandId ? (
                 <Link href={`/bands/${p.bandId}`} className={cls}>
                   {body}
-                  <span className="h-8 px-3.5 rounded-full glass text-[13px] font-semibold flex items-center shrink-0">Open</span>
+                  <span className="h-8 px-3.5 rounded-full glass text-footnote font-semibold flex items-center shrink-0">Open</span>
                 </Link>
               ) : (
                 <div className={cls}>
@@ -60,7 +60,7 @@ export function MyBands({ projects }: { projects: Project[] }) {
                         router.push(`/bands/${res.id}`);
                       })
                     }
-                    className="h-8 px-3.5 rounded-full bg-paper text-ink text-[13px] font-semibold shrink-0 disabled:opacity-50"
+                    className="hit-slop relative h-8 px-3.5 rounded-full bg-paper text-ink text-footnote font-semibold shrink-0 disabled:opacity-50"
                   >
                     Make a band page
                   </button>

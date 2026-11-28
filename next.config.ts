@@ -23,7 +23,31 @@ function blogRedirects() {
   return [...fromPosts, ...dropped].map((r) => ({ ...r, permanent: true }));
 }
 
+/** The commit being built: Cloudflare Workers Builds sets WORKERS_CI_COMMIT_SHA, Amplify AWS_COMMIT_ID, GitHub Actions GITHUB_SHA. Served at /api/health. */
+const BUILD_SHA = process.env.WORKERS_CI_COMMIT_SHA || process.env.AWS_COMMIT_ID || process.env.GITHUB_SHA || "";
+
+/** Supabase project host (profile photos live in its public storage buckets). */
+const SUPABASE_HOST = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").hostname || "*.supabase.co";
+  } catch {
+    return "*.supabase.co";
+  }
+})();
+
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_SHA: BUILD_SHA.slice(0, 40),
+    NEXT_PUBLIC_BUILT_AT: new Date().toISOString(),
+  },
+  images: {
+    // Profile photos come from Supabase Storage and Google sign-in avatars. Without these the
+    // optimizer answers 400 and real people's photos show as blank circles.
+    remotePatterns: [
+      { protocol: "https", hostname: SUPABASE_HOST, pathname: "/storage/v1/object/public/**" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
+    ],
+  },
   experimental: {
     // Keep pages you just saw in the browser's router cache for 30s, so hopping back and forth
     // between tabs is instant. Any save (server action + revalidatePath) clears it right away.

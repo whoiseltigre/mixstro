@@ -56,27 +56,27 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center" role="dialog" aria-modal="true" aria-labelledby="connect-title">
       <button type="button" aria-label="Close" onClick={onClose} className="absolute inset-0 bg-ink/70 backdrop-blur-sm" />
-      <div className="relative w-full md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-[28px] md:rounded-[28px] bg-stage border border-paper/10 px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4">
+      <div className="relative w-full md:max-w-[480px] max-h-[92dvh] overflow-y-auto rounded-t-sheet md:rounded-sheet bg-stage border border-paper/10 px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))] flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="connect-title" className="text-[20px] font-semibold">
+          <h2 id="connect-title" className="text-title3 font-semibold">
             {ready === false ? "Add a song first" : `Say hi to ${first}`}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="size-9 shrink-0 rounded-full bg-paper/8 flex items-center justify-center hover:bg-paper/14">
+          <button type="button" onClick={onClose} aria-label="Close" className="size-11 shrink-0 rounded-full bg-paper/8 flex items-center justify-center hover:bg-paper/14">
             <svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" /></svg>
           </button>
         </div>
 
-        {ready === null && <p className="text-[14px] text-smoke py-6">One sec…</p>}
+        {ready === null && <p className="text-subhead text-smoke py-6">One sec…</p>}
 
         {ready === false && (
           <>
-            <p className="text-[15px] text-smoke text-pretty">
+            <p className="text-callout text-smoke text-pretty">
               Musicians answer people they can hear. Add one song, a clip or a track from a band you&apos;ve played in, and your Connect to {first} is one tap away.
             </p>
-            <Link href="/me/projects" className="h-12 rounded-full bg-paper text-ink text-[16px] font-semibold flex items-center justify-center">
+            <Link href="/me/projects" className="h-12 rounded-full bg-paper text-ink text-body font-semibold flex items-center justify-center">
               Add a song
             </Link>
-            <Link href="/onboarding/sound" className="text-center text-[14px] font-semibold underline underline-offset-4">
+            <Link href="/onboarding/sound" className="text-center text-subhead font-semibold underline underline-offset-4">
               Or paste a clip link
             </Link>
           </>
@@ -84,7 +84,7 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
 
         {ready && (
           <>
-            <p className="text-[14px] text-smoke -mt-2">A short note gets far more replies than a blank request. Tap one to send it.</p>
+            <p className="text-subhead text-smoke -mt-2">A short note gets far more replies than a blank request. Tap one to send it.</p>
             <ul className="flex flex-col gap-2">
               {openers(person).map((o) => (
                 <li key={o}>
@@ -92,16 +92,16 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
                     type="button"
                     disabled={pending}
                     onClick={() => send(o)}
-                    className="w-full text-left p-3.5 rounded-[18px] bg-ink/60 border border-paper/10 text-[15px] leading-[1.4] transition hover:border-tungsten/70 disabled:opacity-50 flex items-center gap-3"
+                    className="w-full text-left p-3.5 rounded-tile bg-ink/60 border border-paper/10 text-callout leading-[1.4] transition hover:border-paper/50 disabled:opacity-50 flex items-center gap-3"
                   >
                     <span className="flex-1">{o}</span>
-                    <span className="shrink-0 text-[13px] font-semibold text-tungsten">Send</span>
+                    <span className="shrink-0 text-footnote font-semibold text-paper">Send</span>
                   </button>
                 </li>
               ))}
             </ul>
             <div className="flex flex-col gap-2 pt-1">
-              <label htmlFor="connect-note" className="text-[13px] font-semibold text-smoke">Or write your own</label>
+              <label htmlFor="connect-note" className="text-footnote font-semibold text-smoke">Or write your own</label>
               <textarea
                 id="connect-note"
                 value={own}
@@ -109,18 +109,18 @@ export function ConnectSheet({ person, onClose, onSent }: { person: ConnectPerso
                 maxLength={MAX}
                 rows={3}
                 placeholder={`What would you like to play with ${first}?`}
-                className="rounded-[18px] bg-ink border border-paper/12 p-3.5 text-[16px] leading-[1.45] placeholder:text-smoke/70 outline-none focus:border-paper/45 resize-none"
+                className="field field-inset p-3.5 text-body leading-[1.45] resize-none"
               />
               <button
                 type="button"
                 disabled={pending || own.trim().length < 2}
                 onClick={() => send(own)}
-                className="h-12 rounded-full bg-paper text-ink text-[16px] font-semibold disabled:opacity-40"
+                className="h-12 rounded-full bg-paper text-ink text-body font-semibold disabled:opacity-40"
               >
                 {pending ? "Sending…" : "Send Connect"}
               </button>
             </div>
-            {error && <p role="alert" className="text-[13px] text-[#FF453A]">{error}</p>}
+            {error && <p role="alert" className="text-footnote text-danger">{error}</p>}
           </>
         )}
       </div>

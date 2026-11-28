@@ -28,7 +28,7 @@ export function StepHeader({ step, total, back, glow }: { step?: number; total?:
           >
             {/* One bar that fills up, lit in the step's color, like a fader being pushed. */}
             <span
-              className="block h-full rounded-full transition-[width] duration-700 ease-[cubic-bezier(0.2,0.9,0.25,1)]"
+              className="block h-full rounded-full transition-[width] duration-700 ease-standard"
               style={{
                 width: `${(step / total) * 100}%`,
                 background: glow ? `linear-gradient(90deg, color-mix(in srgb, ${glow} 55%, #fff0), ${glow})` : "var(--color-paper)",
@@ -36,7 +36,7 @@ export function StepHeader({ step, total, back, glow }: { step?: number; total?:
               }}
             />
           </div>
-          <span className="text-[12px] text-smoke tabular-nums">
+          <span className="text-caption text-smoke tabular-nums">
             {step} of {total}
           </span>
         </>
@@ -49,12 +49,12 @@ export function StepTitle({ title, sub, eyebrow, color }: { title: string; sub?:
   return (
     <div className="flex flex-col gap-2 px-6 pt-6">
       {eyebrow && (
-        <span className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: color ?? "var(--color-tungsten)" }}>
+        <span className="text-caption font-semibold uppercase tracking-[0.14em]" style={{ color: color ?? "var(--color-tungsten)" }}>
           {eyebrow}
         </span>
       )}
-      <h1 className="font-display text-[31px] font-semibold tracking-[-0.03em] leading-[1.05] text-balance">{title}</h1>
-      {sub && <p className="text-[15px] leading-[1.45] text-smoke text-pretty">{sub}</p>}
+      <h1 className="font-display text-display-sm font-semibold tracking-[-0.03em] leading-[1.05] text-balance">{title}</h1>
+      {sub && <p className="text-callout leading-[1.45] text-smoke text-pretty">{sub}</p>}
     </div>
   );
 }

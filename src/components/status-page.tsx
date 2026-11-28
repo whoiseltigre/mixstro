@@ -53,7 +53,7 @@ export function StatusPage({
         <h1 className="mt-6 font-display text-[clamp(30px,6vw,44px)] font-semibold leading-[1.05] tracking-[-0.035em]">
           {title}
         </h1>
-        <div className="mt-4 max-w-[36ch] text-[17px] leading-relaxed text-smoke">{children}</div>
+        <div className="mt-4 max-w-[36ch] text-body-lg leading-relaxed text-smoke">{children}</div>
         <div className="mt-9 flex w-full max-w-sm flex-col gap-3 sm:flex-row">{actions}</div>
       </div>
     </main>

@@ -34,33 +34,52 @@ export function Wordmark({ size = 24 }: { size?: number }) {
 }
 
 type Variant = "primary" | "glass" | "danger" | "gel";
+/** lg (56) for the main action on a screen, md (48) inside cards and sheets, sm (44) for inline actions. Never smaller: 44 is the tap minimum. */
+type Size = "lg" | "md" | "sm";
 
-const base =
-  "h-14 w-full rounded-full text-[17px] flex items-center justify-center gap-2 cursor-pointer transition duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgb(0_0_0/0.35)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper motion-reduce:transform-none disabled:opacity-40 disabled:pointer-events-none";
+/** Every button: a finger-sized pill that dips the instant it's pressed and springs back (`press`). */
+const core =
+  "press rounded-full flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 hover:shadow-lift active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper motion-reduce:transform-none disabled:opacity-40 disabled:pointer-events-none";
+const sizes: Record<Size, string> = {
+  lg: "h-14 w-full text-body-lg",
+  md: "h-12 px-6 text-body",
+  sm: "h-11 px-5 text-callout",
+};
+const base = `${core} ${sizes.lg}`;
+/** Class names for a button, for the rare element that can't be a `Button` (a label, a summary). */
+export function buttonClass(variant: Exclude<Variant, "gel"> = "primary", size: Size = "lg", className?: string) {
+  return cx(core, sizes[size], variants[variant], className);
+}
 const variants: Record<Exclude<Variant, "gel">, string> = {
   primary: "bg-paper text-ink font-semibold hover:bg-white",
   glass: "glass text-paper font-medium hover:bg-paper/10",
-  danger: "bg-[#FF453A] text-paper font-semibold hover:bg-[#ff6159]",
+  danger: "bg-danger text-paper font-semibold hover:bg-[#ff6159]",
 };
 
-/** Primary actions. "gel" adds the Gel rim, reserved for Connect-type peak moments. */
+/**
+ * The one button. Paper is the primary action, glass the secondary, danger for destructive ones.
+ * "gel" adds the gel rim and is reserved for two moments only: Connect, and a new connection
+ * (`npm run lint:design` enforces the list).
+ */
 export function Button({
   variant = "primary",
+  size = "lg",
   className,
+  wide,
   children,
   ...props
-}: ComponentProps<"button"> & { variant?: Variant }) {
+}: ComponentProps<"button"> & { variant?: Variant; size?: Size; /** Fill the row it sits in (lg always does). */ wide?: boolean }) {
   if (variant === "gel") {
     return (
-      <div className="gel-rim rounded-full w-full">
-        <button {...props} className={cx(base, variants.primary, "h-[53px]", className)}>
+      <div className={cx("gel-rim rounded-full", size === "lg" ? "w-full" : wide && "flex-1")}>
+        <button data-haptic="tap" {...props} className={cx(core, sizes[size], variants.primary, size === "lg" && "h-[53px]", "w-full", className)}>
           {children}
         </button>
       </div>
     );
   }
   return (
-    <button {...props} className={cx(base, variants[variant], className)}>
+    <button data-haptic="tap" {...props} className={cx(core, sizes[size], variants[variant], wide && "flex-1", className)}>
       {children}
     </button>
   );
@@ -68,14 +87,141 @@ export function Button({
 
 export function ButtonLink({
   variant = "primary",
+  size = "lg",
   className,
   children,
   ...props
-}: ComponentProps<typeof Link> & { variant?: Exclude<Variant, "gel"> }) {
+}: ComponentProps<typeof Link> & { variant?: Exclude<Variant, "gel">; size?: Size }) {
   return (
-    <Link {...props} className={cx(base, variants[variant], className)}>
+    <Link data-haptic="tap" {...props} className={cx(core, sizes[size], variants[variant], className)}>
       {children}
     </Link>
+  );
+}
+
+/**
+ * The one switch. Its "on" color is the --toggle-on token, so it is the same everywhere.
+ * Pass `label` when there is no visible text next to it.
+ */
+export function Toggle({
+  on,
+  onChange,
+  label,
+  disabled,
+  className,
+}: {
+  on: boolean;
+  onChange: (on: boolean) => void;
+  label?: string;
+  disabled?: boolean;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      disabled={disabled}
+      data-haptic="select"
+      onClick={() => onChange(!on)}
+      className={cx("hit-slop relative w-[51px] h-[31px] rounded-full shrink-0 transition-colors duration-(--duration-quick) disabled:opacity-40", className)}
+      style={{ background: on ? "var(--toggle-on)" : "rgb(245 241 236 / 0.2)" }}
+    >
+      <span
+        aria-hidden="true"
+        className={cx("absolute top-[2px] left-[2px] size-[27px] rounded-full bg-white shadow transition-transform duration-(--duration-base) ease-spring-snappy", on && "translate-x-[20px]")}
+      />
+    </button>
+  );
+}
+
+/** A row with a label on the left and the switch on the right; the whole row is the tap target. */
+export function ToggleRow({ on, onChange, children, disabled }: { on: boolean; onChange: (on: boolean) => void; children: ReactNode; disabled?: boolean }) {
+  return (
+    <div
+      role="presentation"
+      onClick={(e) => {
+        if (!disabled && !(e.target as HTMLElement).closest("button")) onChange(!on);
+      }}
+      className="field flex items-center justify-between gap-3 min-h-[52px] px-4 py-2 cursor-pointer"
+    >
+      <span className="text-body-lg">{children}</span>
+      <Toggle on={on} onChange={onChange} disabled={disabled} label={typeof children === "string" ? children : undefined} />
+    </div>
+  );
+}
+
+/**
+ * The one play button: a Paper icon on a glass circle, Tungsten only while it's playing.
+ * `size` is the visible circle; the tap area is always at least 44px.
+ */
+export function PlayButton({
+  playing,
+  size = 44,
+  label,
+  className,
+  ...props
+}: Omit<ComponentProps<"button">, "children"> & { playing?: boolean; size?: number; label?: string }) {
+  return (
+    <button
+      type="button"
+      aria-label={label ?? (playing ? "Pause" : "Play")}
+      data-haptic="tap"
+      {...props}
+      className={cx("press hit-slop relative rounded-full flex items-center justify-center shrink-0", playing ? "bg-tungsten text-ink" : "glass text-paper", className)}
+      style={{ width: size, height: size, ...props.style }}
+    >
+      <PlayGlyph playing={playing} size={Math.round(size * 0.36)} />
+    </button>
+  );
+}
+
+/** The play/pause mark on its own, for places where the whole row is the button. */
+export function PlayGlyph({ playing, size = 14 }: { playing?: boolean; size?: number }) {
+  return playing ? (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="5" y="4" width="5" height="16" rx="1.5" />
+      <rect x="14" y="4" width="5" height="16" rx="1.5" />
+    </svg>
+  ) : (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ marginLeft: size * 0.08 }}>
+      <path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" />
+    </svg>
+  );
+}
+
+/** A multi-line text field with the same look as `Field`. */
+export function TextArea({ label, hint, id, className, ...props }: ComponentProps<"textarea"> & { label?: string; hint?: string; id: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {label && (
+        <label htmlFor={id} className="text-footnote font-semibold text-smoke">
+          {label}
+        </label>
+      )}
+      <textarea id={id} {...props} className={cx("field px-4 py-3 text-body-lg leading-[1.45] resize-none", className)} />
+      {hint && <p className="text-caption text-smoke">{hint}</p>}
+    </div>
+  );
+}
+
+/** The gear that opens Settings; lives top right on your own profile. */
+export function GearIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M19.4 14.6a1.6 1.6 0 0 0 .32 1.76l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.6 1.6 0 0 0-1.76-.32 1.6 1.6 0 0 0-.97 1.46V20.5a2 2 0 1 1-4 0v-.09a1.6 1.6 0 0 0-1.05-1.46 1.6 1.6 0 0 0-1.76.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.6 1.6 0 0 0 .32-1.76 1.6 1.6 0 0 0-1.46-.97H3.5a2 2 0 1 1 0-4h.09a1.6 1.6 0 0 0 1.46-1.05 1.6 1.6 0 0 0-.32-1.76l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.6 1.6 0 0 0 1.76.32h.08a1.6 1.6 0 0 0 .97-1.46V3.5a2 2 0 1 1 4 0v.09a1.6 1.6 0 0 0 .97 1.46 1.6 1.6 0 0 0 1.76-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.6 1.6 0 0 0-.32 1.76v.08a1.6 1.6 0 0 0 1.46.97h.09a2 2 0 1 1 0 4h-.09a1.6 1.6 0 0 0-1.46.97z" />
+    </svg>
+  );
+}
+
+export function PencilIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 20h4L19 9l-4-4L4 16v4z" />
+      <path d="M13.5 6.5l4 4" />
+    </svg>
   );
 }
 
@@ -89,10 +235,11 @@ export function Chip({
     <button
       type="button"
       aria-pressed={selected}
+      data-haptic="select"
       {...props}
       className={cx(
-        "h-11 px-4 rounded-full text-[15px] inline-flex items-center gap-1.5 border transition active:scale-[0.97]",
-        selected ? "bg-paper text-ink border-paper font-semibold" : "border-paper/16 text-paper",
+        "press h-11 px-4 rounded-full text-callout inline-flex items-center gap-1.5 border",
+        selected ? "bg-paper text-ink border-paper font-semibold" : "border-paper/25 text-paper",
         className,
       )}
     >
@@ -111,24 +258,24 @@ export function Field({
 }: ComponentProps<"input"> & { label: string; hint?: string; id: string }) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="text-[13px] font-semibold text-smoke">
+      <label htmlFor={id} className="text-footnote font-semibold text-smoke">
         {label}
       </label>
       <input
         id={id}
         {...props}
         className={cx(
-          "h-[52px] rounded-2xl bg-stage border border-paper/12 px-4 text-[17px] text-paper placeholder:text-smoke/60 outline-none focus:border-paper/50",
+          "field h-[52px] px-4 text-body-lg",
           className,
         )}
       />
-      {hint && <p className="text-[12px] text-smoke">{hint}</p>}
+      {hint && <p className="text-caption text-smoke">{hint}</p>}
     </div>
   );
 }
 
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <h2 className="text-[13px] font-semibold text-smoke">{children}</h2>;
+  return <h2 className="text-footnote font-semibold text-smoke">{children}</h2>;
 }
 
 export function BackButton({ href, onClick }: { href?: string; onClick?: () => void }) {
@@ -213,7 +360,7 @@ export function GoogleButton({ className, ...props }: ComponentProps<"button">) 
       {...props}
       className={cx(
         base,
-        "bg-[#131314] border border-[#8E918F] text-[#E3E3E3] text-[16px] font-medium gap-3 hover:bg-[#1f1f20] hover:border-[#E3E3E3]",
+        "bg-[#131314] border border-[#8E918F] text-[#E3E3E3] text-body font-medium gap-3 hover:bg-[#1f1f20] hover:border-[#E3E3E3]",
         className,
       )}
       style={{ fontFamily: "var(--font-roboto), Roboto, Arial, sans-serif" }}

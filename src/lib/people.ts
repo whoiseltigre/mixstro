@@ -7,6 +7,9 @@ import { distancesFromMe, ensureLocation } from "./geo";
 import { getJams, pendingCheckins, type Jam } from "./jams";
 import { createClient } from "./supabase/server";
 import { isSupabaseConfigured } from "./supabase/config";
+import { messagePreview } from "./clip-reply";
+import type { ClipProvider } from "./clips";
+import { replyHabit, type ReplyStats } from "./reply-habits";
 
 /**
  * Server-side reads for Today, profiles, search and Messages. With Supabase configured
@@ -167,11 +170,46 @@ function toMusician(row: ProfileRow, influences: InfluenceRow[], viewer: Viewer)
 async function hydrate(viewer: Viewer, rows: ProfileRow[]): Promise<Musician[]> {
   if (!rows.length) return [];
   const ids = rows.map((r) => r.id);
-  const [{ data }, miles] = await Promise.all([
+  const [{ data }, miles, remote, habits] = await Promise.all([
     viewer.supabase.from("influences").select("profile_id, artist_id, artist_name, image_url, rank").in("profile_id", ids),
     distancesFromMe(viewer.supabase, ids),
+    openToRemote(viewer.supabase, ids),
+    replyHabits(viewer.supabase, ids),
   ]);
-  return rows.map((r) => ({ ...toMusician(r, (data ?? []) as InfluenceRow[], viewer), distanceMi: miles.get(r.id) }));
+  return rows.map((r) => {
+    const habit = habits.get(r.id) ?? { slow: false };
+    return {
+      ...toMusician(r, (data ?? []) as InfluenceRow[], viewer),
+      distanceMi: miles.get(r.id),
+      remote: remote.has(r.id),
+      replyLabel: habit.label,
+      slowToReply: habit.slow,
+    };
+  });
+}
+
+/** Who has "Remote collabs" in their Open to. Read on its own so a database without open_to still works. */
+async function openToRemote(supabase: Viewer["supabase"], ids: string[]): Promise<Set<string>> {
+  const { data, error } = await supabase.from("profiles").select("id").in("id", ids).contains("open_to", ["remote"]);
+  return error ? new Set() : new Set(((data ?? []) as { id: string }[]).map((r) => r.id));
+}
+
+/** Reply habits by profile id (public.reply_stats). Empty before that function exists. */
+async function replyHabits(supabase: Viewer["supabase"], ids: string[]) {
+  const { data, error } = await supabase.rpc("reply_stats", { p_ids: ids.slice(0, 200) });
+  const out = new Map<string, ReturnType<typeof replyHabit>>();
+  if (error) return out;
+  for (const r of (data ?? []) as { profile_id: string; asked: number; answered: number; median_hours: number | string | null }[]) {
+    const stats: ReplyStats = { asked: r.asked, answered: r.answered, medianHours: r.median_hours === null ? null : Number(r.median_hours) };
+    out.set(r.profile_id, replyHabit(stats));
+  }
+  return out;
+}
+
+/** Is the viewer open to remote collabs themselves? null when the database doesn't have Open to yet. */
+async function viewerIsRemote(viewer: Viewer): Promise<boolean | null> {
+  const { data, error } = await viewer.supabase.from("profiles").select("open_to").eq("id", viewer.id).maybeSingle<{ open_to: string[] | null }>();
+  return error ? null : Boolean(data?.open_to?.includes("remote"));
 }
 
 /** Musicians by profile id, in the order given, with shared influences and distance. */
@@ -218,18 +256,32 @@ export async function myConnections(viewer: Viewer): Promise<ConnectionRow[]> {
 /** Past this many chats waiting on you, Today pauses until you answer some (#4). */
 export const YOUR_TURN_LIMIT = 8;
 
+type Latest = { connection_id: number; sender_id: string; body: string | null; voice_url: string | null; created_at: string };
+
+/**
+ * The newest message in each conversation, however busy the others are (latest_messages, one
+ * row per thread). Before that function exists it falls back to the old capped scan.
+ */
+async function latestPerThread(viewer: Viewer, connectionIds: number[]): Promise<Latest[]> {
+  if (!connectionIds.length) return [];
+  const { data, error } = await viewer.supabase.rpc("latest_messages", { p_connections: connectionIds });
+  if (!error) return (data ?? []) as Latest[];
+  const { data: rows } = await viewer.supabase
+    .from("messages")
+    .select("connection_id, sender_id, body, voice_url, created_at")
+    .in("connection_id", connectionIds)
+    .order("created_at", { ascending: false })
+    .limit(1000);
+  const seen = new Set<number>();
+  return ((rows ?? []) as Latest[]).filter((m) => !seen.has(m.connection_id) && Boolean(seen.add(m.connection_id)));
+}
+
 /** How many accepted conversations end with a message from the other person. */
 async function yourTurnCount(viewer: Viewer, connections: ConnectionRow[]) {
   const accepted = connections.filter((c) => c.status === "accepted").map((c) => c.id);
   if (accepted.length < YOUR_TURN_LIMIT) return 0;
-  const { data } = await viewer.supabase
-    .from("messages")
-    .select("connection_id, sender_id")
-    .in("connection_id", accepted)
-    .order("created_at", { ascending: false })
-    .limit(1000);
-  const last = new Map<number, string>();
-  for (const m of (data ?? []) as { connection_id: number; sender_id: string }[]) if (!last.has(m.connection_id)) last.set(m.connection_id, m.sender_id);
+  const latest = await latestPerThread(viewer, accepted);
+  const last = new Map<number, string>(latest.map((m) => [m.connection_id, m.sender_id]));
   return [...last.values()].filter((sender) => sender !== viewer.id).length;
 }
 
@@ -244,6 +296,10 @@ export type Today = {
   demo: boolean;
   /** How busy your area is, for the "you're one of the first here" card. Signed-in only. */
   area?: Area;
+  /** Musicians open to remote collabs, at any distance (not already in the deck). */
+  remote?: Musician[];
+  /** Whether you're open to remote collabs yourself (offers the switch when not); null before the database has Open to. */
+  youRemote?: boolean | null;
 };
 
 /**
@@ -267,6 +323,38 @@ export type Area = {
 export const EARLY_AREA = 3;
 
 /**
+ * Who Today chooses from. People who asked to play with you are fetched by id, on their own,
+ * so a busy market can never push them out. Everyone else comes from local_candidates, which
+ * keeps only discoverable, unblocked, not-yet-known people inside your radius BEFORE taking a
+ * limit (200 newer accounts in another city can't crowd out your neighbors). Before that
+ * function exists, the older "200 most recent anywhere" read is used.
+ */
+async function todayCandidates(viewer: Viewer, exclude: Set<string>, incoming: string[]): Promise<ProfileRow[]> {
+  const [{ data: asked }, local] = await Promise.all([
+    incoming.length ? viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", incoming) : Promise.resolve({ data: [] }),
+    viewer.supabase.rpc("local_candidates", { p_limit: 60 }),
+  ]);
+  let organic: ProfileRow[];
+  if (!local.error) {
+    const ids = ((local.data ?? []) as { profile_id: string }[]).map((r) => r.profile_id).filter((id) => !exclude.has(id));
+    const { data } = ids.length ? await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", ids) : { data: [] };
+    organic = (data ?? []) as ProfileRow[];
+    // Few people local yet: add recent people further out, for the early-area card's "nearest
+    // musicians past your radius" (they're still filtered by radius for the deck itself).
+    if (organic.length < EARLY_AREA) {
+      const { data: recent } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).order("last_active_at", { ascending: false }).limit(60);
+      organic = [...organic, ...((recent ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id))];
+    }
+  } else {
+    // discoverable_profiles: onboarded and active in the last 30 days; RLS hides blocked pairs.
+    const { data } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).order("last_active_at", { ascending: false }).limit(200);
+    organic = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
+  }
+  const seen = new Set<string>();
+  return [...((asked ?? []) as ProfileRow[]), ...organic].filter((r) => r.id !== viewer.id && !seen.has(r.id) && Boolean(seen.add(r.id)));
+}
+
+/**
  * Today: up to five musicians you haven't connected with or passed on. People who
  * already reached out to you come first, then the most shared influences.
  */
@@ -282,13 +370,9 @@ export async function getToday(): Promise<Today> {
   // Only needs the connections, so it runs alongside the rest instead of after it.
   const yourTurn = yourTurnCount(viewer, connections);
   const alertRoles = getAlertRoles(viewer).catch(() => ({ roles: [] as string[], picked: false }));
-  // discoverable_profiles: onboarded and active in the last 60 days; RLS hides blocked pairs.
-  const { data } = await viewer.supabase
-    .from("discoverable_profiles")
-    .select(PROFILE_COLUMNS)
-    .order("last_active_at", { ascending: false })
-    .limit(200);
-  const candidates = ((data ?? []) as ProfileRow[]).filter((r) => !exclude.has(r.id));
+  const youRemote = viewerIsRemote(viewer).catch(() => null);
+  const remoteRows = remoteCandidates(viewer, exclude);
+  const candidates = await todayCandidates(viewer, exclude, incoming);
   const [nearby, music] = await Promise.all([
     hydrate(viewer, candidates),
     withMusic(viewer.supabase, candidates.map((r) => r.id)),
@@ -303,6 +387,8 @@ export async function getToday(): Promise<Today> {
     (a, b) =>
       Number(incoming.includes(b.id)) - Number(incoming.includes(a.id)) ||
       profileTier(a, music) - profileTier(b, music) ||
+      // People who leave most Connects unanswered go after everyone who replies.
+      Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)) ||
       score(b) - score(a) ||
       near(a) - near(b),
   );
@@ -318,7 +404,22 @@ export async function getToday(): Promise<Today> {
       .slice(0, 8),
     alertRoles: (await alertRoles).roles,
   };
-  return { people: withSamples(people, TODAY_SIZE, viewer), incoming, notes, demo: false, yourTurn: await yourTurn, area };
+  const deck = withSamples(people, TODAY_SIZE, viewer);
+  const inDeck = new Set(deck.map((m) => m.id));
+  const remote = await hydrate(viewer, (await remoteRows).filter((r) => !inDeck.has(r.id)));
+  const remoteMusic = await withMusic(viewer.supabase, remote.map((m) => m.id));
+  remote.sort((a, b) => profileTier(a, remoteMusic) - profileTier(b, remoteMusic) || Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)) || score(b) - score(a));
+  return { people: deck, incoming, notes, demo: false, yourTurn: await yourTurn, area, remote: remote.slice(0, 6), youRemote: await youRemote };
+}
+
+/** People open to remote collabs, anywhere (public.remote_candidates). Empty before it exists. */
+async function remoteCandidates(viewer: Viewer, exclude: Set<string>): Promise<ProfileRow[]> {
+  const { data, error } = await viewer.supabase.rpc("remote_candidates", { p_limit: 30 });
+  if (error) return [];
+  const ids = ((data ?? []) as { profile_id: string }[]).map((r) => r.profile_id).filter((id) => !exclude.has(id));
+  if (!ids.length) return [];
+  const { data: rows } = await viewer.supabase.from("discoverable_profiles").select(PROFILE_COLUMNS).in("id", ids);
+  return (rows ?? []) as ProfileRow[];
 }
 
 /** Everyone you can search: photo and music first, then most recently active. */
@@ -332,8 +433,8 @@ export async function getSearchable(): Promise<Musician[]> {
   ]);
   const rows = (data ?? []) as ProfileRow[];
   const [real, music] = await Promise.all([hydrate(viewer, rows), withMusic(viewer.supabase, rows.map((r) => r.id))]);
-  // Stable sort keeps "most recently active" within each tier.
-  real.sort((a, b) => profileTier(a, music) - profileTier(b, music));
+  // Stable sort keeps "most recently active" within each tier; people who rarely reply go last in theirs.
+  real.sort((a, b) => profileTier(a, music) - profileTier(b, music) || Number(Boolean(a.slowToReply)) - Number(Boolean(b.slowToReply)));
   return real.length >= ENOUGH_REAL ? real : [...real, ...SAMPLES(viewer)];
 }
 
@@ -375,14 +476,9 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
   if (!accepted.length) return { threads: SAMPLE_THREADS(viewer), demo: false };
 
   const otherIds = accepted.map((c) => (c.from_id === viewer.id ? c.to_id : c.from_id));
-  const [{ data: rows }, { data: messages }] = await Promise.all([
+  const [{ data: rows }, messages] = await Promise.all([
     viewer.supabase.from("profiles").select(PROFILE_COLUMNS).in("id", otherIds),
-    viewer.supabase
-      .from("messages")
-      .select("connection_id, sender_id, body, voice_url, created_at")
-      .in("connection_id", accepted.map((c) => c.id))
-      .order("created_at", { ascending: false })
-      .limit(500),
+    latestPerThread(viewer, accepted.map((c) => c.id)),
   ]);
   const [people, checkins] = await Promise.all([
     hydrate(viewer, (rows ?? []) as ProfileRow[]),
@@ -391,7 +487,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
   const threads = accepted.flatMap((c) => {
     const person = people.find((p) => p.id === (c.from_id === viewer.id ? c.to_id : c.from_id));
     if (!person) return [];
-    const last = (messages ?? []).find((m) => m.connection_id === c.id);
+    const last = messages.find((m) => m.connection_id === c.id);
     const at = last?.created_at ?? c.created_at;
     return [
       {
@@ -400,7 +496,7 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
         preview: checkins.has(c.id)
           ? `Did you end up playing with ${person.name}?`
           : last
-            ? (last.body ?? "Voice note")
+            ? messagePreview(last)
             : `You're connected. Say hi to ${person.name}.`,
         at,
         mine: checkins.has(c.id) ? false : last?.sender_id === viewer.id,
@@ -414,11 +510,39 @@ export async function getThreads(): Promise<{ threads: Thread[]; demo: boolean }
 }
 
 /** `voiceUrl` is a short-lived signed link to the recording in the private "voice" bucket. */
-export type ChatMessage = { id: number; mine: boolean; body: string | null; voiceUrl: string | null; voiceSeconds?: number | null; createdAt: string };
+export type ChatMessage = {
+  id: number;
+  mine: boolean;
+  body: string | null;
+  voiceUrl: string | null;
+  voiceSeconds?: number | null;
+  createdAt: string;
+  /** The phone's id for the send, so the optimistic copy and the stored one are matched. */
+  clientId?: string | null;
+  /** A clip this message points at, and the moment in it. */
+  clip?: ChatClip | null;
+};
+
+/** A clip in a chat. `available` is false once the clip was removed: the reply stays readable. */
+export type ChatClip = {
+  id: number;
+  at: number | null;
+  available: boolean;
+  url?: string;
+  provider?: ClipProvider | null;
+  mine?: boolean;
+  duration?: number | null;
+};
+
+/** A clip you can reply to in this chat: theirs and yours. */
+export type ClipOption = { id: number; url: string; provider: ClipProvider | null; mine: boolean; duration: number | null };
+
+/** Messages per page in a chat. The newest page loads first; older pages load on request. */
+export const CHAT_PAGE = 150;
 
 export type ChatView =
   | { kind: "demo"; person: Musician }
-  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[] }
+  | { kind: "live"; person: Musician; connectionId: number; messages: ChatMessage[]; jams: Jam[]; more: boolean; clips: ClipOption[] }
   | { kind: "not-connected"; person: Musician; connection: ConnectionRow | null; viewerId: string };
 
 /** The conversation with one musician. Messages only exist inside an accepted connection. */
@@ -430,33 +554,94 @@ export const getChat = cache(async (username: string): Promise<ChatView | null> 
     return { kind: "not-connected", person: view.person, connection: view.connection, viewerId: view.viewerId };
   }
   const supabase = (await createClient())!;
-  // "*" so the chat still loads before newer columns (voice_seconds) exist.
-  const [{ data }, jams] = await Promise.all([
-    supabase.from("messages").select("*").eq("connection_id", view.connection.id).order("created_at").limit(500),
+  const [page, jams, clips] = await Promise.all([
+    chatPage(supabase, view.connection.id, view.viewerId, null),
     getJams(supabase, view.connection.id, view.viewerId),
+    chatClipOptions(supabase, view.viewerId, view.person.id),
   ]);
-  const rows = (data ?? []) as { id: number; sender_id: string; body: string | null; voice_url: string | null; voice_seconds?: number | null; created_at: string }[];
+  return { kind: "live", person: view.person, connectionId: view.connection.id, jams, clips, ...page };
+});
+
+type ChatRow = {
+  id: number;
+  sender_id: string;
+  body: string | null;
+  voice_url: string | null;
+  voice_seconds?: number | null;
+  created_at: string;
+  client_id?: string | null;
+  clip_id?: number | null;
+  clip_at?: number | null;
+};
+type ClipRow = { id: number; profile_id: string; url: string; provider: ClipProvider | null; duration_s?: number | null };
+
+/** Your clips and theirs, to reply to. "*" so it loads before duration_s exists. */
+async function chatClipOptions(supabase: Viewer["supabase"], viewerId: string, otherId: string): Promise<ClipOption[]> {
+  const { data } = await supabase.from("clips").select("*").in("profile_id", [otherId, viewerId]).eq("kind", "clip").order("id", { ascending: false }).limit(40);
+  return ((data ?? []) as ClipRow[])
+    .map((c) => ({ id: c.id, url: c.url, provider: c.provider, mine: c.profile_id === viewerId, duration: c.duration_s ?? null }))
+    .sort((a, b) => Number(a.mine) - Number(b.mine));
+}
+
+/**
+ * One page of a chat, newest first with the id breaking ties, then flipped to read top to
+ * bottom. `before` is the oldest message already on screen; null means the newest page.
+ * "*" so it still loads before newer columns (voice_seconds, client_id) exist.
+ */
+async function chatPage(
+  supabase: Viewer["supabase"],
+  connectionId: number,
+  viewerId: string,
+  before: { id: number; createdAt: string } | null,
+): Promise<{ messages: ChatMessage[]; more: boolean }> {
+  let q = supabase.from("messages").select("*").eq("connection_id", connectionId);
+  if (before) q = q.or(`created_at.lt."${before.createdAt}",and(created_at.eq."${before.createdAt}",id.lt.${before.id})`);
+  const { data } = await q.order("created_at", { ascending: false }).order("id", { ascending: false }).limit(CHAT_PAGE + 1);
+  const all = (data ?? []) as ChatRow[];
+  const rows = all.slice(0, CHAT_PAGE).reverse();
   const paths = rows.flatMap((m) => (m.voice_url ? [m.voice_url] : []));
   const signed = new Map<string, string>();
-  if (paths.length) {
-    const { data: links } = await supabase.storage.from("voice").createSignedUrls(paths, 60 * 60 * 6);
-    for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
-  }
+  const clipIds = [...new Set(rows.flatMap((m) => (m.clip_id ? [m.clip_id] : [])))];
+  const [, clipRows] = await Promise.all([
+    paths.length
+      ? supabase.storage
+          .from("voice")
+          .createSignedUrls(paths, 60 * 60 * 6)
+          .then(({ data: links }) => {
+            for (const l of links ?? []) if (l.path && l.signedUrl) signed.set(l.path, l.signedUrl);
+          })
+      : null,
+    // Read as the viewer: a clip that's gone (or that they can't read) comes back missing and shows as unavailable.
+    clipIds.length ? supabase.from("clips").select("*").in("id", clipIds).eq("kind", "clip").then(({ data: c }) => (c ?? []) as ClipRow[]) : ([] as ClipRow[]),
+  ]);
+  const clipsById = new Map(clipRows.map((c) => [c.id, c]));
   return {
-    kind: "live",
-    person: view.person,
-    connectionId: view.connection.id,
-    jams,
+    more: all.length > CHAT_PAGE,
     messages: rows.map((m) => ({
       id: m.id,
-      mine: m.sender_id === view.viewerId,
+      mine: m.sender_id === viewerId,
       body: m.body,
       voiceUrl: m.voice_url ? (signed.get(m.voice_url) ?? null) : null,
       voiceSeconds: m.voice_seconds ?? null,
       createdAt: m.created_at,
+      clientId: m.client_id ?? null,
+      clip: m.clip_id ? toChatClip(m.clip_id, m.clip_at ?? null, clipsById.get(m.clip_id), viewerId) : null,
     })),
   };
-});
+}
+
+function toChatClip(id: number, at: number | null, row: ClipRow | undefined, viewerId: string): ChatClip {
+  if (!row) return { id, at, available: false };
+  return { id, at, available: true, url: row.url, provider: row.provider, mine: row.profile_id === viewerId, duration: row.duration_s ?? null };
+}
+
+/** Older messages in your chat with someone (Load earlier). Same visibility rules as the chat. */
+export async function getOlderMessages(username: string, before: { id: number; createdAt: string }) {
+  const view = await getProfile(username);
+  if (!view?.viewerId || view.connection?.status !== "accepted") return { messages: [] as ChatMessage[], more: false };
+  const supabase = (await createClient())!;
+  return chatPage(supabase, view.connection.id, view.viewerId, before);
+}
 
 /** Starting or rebuilding a band? Drummers and bassists are the classic hard finds. */
 export const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { RETURN_COOKIE, isReturnPath } from "@/lib/return-path";
 import { publicOrigin } from "@/lib/redirect";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -9,12 +10,22 @@ const APP_ROUTES = ["/discover", "/board", "/messages", "/me", "/onboarding", "/
 const VANITY = /^\/@([A-Za-z0-9_.]{3,24})\/?$/;
 const PROFILE = /^\/m\/([A-Za-z0-9_.]{3,24})\/?$/;
 const REF_COOKIE = "mx_ref";
+/** "Start <name> on Mixstro" from the band name generator: carry the name through signup. */
+const BAND_COOKIE = "mx_band";
+
+function rememberBand(request: NextRequest, response: NextResponse) {
+  const raw = request.nextUrl.searchParams.get("band");
+  if (!raw) return response;
+  const name = raw.replace(/[\u0000-\u001f\u007f<>]/g, "").replace(/\s+/g, " ").trim().slice(0, 80);
+  if (name) response.cookies.set(BAND_COOKIE, name, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+  return response;
+}
 
 // The public website lives on the apex domain; the app lives on app.mixstro.com.
 const SITE_HOST = "mixstro.com";
 const APP_ORIGIN = "https://app.mixstro.com";
 // Paths on mixstro.com that belong to the app, sent over to app.mixstro.com.
-const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/b/", "/join"];
+const APP_ONLY = [...APP_ROUTES, "/auth", "/m/", "/@", "/p/", "/b/", "/join", "/o/"];
 
 function siteRouting(request: NextRequest): NextResponse | null {
   const host = (request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? "")
@@ -41,7 +52,7 @@ export async function middleware(request: NextRequest) {
   const vanity = path.match(VANITY)?.[1];
 
   if (!isSupabaseConfigured) {
-    return vanity ? NextResponse.rewrite(new URL(`/m/${vanity.toLowerCase()}`, request.url)) : NextResponse.next();
+    return rememberBand(request, vanity ? NextResponse.rewrite(new URL(`/m/${vanity.toLowerCase()}`, request.url)) : NextResponse.next());
   }
 
   let response = NextResponse.next({ request });
@@ -79,6 +90,16 @@ export async function middleware(request: NextRequest) {
   // A "Confirm your spot" link: remember it through signup so onboarding can bring them back.
   const join = path.match(/^\/join\/([0-9a-f]{32})\/?$/)?.[1];
   if (join) response.cookies.set("mx_join", join, { maxAge: 60 * 60 * 24 * 30, path: "/", sameSite: "lax" });
+  rememberBand(request, response);
+
+  // Back to the shared opening that sent you to sign in (only /o/<id>, set by that page).
+  const back = request.cookies.get(RETURN_COOKIE)?.value;
+  if (user && path === "/discover" && isReturnPath(back)) {
+    const res = NextResponse.redirect(new URL(back, publicOrigin(request.headers, request.nextUrl.origin)));
+    response.cookies.getAll().forEach((c) => res.cookies.set(c));
+    res.cookies.delete(RETURN_COOKIE);
+    return res;
+  }
 
   if (!user && (APP_ROUTES.some((r) => path.startsWith(r)) || path.startsWith("/m/"))) {
     return NextResponse.redirect(new URL("/", publicOrigin(request.headers, request.nextUrl.origin)));

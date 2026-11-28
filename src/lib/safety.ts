@@ -1,9 +1,13 @@
 "use client";
 
-import { alertSafetyTeam } from "@/app/(app)/safety-actions";
+import { alertSafetyTeam, deleteMyAccount } from "@/app/(app)/safety-actions";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-/** Block, report and delete account (#11). Demo mode keeps blocks locally. */
+/**
+ * Block, report and delete account (#11). Only demo mode (no Supabase set up at all) keeps
+ * blocks on the device; with real accounts every failure is reported, never shown as done.
+ */
 
 export const REPORT_REASONS = [
   { id: "fake", label: "Fake profile or impersonation" },
@@ -23,16 +27,21 @@ async function signedIn() {
   return data.user ? { supabase, user: data.user } : null;
 }
 
-async function profileId(username: string) {
-  const s = await signedIn();
-  if (!s) return null;
-  const { data } = await s.supabase.from("profiles").select("id").eq("username", username).maybeSingle();
-  return data ? { ...s, id: data.id as string } : null;
+const SIGNED_OUT = "Your session ended. Sign in again and try once more.";
+const OFFLINE = "That didn't go through. Check your connection and try again.";
+
+/** The signed-in person and the profile behind a username, or why not. */
+async function target(username: string): Promise<{ error: string } | { s: NonNullable<Awaited<ReturnType<typeof signedIn>>>; id: string }> {
+  const s = await signedIn().catch(() => null);
+  if (!s) return { error: SIGNED_OUT };
+  const { data, error } = await s.supabase.from("profiles").select("id").eq("username", username).maybeSingle();
+  if (error) return { error: OFFLINE };
+  if (!data) return { error: "We couldn't find that profile. They may have deleted their account." };
+  return { s, id: data.id as string };
 }
 
 export async function blockUser(username: string): Promise<{ error?: string }> {
-  const s = await profileId(username);
-  if (!s) {
+  if (!isSupabaseConfigured) {
     try {
       const list: string[] = JSON.parse(localStorage.getItem(BLOCKS_KEY) ?? "[]");
       localStorage.setItem(BLOCKS_KEY, JSON.stringify([...new Set([...list, username])]));
@@ -41,57 +50,65 @@ export async function blockUser(username: string): Promise<{ error?: string }> {
     }
     return {};
   }
-  const { error } = await s.supabase.from("blocks").upsert({ blocker_id: s.user.id, blocked_id: s.id });
-  if (error) return { error: error.message };
-  alertSafetyTeam("block", s.id).catch(() => {});
+  const t = await target(username);
+  if ("error" in t) return t;
+  const { error } = await t.s.supabase.from("blocks").upsert({ blocker_id: t.s.user.id, blocked_id: t.id });
+  if (error) return { error: OFFLINE };
+  alertSafetyTeam("block", t.id).catch(() => {});
   return {};
 }
 
 export async function reportUser(username: string, reason: ReportReason, details: string): Promise<{ error?: string }> {
-  const s = await profileId(username);
-  if (!s) return {};
-  const { error } = await s.supabase
+  if (!isSupabaseConfigured) return {};
+  const t = await target(username);
+  if ("error" in t) return t;
+  const { error } = await t.s.supabase
     .from("reports")
-    .insert({ reporter_id: s.user.id, reported_id: s.id, reason, details: details.trim() || null });
-  if (error) return { error: error.message };
-  alertSafetyTeam("report", s.id).catch(() => {});
+    .insert({ reporter_id: t.s.user.id, reported_id: t.id, reason, details: details.trim() || null });
+  if (error) return { error: OFFLINE };
+  alertSafetyTeam("report", t.id).catch(() => {});
   return {};
 }
 
-/** Removes uploaded clips, then the account itself; the profile and everything under it cascades. */
-export async function deleteAccount(): Promise<{ error?: string }> {
-  const s = await signedIn();
-  if (!s) {
-    try {
-      Object.keys(localStorage)
-        .filter((k) => k.startsWith("mixstro:"))
-        .forEach((k) => localStorage.removeItem(k));
-    } catch {
-      // Nothing stored.
-    }
-    return {};
-  }
-  // Your recordings and photos go too (each lives in a folder named after you).
-  for (const bucket of ["clips", "avatars"]) {
-    const { data: files } = await s.supabase.storage.from(bucket).list(s.user.id, { limit: 1000 });
-    if (files?.length) await s.supabase.storage.from(bucket).remove(files.map((f) => `${s.user.id}/${f.name}`));
-  }
-  const { error } = await s.supabase.rpc("delete_my_account");
-  if (error) return { error: error.message };
+/** Clears everything Mixstro keeps in this browser. */
+function clearDevice() {
   clearAppCache();
-  await s.supabase.auth.signOut();
   try {
-    localStorage.removeItem("mixstro:onboarding");
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith("mixstro:"))
+      .forEach((k) => localStorage.removeItem(k));
   } catch {
     // Nothing stored.
   }
-  return {};
 }
 
 /**
- * Signs out on this device: stops push here (so the next person on this phone or computer
- * doesn't get your notifications), ends the session and clears what's kept in the browser.
+ * Deletes the account on the server (files, voice notes, then the account itself), then
+ * signs out here and clears this device. Only reports success once the server says it's done.
  */
+export async function deleteAccount(): Promise<{ error?: string }> {
+  if (!isSupabaseConfigured) {
+    clearDevice();
+    return {};
+  }
+  let result: Awaited<ReturnType<typeof deleteMyAccount>>;
+  try {
+    result = await deleteMyAccount();
+  } catch {
+    return { error: OFFLINE };
+  }
+  if (result.error) return { error: result.error };
+  try {
+    const { disablePush } = await import("@/lib/push-client");
+    await disablePush();
+  } catch {
+    // Push was never on here.
+  }
+  await createClient()?.auth.signOut({ scope: "local" }).catch(() => {});
+  clearDevice();
+  return {};
+}
+
 /** The iPhone app keeps copies of screens for fast launches (public/sw.js): drop them. */
 function clearAppCache() {
   try {
@@ -101,6 +118,10 @@ function clearAppCache() {
   }
 }
 
+/**
+ * Signs out on this device: stops push here (so the next person on this phone or computer
+ * doesn't get your notifications), ends the session and clears what's kept in the browser.
+ */
 export async function signOut(): Promise<{ error?: string }> {
   clearAppCache();
   try {

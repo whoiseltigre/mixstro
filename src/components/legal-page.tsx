@@ -10,11 +10,11 @@ export function LegalPage({ title, updated, children }: { title: string; updated
         <Wordmark size={18} />
         <span className="size-10" />
       </div>
-      <h1 className="headline mt-8 text-[34px]" style={{ fontWeight: 700 }}>
+      <h1 className="headline mt-8 text-display" style={{ fontWeight: 700 }}>
         {title}
       </h1>
-      <p className="mt-2 text-[13px] text-smoke">Last updated {updated}</p>
-      <div className="mt-8 flex flex-col gap-6 text-[15px] leading-[1.55] text-paper/85 [&_h2]:mb-1.5 [&_h2]:text-[17px] [&_h2]:font-semibold [&_h2]:text-paper">
+      <p className="mt-2 text-footnote text-smoke">Last updated {updated}</p>
+      <div className="mt-8 flex flex-col gap-6 text-callout leading-[1.55] text-paper/85 [&_h2]:mb-1.5 [&_h2]:text-body-lg [&_h2]:font-semibold [&_h2]:text-paper">
         {children}
       </div>
     </main>

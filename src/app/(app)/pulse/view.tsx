@@ -88,7 +88,85 @@ const STATE = {
   early: { label: "Too early to tell", dot: "bg-paper/30" },
 } as const;
 
-export function PulseView({ p }: { p: Pulse }) {
+/** tool_pulse(): band name generator counts for the last 28 days. */
+export type ToolPulse = { days: number; counts: Record<string, number>; votes_made: number; votes_two_voters: number; votes_second_round: number };
+
+const FUNNEL: [key: string, label: string][] = [
+  ["bng_generate", "Batches generated"],
+  ["bng_shortlist", "Names shortlisted"],
+  ["bng_check", "Is it taken? checks"],
+  ["bng_share", "Ask the band shares"],
+  ["bng_story", "Story images made"],
+  ["bng_vote_cast", "Votes cast"],
+  ["bng_signup_click", "Start on Mixstro clicks"],
+  ["bng_profile_done", "Profiles finished"],
+];
+
+function Generator({ t }: { t: ToolPulse }) {
+  const stats: [string, number][] = [
+    ...FUNNEL.map(([k, label]) => [label, t.counts[k] ?? 0] as [string, number]),
+    ["Band votes started", t.votes_made],
+    ["Votes with 2+ voters", t.votes_two_voters],
+    ["Votes with a 2nd round", t.votes_second_round],
+  ];
+  return (
+    <section aria-labelledby="generator" className="flex flex-col gap-3">
+      <h2 id="generator" className="text-body-lg font-semibold">Band name generator</h2>
+      <p className="text-footnote text-smoke text-pretty -mt-1">Last {t.days} days, everyone who used it (no sign-in needed, so test visits count too).</p>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+        {stats.map(([label, n]) => (
+          <li key={label} className="p-4 rounded-card bg-stage border border-paper/8 flex flex-col gap-1">
+            <span className="text-title-lg font-semibold leading-none tabular-nums">{n.toLocaleString("en-US")}</span>
+            <span className="text-footnote text-smoke">{label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export type OpeningPulse = {
+  open: number;
+  opened_28d: number;
+  filled_28d: number;
+  expired_28d: number;
+  checked: number;
+  zero_supply: number;
+  by_role: Record<string, { open: number; zero: number }>;
+};
+
+/** Openings: local supply (open requests with nobody eligible nearby) and outcomes. */
+function Openings({ o }: { o: OpeningPulse }) {
+  const stats: [string, string][] = [
+    ["Open now", String(o.open)],
+    ["Nobody eligible nearby", `${o.zero_supply} of ${o.checked}`],
+    ["Opened, 28 days", String(o.opened_28d)],
+    ["Filled, 28 days", String(o.filled_28d)],
+    ["Expired, 28 days", String(o.expired_28d)],
+  ];
+  const roles = Object.entries(o.by_role).sort((a, b) => b[1].open - a[1].open);
+  return (
+    <section aria-labelledby="openings" className="flex flex-col gap-3">
+      <h2 id="openings" className="text-body-lg font-semibold">Openings</h2>
+      <p className="text-footnote text-smoke text-pretty -mt-1">Requests with nobody eligible nearby tell you which roles to recruit, and where.</p>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+        {stats.map(([label, n]) => (
+          <li key={label} className="p-4 rounded-card bg-stage border border-paper/8 flex flex-col gap-1">
+            <span className="text-title-lg font-semibold leading-none tabular-nums">{n}</span>
+            <span className="text-footnote text-smoke">{label}</span>
+          </li>
+        ))}
+      </ul>
+      {roles.length > 0 && (
+        <p className="text-footnote text-smoke">
+          {roles.map(([role, r]) => `${role}: ${r.open} open, ${r.zero} with nobody nearby`).join(" · ")}
+        </p>
+      )}
+    </section>
+  );
+}
+
+export function PulseView({ p, tool, openings }: { p: Pulse; tool?: ToolPulse; openings?: OpeningPulse }) {
   const replies = new Map(p.replies.map((r) => [r.week, r]));
 
   return (
@@ -96,8 +174,8 @@ export function PulseView({ p }: { p: Pulse }) {
       <header className="mt-3 flex items-center gap-3">
         <BackButton href="/settings" />
         <div className="flex flex-col">
-          <h1 className="headline text-[28px]">Pulse</h1>
-          <span className="text-[13px] text-smoke">
+          <h1 className="headline text-title-lg">Pulse</h1>
+          <span className="text-footnote text-smoke">
             {p.real_people} real musicians · updated{" "}
             {new Date(p.generated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
           </span>
@@ -105,34 +183,34 @@ export function PulseView({ p }: { p: Pulse }) {
       </header>
 
       <section aria-labelledby="signals" className="flex flex-col gap-3">
-        <h2 id="signals" className="text-[17px] font-semibold">The seven signals</h2>
-        <p className="text-[13px] text-smoke text-pretty -mt-1">
+        <h2 id="signals" className="text-body-lg font-semibold">The seven signals</h2>
+        <p className="text-footnote text-smoke text-pretty -mt-1">
           Rates use the last four signup weeks old enough to judge. Sample people, your account and test accounts are left out.
         </p>
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {tiles(p).map((t) => (
-            <li key={t.name} className="p-4 rounded-[20px] bg-stage border border-paper/8 flex flex-col gap-2">
-              <span className="text-[13px] font-semibold text-smoke">{t.name}</span>
+            <li key={t.name} className="p-4 rounded-card bg-stage border border-paper/8 flex flex-col gap-2">
+              <span className="text-footnote font-semibold text-smoke">{t.name}</span>
               <span className="flex items-baseline gap-2">
-                <span className="text-[34px] font-semibold leading-none tabular-nums">{t.value}</span>
-                <span className="text-[13px] text-smoke">target {t.target}</span>
+                <span className="text-display font-semibold leading-none tabular-nums">{t.value}</span>
+                <span className="text-footnote text-smoke">target {t.target}</span>
               </span>
-              <span className="flex items-center gap-1.5 text-[13px] font-semibold">
+              <span className="flex items-center gap-1.5 text-footnote font-semibold">
                 <span className={`size-2 rounded-full ${STATE[t.state].dot}`} aria-hidden="true" />
                 {STATE[t.state].label}
               </span>
-              <span className="text-[12.5px] text-smoke text-pretty">{t.sub}</span>
+              <span className="text-footnote text-smoke text-pretty">{t.sub}</span>
             </li>
           ))}
         </ul>
       </section>
 
       <section aria-labelledby="weeks" className="flex flex-col gap-3">
-        <h2 id="weeks" className="text-[17px] font-semibold">By signup week</h2>
+        <h2 id="weeks" className="text-body-lg font-semibold">By signup week</h2>
         <div className="overflow-x-auto -mx-5 px-5 md:mx-0 md:px-0">
-          <table className="w-full min-w-[640px] text-[14px] tabular-nums">
+          <table className="w-full min-w-[640px] text-subhead tabular-nums">
             <thead>
-              <tr className="text-left text-[12px] text-smoke">
+              <tr className="text-left text-caption text-smoke">
                 <th className="py-2 pr-3 font-semibold">Week of</th>
                 <th className="py-2 px-3 font-semibold text-right">Signups</th>
                 <th className="py-2 px-3 font-semibold text-right">Finished</th>
@@ -169,16 +247,19 @@ export function PulseView({ p }: { p: Pulse }) {
         </div>
       </section>
 
+      {openings && <Openings o={openings} />}
+      {tool && <Generator t={tool} />}
+
       <div className="grid md:grid-cols-2 gap-8">
         <section aria-labelledby="instead" className="flex flex-col gap-3">
-          <h2 id="instead" className="text-[17px] font-semibold">What they&apos;d use instead</h2>
-          <p className="text-[13px] text-smoke -mt-1">
+          <h2 id="instead" className="text-body-lg font-semibold">What they&apos;d use instead</h2>
+          <p className="text-footnote text-smoke -mt-1">
             Survey: {p.survey.very} very, {p.survey.somewhat} somewhat, {p.survey.not} not disappointed.
           </p>
           <Quotes items={p.survey.instead.map((i) => ({ text: i.text, meta: `${i.answer} · ${day(i.at)}` }))} empty="No answers yet." />
         </section>
         <section aria-labelledby="notes" className="flex flex-col gap-3">
-          <h2 id="notes" className="text-[17px] font-semibold">Feedback</h2>
+          <h2 id="notes" className="text-body-lg font-semibold">Feedback</h2>
           <Quotes items={p.notes.map((n) => ({ text: n.body, meta: `@${n.username} · ${day(n.at)}` }))} empty="Nothing sent yet." />
         </section>
       </div>
@@ -193,13 +274,13 @@ function Pending() {
 }
 
 function Quotes({ items, empty }: { items: { text: string; meta: string }[]; empty: string }) {
-  if (!items.length) return <p className="text-[14px] text-smoke">{empty}</p>;
+  if (!items.length) return <p className="text-subhead text-smoke">{empty}</p>;
   return (
     <ul className="flex flex-col gap-2">
       {items.map((q, i) => (
-        <li key={i} className="p-3.5 rounded-[16px] bg-stage flex flex-col gap-1">
-          <span className="text-[14.5px] text-pretty whitespace-pre-line">{q.text}</span>
-          <span className="text-[12px] text-smoke">{q.meta}</span>
+        <li key={i} className="p-3.5 rounded-2xl bg-stage flex flex-col gap-1">
+          <span className="text-callout text-pretty whitespace-pre-line">{q.text}</span>
+          <span className="text-caption text-smoke">{q.meta}</span>
         </li>
       ))}
     </ul>

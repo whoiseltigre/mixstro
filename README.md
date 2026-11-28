@@ -1,6 +1,6 @@
 # Mixstro
 
-Where musicians meet. Mixstro is for three things: showing off your whole musical journey, finding people to start or fill out a band, and networking for gigs and other musicians. No swiping: five musicians worth meeting each day, based on shared influences, goals, and where and when you play.
+Where musicians meet. Mixstro is for three things: showing off your whole musical journey, finding people to start or fill out a band, and networking for gigs and other musicians. No swiping and nobody to pass on: a daily lineup of musicians worth meeting, based on shared influences, goals, and where and when you play.
 
 Installable web app (PWA) built with Next.js 15, Tailwind CSS 4 and Supabase.
 
@@ -40,7 +40,7 @@ Open http://localhost:3000 on a phone-sized window, or add it to your iPhone hom
 - Warm neutrals do 95% of the work: Ink `#0F0D0B`, Stage `#1A1816`, Riser `#292624`, Smoke `#A8A49E`, Paper `#F5F1EC`.
 - Tungsten `#FFB245` is the only accent, at most once per screen.
 - The Gel sheen (`var(--gel)`) is only for peak moments: Connect and a new connection.
-- Headlines use SF Pro Display / Inter Tight 800 at -0.035em. No serif or italic display type.
+- Headlines use SF Pro Display / Inter Tight at the `--headline-weight` token (620) and -0.028em. No serif or italic display type.
 
 ## Artist search
 

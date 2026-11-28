@@ -5,6 +5,7 @@ import { after } from "next/server";
 import { getViewer } from "@/lib/people";
 import { notifyBandMessage, notifyBandNote } from "@/lib/notify";
 import { spotTitle, type BandStatus } from "@/lib/band-page";
+import { ROLE_IDS, expandRoles, nounFor } from "@/lib/instruments";
 
 /**
  * Running a band: editing its page, shows, open spots, the band chat and notes from
@@ -153,14 +154,22 @@ export async function closeSpot(id: string, postId: string): Promise<Result> {
   return {};
 }
 
-export async function sendBandMessage(id: string, body: string): Promise<Result> {
+/**
+ * `clientId`: the phone's id for this send, the same on a retry. The database keeps one row per
+ * band, sender and send id, so a retry after a lost answer doesn't post twice.
+ */
+export async function sendBandMessage(id: string, body: string, clientId?: string): Promise<Result> {
   const n = bandId(id);
   if (n === null) return DEMO;
   const text = body.trim().slice(0, 4000);
   if (!text) return { error: "Write something first." };
   const viewer = await getViewer();
   if (!viewer) return SIGNED_OUT;
-  const { error } = await viewer.supabase.from("band_messages").insert({ band_id: n, sender_id: viewer.id, kind: "text", body: text });
+  const client_id = clientId && /^[0-9a-f-]{36}$/i.test(clientId) ? clientId : undefined;
+  const row = { band_id: n, sender_id: viewer.id, kind: "text", body: text };
+  let { error } = await viewer.supabase.from("band_messages").insert(client_id ? { ...row, client_id } : row);
+  if (error?.code === "23505" && client_id) return {}; // landed on an earlier try
+  if (error && client_id && (error.code === "42703" || error.code === "PGRST204")) ({ error } = await viewer.supabase.from("band_messages").insert(row));
   if (error) return { error: "That didn't send. Try again." };
   after(() => notifyBandMessage(n, viewer.id, text));
   revalidatePath("/messages", "layout");
@@ -216,4 +225,137 @@ export async function startBand(projectId: string): Promise<{ id?: string; error
   if (error || data == null) return { error: "That didn't work. Try again." };
   revalidatePath("/me");
   return { id: String(data) };
+}
+
+/** Opening the band chat marks it read. Called by the chat itself, not its loader, so prefetching the page never clears unread counts. */
+export async function markBandRead(id: string): Promise<void> {
+  const n = bandId(id);
+  if (n === null) return;
+  const viewer = await getViewer();
+  if (!viewer) return;
+  await viewer.supabase.rpc("mark_band_read", { p_band: n });
+}
+
+// Rehearsals, setlists and fill-ins: what a working band opens the app for every week. -------
+
+/** Plan a rehearsal, or the same time weekly (up to 8 weeks). `startsAt` is an ISO time from the phone. */
+export async function planRehearsal(id: string, r: { startsAt: string; place: string; note: string; weeks: number }): Promise<Result> {
+  const n = bandId(id);
+  if (n === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  if (Number.isNaN(Date.parse(r.startsAt))) return { error: "Pick a day and time." };
+  const place = clean(r.place, 80);
+  if (!place || place.length < 2) return { error: "Say where you're rehearsing." };
+  const { error } = await viewer.supabase.rpc("plan_rehearsals", {
+    p_band: n,
+    p_starts: new Date(r.startsAt).toISOString(),
+    p_place: place,
+    p_note: clean(r.note, 200),
+    p_weeks: Math.max(1, Math.min(8, Math.round(r.weeks) || 1)),
+  });
+  if (error) {
+    if (error.message.includes("pick a time")) return { error: "Pick a time that's still ahead." };
+    if (error.message.includes("too many")) return { error: "That's a lot planned already. Remove a few first." };
+    return { error: "That didn't save. Try again." };
+  }
+  after(() => notifyBandMessage(n, viewer.id, `Planned a rehearsal at ${place}`));
+  refresh(n);
+  revalidatePath(`/messages/b/${n}`);
+  return {};
+}
+
+export async function answerRehearsal(id: string, rehearsalId: string, answer: "in" | "out"): Promise<Result> {
+  const n = bandId(id);
+  const r = bandId(rehearsalId);
+  if (n === null || r === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  if (answer !== "in" && answer !== "out") return { error: "Pick in or out." };
+  const { error } = await viewer.supabase
+    .from("band_rehearsal_rsvps")
+    .upsert({ rehearsal_id: r, profile_id: viewer.id, answer, updated_at: new Date().toISOString() }, { onConflict: "rehearsal_id,profile_id" });
+  if (error) return { error: "That didn't save. Try again." };
+  refresh(n);
+  return {};
+}
+
+export async function removeRehearsal(id: string, rehearsalId: string): Promise<Result> {
+  const n = bandId(id);
+  const r = bandId(rehearsalId);
+  if (n === null || r === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  const { error } = await viewer.supabase.from("band_rehearsals").delete().eq("id", r).eq("band_id", n);
+  if (error) return { error: "That didn't go through. Try again." };
+  refresh(n);
+  return {};
+}
+
+/** Save a setlist: a name and one song per line. `setlistId` null makes a new one. */
+export async function saveSetlist(id: string, setlistId: string | null, name: string, songsText: string): Promise<Result> {
+  const n = bandId(id);
+  if (n === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  const title = clean(name, 60);
+  if (!title) return { error: "Give the setlist a name." };
+  const songs = songsText.split("\n").map((l) => l.replace(/^\s*\d+[.)]\s*/, "").trim().slice(0, 80)).filter(Boolean).slice(0, 60);
+  const row = { band_id: n, name: title, songs, updated_by: viewer.id };
+  const sid = setlistId ? bandId(setlistId) : null;
+  const { error } = sid === null ? await viewer.supabase.from("band_setlists").insert(row) : await viewer.supabase.from("band_setlists").update(row).eq("id", sid).eq("band_id", n);
+  if (error) return { error: "That didn't save. Try again." };
+  refresh(n);
+  return {};
+}
+
+export async function removeSetlist(id: string, setlistId: string): Promise<Result> {
+  const n = bandId(id);
+  const sid = bandId(setlistId);
+  if (n === null || sid === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  const { error } = await viewer.supabase.from("band_setlists").delete().eq("id", sid).eq("band_id", n);
+  if (error) return { error: "That didn't go through. Try again." };
+  refresh(n);
+  return {};
+}
+
+/**
+ * Need a sub for one date: a dated Board opening for the band. Players nearby who play it get an
+ * alert (the openings job), answers land in the band chat, and it closes the day after.
+ */
+export async function postFillIn(id: string, f: { role: string; date: string; details: string; paid: boolean; pay: string }): Promise<Result & { postId?: number }> {
+  const n = bandId(id);
+  if (n === null) return DEMO;
+  const viewer = await getViewer();
+  if (!viewer) return SIGNED_OUT;
+  if (!ROLE_IDS.includes(f.role)) return { error: "Pick who you need." };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date) || f.date < new Date(Date.now() - 864e5).toISOString().slice(0, 10)) return { error: "Pick the date you need them." };
+  const { data: band } = await viewer.supabase.from("bands").select("name, city").eq("id", n).maybeSingle<{ name: string; city: string | null }>();
+  if (!band) return { error: "That band isn't here anymore." };
+  const when = new Date(`${f.date}T12:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  const { data, error } = await viewer.supabase
+    .from("board_posts")
+    .insert({
+      author_id: viewer.id,
+      band_id: n,
+      kind: "session",
+      title: `${band.name}: fill-in ${nounFor(f.role)} for ${when}`.slice(0, 80),
+      role: f.role,
+      details: f.details.trim().slice(0, 1000) || null,
+      neighborhood: band.city ?? viewer.profile?.neighborhood ?? null,
+      paid: Boolean(f.paid),
+      pay: f.paid ? clean(f.pay, 40) : null,
+      closes_on: f.date,
+      needed_role: f.role,
+      needed_instruments: expandRoles([f.role]),
+      event_date: f.date,
+    })
+    .select("id")
+    .single<{ id: number }>();
+  if (error || !data) return { error: "That didn't post. Try again." };
+  refresh(n);
+  revalidatePath("/board");
+  return { postId: data.id };
 }

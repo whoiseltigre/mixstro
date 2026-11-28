@@ -46,6 +46,8 @@ function previewOf(r: Pick<MyBandRow, "last_kind" | "last_body" | "last_sender" 
       return `New show: ${r.last_body ?? ""}`;
     case "joined":
       return `${who} confirmed their spot`;
+    case "rehearsal":
+      return `${who} planned a rehearsal`;
     default:
       return "Say hi to the band";
   }
@@ -72,6 +74,10 @@ export async function getMyBands(): Promise<MyBand[]> {
 
 export type BillToConfirm = { showId: string; fromBand: string; fromName: string; date: string; venue: string };
 
+/** A planned rehearsal and who's in. `mine`: your answer, if you gave one. */
+export type Rehearsal = { id: string; startsAt: string; place: string; note?: string; mine?: "in" | "out"; inNames: string[]; outCount: number };
+export type Setlist = { id: string; name: string; songs: string[] };
+
 export type BandHub = {
   band: BandPage;
   /** Your project in the band, for "Invite a bandmate". */
@@ -79,7 +85,56 @@ export type BandHub = {
   bills: BillToConfirm[];
   chat: MyBand | null;
   demo: boolean;
+  /** Upcoming rehearsals, soonest first. Undefined before the database has them. */
+  rehearsals?: Rehearsal[];
+  setlists?: Setlist[];
 };
+
+const DEMO_REHEARSALS = (): Rehearsal[] => {
+  const next = new Date();
+  next.setDate(next.getDate() + ((4 - next.getDay() + 7) % 7 || 7));
+  next.setHours(19, 0, 0, 0);
+  return [0, 7].map((d, i) => ({
+    id: `demo-${i}`,
+    startsAt: new Date(next.getTime() + d * 864e5).toISOString(),
+    place: "Lucky Lou's, Room B",
+    note: i === 0 ? "New one: run the bridge twice" : undefined,
+    mine: i === 0 ? "in" : undefined,
+    inNames: i === 0 ? ["You", "Maya"] : ["Maya"],
+    outCount: 0,
+  }));
+};
+const DEMO_SETLISTS: Setlist[] = [{ id: "demo-1", name: "Friday at the Echo", songs: ["Night Shift", "Paper Moon", "Static Hearts", "Slow Burn", "Last Call"] }];
+
+/** Rehearsals and setlists for Your band. Undefined (not empty) when the tables don't exist yet. */
+async function bandHabit(viewer: NonNullable<Awaited<ReturnType<typeof getViewer>>>, band: number) {
+  const [{ data: rows, error: rErr }, { data: lists, error: sErr }] = await Promise.all([
+    viewer.supabase.from("band_rehearsals").select("id, starts_at, place, note").eq("band_id", band).gte("starts_at", new Date(Date.now() - 2 * 3600_000).toISOString()).order("starts_at").limit(6),
+    viewer.supabase.from("band_setlists").select("id, name, songs").eq("band_id", band).order("updated_at", { ascending: false }).limit(12),
+  ]);
+  let rehearsals: Rehearsal[] | undefined;
+  if (!rErr) {
+    const list = (rows ?? []) as { id: number; starts_at: string; place: string; note: string | null }[];
+    const { data: answers } = list.length
+      ? await viewer.supabase.from("band_rehearsal_rsvps").select("rehearsal_id, profile_id, answer, profiles(first_name)").in("rehearsal_id", list.map((r) => r.id))
+      : { data: [] };
+    const all = (answers ?? []) as unknown as { rehearsal_id: number; profile_id: string; answer: "in" | "out"; profiles: { first_name: string } | null }[];
+    rehearsals = list.map((r) => {
+      const mineRows = all.filter((a) => a.rehearsal_id === r.id);
+      return {
+        id: String(r.id),
+        startsAt: r.starts_at,
+        place: r.place,
+        note: r.note ?? undefined,
+        mine: mineRows.find((a) => a.profile_id === viewer.id)?.answer,
+        inNames: mineRows.filter((a) => a.answer === "in").map((a) => (a.profile_id === viewer.id ? "You" : (a.profiles?.first_name ?? "Someone"))),
+        outCount: mineRows.filter((a) => a.answer === "out").length,
+      };
+    });
+  }
+  const setlists = sErr ? undefined : ((lists ?? []) as { id: number; name: string; songs: string[] }[]).map((l) => ({ id: String(l.id), name: l.name, songs: l.songs }));
+  return { rehearsals, setlists };
+}
 
 /** Your band, for members only. Null when you're not in it (or it doesn't exist). */
 export async function getBandHub(id: string): Promise<BandHub | null> {
@@ -93,15 +148,18 @@ export async function getBandHub(id: string): Promise<BandHub | null> {
       bills: [{ showId: "x", fromBand: "low-tide-trio", fromName: "Low Tide Trio", date: band.shows[1]?.date ?? band.shows[0].date, venue: "Zebulon" }],
       chat: DEMO_MINE,
       demo: true,
+      rehearsals: DEMO_REHEARSALS(),
+      setlists: DEMO_SETLISTS,
     };
   }
   const band = await getBandPage(id);
   if (!band || !band.isMember) return null;
   const n = Number(id);
-  const [{ data: mine }, { data: bills }, myBands] = await Promise.all([
+  const [{ data: mine }, { data: bills }, myBands, habit] = await Promise.all([
     viewer.supabase.from("band_members").select("project_id").eq("band_id", n).eq("profile_id", viewer.id).maybeSingle<{ project_id: number }>(),
     viewer.supabase.rpc("band_bills_to_confirm", { p_band: n }),
     getMyBands(),
+    bandHabit(viewer, n),
   ]);
   type Bill = { show_id: number; from_band: number; from_name: string; show_date: string; venue: string };
   return {
@@ -110,12 +168,13 @@ export async function getBandHub(id: string): Promise<BandHub | null> {
     bills: ((bills ?? []) as Bill[]).map((b) => ({ showId: String(b.show_id), fromBand: String(b.from_band), fromName: b.from_name, date: b.show_date, venue: b.venue })),
     chat: myBands.find((b) => b.id === id) ?? null,
     demo: false,
+    ...habit,
   };
 }
 
 export type BandChatMessage = {
   id: number;
-  kind: "text" | "voice" | "note" | "spot_reply" | "show" | "joined";
+  kind: "text" | "voice" | "note" | "spot_reply" | "show" | "joined" | "rehearsal";
   mine: boolean;
   sender?: { username: string; name: string; photo: string | null; instrument: string };
   body: string | null;
@@ -154,6 +213,7 @@ export async function getBandChat(id: string): Promise<BandChat | null> {
         { id: 2, kind: "text", mine: true, body: "New ending for Low Ceilings, tell me if it's too long", voiceUrl: null, createdAt: ago(60 * 3) },
         { id: 4, kind: "text", mine: false, sender: maya, body: "Love it. Soundcheck at 7?", voiceUrl: null, createdAt: ago(40) },
         { id: 5, kind: "text", mine: true, body: "7 works. Still need a drummer for December though", voiceUrl: null, createdAt: ago(30) },
+        { id: 7, kind: "rehearsal", mine: false, sender: maya, body: `${DEMO_REHEARSALS()[0].startsAt}|Lucky Lou's, Room B|4`, voiceUrl: null, createdAt: ago(20) },
         { id: 6, kind: "spot_reply", mine: false, sender: rafa, body: "Drums", voiceUrl: null, refId: null, createdAt: ago(12) },
       ],
     };
@@ -164,10 +224,9 @@ export async function getBandChat(id: string): Promise<BandChat | null> {
   if (!isMember) return null;
   const [{ data: band }, { data: rows }, { data: memberRows }, { data: shows }] = await Promise.all([
     viewer.supabase.from("bands").select("id, name, photo_url").eq("id", n).maybeSingle<{ id: number; name: string; photo_url: string | null }>(),
-    viewer.supabase.from("band_messages").select("id, kind, sender_id, body, voice_url, voice_seconds, ref_id, created_at").eq("band_id", n).order("created_at", { ascending: false }).limit(300),
+    viewer.supabase.from("band_messages").select("id, kind, sender_id, body, voice_url, voice_seconds, ref_id, created_at").eq("band_id", n).order("created_at", { ascending: false }).order("id", { ascending: false }).limit(300),
     viewer.supabase.from("band_members").select("profile_id, projects(end_year)").eq("band_id", n),
     viewer.supabase.from("band_shows").select("show_date, show_time, venue").eq("band_id", n).gte("show_date", new Date().toISOString().slice(0, 10)).order("show_date").limit(1),
-    viewer.supabase.rpc("mark_band_read", { p_band: n }),
   ]);
   if (!band) return null;
   type Msg = { id: number; kind: BandChatMessage["kind"]; sender_id: string | null; body: string | null; voice_url: string | null; voice_seconds: number | null; ref_id: number | null; created_at: string };

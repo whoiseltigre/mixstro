@@ -1,9 +1,15 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { accentOf } from "@/components/blog/cover";
 import { photoProps } from "@/lib/blog-img";
+import { Generator } from "@/app/band-name-generator/generator";
+import { generateNames } from "@/lib/band-names/generate.ts";
+import "@/app/band-name-generator/bng.css";
 import { AUTHORS, SITE_URL, authorPath, authorSchema, pageTitle, sourceOf, category, formatDate, getAllPosts, getPost, relatedPosts } from "@/lib/blog";
+
+const GENERATOR_MARK = "<p>[[band-name-generator]]</p>";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -112,7 +118,13 @@ export default async function BlogPost({ params }: Props) {
           </figure>
         )}
 
-        <article className="mxb-article" dangerouslySetInnerHTML={{ __html: post.html }} />
+        {/* A paragraph holding only [[band-name-generator]] embeds the live generator at that spot. */}
+        {post.html.split(GENERATOR_MARK).map((part, i) => (
+          <Fragment key={i}>
+            {i > 0 && <Generator initial={generateNames({ seed: post.slug.length })} />}
+            <article className="mxb-article" dangerouslySetInnerHTML={{ __html: part }} />
+          </Fragment>
+        ))}
 
         {author && (
           <aside className="mxb-author">

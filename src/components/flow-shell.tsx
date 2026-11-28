@@ -23,7 +23,7 @@ export function FlowShell({ children }: { children: React.ReactNode }) {
       <Link href="/" aria-label="Mixstro home" className="hidden md:inline-flex absolute top-8 left-10 z-10">
         <Wordmark size={26} />
       </Link>
-      <div className="relative w-full mx-auto md:max-w-[560px] md:rounded-[32px] md:bg-ink md:border md:border-paper/10 md:shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)] md:overflow-hidden md:[&_main]:min-h-[720px] md:[&>form]:min-h-[720px]">
+      <div className="relative w-full mx-auto md:max-w-[560px] md:rounded-hero md:bg-ink md:border md:border-paper/10 md:shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)] md:overflow-hidden md:[&_main]:min-h-[720px] md:[&>form]:min-h-[720px]">
         {children}
       </div>
     </div>

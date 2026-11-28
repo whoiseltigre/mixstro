@@ -6,6 +6,7 @@ import { PROVIDER_LABEL, parseClip, type ClipProvider, type ParsedClip } from "@
 import { PLATFORM_LABEL, PLATFORM_ORDER, type TrackDetails } from "@/lib/music-track";
 import { trackPlayer } from "@/lib/projects";
 import { FadeImg } from "@/components/fade-image";
+import { PlayButton } from "@/components/ui";
 
 /**
  * The Mixstro player: one look for every song on Mixstro, whatever service it lives on.
@@ -14,7 +15,8 @@ import { FadeImg } from "@/components/fade-image";
  * to the platform's own embed. It lives in the root layout, so it keeps playing while you browse.
  */
 
-export type PlayRequest = { id: string; url: string; provider: ClipProvider; title?: string; sub?: string; artwork?: string };
+/** `at` starts a recording or video at that second (a clip reply's moment). Song previews are excerpts, so they start at the top. */
+export type PlayRequest = { id: string; url: string; provider: ClipProvider; title?: string; sub?: string; artwork?: string; at?: number | null };
 type Now = PlayRequest & { details?: TrackDetails; mode: "loading" | "audio" | "embed" };
 
 type Player = {
@@ -37,13 +39,20 @@ const SILENCE = "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjE2
 
 const cache = new Map<string, Promise<TrackDetails>>();
 
-/** Details for a link, fetched once per page load. */
+/**
+ * Details for a link, fetched once per page load and shared by everyone asking at the same
+ * time. A failed or rate-limited answer isn't kept, so the next tap tries again.
+ */
 export function loadDetails(url: string): Promise<TrackDetails> {
   let p = cache.get(url);
   if (!p) {
+    const forget = () => {
+      cache.delete(url);
+      return { links: {} } as TrackDetails;
+    };
     p = fetch(`/api/music/track?url=${encodeURIComponent(url)}`)
-      .then((r) => (r.ok ? r.json() : { links: {} }))
-      .catch(() => ({ links: {} }));
+      .then((r) => (r.ok ? (r.json() as Promise<TrackDetails>) : forget()))
+      .catch(forget);
     cache.set(url, p);
   }
   return p;
@@ -88,19 +97,32 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const startAudio = useCallback((src: string) => {
+  const startAudio = useCallback((src: string, at?: number | null) => {
     const a = audio.current;
     if (!a) return;
     a.src = src;
     setProgress(0);
+    if (at) {
+      const jump = () => {
+        if (a.src === src || a.currentSrc === src) a.currentTime = Math.min(at, Math.max(0, (a.duration || at) - 0.5));
+      };
+      a.addEventListener("loadedmetadata", jump, { once: true });
+    }
     a.play().catch(() => setPlaying(false));
   }, []);
 
   const play = useCallback(
     (req: PlayRequest) => {
       const a = audio.current;
-      // Same song: play or pause it.
+      // Same song: play or pause it (or jump to a new moment in it).
       if (now?.id === req.id) {
+        if (now.mode === "audio" && a && req.at != null && req.at !== now.at) {
+          a.currentTime = req.at;
+          setNow({ ...now, at: req.at });
+          if (a.paused) a.play().catch(() => {});
+          return;
+        }
+        if (now.mode === "embed" && req.at != null && req.at !== now.at) return setNow({ ...now, at: req.at });
         if (now.mode === "audio" && a) {
           if (a.paused) a.play().catch(() => {});
           else a.pause();
@@ -114,7 +136,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       if (!audioFirst) return setNow({ ...req, mode: "embed" });
       if (req.provider === "upload") {
         setNow({ ...req, mode: "audio" });
-        return startAudio(req.url);
+        return startAudio(req.url, req.at);
       }
       // Unlock playback inside the tap, then swap in the preview once we know it.
       if (a) {
@@ -179,7 +201,9 @@ function MiniPlayer() {
   const now = p.now!;
   const [open, setOpen] = useState(false);
   const above = useAboveTabBar();
-  const embed: (ParsedClip & { height?: number }) | null = now.mode === "embed" ? (trackPlayer({ id: now.id, provider: now.provider, url: now.url }) ?? parseClip(now.url)) : null;
+  const parsed: (ParsedClip & { height?: number }) | null = now.mode === "embed" ? (trackPlayer({ id: now.id, provider: now.provider, url: now.url }) ?? parseClip(now.url)) : null;
+  // YouTube honours a start time; other embeds open at the top.
+  const embed = parsed && now.at && parsed.provider === "youtube" && parsed.embed ? { ...parsed, embed: `${parsed.embed}&start=${Math.floor(now.at)}` } : parsed;
   const links = PLATFORM_ORDER.filter((k) => now.details?.links[k]);
   const title = now.title || now.details?.title || `${PROVIDER_LABEL[now.provider]} track`;
   const sub = now.sub ?? now.details?.artist;
@@ -188,7 +212,7 @@ function MiniPlayer() {
     <div
       role="region"
       aria-label="Now playing"
-      className={`fixed z-30 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] glass !bg-[rgb(26_24_22/0.82)] rounded-[24px] p-2 flex flex-col gap-2 shadow-[0_12px_40px_rgb(0_0_0/0.5)] md:bottom-6 ${
+      className={`fixed z-30 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[408px] glass !bg-[rgb(26_24_22/0.82)] rounded-panel p-2 flex flex-col gap-2 shadow-float md:bottom-6 ${
         above ? "bottom-[calc(max(env(safe-area-inset-bottom),16px)+74px)]" : "bottom-[calc(max(env(safe-area-inset-bottom),16px))]"
       }`}
     >
@@ -196,20 +220,14 @@ function MiniPlayer() {
         <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={open ? "Show less" : "Show more"} className="flex-1 min-w-0 flex items-center gap-3 text-left">
           <Cover src={now.artwork ?? now.details?.artwork} size={44} />
           <span className="flex-1 min-w-0 flex flex-col">
-            <span className="text-[14px] font-semibold truncate">{title}</span>
-            <span className="text-[12px] text-smoke truncate">
+            <span className="text-subhead font-semibold truncate">{title}</span>
+            <span className="text-caption text-smoke truncate">
               {now.mode === "loading" ? "Finding the song…" : now.mode === "audio" && now.provider !== "upload" ? `${sub ? `${sub} · ` : ""}Preview` : sub ?? PROVIDER_LABEL[now.provider]}
             </span>
           </span>
         </button>
         {now.mode === "audio" && (
-          <button type="button" onClick={p.toggle} aria-label={p.playing ? "Pause" : "Play"} className="size-10 rounded-full bg-paper text-ink flex items-center justify-center shrink-0 active:scale-95 transition">
-            {p.playing ? (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z" /></svg>
-            ) : (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg>
-            )}
-          </button>
+          <PlayButton playing={p.playing} size={40} onClick={p.toggle} />
         )}
         {now.mode === "loading" && <span aria-hidden="true" className="size-10 rounded-full border-2 border-paper/20 border-t-tungsten animate-spin shrink-0" />}
         <button type="button" onClick={p.close} aria-label="Close player" className="hit-slop relative size-9 rounded-full bg-paper/12 flex items-center justify-center shrink-0">
@@ -245,10 +263,10 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
   const keys = PLATFORM_ORDER.filter((k) => links[k]);
   if (!keys.length) return null;
   return (
-    <div className={`flex items-center gap-1.5 flex-wrap text-[12px] text-smoke ${className}`}>
+    <div className={`flex items-center gap-1.5 flex-wrap text-caption text-smoke ${className}`}>
       <span className="mr-0.5">Listen in full on</span>
       {keys.map((k) => (
-        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
+        <a key={k} href={links[k]} target="_blank" rel="noopener noreferrer" className="hit-slop relative h-7 px-2.5 rounded-full bg-paper/10 hover:bg-paper/18 text-paper font-semibold flex items-center transition">
           {PLATFORM_LABEL[k]}
         </a>
       ))}
@@ -259,7 +277,7 @@ export function ListenOn({ links, className = "" }: { links: TrackDetails["links
 export function Cover({ src, size, round, className = "" }: { src?: string; size: number; round?: boolean; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
-    <span className={`relative shrink-0 overflow-hidden bg-riser ${round ? "rounded-full" : size > 48 ? "rounded-[14px]" : "rounded-[10px]"} ${className}`} style={{ width: size, height: size }}>
+    <span className={`relative shrink-0 overflow-hidden bg-riser ${round ? "rounded-full" : size > 48 ? "rounded-field" : "rounded-xs"} ${className}`} style={{ width: size, height: size }}>
       {src && !failed && <FadeImg src={src} alt="" onError={() => setFailed(true)} className="absolute inset-0 size-full object-cover" />}
     </span>
   );

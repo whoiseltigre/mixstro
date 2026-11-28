@@ -37,12 +37,12 @@ export function QuickReplies({
     });
   };
 
-  if (closed) return <p className="text-[14px] text-smoke">Done. We&apos;ll let {first} know it&apos;s not the right fit, kindly.</p>;
-  const chip = "h-9 px-3.5 rounded-full text-[14px] font-medium border transition disabled:opacity-50 whitespace-nowrap";
+  if (closed) return <p className="text-subhead text-smoke">Done. We&apos;ll let {first} know it&apos;s not the right fit, kindly.</p>;
+  const chip = "h-9 px-3.5 rounded-full text-subhead font-medium border transition disabled:opacity-50 whitespace-nowrap";
   return (
     <div className="flex flex-col gap-1.5">
       {note && (
-        <p className="self-start max-w-full rounded-[18px] rounded-bl-[6px] bg-paper/10 border border-paper/12 px-3.5 py-2.5 text-[15px] leading-[1.4] mb-1">
+        <p className="self-start max-w-full rounded-tile rounded-bl-[6px] bg-paper/10 border border-paper/12 px-3.5 py-2.5 text-callout leading-[1.4] mb-1">
           <span className="sr-only">{first} wrote: </span>
           {note}
         </p>
@@ -58,7 +58,7 @@ export function QuickReplies({
           Not the right fit, good luck
         </button>
       </div>
-      {error && <p className="text-[12px] text-[#FF453A]">{error}</p>}
+      {error && <p className="text-caption text-danger">{error}</p>}
     </div>
   );
 }

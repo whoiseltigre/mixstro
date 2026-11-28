@@ -1,4 +1,6 @@
-import { adminClient, notifyJamSoon, notifyRoleAlert, notifyYourTurn } from "./notify";
+import { resumeDeletions } from "./account-deletion";
+import { drainNotificationIntents } from "./notification-intents";
+import { adminClient, notifyJamSoon, notifyRehearsalSoon, notifyRoleAlert, notifyStillLooking, notifyYourTurn } from "./notify";
 import { familyOf, fillsRole } from "./instruments";
 
 /**
@@ -7,18 +9,71 @@ import { familyOf, fillsRole } from "./instruments";
  */
 
 const HOUR = 3600_000;
+const DAY = 24 * HOUR;
 /** Same suggestion the app makes when you haven't picked roles but are starting a band (src/lib/people.ts). */
 const DEFAULT_ALERT_ROLES = ["Drums", "Bass"];
 
 export async function runReminders() {
   const db = adminClient();
   if (!db) return { skipped: "no service role key" };
-  const [yourTurn, jams, alerts] = await Promise.all([
+  const [yourTurn, jams, alerts, deletions, notifications, stillLooking, rehearsals] = await Promise.all([
     yourTurnNudges().catch((e) => (console.error("reminders: your turn", e), -1)),
     jamReminders().catch((e) => (console.error("reminders: jams", e), -1)),
     roleAlerts().catch((e) => (console.error("reminders: role alerts", e), -1)),
+    resumeDeletions().catch((e) => (console.error("reminders: deletions", e), -1)),
+    openingUpkeep().then(() => drainNotificationIntents()).catch((e) => (console.error("reminders: notifications", e), { sent: -1 })),
+    stillLookingCheckins().catch((e) => (console.error("reminders: still looking", e), -1)),
+    rehearsalReminders().catch((e) => (console.error("reminders: rehearsals", e), -1)),
   ]);
-  return { yourTurn, jams, alerts };
+  return { yourTurn, jams, alerts, deletions, notifications, stillLooking, rehearsals };
+}
+
+/** Band rehearsals starting in 1h45m to 3h: remind current members who are in or haven't answered. */
+async function rehearsalReminders() {
+  const db = adminClient()!;
+  const now = Date.now();
+  const { data, error } = await db
+    .from("band_rehearsals")
+    .select("id, band_id, starts_at, place, bands(name)")
+    .gte("starts_at", new Date(now + 1.75 * HOUR).toISOString())
+    .lte("starts_at", new Date(now + 3 * HOUR).toISOString())
+    .limit(200);
+  if (error) return 0; // before the band habit tables exist
+  const rows = (data ?? []) as unknown as { id: number; band_id: number; starts_at: string; place: string; bands: { name: string } | null }[];
+  let sent = 0;
+  for (const r of rows) {
+    const [{ data: members }, { data: outs }] = await Promise.all([
+      db.from("band_members").select("profile_id, projects!inner(end_year)").eq("band_id", r.band_id).is("projects.end_year", null),
+      db.from("band_rehearsal_rsvps").select("profile_id").eq("rehearsal_id", r.id).eq("answer", "out"),
+    ]);
+    const out = new Set(((outs ?? []) as { profile_id: string }[]).map((o) => o.profile_id));
+    for (const m of (members ?? []) as { profile_id: string }[]) {
+      if (out.has(m.profile_id)) continue;
+      await notifyRehearsalSoon(r.id, m.profile_id, r.band_id, r.bands?.name ?? "Band", r.starts_at, r.place);
+      sent++;
+    }
+  }
+  return sent;
+}
+
+/**
+ * Away 21 days: one "still looking?" email before your profile drops out of Today and search
+ * at 30 days (discoverable_profiles). Opening Mixstro once keeps you in. Once per stretch away:
+ * the ref is the day you were last active, so a later absence gets its own check-in.
+ */
+async function stillLookingCheckins() {
+  const db = adminClient()!;
+  const now = Date.now();
+  const { data } = await db
+    .from("profiles")
+    .select("id, last_active_at")
+    .not("onboarded_at", "is", null)
+    .lte("last_active_at", new Date(now - 21 * DAY).toISOString())
+    .gte("last_active_at", new Date(now - 23 * DAY).toISOString())
+    .limit(200);
+  const rows = (data ?? []) as { id: string; last_active_at: string }[];
+  for (const r of rows) await notifyStillLooking(r.id, r.last_active_at.slice(0, 10));
+  return rows.length;
 }
 
 /** Last message in an accepted chat, from the other person, sent 48 to 72 hours ago and still unanswered. */
@@ -158,4 +213,12 @@ function distanceMi(a: { lat: number; lng: number }, b: { lat: number; lng: numb
   const rad = (d: number) => (d * Math.PI) / 180;
   const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lng - a.lng) / 2) ** 2;
   return 2 * 3958.8 * Math.asin(Math.sqrt(h));
+}
+
+/** Close openings past their expiry and queue alerts for ones just opened or renewed. */
+async function openingUpkeep() {
+  const db = adminClient()!;
+  const [expired, queued] = await Promise.all([db.rpc("expire_openings"), db.rpc("queue_opening_alerts")]);
+  if (expired.error && expired.error.code !== "PGRST202") console.error("reminders: expire openings", expired.error.message);
+  if (queued.error && queued.error.code !== "PGRST202") console.error("reminders: opening alerts", queued.error.message);
 }
