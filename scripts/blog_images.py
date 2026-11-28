@@ -159,13 +159,13 @@ def set_fields(slug: str, fields: dict):
 
 
 def place_inline(slug: str, photos):
-    """Puts each photo after the first paragraph under the H2 that starts with its `section`."""
+    """Puts each photo after the first paragraph under the H2 or H3 that starts with its `section`."""
     p = POSTS / f"{slug}.md"
     text = p.read_text()
     # drop photos from an earlier run
     text = re.sub(rf"\n!\[[^\]]*\]\(/site/v1/blog/{re.escape(slug)}/photo-[^)]*\)\n", "", text)
     for section, line in photos:
-        m = re.search(rf"^## {re.escape(section)}.*$", text, re.M)
+        m = re.search(rf"^###? {re.escape(section)}.*$", text, re.M)
         if not m:
             raise SystemExit(f"{slug}: no H2 starting with {section!r}")
         # end of the first paragraph after the heading

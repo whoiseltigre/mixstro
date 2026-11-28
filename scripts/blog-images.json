@@ -343,5 +343,36 @@
         "section": "How do you know if a band name is taken?"
       }
     ]
+  },
+  "how-to-get-gigs": {
+    "cover": {
+      "file": "pexels/how-to-start-a-band/small-concert-bar-16674070.jpeg",
+      "alt": "A singer and guitarist playing to a full room in a small club",
+      "credit": "Matheus Bertelli",
+      "credit_url": "https://www.pexels.com/photo/people-sitting-on-concert-in-casino-16674070/"
+    },
+    "inline": [
+      {
+        "file": "pexels/how-to-start-a-band/small-concert-bar-6173859.jpeg",
+        "alt": "A singer and guitarist playing a small bar show with the audience close to the stage",
+        "credit": "RDNE Stock project",
+        "credit_url": "https://www.pexels.com/photo/audience-looking-at-a-man-and-a-woman-on-stage-6173859/",
+        "section": "What do you need before you ask for gigs?"
+      },
+      {
+        "file": "pexels/how-to-find-band-members/open-mic-15789086.jpeg",
+        "alt": "A singer playing acoustic guitar at an open mic under stage lights",
+        "credit": "Viktorya Sergeeva",
+        "credit_url": "https://www.pexels.com/photo/woman-standing-and-playing-guitar-and-singing-15789086/",
+        "section": "Open mics and jam nights"
+      },
+      {
+        "file": "unsplash/how-to-start-a-band/bar-gig-sqJ4tLBiurw.jpg",
+        "alt": "A rock band playing on a club stage under purple and blue lights",
+        "credit": "Matthew Kalapuch",
+        "credit_url": "https://unsplash.com/@matthewkalapuch",
+        "section": "How do you get booked again?"
+      }
+    ]
   }
 }

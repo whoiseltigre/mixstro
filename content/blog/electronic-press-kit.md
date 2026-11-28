@@ -16,7 +16,7 @@ old_urls: []
 
 **The short answer:** an electronic press kit (EPK) is a single page or file that gives venues, promoters and press everything they need to book or write about you. It should include a short bio, three of your best songs, a live video, a few good photos, notable shows or press, your tech needs and your contact details.
 
-If you're trying to get gigs, an EPK is the first thing a booker asks for, and a good one does half the selling for you. Here's what to put in it, how to build one without paying for anything, and how to send it so it actually gets opened. If you've just [started a band](/blog/how-to-start-a-band), this is the step that turns a few rehearsals into a first show.
+If you're trying to [get gigs](/blog/how-to-get-gigs), an EPK is the first thing a booker asks for, and a good one does half the selling for you. Here's what to put in it, how to build one without paying for anything, and how to send it so it actually gets opened. If you've just [started a band](/blog/how-to-start-a-band), this is the step that turns a few rehearsals into a first show.
 
 ## What is an EPK?
 
